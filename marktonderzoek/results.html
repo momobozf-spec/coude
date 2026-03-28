@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – Jamal & Jamila</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:      #0F1923;
+      --bg2:     #162130;
+      --bg3:     #1D2D3E;
+      --border:  rgba(255,255,255,0.07);
+      --gold:    #C9A84C;
+      --gold2:   #E8C96B;
+      --green:   #3ECF8E;
+      --green2:  #2AB579;
+      --blue:    #4F9CF9;
+      --purple:  #9B6DFF;
+      --red:     #F87171;
+      --orange:  #FB923C;
+      --text:    #F1F5F9;
+      --muted:   #94A3B8;
+      --muted2:  #64748B;
+      --radius:  14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+
+    /* ── TOPBAR ─── */
+    .topbar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px; position: sticky; top: 0; z-index: 100;
+    }
+    .tb-left { display: flex; align-items: center; gap: 16px; }
+    .tb-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem; color: var(--gold);
+      letter-spacing: 0.3px;
+    }
+    .tb-divider { width: 1px; height: 22px; background: var(--border); }
+    .tb-title { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
+    .tb-right { display: flex; align-items: center; gap: 10px; }
+
+    .pill-badge {
+      background: rgba(62,207,142,0.12); color: var(--green);
+      border: 1px solid rgba(62,207,142,0.2);
+      border-radius: 99px; padding: 3px 12px;
+      font-size: 0.72rem; font-weight: 600;
+    }
+    .pill-badge.offline { background: rgba(248,113,113,0.12); color: var(--red); border-color: rgba(248,113,113,0.2); }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 16px; border-radius: 8px;
+      font-size: 0.78rem; font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer; border: none; text-decoration: none;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-primary { background: var(--gold); color: #1a1400; }
+    .btn-primary:hover { background: var(--gold2); }
+    .btn-ghost { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.09); color: var(--text); }
+    .btn-danger { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+    .btn-danger:hover { background: rgba(248,113,113,0.2); }
+    .btn-icon { padding: 7px 10px; }
+
+    /* ── LAYOUT ─── */
+    .page { display: flex; flex: 1; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--bg2); border-right: 1px solid var(--border);
+      padding: 24px 12px; display: flex; flex-direction: column; gap: 4px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 14px; border-radius: 10px; cursor: pointer;
+      font-size: 0.82rem; font-weight: 500; color: var(--muted);
+      transition: all 0.15s; user-select: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+    .nav-item.active { background: rgba(201,168,76,0.1); color: var(--gold); }
+    .nav-icon { width: 18px; text-align: center; font-size: 0.95rem; }
+    .nav-group { font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); text-transform: uppercase; padding: 14px 14px 6px; margin-top: 8px; }
+
+    /* CONTENT */
+    .content { flex: 1; overflow-y: auto; padding: 28px; }
+
+    /* ── KPI CARDS ─── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .kpi {
+      background: var(--bg2); border-radius: var(--radius);
+      border: 1px solid var(--border); padding: 20px 22px;
+      position: relative; overflow: hidden;
+    }
+    .kpi::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    }
+    .kpi.green::before  { background: linear-gradient(90deg, var(--green), transparent); }
+    .kpi.gold::before   { background: linear-gradient(90deg, var(--gold), transparent); }
+    .kpi.blue::before   { background: linear-gradient(90deg, var(--blue), transparent); }
+    .kpi.purple::before { background: linear-gradient(90deg, var(--purple), transparent); }
+
+    .kpi-label { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+    .kpi-value { font-size: 2rem; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+    .kpi.green  .kpi-value { color: var(--green); }
+    .kpi.gold   .kpi-value { color: var(--gold2); }
+    .kpi.blue   .kpi-value { color: var(--blue); }
+    .kpi.purple .kpi-value { color: var(--purple); }
+    .kpi-sub { font-size: 0.73rem; color: var(--muted2); }
+    .kpi-icon { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 2rem; opacity: 0.1; }
+
+    /* ── CHART GRID ─── */
+    .chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .chart-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+    .panel {
+      background: var(--bg2); border-radius: var(--radius);
+      border: 1px solid var(--border); overflow: hidden;
+    }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+    }
+    .panel-title { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+    .panel-sub { font-size: 0.72rem; color: var(--muted2); margin-top: 2px; }
+    .panel-body { padding: 20px; }
+    .panel-body.no-pad { padding: 0; }
+    .panel.full-w { margin-bottom: 16px; }
+
+    .chart-wrap { position: relative; height: 220px; }
+    .chart-wrap.tall { height: 280px; }
+    .chart-wrap.sm { height: 160px; }
+
+    /* ── MATRIX TABLE ─── */
+    .m-table { width: 100%; border-collapse: collapse; }
+    .m-table th {
+      font-size: 0.68rem; font-weight: 700; color: var(--muted2); text-transform: uppercase;
+      letter-spacing: 0.8px; padding: 10px 16px; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .m-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.83rem; }
+    .m-table tbody tr:last-child td { border-bottom: none; }
+    .m-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+    .score-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+    .score-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--green), var(--blue)); }
+    .score-num { font-weight: 700; font-size: 0.92rem; color: var(--green); }
+    .stars { color: var(--gold); font-size: 0.78rem; letter-spacing: 1px; }
+
+    /* ── OPEN ANSWERS ─── */
+    .open-list { display: flex; flex-direction: column; gap: 8px; }
+    .open-item {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      border-radius: 0 10px 10px 0; padding: 12px 16px;
+      font-size: 0.84rem; color: #CBD5E1; line-height: 1.6;
+    }
+    .open-item.gold-border { border-left-color: var(--gold); }
+
+    /* ── EMAILS ─── */
+    .email-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .email-tag {
+      background: rgba(79,156,249,0.1); color: var(--blue);
+      border: 1px solid rgba(79,156,249,0.2);
+      border-radius: 99px; padding: 5px 14px; font-size: 0.78rem; font-weight: 500;
+    }
+
+    /* ── SECTION VIEWS ─── */
+    .view { display: none; }
+    .view.active { display: block; }
+    .section-head { margin-bottom: 24px; }
+    .section-head h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
+    .section-head p { font-size: 0.82rem; color: var(--muted); }
+
+    /* Empty */
+    .empty {
+      text-align: center; padding: 64px 24px;
+    }
+    .empty-icon { font-size: 3rem; opacity: 0.3; margin-bottom: 14px; }
+    .empty p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
+    .empty a { color: var(--gold); }
+
+    /* Loading */
+    #loading-screen {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999;
+    }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading-screen p { color: var(--muted); margin-top: 16px; font-size: 0.85rem; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .chart-grid-2, .chart-grid-3 { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+    }
+    @media (max-width: 600px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .content { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <p>Dashboard laden…</p>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-left">
+    <div class="tb-logo">Jamal &amp; Jamila</div>
+    <div class="tb-divider"></div>
+    <div class="tb-title">Admin Dashboard</div>
+  </div>
+  <div class="tb-right">
+    <span class="pill-badge" id="server-status">● Live</span>
+    <button class="btn btn-ghost btn-icon" onclick="loadData()" title="Vernieuwen">↺</button>
+    <a href="/api/responses/export" class="btn btn-primary">⬇ CSV</a>
+    <a href="survey.html" class="btn btn-ghost" target="_blank">Survey ↗</a>
+    <button class="btn btn-danger" onclick="clearAll()">Wissen</button>
+  </div>
+</div>
+
+<div class="page">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="nav-group">Overzicht</div>
+    <div class="nav-item active" onclick="showView('overview')"><span class="nav-icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="showView('demografie')"><span class="nav-icon">👤</span> Demografie</div>
+    <div class="nav-group">Analyse</div>
+    <div class="nav-item" onclick="showView('koopgedrag')"><span class="nav-icon">🛍️</span> Koopgedrag</div>
+    <div class="nav-item" onclick="showView('producten')"><span class="nav-icon">💎</span> Producten</div>
+    <div class="nav-item" onclick="showView('matrix')"><span class="nav-icon">⭐</span> Voorkeuren</div>
+    <div class="nav-group">Feedback</div>
+    <div class="nav-item" onclick="showView('open')"><span class="nav-icon">💬</span> Open vragen</div>
+    <div class="nav-item" onclick="showView('emails')"><span class="nav-icon">📧</span> E-mails</div>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="content" id="main-content">
+
+    <!-- OVERVIEW -->
+    <div class="view active" id="view-overview">
+      <div class="section-head">
+        <h2>Dashboard overzicht</h2>
+        <p id="overview-sub">Marktbevraging: Islamitische Webshop — Jamal &amp; Jamila</p>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi green"><div class="kpi-label">Totaal antwoorden</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-sub" id="kpi-last">—</div><div class="kpi-icon">📋</div></div>
+        <div class="kpi gold"><div class="kpi-label">Talen</div><div class="kpi-value" id="kpi-langs">—</div><div class="kpi-sub" id="kpi-langs-sub">—</div><div class="kpi-icon">🌍</div></div>
+        <div class="kpi blue"><div class="kpi-label">Top regio</div><div class="kpi-value" id="kpi-regio" style="font-size:1rem;margin-top:6px">—</div><div class="kpi-sub">meest voorkomend</div><div class="kpi-icon">📍</div></div>
+        <div class="kpi purple"><div class="kpi-label">Gem. matrix score</div><div class="kpi-value" id="kpi-matrix">—</div><div class="kpi-sub">over alle aspecten /5</div><div class="kpi-icon">⭐</div></div>
+      </div>
+      <div class="chart-grid-2">
+        <div class="panel">
+          <div class="panel-head"><div><div class="panel-title">Leeftijdsverdeling</div><div class="panel-sub">Respondenten per leeftijdsgroep</div></div></div>
+          <div class="panel-body"><div class="chart-wrap"><canvas id="c-leeftijd"></canvas></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><div class="panel-title">Geslacht</div><div class="panel-sub">Verdeling man / vrouw</div></div></div>
+          <div class="panel-body"><div class="chart-wrap"><canvas id="c-geslacht"></canvas></div></div>
+        </div>
+      </div>
+      <div class="chart-grid-2">
+        <div class="panel">
+          <div class="panel-head"><div><div class="panel-title">Top productcategorieën</div><div class="panel-sub">Meest gekozen categorieën</div></div></div>
+          <div class="panel-body"><div class="chart-wrap tall"><canvas id="c-cat-overview"></canvas></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><div class="panel-title">Budget per product</div><div class="panel-sub">Bereidheid te betalen</div></div></div>
+          <div class="panel-body"><div class="chart-wrap tall"><canvas id="c-budget-overview"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMOGRAFIE -->
+    <div class="view" id="view-demografie">
+      <div class="section-head"><h2>Demografische gegevens</h2><p>Wie zijn de respondenten?</p></div>
+      <div class="chart-grid-2">
+        <div class="panel"><div class="panel-head"><div class="panel-title">Leeftijd</div></div><div class="panel-body"><div class="chart-wrap tall"><canvas id="c-leeftijd2"></canvas></div></div></div>
+        <div class="panel"><div class="panel-head"><div class="panel-title">Geslacht</div></div><div class="panel-body"><div class="chart-wrap tall"><canvas id="c-geslacht2"></canvas></div></div></div>
+      </div>
+      <div class="chart-grid-2">
+        <div class="panel"><div class="panel-head"><div class="panel-title">Etnische achtergrond</div></div><div class="panel-body"><div class="chart-wrap tall"><canvas id="c-achtergrond"></canvas></div></div></div>
+        <div class="panel"><div class="panel-head"><div class="panel-title">Regio</div></div><div class="panel-body"><div class="chart-wrap tall"><canvas id="c-regio"></canvas></div></div></div>
+      </div>
+    </div>
+
+    <!-- KOOPGEDRAG -->
+    <div class="view" id="view-koopgedrag">
+      <div class="section-head"><h2>Koopgedrag</h2><p>Hoe en wanneer kopen respondenten?</p></div>
+      <div class="chart-grid-2">
+        <div class="panel"><div class="panel-head"><div class="panel-title">Online aankoopfrequentie</div></div><div class="panel-body"><div class="chart-wrap tall"><canvas id="c-frequentie"></canvas></div></div></div>
+        <div class="panel"><div class="panel-head"><div class="panel-title">Aankoopkanalen</div></div><div class="panel-body"><div class="chart-wrap tall"><canvas id="c-kanalen"></canvas></div></div></div>
+      </div>
+      <div class="panel full-w"><div class="panel-head"><div class="panel-title">Gelegenheden</div></div><div class="panel-body"><div class="chart-wrap"><canvas id="c-gelegenheden"></canvas></div></div></div>
+    </div>
+
+    <!-- PRODUCTEN -->
+    <div class="view" id="view-producten">
+      <div class="section-head"><h2>Producten &amp; budget</h2><p>Wat willen respondenten kopen en hoeveel willen ze betalen?</p></div>
+      <div class="panel full-w"><div class="panel-head"><div class="panel-title">Productcategorieën</div></div><div class="panel-body"><div class="chart-wrap tall"><canvas id="c-categorieen"></canvas></div></div></div>
+      <div class="chart-grid-2">
+        <div class="panel"><div class="panel-head"><div class="panel-title">Budget per product</div></div><div class="panel-body"><div class="chart-wrap"><canvas id="c-budget-product"></canvas></div></div></div>
+        <div class="panel"><div class="panel-head"><div class="panel-title">Budget geschenkpakket</div></div><div class="panel-body"><div class="chart-wrap"><canvas id="c-budget-geschenk"></canvas></div></div></div>
+      </div>
+    </div>
+
+    <!-- MATRIX -->
+    <div class="view" id="view-matrix">
+      <div class="section-head"><h2>Voorkeuren webshop</h2><p>Hoe belangrijk zijn de volgende aspecten? (schaal 1–5)</p></div>
+      <div class="panel full-w"><div class="panel-head"><div class="panel-title">Overzicht aspecten</div></div><div class="panel-body"><div class="chart-wrap tall"><canvas id="c-matrix-bar"></canvas></div></div></div>
+      <div class="panel full-w">
+        <div class="panel-head"><div class="panel-title">Gedetailleerd overzicht</div></div>
+        <div class="panel-body no-pad">
+          <table class="m-table" id="matrix-table">
+            <thead><tr><th>Aspect</th><th>Gem. score</th><th>Beoordeling</th><th>Score</th><th>Resp.</th></tr></thead>
+            <tbody id="matrix-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPEN -->
+    <div class="view" id="view-open">
+      <div class="section-head"><h2>Open vragen</h2><p>Kwalitatieve feedback van respondenten</p></div>
+      <div class="panel full-w">
+        <div class="panel-head"><div class="panel-title">Wat mist u in bestaande islamitische webshops?</div></div>
+        <div class="panel-body"><div class="open-list" id="open-mist"></div></div>
+      </div>
+      <div class="panel full-w">
+        <div class="panel-head"><div class="panel-title">Wat zou een innovatieve webshop uniek kunnen maken?</div></div>
+        <div class="panel-body"><div class="open-list" id="open-uniek"></div></div>
+      </div>
+    </div>
+
+    <!-- EMAILS -->
+    <div class="view" id="view-emails">
+      <div class="section-head"><h2>E-mailadressen</h2><p>Geïnteresseerden in updates en promoties</p></div>
+      <div class="panel full-w">
+        <div class="panel-head"><div class="panel-title" id="email-count-title">E-mailadressen</div></div>
+        <div class="panel-body"><div class="email-tags" id="email-list"></div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+/* ─── CHART DEFAULTS ──────────────────────────────── */
+Chart.defaults.color = '#94A3B8';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+Chart.defaults.font.family = 'Inter';
+Chart.defaults.font.size = 11;
+
+const PALETTE = ['#C9A84C','#3ECF8E','#4F9CF9','#9B6DFF','#FB923C','#F472B6','#34D399','#60A5FA','#A78BFA','#FBBF24','#F87171','#4ADE80'];
+const charts = {};
+
+function makeChart(id, type, labels, data, opts = {}) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, {
+    type,
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: type === 'doughnut' || type === 'pie'
+          ? PALETTE.slice(0, data.length)
+          : PALETTE.slice(0, data.length).map(c => c + 'CC'),
+        borderColor: type === 'doughnut' || type === 'pie'
+          ? PALETTE.slice(0, data.length)
+          : PALETTE.slice(0, data.length),
+        borderWidth: type === 'bar' ? 0 : 2,
+        borderRadius: type === 'bar' ? 6 : 0,
+        borderSkipped: false,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: type === 'doughnut' || type === 'pie',
+          position: 'right',
+          labels: { boxWidth: 12, padding: 14, font: { size: 11 } }
+        },
+        tooltip: {
+          backgroundColor: '#1D2D3E',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          padding: 10,
+          callbacks: {
+            label: ctx => {
+              const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+              const pct = total > 0 ? Math.round(ctx.parsed * 100 / total) + '%' : '0%';
+              return type === 'bar'
+                ? ` ${ctx.parsed.toFixed(type === 'radar' ? 1 : 0)}`
+                : ` ${ctx.raw} (${pct})`;
+            }
+          }
+        }
+      },
+      scales: (type === 'bar' || type === 'horizontalBar') ? {
+        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748B' } },
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748B' }, beginAtZero: true }
+      } : {},
+      indexAxis: opts.horizontal ? 'y' : 'x',
+      ...opts
+    }
+  });
+}
+
+/* ─── DATA ────────────────────────────────────────── */
+const MATRIX_KEYS = ['prijs','authenticiteit','halal','duurzaamheid','levering','verpakking','klantendienst','loyaliteit'];
+const MATRIX_LABELS = ['Prijs','Authenticiteit','Halalcertificering','Duurzaamheid','Snelle levering','Verpakking','Klantendienst','Loyaliteit'];
+
+function countField(responses, field) {
+  const c = {};
+  responses.forEach(r => {
+    const v = r.answers[field];
+    if (!v) return;
+    (Array.isArray(v) ? v : [v]).forEach(x => c[x] = (c[x] || 0) + 1);
+  });
+  return c;
+}
+
+function sortedEntries(obj, limit) {
+  const e = Object.entries(obj).sort((a, b) => b[1] - a[1]);
+  return limit ? e.slice(0, limit) : e;
+}
+
+let currentView = 'overview';
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(`'${name}'`)) n.classList.add('active');
+  });
+  currentView = name;
+  if (window._responses) buildChartsForView(name, window._responses);
+}
+
+async function loadData() {
+  try {
+    const res = await fetch('/api/responses');
+    const responses = await res.json();
+    window._responses = responses;
+    document.getElementById('loading-screen').style.display = 'none';
+    updateKPIs(responses);
+    buildChartsForView(currentView, responses);
+    fillOpenAnswers(responses);
+    fillEmails(responses);
+    document.getElementById('server-status').textContent = '● Live';
+    document.getElementById('server-status').className = 'pill-badge';
+  } catch {
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('server-status').textContent = '● Offline';
+    document.getElementById('server-status').className = 'pill-badge offline';
+  }
+}
+
+function updateKPIs(responses) {
+  const n = responses.length;
+  document.getElementById('kpi-total').textContent = n;
+
+  const lastDate = n > 0
+    ? new Date(responses[n-1].timestamp).toLocaleDateString('nl-BE', {day:'numeric',month:'short'})
+    : '—';
+  document.getElementById('kpi-last').textContent = n > 0 ? `Laatste: ${lastDate}` : 'Nog geen antwoorden';
+
+  const langs = {};
+  responses.forEach(r => { const l = r.answers.lang || 'nl'; langs[l] = (langs[l]||0)+1; });
+  const topLang = Object.entries(langs).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('kpi-langs').textContent = topLang ? topLang[0].toUpperCase() : '—';
+  document.getElementById('kpi-langs-sub').textContent = Object.entries(langs).map(([l,c])=>`${l.toUpperCase()}: ${c}`).join(' · ') || '—';
+
+  const regioCounts = countField(responses, 'regio');
+  const topRegio = Object.entries(regioCounts).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('kpi-regio').textContent = topRegio ? topRegio[0].replace('België – ','BE–').replace('Noord-Afrika','N-Afrika') : '—';
+
+  let matrixAvgs = [];
+  MATRIX_KEYS.forEach(key => {
+    const vals = responses.map(r => parseFloat(r.answers.matrix?.[key])).filter(v => !isNaN(v));
+    if (vals.length) matrixAvgs.push(vals.reduce((a,b)=>a+b,0)/vals.length);
+  });
+  const overallAvg = matrixAvgs.length ? (matrixAvgs.reduce((a,b)=>a+b,0)/matrixAvgs.length).toFixed(1) : '—';
+  document.getElementById('kpi-matrix').textContent = overallAvg;
+}
+
+function buildChartsForView(view, responses) {
+  const n = responses.length;
+  if (n === 0) return;
+
+  const sortCount = (field, limit) => {
+    const e = sortedEntries(countField(responses, field), limit);
+    return { labels: e.map(x=>x[0]), data: e.map(x=>x[1]) };
+  };
+
+  if (view === 'overview') {
+    const leeftijd = sortCount('leeftijd');
+    makeChart('c-leeftijd', 'doughnut', leeftijd.labels, leeftijd.data);
+    const geslacht = sortCount('geslacht');
+    makeChart('c-geslacht', 'pie', geslacht.labels, geslacht.data);
+    const cat = sortCount('categorieen', 6);
+    makeChart('c-cat-overview', 'bar', cat.labels, cat.data, { horizontal: true });
+    const bp = sortCount('budget_product');
+    makeChart('c-budget-overview', 'doughnut', bp.labels, bp.data);
+  }
+
+  if (view === 'demografie') {
+    const l = sortCount('leeftijd'); makeChart('c-leeftijd2', 'bar', l.labels, l.data, { horizontal: true });
+    const g = sortCount('geslacht'); makeChart('c-geslacht2', 'doughnut', g.labels, g.data);
+    const a = sortCount('achtergrond'); makeChart('c-achtergrond', 'bar', a.labels, a.data, { horizontal: true });
+    const r = sortCount('regio', 8); makeChart('c-regio', 'bar', r.labels, r.data, { horizontal: true });
+  }
+
+  if (view === 'koopgedrag') {
+    const f = sortCount('frequentie'); makeChart('c-frequentie', 'bar', f.labels, f.data, { horizontal: true });
+    const k = sortCount('kanalen'); makeChart('c-kanalen', 'doughnut', k.labels, k.data);
+    const g = sortCount('gelegenheden'); makeChart('c-gelegenheden', 'bar', g.labels, g.data, { horizontal: true });
+  }
+
+  if (view === 'producten') {
+    const c = sortCount('categorieen'); makeChart('c-categorieen', 'bar', c.labels, c.data, { horizontal: true });
+    const bp = sortCount('budget_product'); makeChart('c-budget-product', 'doughnut', bp.labels, bp.data);
+    const bg = sortCount('budget_geschenk'); makeChart('c-budget-geschenk', 'doughnut', bg.labels, bg.data);
+  }
+
+  if (view === 'matrix') {
+    const avgs = MATRIX_KEYS.map(key => {
+      const vals = responses.map(r => parseFloat(r.answers.matrix?.[key])).filter(v => !isNaN(v));
+      return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+    });
+    makeChart('c-matrix-bar', 'bar', MATRIX_LABELS, avgs.map(v=>parseFloat(v.toFixed(2))), {
+      plugins: { legend: { display: false } },
+      scales: { y: { min: 0, max: 5, ticks: { stepSize: 1 } } }
+    });
+
+    const tbody = document.getElementById('matrix-tbody');
+    tbody.innerHTML = '';
+    MATRIX_KEYS.forEach((key, i) => {
+      const vals = responses.map(r => parseFloat(r.answers.matrix?.[key])).filter(v => !isNaN(v));
+      const avg = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+      const pct = avg / 5 * 100;
+      const stars = '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg));
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:500">${MATRIX_LABELS[i]}</td>
+        <td class="score-num">${avg ? avg.toFixed(1) : '—'}</td>
+        <td class="stars">${stars}</td>
+        <td style="min-width:120px"><div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div></td>
+        <td style="color:var(--muted2)">${vals.length}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+}
+
+function fillOpenAnswers(responses) {
+  ['mist', 'uniek'].forEach(field => {
+    const el = document.getElementById('open-' + field);
+    if (!el) return;
+    const answers = responses.map(r => r.answers[field]).filter(Boolean);
+    if (!answers.length) {
+      el.innerHTML = '<p style="color:var(--muted2);font-size:0.83rem">Geen antwoorden ontvangen.</p>';
+      return;
+    }
+    el.innerHTML = answers.map(a =>
+      `<div class="open-item${field==='uniek'?' gold-border':''}">${a}</div>`
+    ).join('');
+  });
+}
+
+function fillEmails(responses) {
+  const emails = responses.map(r => r.answers.email).filter(Boolean);
+  document.getElementById('email-count-title').textContent = `E-mailadressen (${emails.length})`;
+  const el = document.getElementById('email-list');
+  if (!emails.length) {
+    el.innerHTML = '<p style="color:var(--muted2);font-size:0.83rem">Nog geen e-mailadressen ontvangen.</p>';
+    return;
+  }
+  el.innerHTML = emails.map(e => `<span class="email-tag">✉ ${e}</span>`).join('');
+}
+
+async function clearAll() {
+  if (!confirm('Alle antwoorden permanent wissen?')) return;
+  await fetch('/api/responses', { method: 'DELETE' });
+  window._responses = [];
+  updateKPIs([]);
+  fillOpenAnswers([]);
+  fillEmails([]);
+  Object.values(charts).forEach(c => c.destroy());
+}
+
+loadData();
+setInterval(loadData, 30000); // auto-refresh every 30s
+</script>
+</body>
+</html>

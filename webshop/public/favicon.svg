@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <circle cx="32" cy="32" r="30" fill="#C6A86C" />
+  <circle cx="32" cy="32" r="26" fill="#1C1714" />
+  <text
+    x="32"
+    y="41"
+    text-anchor="middle"
+    font-size="28"
+    font-family="Amiri, serif"
+    fill="#C6A86C"
+  >
+    ج
+  </text>
+</svg>
