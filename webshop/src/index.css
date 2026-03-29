@@ -22,6 +22,10 @@ body {
   font-family: var(--font-body);
   color: var(--color-brown);
   background-color: var(--color-cream);
+  background-image:
+    radial-gradient(circle at top left, rgba(198, 168, 108, 0.12), transparent 30%),
+    radial-gradient(circle at top right, rgba(107, 123, 94, 0.08), transparent 24%),
+    linear-gradient(180deg, #fdfaf5 0%, #fbf7f0 48%, #f7efe3 100%);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -69,6 +73,29 @@ h1, h2, h3, h4, h5, h6 {
 /* Gold gradient for special elements */
 .gold-gradient {
   background: linear-gradient(135deg, #C6A86C 0%, #E8D5A3 50%, #C6A86C 100%);
+}
+
+.ink-gradient {
+  background: linear-gradient(145deg, rgba(28, 23, 20, 0.98) 0%, rgba(44, 36, 32, 0.96) 55%, rgba(74, 60, 49, 0.92) 100%);
+}
+
+.shell-card {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(198, 168, 108, 0.18);
+  box-shadow: 0 22px 70px rgba(44, 36, 32, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.gold-outline {
+  border: 1px solid rgba(198, 168, 108, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.soft-grid {
+  background-image:
+    linear-gradient(rgba(198, 168, 108, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(198, 168, 108, 0.06) 1px, transparent 1px);
+  background-size: 36px 36px;
 }
 
 /* Islamic geometric pattern background */

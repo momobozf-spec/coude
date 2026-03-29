@@ -8,14 +8,19 @@ import ProductCard from '../components/ProductCard'
 
 function useOnScreen(ref) {
   const [isVisible, setIsVisible] = useState(false)
+
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setIsVisible(true) },
+      ([entry]) => {
+        if (entry.isIntersecting) setIsVisible(true)
+      },
       { threshold: 0.1 }
     )
+
     if (ref.current) observer.observe(ref.current)
     return () => observer.disconnect()
   }, [ref])
+
   return isVisible
 }
 
@@ -23,7 +28,7 @@ export default function HomePage() {
   const { t } = useLanguageStore()
   const giftBoxes = getGiftBoxes()
   const shopCategories = categories.filter(
-    (c) => c.id !== 'addons' && c.id !== 'decor'
+    (category) => category.id !== 'addons' && category.id !== 'decor'
   )
   const featuredReviews = reviews.slice(0, 4)
 
@@ -35,196 +40,236 @@ export default function HomePage() {
   const reviewsVisible = useOnScreen(reviewsRef)
 
   const partners = [
-    'Halal Quality Control',
-    'Islamic Relief',
-    'DHL Express',
-    'Mollie Payments',
-    'Thuiswinkel Waarborg',
+    'Mollie',
+    'Bancontact',
+    'PostNL Ready',
+    'Klaviyo Ready',
+    'Shopify API Ready',
   ]
 
   return (
     <div className="min-h-screen">
-      {/* ─── Hero Section ─── */}
-      <section className="pattern-bg bg-cream relative overflow-hidden">
-        {/* Floating geometric patterns */}
+      <section className="relative overflow-hidden px-4 pb-8 pt-8 md:px-6 md:pt-10">
         <div className="absolute inset-0 pointer-events-none">
-          <div
-            className="absolute top-20 left-10 w-24 h-24 border border-gold/20 rotate-45"
-            style={{ animation: 'float 8s ease-in-out infinite' }}
-          />
-          <div
-            className="absolute top-40 right-20 w-16 h-16 border border-gold/15 rotate-12"
-            style={{ animation: 'float 6s ease-in-out infinite 1s' }}
-          />
-          <div
-            className="absolute bottom-20 left-1/4 w-20 h-20 border border-gold/10 -rotate-12"
-            style={{ animation: 'float 10s ease-in-out infinite 2s' }}
-          />
-          <div
-            className="absolute bottom-32 right-1/3 w-12 h-12 border border-gold/20 rotate-45"
-            style={{ animation: 'float 7s ease-in-out infinite 0.5s' }}
-          />
+          <div className="absolute left-[8%] top-16 h-44 w-44 rounded-full bg-gold/12 blur-3xl" />
+          <div className="absolute right-[8%] top-28 h-52 w-52 rounded-full bg-olive/10 blur-3xl" />
+          <div className="absolute inset-x-0 top-0 h-[34rem] bg-[radial-gradient(circle_at_top,rgba(198,168,108,0.14),transparent_55%)]" />
         </div>
 
-        <div className="max-w-5xl mx-auto px-4 py-24 md:py-36 text-center relative z-10">
-          <p
-            className="arabic text-gold text-lg md:text-xl mb-8 opacity-0"
-            style={{ animation: 'heroFadeUp 0.8s ease-out 0.2s forwards' }}
-          >
-            {t('hero.bismillah')}
-          </p>
-          <h1
-            className="font-heading text-5xl md:text-7xl font-bold text-brown leading-tight mb-8 opacity-0"
-            style={{ animation: 'heroFadeUp 0.8s ease-out 0.4s forwards' }}
-          >
-            {t('hero.headline').split(',').map((part, i) => (
-              <span key={i}>
-                {i > 0 && <br />}
-                {i > 0 ? (
-                  <span className="text-gold">{part}</span>
-                ) : (
-                  part + ','
-                )}
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-stretch">
+          <div className="ink-gradient relative overflow-hidden rounded-[2rem] px-6 py-8 text-cream shadow-[0_30px_100px_rgba(28,23,20,0.22)] md:px-10 md:py-12">
+            <div className="absolute inset-0 opacity-20 pattern-bg" />
+            <div className="absolute -right-20 top-10 h-52 w-52 rounded-full bg-gold/20 blur-3xl" />
+            <div className="absolute bottom-0 left-0 h-56 w-56 rounded-full bg-olive/10 blur-3xl" />
+
+            <div className="relative z-10 max-w-2xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-gold/25 bg-white/6 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.28em] text-gold/90">
+                <span className="h-2 w-2 rounded-full bg-gold" />
+                Premium Islamic gifting for Europe
+              </span>
+
+              <p className="arabic mt-8 text-lg text-gold md:text-xl">
+                {t('hero.bismillah')}
+              </p>
+
+              <h1 className="mt-6 font-heading text-5xl leading-[0.95] text-cream md:text-7xl">
+                {t('hero.headline')}
+              </h1>
+
+              <p className="mt-6 max-w-xl text-base leading-7 text-cream/72 md:text-lg">
+                {t('hero.subheadline')}
+              </p>
+
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+                <Link
+                  to="/shop"
+                  className="gold-gradient rounded-full px-8 py-4 text-center text-base font-semibold text-dark shadow-[0_18px_35px_rgba(198,168,108,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(198,168,108,0.45)]"
+                >
+                  {t('hero.cta')}
+                </Link>
+                <Link
+                  to="/over-ons"
+                  className="rounded-full border border-white/18 bg-white/8 px-8 py-4 text-center text-base font-semibold text-cream transition-all duration-300 hover:bg-white/12"
+                >
+                  {t('hero.ctaSecondary')}
+                </Link>
+              </div>
+
+              <div className="mt-10 grid gap-4 sm:grid-cols-3">
+                {[
+                  'NL / BE focus',
+                  'FR / DE friendly',
+                  'Luxury gift appeal',
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-[1.4rem] border border-white/12 bg-white/8 px-4 py-4 backdrop-blur"
+                  >
+                    <p className="text-[11px] uppercase tracking-[0.24em] text-gold/80">
+                      Market
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-cream/88">
+                      {item}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <p className="mt-8 text-sm text-cream/58">{t('hero.socialProof')}</p>
+            </div>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
+            <div className="shell-card overflow-hidden rounded-[2rem] p-6 md:p-7">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-brown/35">
+                    Signature Edit
+                  </p>
+                  <h2 className="mt-3 font-heading text-3xl leading-none text-brown">
+                    Cadeaus die luxe en betekenis combineren
+                  </h2>
+                </div>
+                <div className="rounded-full border border-gold/20 bg-gold/10 px-4 py-2 text-xs font-semibold text-gold">
+                  Rituals feel
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-2 gap-4">
+                {giftBoxes.slice(0, 4).map((product) => (
+                  <div
+                    key={product.id}
+                    className="rounded-[1.4rem] border border-gold/10 bg-gradient-to-br from-white via-white to-sand/60 p-4"
+                  >
+                    <div className="text-4xl">{product.image}</div>
+                    <p className="mt-4 text-xs uppercase tracking-[0.22em] text-brown/35">
+                      {product.category}
+                    </p>
+                    <p className="mt-2 font-heading text-xl text-brown">
+                      {product.name}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="shell-card rounded-[2rem] p-6 md:p-7">
+              <p className="text-[11px] uppercase tracking-[0.28em] text-brown/35">
+                Why customers convert
+              </p>
+              <div className="mt-5 space-y-4">
+                {[
+                  'Premium unboxing met zachte earth tones en gouden accenten',
+                  'Duidelijke prijsniveaus voor gifting op elk budgetniveau',
+                  'Geschikt voor NL, BE, FR en DE met meertalige storefront',
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-start gap-3 rounded-[1.2rem] border border-gold/12 bg-white/60 px-4 py-4"
+                  >
+                    <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-gold/12 text-xs text-gold">
+                      ✓
+                    </span>
+                    <p className="text-sm leading-6 text-brown/72">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-4 md:px-6">
+        <div className="mx-auto max-w-7xl rounded-[1.8rem] border border-olive/12 bg-olive px-6 py-5 text-white shadow-[0_24px_60px_rgba(107,123,94,0.18)]">
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-sm md:text-base">
+            {[
+              { icon: '✓', text: t('trust.halal') },
+              { icon: '🎁', text: t('trust.giftWrap') },
+              { icon: '🚚', text: t('trust.freeShipping') },
+              { icon: '↩', text: t('trust.returns') },
+            ].map((item) => (
+              <span key={item.text} className="flex items-center gap-2">
+                <span className="text-lg">{item.icon}</span>
+                <span className="font-medium">{item.text}</span>
               </span>
             ))}
-          </h1>
-          <p
-            className="text-brown/70 text-lg md:text-xl max-w-2xl mx-auto mb-12 opacity-0"
-            style={{ animation: 'heroFadeUp 0.8s ease-out 0.6s forwards' }}
-          >
-            {t('hero.subheadline')}
-          </p>
-          <div
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-12 opacity-0"
-            style={{ animation: 'heroFadeUp 0.8s ease-out 0.8s forwards' }}
-          >
-            <Link
-              to="/shop"
-              className="gold-gradient text-dark px-10 py-4 rounded-full font-semibold hover:shadow-lg hover:shadow-gold/25 transition-all duration-300 text-lg"
-            >
-              {t('hero.cta')}
-            </Link>
-            <Link
-              to="/over-ons"
-              className="border-2 border-brown/30 text-brown px-10 py-4 rounded-full font-semibold hover:bg-brown hover:text-cream transition-all duration-300 text-lg"
-            >
-              {t('hero.ctaSecondary')}
-            </Link>
           </div>
-          <p
-            className="text-brown/60 text-sm opacity-0"
-            style={{ animation: 'heroFadeUp 0.8s ease-out 1s forwards' }}
-          >
-            {t('hero.socialProof')}
-          </p>
-        </div>
-
-        <style>{`
-          @keyframes heroFadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(var(--tw-rotate, 45deg)); }
-            50% { transform: translateY(-15px) rotate(var(--tw-rotate, 45deg)); }
-          }
-        `}</style>
-      </section>
-
-      {/* ─── Trust Bar ─── */}
-      <section className="bg-olive text-white py-5">
-        <div className="max-w-6xl mx-auto px-4 flex flex-wrap justify-center gap-x-10 gap-y-3 text-sm md:text-base">
-          {[
-            { icon: '✓', text: t('trust.halal') },
-            { icon: '🎁', text: t('trust.giftWrap') },
-            { icon: '🚚', text: t('trust.freeShipping') },
-            { icon: '↩️', text: t('trust.returns') },
-          ].map((item) => (
-            <span
-              key={item.text}
-              className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 cursor-default"
-            >
-              <span className="text-lg">{item.icon}</span>
-              <span className="font-medium">{item.text}</span>
-            </span>
-          ))}
         </div>
       </section>
 
-      {/* ─── Signature Boxes ─── */}
-      <section ref={boxesRef} className="max-w-6xl mx-auto px-4 py-20 md:py-28">
-        <div className="text-center mb-14">
-          <p className="text-gold font-medium text-sm uppercase tracking-widest mb-3">
-            Collection
+      <section ref={boxesRef} className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-28">
+        <div className="mb-14 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.3em] text-gold">
+              Signature collection
+            </p>
+            <h2 className="mt-4 font-heading text-4xl text-brown md:text-5xl">
+              {t('sections.signatureBoxes')}
+            </h2>
+          </div>
+          <p className="max-w-xl text-sm leading-7 text-brown/58 md:text-base">
+            Een warm, premium design dat overtuigt in Nederland, Belgie, Frankrijk
+            en Duitsland begint met duidelijke gifting momenten en een sterke first
+            impression.
           </p>
-          <h2 className="font-heading text-3xl md:text-5xl font-bold text-brown">
-            {t('sections.signatureBoxes')}
-          </h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {giftBoxes.map((product, i) => (
+
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
+          {giftBoxes.map((product, index) => (
             <div
               key={product.id}
               className={`transition-all duration-700 ${
-                boxesVisible
-                  ? 'opacity-100 translate-y-0'
-                  : 'opacity-0 translate-y-8'
+                boxesVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
               }`}
-              style={{ transitionDelay: `${i * 150}ms` }}
+              style={{ transitionDelay: `${index * 120}ms` }}
             >
               <ProductCard product={product} />
             </div>
           ))}
         </div>
-        <div className="text-center mt-12">
-          <Link
-            to="/shop"
-            className="inline-flex items-center gap-2 text-gold font-semibold hover:gap-4 transition-all duration-300 text-lg group"
-          >
-            {t('sections.viewAllProducts')}
-            <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
-          </Link>
-        </div>
       </section>
 
-      {/* ─── Shop op Gelegenheid ─── */}
-      <section ref={categoriesRef} className="bg-sand py-20 md:py-28">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-gold font-medium text-sm uppercase tracking-widest mb-3">
-              Categories
-            </p>
-            <h2 className="font-heading text-3xl md:text-5xl font-bold text-brown">
-              {t('sections.shopByOccasion')}
-            </h2>
+      <section ref={categoriesRef} className="px-4 pb-20 md:px-6 md:pb-28">
+        <div className="mx-auto max-w-7xl rounded-[2.2rem] border border-gold/12 bg-gradient-to-br from-sand via-[#f7efe2] to-cream p-7 shadow-[0_24px_80px_rgba(44,36,32,0.08)] md:p-10">
+          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.3em] text-gold">
+                Occasions
+              </p>
+              <h2 className="mt-4 font-heading text-4xl text-brown md:text-5xl">
+                {t('sections.shopByOccasion')}
+              </h2>
+            </div>
+            <div className="rounded-full border border-gold/18 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-brown/52">
+              mobile-first luxury storefront
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {shopCategories.map((cat, i) => (
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {shopCategories.map((category, index) => (
               <Link
-                key={cat.id}
-                to={`/collections/${cat.slug}`}
-                className={`group relative bg-white rounded-2xl p-8 text-center overflow-hidden hover:shadow-xl transition-all duration-500 ${
+                key={category.id}
+                to={`/collections/${category.slug}`}
+                className={`group relative overflow-hidden rounded-[1.8rem] border border-white/70 bg-white/72 p-7 shadow-[0_18px_50px_rgba(44,36,32,0.06)] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_24px_70px_rgba(44,36,32,0.12)] ${
                   categoriesVisible
-                    ? 'opacity-100 translate-y-0'
-                    : 'opacity-0 translate-y-8'
+                    ? 'translate-y-0 opacity-100'
+                    : 'translate-y-8 opacity-0'
                 }`}
-                style={{ transitionDelay: `${i * 100}ms` }}
+                style={{ transitionDelay: `${index * 110}ms` }}
               >
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative z-10">
-                  <span className="text-5xl block mb-5 group-hover:scale-125 transition-transform duration-500">
-                    {cat.icon}
-                  </span>
-                  <h3 className="font-heading text-xl font-semibold text-brown mb-1">
-                    {t(`categories.${cat.id}`)}
+                <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-gold/10 blur-3xl transition-transform duration-500 group-hover:scale-110" />
+                <div className="relative">
+                  <span className="text-5xl">{category.icon}</span>
+                  <h3 className="mt-6 font-heading text-2xl text-brown">
+                    {t(`categories.${category.id}`)}
                   </h3>
-                  <p className="arabic text-gold text-sm mb-4">{cat.nameAr}</p>
-                  <p className="text-brown/60 text-sm leading-relaxed">
-                    {t(`categoryDescriptions.${cat.id}`)}
+                  <p className="arabic mt-2 text-sm text-gold">{category.nameAr}</p>
+                  <p className="mt-4 text-sm leading-7 text-brown/60">
+                    {t(`categoryDescriptions.${category.id}`)}
                   </p>
-                  <span className="inline-block mt-4 text-gold text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                    {t('common.viewAll')} &rarr;
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-gold transition-all duration-300 group-hover:gap-3">
+                    {t('common.viewAll')}
+                    <span>&rarr;</span>
                   </span>
                 </div>
               </Link>
@@ -233,45 +278,41 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── Reviews ─── */}
-      <section ref={reviewsRef} className="max-w-6xl mx-auto px-4 py-20 md:py-28">
-        <div className="text-center mb-14">
-          <p className="text-gold font-medium text-sm uppercase tracking-widest mb-3">
+      <section ref={reviewsRef} className="mx-auto max-w-7xl px-4 py-4 md:px-6">
+        <div className="mb-12 text-center">
+          <p className="text-[11px] uppercase tracking-[0.3em] text-gold">
             Testimonials
           </p>
-          <h2 className="font-heading text-3xl md:text-5xl font-bold text-brown">
+          <h2 className="mt-4 font-heading text-4xl text-brown md:text-5xl">
             {t('sections.customerReviews')}
           </h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredReviews.map((review, i) => (
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+          {featuredReviews.map((review, index) => (
             <div
               key={review.id}
-              className={`bg-white rounded-2xl p-7 shadow-sm hover:shadow-md transition-all duration-500 ${
-                reviewsVisible
-                  ? 'opacity-100 translate-y-0'
-                  : 'opacity-0 translate-y-8'
+              className={`shell-card rounded-[1.8rem] p-6 transition-all duration-700 ${
+                reviewsVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
               }`}
-              style={{ transitionDelay: `${i * 100}ms` }}
+              style={{ transitionDelay: `${index * 100}ms` }}
             >
-              <div className="text-gold/30 text-5xl font-heading leading-none mb-2">
-                &ldquo;
+              <div className="flex items-center justify-between">
+                <span className="font-heading text-5xl leading-none text-gold/28">
+                  &ldquo;
+                </span>
+                <span className="rounded-full border border-gold/12 bg-gold/10 px-3 py-1 text-xs font-semibold text-gold">
+                  {review.rating}.0
+                </span>
               </div>
-              <div className="text-gold mb-3 text-sm">
-                {'★'.repeat(review.rating)}
-                {'☆'.repeat(5 - review.rating)}
-              </div>
-              <p className="text-brown/80 text-sm mb-5 leading-relaxed line-clamp-4">
-                {review.text}
-              </p>
-              <div className="border-t border-sand pt-4">
-                <p className="font-semibold text-brown text-sm">
-                  {review.name}
-                </p>
+              <div className="mt-2 text-sm text-gold">{'★'.repeat(review.rating)}</div>
+              <p className="mt-4 text-sm leading-7 text-brown/72">{review.text}</p>
+              <div className="mt-6 border-t border-gold/12 pt-4">
+                <p className="font-semibold text-brown">{review.name}</p>
                 {review.verified && (
-                  <span className="text-olive text-xs flex items-center gap-1 mt-1">
+                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-olive">
                     ✓ {t('common.verified')}
-                  </span>
+                  </p>
                 )}
               </div>
             </div>
@@ -279,17 +320,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── Partners Strip ─── */}
-      <section className="bg-sand/50 py-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <p className="text-center text-brown/40 text-sm uppercase tracking-widest mb-8 font-medium">
+      <section className="px-4 py-16 md:px-6">
+        <div className="mx-auto max-w-7xl rounded-[1.8rem] border border-gold/12 bg-white/65 px-6 py-10 shadow-[0_20px_70px_rgba(44,36,32,0.06)] backdrop-blur">
+          <p className="text-center text-[11px] uppercase tracking-[0.3em] text-brown/35">
             {t('partners.title')}
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-4">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
             {partners.map((name) => (
               <span
                 key={name}
-                className="text-brown/30 font-heading text-lg md:text-xl font-bold hover:text-brown/50 transition-colors duration-300 cursor-default"
+                className="font-heading text-xl font-semibold text-brown/40 transition-colors duration-300 hover:text-brown/60"
               >
                 {name}
               </span>
@@ -298,48 +338,42 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── Newsletter ─── */}
-      <section className="relative overflow-hidden py-20 md:py-28">
-        <div className="absolute inset-0 pattern-bg bg-cream" />
-        {/* Gold accent lines */}
-        <div className="absolute top-0 left-0 w-full h-1 gold-gradient" />
-        <div className="absolute bottom-0 left-0 w-full h-1 gold-gradient" />
-
-        <div className="max-w-xl mx-auto px-4 text-center relative z-10">
-          <div className="inline-block mb-6">
-            <div className="w-12 h-12 border-2 border-gold/30 rotate-45 mx-auto flex items-center justify-center">
-              <div className="w-6 h-6 border border-gold/50 rotate-0" />
+      <section className="px-4 pb-20 pt-4 md:px-6 md:pb-28">
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-[2.2rem] border border-gold/15 bg-white/75 p-8 shadow-[0_26px_90px_rgba(44,36,32,0.08)] backdrop-blur md:p-12">
+          <div className="mx-auto max-w-2xl text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-gold/22 bg-gold/10 text-gold">
+              ✦
             </div>
-          </div>
-          <h2 className="font-heading text-3xl md:text-5xl font-bold text-brown mb-5">
-            {t('newsletter.heading')}
-          </h2>
-          <p className="text-brown/70 mb-10 text-lg">
-            {t('newsletter.subheading')}
-          </p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              alert(t('footer.subscribed'))
-            }}
-            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-          >
-            <input
-              type="email"
-              placeholder={t('newsletter.placeholder')}
-              required
-              className="flex-1 px-5 py-4 rounded-full border border-brown/20 focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 bg-white text-brown transition-all"
-            />
-            <button
-              type="submit"
-              className="gold-gradient text-dark px-8 py-4 rounded-full font-semibold hover:shadow-lg hover:shadow-gold/25 transition-all duration-300 cursor-pointer whitespace-nowrap"
+            <h2 className="mt-6 font-heading text-4xl text-brown md:text-5xl">
+              {t('newsletter.heading')}
+            </h2>
+            <p className="mt-5 text-base leading-8 text-brown/62">
+              {t('newsletter.subheading')}
+            </p>
+            <form
+              onSubmit={(event) => {
+                event.preventDefault()
+                alert(t('footer.subscribed'))
+              }}
+              className="mt-8 flex flex-col gap-3 sm:flex-row"
             >
-              {t('newsletter.button')}
-            </button>
-          </form>
-          <p className="text-brown/40 text-xs mt-5">
-            {t('newsletter.privacy')}
-          </p>
+              <input
+                type="email"
+                placeholder={t('newsletter.placeholder')}
+                required
+                className="gold-outline h-14 flex-1 rounded-full bg-cream/80 px-6 text-brown outline-none transition-all focus:border-gold focus:ring-2 focus:ring-gold/18"
+              />
+              <button
+                type="submit"
+                className="gold-gradient rounded-full px-8 py-4 font-semibold text-dark shadow-[0_18px_35px_rgba(198,168,108,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(198,168,108,0.36)]"
+              >
+                {t('newsletter.button')}
+              </button>
+            </form>
+            <p className="mt-5 text-xs uppercase tracking-[0.2em] text-brown/35">
+              {t('newsletter.privacy')}
+            </p>
+          </div>
         </div>
       </section>
     </div>
