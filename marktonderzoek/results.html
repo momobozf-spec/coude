@@ -252,6 +252,8 @@
     <div class="nav-group">Feedback</div>
     <div class="nav-item" onclick="showView('open')"><span class="nav-icon">💬</span> Open vragen</div>
     <div class="nav-item" onclick="showView('emails')"><span class="nav-icon">📧</span> E-mails</div>
+    <div class="nav-group" style="margin-top:auto;padding-top:20px;">Sessie</div>
+    <div class="nav-item" onclick="logout()" style="color:#F87171;"><span class="nav-icon">🚪</span> Uitloggen</div>
   </nav>
 
   <!-- CONTENT -->
@@ -460,6 +462,11 @@ function showView(name) {
   });
   currentView = name;
   if (window._responses) buildChartsForView(name, window._responses);
+}
+
+async function logout() {
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/login.html';
 }
 
 async function loadData() {

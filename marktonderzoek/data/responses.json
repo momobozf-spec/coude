@@ -1,3 +1,68 @@
 {
-  "responses": []
+  "responses": [
+    {
+      "id": "1774740770783",
+      "timestamp": "2026-03-28T23:32:50.783Z",
+      "answers": {
+        "frequentie": "Nooit",
+        "voor_wie": [
+          "Voor mezelf",
+          "Als cadeau voor vrienden / kennissen"
+        ],
+        "kanalen": [
+          "Fysieke winkels"
+        ],
+        "gelegenheden": [
+          "Geboorte"
+        ],
+        "social_media": [
+          "Instagram"
+        ],
+        "apparaat": "Tablet",
+        "categorieen": [
+          "Gebedskleding (djellaba, abaya, kimono)",
+          "Geuren (parfum, wierook, kaarsen)"
+        ],
+        "budget_product": "Minder dan €10",
+        "budget_geschenk": "Minder dan €15",
+        "betaalmethode": [
+          "Creditcard (Visa / Mastercard)"
+        ],
+        "leveringstijd": "3–5 werkdagen",
+        "loyaliteit_interesse": "Misschien, hangt af van de prijs",
+        "matrix": {
+          "prijs": 4,
+          "authenticiteit": 4,
+          "reviews": 4,
+          "meertalig": 3,
+          "cadeau_opties": 3,
+          "gratis_verzending": 3,
+          "loyaliteit": 3,
+          "levering": 3,
+          "duurzaamheid": 3,
+          "halal": 3,
+          "klantendienst": 3,
+          "verpakking": 3
+        },
+        "bekende_shops": [],
+        "belemmeringen": [
+          "Lange levertijden",
+          "Geen halalcertificering zichtbaar"
+        ],
+        "mist": "",
+        "uniek": "",
+        "nps": 5,
+        "religieuze_praktijk": "Strikt praktiserend (dagelijkse gebeden, volledig halal leven)",
+        "leeftijd": "35–44",
+        "geslacht": "Vrouw",
+        "achtergrond": [
+          "Amazigh",
+          "Europees"
+        ],
+        "regio": "Duitsland",
+        "email": "mbouzouf@jems-group.com",
+        "lang": "nl"
+      }
+    }
+  ]
 }

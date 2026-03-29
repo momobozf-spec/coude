@@ -2,15 +2,71 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const session = require('express-session');
 
 const app = express();
 const PORT = 3000;
 const RESPONSES_FILE = path.join(__dirname, 'data', 'responses.json');
 
+// Admin credentials – wijzig dit naar jouw eigen wachtwoord
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'jamiljamila2025';
+
 app.use(cors());
 app.use(express.json());
 app.use((req, res, next) => { res.setHeader('ngrok-skip-browser-warning', '1'); next(); });
-app.use(express.static(__dirname));
+app.use(session({
+  secret: 'alnoor_secret_2025',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 8 * 60 * 60 * 1000 } // 8 uur
+}));
+
+// Auth middleware
+function requireAuth(req, res, next) {
+  if (req.session && req.session.isAdmin) return next();
+  res.redirect('/login.html');
+}
+
+// Publieke bestanden (survey toegankelijk voor iedereen)
+app.use('/survey.html', express.static(path.join(__dirname, 'survey.html')));
+app.use('/login.html', express.static(path.join(__dirname, 'login.html')));
+
+// Statische assets (css, js, fonts) publiek
+app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
+
+// Beveiligde pagina's
+app.get('/results.html', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'results.html'));
+});
+app.get('/admin.html', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// Root redirect
+app.get('/', (req, res) => res.redirect('/survey.html'));
+
+// Login API
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    req.session.isAdmin = true;
+    res.json({ success: true });
+  } else {
+    res.status(401).json({ error: 'Ongeldige gebruikersnaam of wachtwoord' });
+  }
+});
+
+// Logout API
+app.post('/api/logout', (req, res) => {
+  req.session.destroy();
+  res.json({ success: true });
+});
+
+// Check auth status
+app.get('/api/auth', (req, res) => {
+  res.json({ authenticated: !!(req.session && req.session.isAdmin) });
+});
 
 function readResponses() {
   if (!fs.existsSync(RESPONSES_FILE)) return { responses: [] };
@@ -20,7 +76,7 @@ function writeResponses(data) {
   fs.writeFileSync(RESPONSES_FILE, JSON.stringify(data, null, 2));
 }
 
-// Submit response
+// Submit response (publiek – respondenten moeten kunnen indienen)
 app.post('/api/responses', (req, res) => {
   const data = readResponses();
   data.responses.push({ id: Date.now().toString(), timestamp: new Date().toISOString(), answers: req.body });
@@ -28,17 +84,17 @@ app.post('/api/responses', (req, res) => {
   res.json({ success: true });
 });
 
-// Get all responses
-app.get('/api/responses', (req, res) => res.json(readResponses().responses));
+// Get all responses (beveiligd)
+app.get('/api/responses', requireAuth, (req, res) => res.json(readResponses().responses));
 
-// Delete all responses
-app.delete('/api/responses', (req, res) => {
+// Delete all responses (beveiligd)
+app.delete('/api/responses', requireAuth, (req, res) => {
   writeResponses({ responses: [] });
   res.json({ success: true });
 });
 
-// Export CSV
-app.get('/api/responses/export', (req, res) => {
+// Export CSV (beveiligd)
+app.get('/api/responses/export', requireAuth, (req, res) => {
   const { responses } = readResponses();
   if (!responses.length) return res.status(400).json({ error: 'Geen antwoorden' });
 
@@ -79,6 +135,7 @@ app.get('/api/responses/export', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`\nJamal & Jamila – Marktbevraging`);
-  console.log(`Survey:   http://localhost:${PORT}/survey.html`);
+  console.log(`Survey:     http://localhost:${PORT}/survey.html`);
+  console.log(`Login:      http://localhost:${PORT}/login.html`);
   console.log(`Resultaten: http://localhost:${PORT}/results.html\n`);
 });
