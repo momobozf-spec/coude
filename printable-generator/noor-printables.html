@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Noor Printables — Islamitische Kleurplaten voor Kinderen</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--green:#1a6b4a;--green-light:#e8f5ec;--green-dark:#145239;--gold:#c9920a;--gold-light:#fdf3d7;--gold-dark:#a07608;--bg:#faf9f5;--card:#fff;--text:#1a1a2e;--text-light:#666;--radius:12px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ===== HEADER ===== */
+.header{background:#fff;border-bottom:1px solid #e8e4dc;padding:12px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.header-brand{display:flex;align-items:center;gap:8px}
+.header-brand h1{font-family:'Amiri',serif;font-size:1.25rem;color:var(--green);font-weight:700}
+.header-brand .moon{font-size:1.4rem}
+.header-actions{display:flex;align-items:center;gap:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:0.8125rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;text-decoration:none}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:var(--green-dark)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#daa520);color:#fff;box-shadow:0 2px 8px rgba(201,146,10,.3)}
+.btn-gold:hover{box-shadow:0 4px 16px rgba(201,146,10,.4);transform:translateY(-1px)}
+.btn-outline{background:transparent;border:1.5px solid #d1d5db;color:var(--text)}
+.btn-outline:hover{background:#f3f4f6}
+.btn-sm{padding:6px 12px;font-size:0.75rem}
+.premium-badge{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:600;background:var(--green-light);color:var(--green)}
+
+/* ===== VIEW STATES ===== */
+.view{display:none}
+.view.active{display:block}
+
+/* ===== GALLERY ===== */
+.gallery-header{padding:20px 16px 8px;text-align:center}
+.gallery-header h2{font-family:'Amiri',serif;font-size:1.5rem;color:var(--text);margin-bottom:4px}
+.gallery-header p{font-size:0.875rem;color:var(--text-light)}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:12px 16px 80px}
+@media(min-width:640px){.gallery-grid{grid-template-columns:repeat(3,1fr);max-width:600px;margin:0 auto}}
+@media(min-width:900px){.gallery-grid{grid-template-columns:repeat(4,1fr);max-width:800px}}
+
+.gallery-item{position:relative;border-radius:var(--radius);overflow:hidden;cursor:pointer;background:#fff;border:1px solid #e8e4dc;transition:all .3s;aspect-ratio:3/4}
+.gallery-item:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.gallery-item svg{width:100%;height:100%;object-fit:cover;transition:filter .3s}
+.gallery-item.locked svg{filter:blur(3px)}
+.gallery-item.locked::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:1}
+.gallery-item .lock-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;z-index:2;opacity:0;transition:opacity .3s}
+.gallery-item.locked .lock-icon{opacity:1}
+.gallery-item .badge{position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:6px;font-size:0.625rem;font-weight:700;z-index:3;text-transform:uppercase;letter-spacing:.5px}
+.badge-free{background:var(--green);color:#fff}
+.badge-premium{background:linear-gradient(135deg,var(--gold),#daa520);color:#fff}
+.gallery-item .item-title{position:absolute;bottom:0;left:0;right:0;padding:8px;background:linear-gradient(transparent,rgba(0,0,0,.6));color:#fff;font-size:0.75rem;font-weight:600;z-index:3}
+
+/* ===== CANVAS VIEW ===== */
+.canvas-toolbar{display:flex;align-items:center;gap:8px;padding:8px 16px;background:#fff;border-bottom:1px solid #e8e4dc;overflow-x:auto;flex-wrap:wrap}
+.tool-group{display:flex;align-items:center;gap:4px}
+.tool-btn{width:36px;height:36px;border-radius:8px;border:2px solid transparent;background:#f3f4f6;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all .15s}
+.tool-btn.active{border-color:var(--green);background:var(--green-light)}
+.tool-btn:hover{background:#e5e7eb}
+.color-dot{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all .15s}
+.color-dot.active{border-color:var(--text);transform:scale(1.2)}
+.color-dot:hover{transform:scale(1.15)}
+.size-dot{width:32px;height:32px;border-radius:8px;border:2px solid transparent;background:#f3f4f6;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.size-dot.active{border-color:var(--green);background:var(--green-light)}
+.canvas-container{position:relative;flex:1;display:flex;justify-content:center;background:#e8e4dc;overflow:hidden;touch-action:none}
+.canvas-container canvas{background:#fff;max-width:100%;max-height:100%;object-fit:contain}
+.watermark{position:absolute;bottom:8px;right:8px;font-size:0.6rem;color:rgba(0,0,0,.25);pointer-events:none;z-index:5}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;visibility:hidden;transition:all .3s}
+.modal-overlay.show{opacity:1;visibility:visible}
+.modal{background:#fff;border-radius:16px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;transform:translateY(20px) scale(.95);transition:all .3s;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-overlay.show .modal{transform:translateY(0) scale(1)}
+.modal-top{background:linear-gradient(135deg,var(--green),var(--green-dark));padding:24px;text-align:center;border-radius:16px 16px 0 0}
+.modal-top .star{font-size:2.5rem;margin-bottom:8px;display:block}
+.modal-top h2{font-family:'Amiri',serif;font-size:1.5rem;color:#fff;margin-bottom:4px}
+.modal-top p{color:rgba(255,255,255,.8);font-size:0.875rem}
+.modal-body{padding:24px}
+.price-display{text-align:center;margin-bottom:20px}
+.price-old{font-size:1rem;color:#999;text-decoration:line-through}
+.price-new{font-size:2.5rem;font-weight:800;color:var(--green);margin:4px 0}
+.price-period{font-size:0.875rem;color:var(--text-light)}
+.modal-body .btn{width:100%;padding:14px;font-size:0.9375rem;margin-bottom:10px}
+.btn-lifetime{background:#f8f5ee;color:var(--gold-dark);border:1.5px solid var(--gold);font-weight:600}
+.btn-lifetime:hover{background:var(--gold-light)}
+.perks{display:flex;justify-content:center;gap:16px;margin:16px 0;flex-wrap:wrap}
+.perks span{font-size:0.75rem;color:var(--green);font-weight:500}
+.code-section{margin-top:20px;padding-top:16px;border-top:1px solid #e8e4dc}
+.code-section label{font-size:0.75rem;color:var(--text-light);display:block;margin-bottom:6px}
+.code-row{display:flex;gap:8px}
+.code-row input{flex:1;padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:0.875rem;outline:none}
+.code-row input:focus{border-color:var(--green)}
+.code-row .btn{width:auto;padding:8px 16px;font-size:0.8125rem}
+.code-error{color:#dc2626;font-size:0.75rem;margin-top:6px}
+.code-success{color:var(--green);font-size:0.75rem;margin-top:6px}
+.modal-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.2);color:#fff;font-size:1.25rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.modal-close:hover{background:rgba(255,255,255,.3)}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div class="header-brand">
+    <span class="moon">&#127769;</span>
+    <h1>Noor Printables</h1>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outline btn-sm" id="btnGallery" onclick="showView('gallery')">&#128444; Galerij</button>
+    <span id="premiumHeaderSlot"></span>
+    <button class="btn btn-green btn-sm" id="btnSave" onclick="saveImage()" style="display:none">&#128190; Opslaan</button>
+  </div>
+</div>
+
+<!-- ===== GALLERY VIEW ===== -->
+<div class="view active" id="galleryView">
+  <div class="gallery-header">
+    <h2>&#127769; Islamitische Kleurplaten</h2>
+    <p>Kies een kleurplaat en begin met kleuren!</p>
+  </div>
+  <div class="gallery-grid" id="galleryGrid"></div>
+</div>
+
+<!-- ===== CANVAS VIEW ===== -->
+<div class="view" id="canvasView">
+  <div class="canvas-toolbar">
+    <div class="tool-group">
+      <button class="tool-btn active" data-tool="brush" onclick="setTool('brush')" title="Penseel">&#9998;</button>
+      <button class="tool-btn" data-tool="fill" onclick="setTool('fill')" title="Vullen">&#128396;</button>
+      <button class="tool-btn" data-tool="eraser" onclick="setTool('eraser')" title="Gum">&#128221;</button>
+    </div>
+    <div class="tool-group" id="sizeGroup">
+      <div class="size-dot active" data-size="4" onclick="setSize(4,this)"><div style="width:4px;height:4px;border-radius:50%;background:#333"></div></div>
+      <div class="size-dot" data-size="10" onclick="setSize(10,this)"><div style="width:10px;height:10px;border-radius:50%;background:#333"></div></div>
+      <div class="size-dot" data-size="18" onclick="setSize(18,this)"><div style="width:16px;height:16px;border-radius:50%;background:#333"></div></div>
+      <div class="size-dot" data-size="28" onclick="setSize(28,this)"><div style="width:22px;height:22px;border-radius:50%;background:#333"></div></div>
+    </div>
+    <div class="tool-group" id="colorPalette"></div>
+    <input type="color" id="customColor" value="#e74c3c" style="width:28px;height:28px;border:none;border-radius:50%;cursor:pointer;padding:0" title="Eigen kleur">
+    <div style="flex:1"></div>
+    <button class="tool-btn" onclick="undo()" title="Ongedaan maken">&#8630;</button>
+    <button class="tool-btn" onclick="clearCanvas()" title="Alles wissen">&#128465;</button>
+  </div>
+  <div class="canvas-container" id="canvasContainer">
+    <canvas id="drawCanvas"></canvas>
+    <canvas id="overlayCanvas" style="position:absolute;pointer-events:none"></canvas>
+    <div class="watermark" id="watermark">NoorPrintables.com — Upgrade for watermark-free</div>
+  </div>
+</div>
+
+<!-- ===== UPGRADE MODAL ===== -->
+<div class="modal-overlay" id="upgradeModal">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div class="modal-top">
+      <span class="star">&#127775;</span>
+      <h2>Noor Printables Premium</h2>
+      <p>Alle 12 kleurplaten + elke week nieuwe platen</p>
+    </div>
+    <div class="modal-body">
+      <div class="price-display">
+        <span class="price-old">&euro;9,99/maand</span>
+        <div class="price-new">&euro;4,99<span style="font-size:.875rem;font-weight:400;color:var(--text-light)">/maand</span></div>
+      </div>
+
+      <a href="https://gumroad.com/noorprintables" target="_blank" class="btn btn-green" style="font-size:1rem;padding:16px">
+        &#128275; Unlock Now &mdash; &euro;4,99/maand
+      </a>
+      <a href="https://gumroad.com/noorprintables" target="_blank" class="btn btn-lifetime">
+        &#9889; Lifetime access &mdash; &euro;24,99 (eenmalig)
+      </a>
+
+      <div class="perks">
+        <span>&#10003; Direct toegang</span>
+        <span>&#10003; Altijd opzegbaar</span>
+        <span>&#10003; Wekelijks nieuw</span>
+      </div>
+
+      <div class="code-section">
+        <label>Heb je al een code? Voer hem hier in:</label>
+        <div class="code-row">
+          <input type="text" id="codeInput" placeholder="Bijv. NOOR2025" autocomplete="off">
+          <button class="btn btn-green btn-sm" onclick="activateCode()">Activeren</button>
+        </div>
+        <div id="codeFeedback"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const COLORS = ['#e74c3c','#e67e22','#f1c40f','#27ae60','#1abc9c','#2980b9','#8e44ad','#e91e63','#00bcd4','#8bc34a','#ff9800','#795548','#607d8b','#ffffff','#000000'];
+const FREE_IDS = ['geometric','mosque','crescent'];
+const VALID_CODE = 'NOOR2025';
+let isPremium = localStorage.getItem('noor_premium') === 'true';
+let currentTool = 'brush';
+let currentColor = '#e74c3c';
+let brushSize = 4;
+let isDrawing = false;
+let history = [];
+let historyIdx = -1;
+let currentTemplate = null;
+const CW = 600, CH = 750;
+
+// Star helper
+function sp(cx,cy,oR,iR,pts){const s=[];const st=Math.PI/pts;for(let i=0;i<2*pts;i++){const r=i%2===0?oR:iR;const a=i*st-Math.PI/2;s.push(`${(cx+Math.cos(a)*r).toFixed(1)},${(cy+Math.sin(a)*r).toFixed(1)}`);}return s.join(' ');}
+
+const TEMPLATES = [
+  {id:'geometric',name:'Geometrisch Patroon',cat:'islamic',svg:`<svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="750" fill="#fff"/><polygon points="${sp(300,350,80,40,8)}" fill="none" stroke="#333" stroke-width="2.5"/><circle cx="300" cy="350" r="25" fill="none" stroke="#333" stroke-width="2"/>${[0,1,2,3,4,5].map(i=>{const a=i*Math.PI*2/6-Math.PI/2;const x=300+Math.cos(a)*160;const y=350+Math.sin(a)*160;return`<polygon points="${sp(x,y,40,20,8)}" fill="none" stroke="#333" stroke-width="2"/><circle cx="${x}" cy="${y}" r="12" fill="none" stroke="#333" stroke-width="1.5"/>`;}).join('')}${[0,1,2,3,4,5,6,7,8,9,10,11].map(i=>{const a=i*Math.PI*2/12;return`<circle cx="${300+Math.cos(a)*240}" cy="${350+Math.sin(a)*240}" r="15" fill="none" stroke="#333" stroke-width="1.5"/>`;}).join('')}<circle cx="300" cy="350" r="280" fill="none" stroke="#333" stroke-width="2"/><text x="300" y="700" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#bbb">Geometrisch Patroon</text></svg>`},
+  {id:'mosque',name:'Moskee',cat:'islamic',svg:`<svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="750" fill="#fff"/><line x1="50" y1="600" x2="550" y2="600" stroke="#333" stroke-width="2"/><rect x="150" y="400" width="300" height="200" fill="none" stroke="#333" stroke-width="2.5" rx="2"/><path d="M 150 400 Q 300 220 450 400" fill="none" stroke="#333" stroke-width="2.5"/><circle cx="300" cy="250" r="18" fill="none" stroke="#333" stroke-width="2"/><circle cx="308" cy="246" r="14" fill="white" stroke="#333" stroke-width="1.5"/><path d="M 260 600 L 260 490 Q 300 450 340 490 L 340 600" fill="none" stroke="#333" stroke-width="2.5"/><path d="M 180 470 Q 200 450 220 470 L 220 520 L 180 520 Z" fill="none" stroke="#333" stroke-width="2"/><path d="M 380 470 Q 400 450 420 470 L 420 520 L 380 520 Z" fill="none" stroke="#333" stroke-width="2"/><rect x="80" y="310" width="40" height="290" fill="none" stroke="#333" stroke-width="2"/><path d="M 80 310 Q 100 270 120 310" fill="none" stroke="#333" stroke-width="2"/><rect x="480" y="310" width="40" height="290" fill="none" stroke="#333" stroke-width="2"/><path d="M 480 310 Q 500 270 520 310" fill="none" stroke="#333" stroke-width="2"/><circle cx="160" cy="100" r="35" fill="none" stroke="#333" stroke-width="2"/><circle cx="175" cy="92" r="28" fill="white" stroke="#333" stroke-width="1.5"/><polygon points="${sp(520,120,8,4,5)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(450,170,6,3,5)}" fill="none" stroke="#333" stroke-width="1.5"/><text x="300" y="700" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#bbb">Moskee</text></svg>`},
+  {id:'crescent',name:'Crescent & Sterren',cat:'islamic',svg:`<svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="750" fill="#fff"/><circle cx="280" cy="300" r="150" fill="none" stroke="#333" stroke-width="2.5"/><circle cx="330" cy="280" r="120" fill="white" stroke="#333" stroke-width="2"/><polygon points="${sp(200,260,45,22,5)}" fill="none" stroke="#333" stroke-width="2.5"/><circle cx="300" cy="300" r="200" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="8 4"/>${[[480,150,20],[120,150,16],[500,350,14],[100,400,12],[450,500,18],[150,530,14],[350,550,10]].map(([x,y,r])=>`<polygon points="${sp(x,y,r,r/2,5)}" fill="none" stroke="#333" stroke-width="1.5"/>`).join('')}<polygon points="${sp(250,520,16,8,6)}" fill="none" stroke="#333" stroke-width="2"/><polygon points="${sp(300,580,35,17,8)}" fill="none" stroke="#333" stroke-width="2"/><text x="300" y="700" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#bbb">Crescent &amp; Sterren</text></svg>`},
+  {id:'lantern',name:'Ramadan Lantaarn',cat:'ramadan',svg:`<svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="750" fill="#fff"/><path d="M 300 50 L 300 100" stroke="#333" stroke-width="2.5"/><path d="M 270 50 Q 300 30 330 50" fill="none" stroke="#333" stroke-width="2.5"/><path d="M 230 120 L 250 100 L 350 100 L 370 120" fill="none" stroke="#333" stroke-width="2.5"/><path d="M 220 120 Q 200 300 220 480 L 380 480 Q 400 300 380 120 Z" fill="none" stroke="#333" stroke-width="2.5"/><line x1="240" y1="160" x2="240" y2="440" stroke="#333" stroke-width="1.5"/><line x1="300" y1="120" x2="300" y2="480" stroke="#333" stroke-width="1.5"/><line x1="360" y1="160" x2="360" y2="440" stroke="#333" stroke-width="1.5"/><polygon points="${sp(270,220,18,9,6)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(330,220,18,9,6)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(270,340,18,9,6)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(330,340,18,9,6)}" fill="none" stroke="#333" stroke-width="1.5"/><line x1="220" y1="300" x2="380" y2="300" stroke="#333" stroke-width="1.5"/><path d="M 240 480 L 260 510 L 340 510 L 360 480" fill="none" stroke="#333" stroke-width="2.5"/><text x="300" y="700" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#bbb">Ramadan Lantaarn</text></svg>`},
+  {id:'kaaba',name:'Kaaba',cat:'hajj',svg:`<svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="750" fill="#fff"/><polygon points="200,350 400,350 400,550 200,550" fill="none" stroke="#333" stroke-width="2.5"/><polygon points="200,350 300,290 500,290 400,350" fill="none" stroke="#333" stroke-width="2.5"/><polygon points="400,350 500,290 500,490 400,550" fill="none" stroke="#333" stroke-width="2.5"/><line x1="200" y1="420" x2="400" y2="420" stroke="#333" stroke-width="3"/><line x1="400" y1="420" x2="500" y2="360" stroke="#333" stroke-width="3"/><rect x="270" y="440" width="60" height="90" rx="2" fill="none" stroke="#333" stroke-width="2"/><path d="M 270 440 Q 300 420 330 440" fill="none" stroke="#333" stroke-width="2"/><ellipse cx="340" cy="580" rx="220" ry="40" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 3"/><circle cx="150" cy="130" r="40" fill="none" stroke="#333" stroke-width="2"/><circle cx="168" cy="122" r="32" fill="white" stroke="#333" stroke-width="1.5"/><polygon points="${sp(450,100,12,6,5)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(520,180,10,5,5)}" fill="none" stroke="#333" stroke-width="1.5"/><text x="300" y="700" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#bbb">Kaaba</text></svg>`},
+  {id:'eidgifts',name:'Eid Cadeaus',cat:'eid',svg:`<svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="750" fill="#fff"/><rect x="180" y="320" width="240" height="180" rx="4" fill="none" stroke="#333" stroke-width="2.5"/><rect x="180" y="280" width="240" height="40" rx="4" fill="none" stroke="#333" stroke-width="2.5"/><line x1="300" y1="280" x2="300" y2="500" stroke="#333" stroke-width="2.5"/><line x1="180" y1="400" x2="420" y2="400" stroke="#333" stroke-width="2.5"/><ellipse cx="270" cy="265" rx="30" ry="18" fill="none" stroke="#333" stroke-width="2"/><ellipse cx="330" cy="265" rx="30" ry="18" fill="none" stroke="#333" stroke-width="2"/><circle cx="300" cy="270" r="8" fill="none" stroke="#333" stroke-width="2"/><polygon points="${sp(240,360,14,7,5)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(360,360,14,7,5)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(240,450,14,7,5)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(360,450,14,7,5)}" fill="none" stroke="#333" stroke-width="1.5"/><rect x="80" y="430" width="80" height="70" rx="3" fill="none" stroke="#333" stroke-width="2"/><rect x="440" y="420" width="90" height="80" rx="3" fill="none" stroke="#333" stroke-width="2"/><polygon points="${sp(300,140,24,12,8)}" fill="none" stroke="#333" stroke-width="2"/><polygon points="${sp(150,180,20,10,5)}" fill="none" stroke="#333" stroke-width="2"/><polygon points="${sp(450,160,16,8,5)}" fill="none" stroke="#333" stroke-width="2"/><text x="300" y="600" text-anchor="middle" font-family="sans-serif" font-size="32" fill="#ddd">Eid Mubarak!</text><text x="300" y="700" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#bbb">Eid Cadeaus</text></svg>`},
+  {id:'quran',name:'Quran',cat:'islamic',svg:`<svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="750" fill="#fff"/><rect x="160" y="200" width="280" height="380" rx="8" fill="none" stroke="#333" stroke-width="2.5"/><rect x="170" y="210" width="260" height="360" rx="5" fill="none" stroke="#333" stroke-width="1"/><line x1="300" y1="200" x2="300" y2="580" stroke="#333" stroke-width="1.5"/><polygon points="${sp(300,320,50,25,8)}" fill="none" stroke="#333" stroke-width="2"/><circle cx="300" cy="320" r="18" fill="none" stroke="#333" stroke-width="1.5"/><rect x="220" y="420" width="160" height="2" fill="#333"/><rect x="240" y="440" width="120" height="2" fill="#333"/><rect x="200" y="460" width="200" height="2" fill="#333"/><polygon points="${sp(300,160,16,8,6)}" fill="none" stroke="#333" stroke-width="2"/><path d="M 155 250 Q 145 390 155 530" fill="none" stroke="#333" stroke-width="2"/><path d="M 445 250 Q 455 390 445 530" fill="none" stroke="#333" stroke-width="2"/><text x="300" y="700" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#bbb">Quran</text></svg>`},
+  {id:'dua',name:'Dua Handen',cat:'values',svg:`<svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="750" fill="#fff"/><path d="M 200 500 Q 200 350 250 280 Q 270 250 280 200 L 290 200 Q 285 250 275 280 Q 300 240 310 190 L 320 190 Q 315 240 305 280 Q 330 230 340 180 L 350 180 Q 345 235 320 290 Q 340 260 355 220 L 365 225 Q 350 270 330 300 Q 350 380 340 440 Q 330 490 300 500" fill="none" stroke="#333" stroke-width="2.5"/><path d="M 400 500 Q 400 350 350 280 Q 330 250 320 200 L 310 200 Q 315 250 325 280 Q 300 240 290 190 L 280 190 Q 285 240 295 280 Q 270 230 260 180 L 250 180 Q 255 235 280 290 Q 260 260 245 220 L 235 225 Q 250 270 270 300 Q 250 380 260 440 Q 270 490 300 500" fill="none" stroke="#333" stroke-width="2.5"/><polygon points="${sp(300,130,30,15,8)}" fill="none" stroke="#333" stroke-width="2"/>${[[180,180,8],[420,180,8],[150,300,6],[450,300,6],[200,100,10],[400,100,10]].map(([x,y,r])=>`<polygon points="${sp(x,y,r,r/2,5)}" fill="none" stroke="#333" stroke-width="1.5"/>`).join('')}<text x="300" y="700" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#bbb">Dua Handen</text></svg>`},
+  {id:'dates',name:'Iftar Dadels',cat:'ramadan',svg:`<svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="750" fill="#fff"/><ellipse cx="300" cy="420" rx="200" ry="30" fill="none" stroke="#333" stroke-width="2"/><rect x="100" y="380" width="400" height="40" rx="8" fill="none" stroke="#333" stroke-width="2.5"/>${[[200,360,25,15],[260,350,22,14],[320,355,24,15],[380,360,22,13],[240,340,20,12],[340,340,20,12],[300,330,24,14]].map(([x,y,rx,ry])=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="none" stroke="#333" stroke-width="2"/>`).join('')}<circle cx="300" cy="200" r="60" fill="none" stroke="#333" stroke-width="2"/><circle cx="320" cy="192" r="48" fill="white" stroke="#333" stroke-width="1.5"/><polygon points="${sp(265,178,8,4,5)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(200,250,12,6,5)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(400,230,10,5,5)}" fill="none" stroke="#333" stroke-width="1.5"/><text x="300" y="550" text-anchor="middle" font-family="sans-serif" font-size="26" fill="#ddd">Iftar Time!</text><text x="300" y="700" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#bbb">Iftar Dadels</text></svg>`},
+  {id:'minaret',name:'Minaret',cat:'islamic',svg:`<svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="750" fill="#fff"/><rect x="250" y="200" width="100" height="400" fill="none" stroke="#333" stroke-width="2.5"/><path d="M 250 200 Q 300 120 350 200" fill="none" stroke="#333" stroke-width="2.5"/><circle cx="300" cy="145" r="15" fill="none" stroke="#333" stroke-width="2"/><circle cx="308" cy="142" r="11" fill="white" stroke="#333" stroke-width="1.5"/><polygon points="${sp(285,133,5,2.5,5)}" fill="none" stroke="#333" stroke-width="1.5"/><line x1="300" y1="100" x2="300" y2="125" stroke="#333" stroke-width="2"/><line x1="250" y1="300" x2="350" y2="300" stroke="#333" stroke-width="2"/><line x1="250" y1="400" x2="350" y2="400" stroke="#333" stroke-width="2"/><line x1="250" y1="500" x2="350" y2="500" stroke="#333" stroke-width="2"/><path d="M 270 330 Q 300 310 330 330 L 330 370 L 270 370 Z" fill="none" stroke="#333" stroke-width="2"/><path d="M 270 430 Q 300 410 330 430 L 330 470 L 270 470 Z" fill="none" stroke="#333" stroke-width="2"/><rect x="220" y="600" width="160" height="10" fill="none" stroke="#333" stroke-width="2"/><polygon points="${sp(150,200,14,7,5)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(450,180,10,5,5)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(480,280,8,4,5)}" fill="none" stroke="#333" stroke-width="1.5"/><text x="300" y="700" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#bbb">Minaret</text></svg>`},
+  {id:'hajj',name:'Hajj Pelgrimage',cat:'hajj',svg:`<svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="750" fill="#fff"/><polygon points="250,380 350,380 350,480 250,480" fill="none" stroke="#333" stroke-width="2.5"/><polygon points="250,380 300,340 400,340 350,380" fill="none" stroke="#333" stroke-width="2"/><polygon points="350,380 400,340 400,440 350,480" fill="none" stroke="#333" stroke-width="2"/><line x1="250" y1="420" x2="350" y2="420" stroke="#333" stroke-width="2.5"/><ellipse cx="310" cy="510" rx="160" ry="25" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="5 3"/>${[[160,350,20],[440,340,18],[180,480,15],[430,470,16],[120,420,12],[470,400,13]].map(([x,y,h])=>`<circle cx="${x}" cy="${y}" r="10" fill="none" stroke="#333" stroke-width="1.5"/><line x1="${x}" y1="${y+10}" x2="${x}" y2="${y+h+10}" stroke="#333" stroke-width="1.5"/>`).join('')}<path d="M 250 200 Q 300 140 350 200" fill="none" stroke="#333" stroke-width="2"/><polygon points="${sp(300,175,12,6,5)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(200,150,10,5,5)}" fill="none" stroke="#333" stroke-width="1.5"/><polygon points="${sp(420,170,14,7,5)}" fill="none" stroke="#333" stroke-width="1.5"/><text x="300" y="700" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#bbb">Hajj Pelgrimage</text></svg>`},
+  {id:'zakat',name:'Zakat & Geven',cat:'values',svg:`<svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="750" fill="#fff"/><path d="M 250 400 Q 250 320 300 300 Q 350 320 350 400 L 350 500 L 250 500 Z" fill="none" stroke="#333" stroke-width="2.5"/><circle cx="300" cy="260" r="8" fill="none" stroke="#333" stroke-width="2"/><line x1="300" y1="268" x2="300" y2="300" stroke="#333" stroke-width="2"/><rect x="270" y="350" width="60" height="5" fill="none" stroke="#333" stroke-width="1.5"/><rect x="270" y="370" width="60" height="5" fill="none" stroke="#333" stroke-width="1.5"/><rect x="270" y="390" width="60" height="5" fill="none" stroke="#333" stroke-width="1.5"/><path d="M 200 480 Q 200 380 250 400" fill="none" stroke="#333" stroke-width="2"/><path d="M 400 480 Q 400 380 350 400" fill="none" stroke="#333" stroke-width="2"/>${[[170,300,10],[430,300,10],[150,200,14],[450,200,14],[300,150,18]].map(([x,y,r])=>`<polygon points="${sp(x,y,r,r/2,5)}" fill="none" stroke="#333" stroke-width="1.5"/>`).join('')}<polygon points="${sp(300,150,18,9,8)}" fill="none" stroke="#333" stroke-width="2"/><text x="300" y="600" text-anchor="middle" font-family="sans-serif" font-size="26" fill="#ddd">Zakat</text><text x="300" y="700" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#bbb">Zakat &amp; Geven</text></svg>`},
+];
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  buildPalette();
+  buildGallery();
+  updatePremiumUI();
+  document.getElementById('customColor').addEventListener('input', e => {
+    currentColor = e.target.value;
+    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+  });
+}
+
+function buildPalette() {
+  const pal = document.getElementById('colorPalette');
+  COLORS.forEach((c,i) => {
+    const dot = document.createElement('div');
+    dot.className = 'color-dot' + (i===0?' active':'');
+    dot.style.background = c;
+    if(c==='#ffffff') dot.style.border='2px solid #ccc';
+    dot.onclick = () => {
+      currentColor = c;
+      if(currentTool==='eraser') setTool('brush');
+      document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active'));
+      dot.classList.add('active');
+    };
+    pal.appendChild(dot);
+  });
+}
+
+function buildGallery() {
+  const grid = document.getElementById('galleryGrid');
+  grid.innerHTML = '';
+  TEMPLATES.forEach(t => {
+    const isFree = FREE_IDS.includes(t.id);
+    const isLocked = !isFree && !isPremium;
+    const item = document.createElement('div');
+    item.className = 'gallery-item' + (isLocked ? ' locked' : '');
+    item.innerHTML = `
+      ${t.svg}
+      <span class="badge ${isFree ? 'badge-free' : 'badge-premium'}">${isFree ? 'GRATIS' : 'PREMIUM ⭐'}</span>
+      <span class="lock-icon">&#128274;</span>
+      <div class="item-title">${t.name}</div>
+    `;
+    item.onclick = () => {
+      if (isLocked) { openModal(); return; }
+      openTemplate(t);
+    };
+    grid.appendChild(item);
+  });
+}
+
+// ============================================================
+// PREMIUM
+// ============================================================
+function updatePremiumUI() {
+  const slot = document.getElementById('premiumHeaderSlot');
+  if (isPremium) {
+    slot.innerHTML = '<span class="premium-badge">&#10003; Premium actief</span>';
+  } else {
+    slot.innerHTML = '<button class="btn btn-gold btn-sm" onclick="openModal()">&#11088; Go Premium</button>';
+  }
+  document.getElementById('watermark').style.display = isPremium ? 'none' : 'block';
+  buildGallery();
+}
+
+function openModal() {
+  document.getElementById('upgradeModal').classList.add('show');
+  document.getElementById('codeFeedback').textContent = '';
+  document.getElementById('codeInput').value = '';
+}
+function closeModal() {
+  document.getElementById('upgradeModal').classList.remove('show');
+}
+
+function activateCode() {
+  const code = document.getElementById('codeInput').value.trim().toUpperCase();
+  const fb = document.getElementById('codeFeedback');
+  if (code === VALID_CODE) {
+    isPremium = true;
+    localStorage.setItem('noor_premium', 'true');
+    fb.className = 'code-success';
+    fb.textContent = '&#10003; Code geactiveerd! Je hebt nu Premium toegang.';
+    setTimeout(() => { closeModal(); updatePremiumUI(); }, 1200);
+  } else {
+    fb.className = 'code-error';
+    fb.textContent = 'Ongeldige code. Probeer opnieuw.';
+  }
+}
+
+document.getElementById('upgradeModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('upgradeModal')) closeModal();
+});
+
+// ============================================================
+// VIEWS
+// ============================================================
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(name + 'View').classList.add('active');
+  document.getElementById('btnSave').style.display = name === 'canvas' ? '' : 'none';
+}
+
+// ============================================================
+// CANVAS
+// ============================================================
+function openTemplate(t) {
+  currentTemplate = t;
+  showView('canvas');
+
+  const drawC = document.getElementById('drawCanvas');
+  const overC = document.getElementById('overlayCanvas');
+  const container = document.getElementById('canvasContainer');
+
+  drawC.width = CW; drawC.height = CH;
+  overC.width = CW; overC.height = CH;
+
+  // Position overlay
+  const updateOverlay = () => {
+    overC.style.left = drawC.offsetLeft + 'px';
+    overC.style.top = drawC.offsetTop + 'px';
+    overC.style.width = drawC.offsetWidth + 'px';
+    overC.style.height = drawC.offsetHeight + 'px';
+  };
+
+  // White background
+  const ctx = drawC.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, CW, CH);
+  history = [ctx.getImageData(0, 0, CW, CH)];
+  historyIdx = 0;
+
+  // Load SVG onto overlay
+  const img = new Image();
+  const blob = new Blob([t.svg], {type:'image/svg+xml'});
+  const url = URL.createObjectURL(blob);
+  img.onload = () => {
+    const octx = overC.getContext('2d');
+    octx.clearRect(0, 0, CW, CH);
+    octx.drawImage(img, 0, 0, CW, CH);
+    URL.revokeObjectURL(url);
+    updateOverlay();
+  };
+  img.src = url;
+
+  // Touch & mouse events
+  drawC.onmousedown = e => startDraw(e);
+  drawC.onmousemove = e => draw(e);
+  drawC.onmouseup = drawC.onmouseleave = endDraw;
+  drawC.ontouchstart = e => { e.preventDefault(); startDraw(e); };
+  drawC.ontouchmove = e => { e.preventDefault(); draw(e); };
+  drawC.ontouchend = endDraw;
+
+  setTimeout(updateOverlay, 50);
+  window.onresize = updateOverlay;
+}
+
+function getPos(e) {
+  const c = document.getElementById('drawCanvas');
+  const r = c.getBoundingClientRect();
+  const sx = CW / r.width, sy = CH / r.height;
+  let cx, cy;
+  if (e.touches) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+  else { cx = e.clientX; cy = e.clientY; }
+  return { x: (cx - r.left) * sx, y: (cy - r.top) * sy };
+}
+
+function startDraw(e) {
+  const {x, y} = getPos(e);
+  if (currentTool === 'fill') { floodFill(x, y); saveState(); return; }
+  isDrawing = true;
+  const ctx = document.getElementById('drawCanvas').getContext('2d');
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = brushSize;
+  ctx.strokeStyle = currentTool === 'eraser' ? '#fff' : currentColor;
+}
+
+function draw(e) {
+  if (!isDrawing) return;
+  const {x, y} = getPos(e);
+  const ctx = document.getElementById('drawCanvas').getContext('2d');
+  ctx.lineTo(x, y);
+  ctx.stroke();
+}
+
+function endDraw() {
+  if (isDrawing) { isDrawing = false; saveState(); }
+}
+
+function saveState() {
+  const ctx = document.getElementById('drawCanvas').getContext('2d');
+  const data = ctx.getImageData(0, 0, CW, CH);
+  history = history.slice(0, historyIdx + 1);
+  history.push(data);
+  if (history.length > 30) history.shift();
+  historyIdx = history.length - 1;
+}
+
+function undo() {
+  if (historyIdx <= 0) return;
+  historyIdx--;
+  document.getElementById('drawCanvas').getContext('2d').putImageData(history[historyIdx], 0, 0);
+}
+
+function clearCanvas() {
+  const ctx = document.getElementById('drawCanvas').getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, CW, CH);
+  saveState();
+}
+
+function setTool(t) {
+  currentTool = t;
+  document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === t));
+}
+
+function setSize(s, el) {
+  brushSize = s;
+  document.querySelectorAll('.size-dot').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function floodFill(sx, sy) {
+  const c = document.getElementById('drawCanvas');
+  const ctx = c.getContext('2d');
+  const img = ctx.getImageData(0, 0, CW, CH);
+  const d = img.data;
+  const x = Math.floor(sx), y = Math.floor(sy);
+  const idx = (y * CW + x) * 4;
+  const sR = d[idx], sG = d[idx+1], sB = d[idx+2];
+
+  const tc = document.createElement('canvas');
+  tc.width = tc.height = 1;
+  const tctx = tc.getContext('2d');
+  tctx.fillStyle = currentColor;
+  tctx.fillRect(0,0,1,1);
+  const fd = tctx.getImageData(0,0,1,1).data;
+  if (sR===fd[0] && sG===fd[1] && sB===fd[2]) return;
+
+  const tol = 32;
+  const match = i => Math.abs(d[i]-sR)<=tol && Math.abs(d[i+1]-sG)<=tol && Math.abs(d[i+2]-sB)<=tol;
+  const visited = new Uint8Array(CW * CH);
+  const stack = [[x,y]];
+
+  while (stack.length) {
+    const [px,py] = stack.pop();
+    if (px<0||px>=CW||py<0||py>=CH) continue;
+    const pi = py*CW+px;
+    if (visited[pi]) continue;
+    visited[pi] = 1;
+    if (!match(pi*4)) continue;
+    d[pi*4]=fd[0]; d[pi*4+1]=fd[1]; d[pi*4+2]=fd[2]; d[pi*4+3]=255;
+    stack.push([px+1,py],[px-1,py],[px,py+1],[px,py-1]);
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+// ============================================================
+// SAVE / PRINT
+// ============================================================
+function saveImage() {
+  const exp = document.createElement('canvas');
+  exp.width = CW; exp.height = CH;
+  const ctx = exp.getContext('2d');
+  ctx.drawImage(document.getElementById('drawCanvas'), 0, 0);
+  ctx.drawImage(document.getElementById('overlayCanvas'), 0, 0);
+
+  if (!isPremium) {
+    ctx.save();
+    ctx.font = '12px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.textAlign = 'right';
+    ctx.fillText('NoorPrintables.com — Upgrade for watermark-free', CW - 10, CH - 10);
+    ctx.restore();
+  }
+
+  const link = document.createElement('a');
+  link.download = `noor-${currentTemplate?.id || 'coloring'}.png`;
+  link.href = exp.toDataURL('image/png');
+  link.click();
+}
+
+// ============================================================
+// START
+// ============================================================
+init();
+</script>
+</body>
+</html>

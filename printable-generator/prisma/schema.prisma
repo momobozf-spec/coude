@@ -1,0 +1,540 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id                    String           @id @default(cuid())
+  name                  String
+  email                 String           @unique
+  password              String           @default("")
+  image                 String?
+  plan                  String           @default("free")
+  userType              String           @default("parent") @map("user_type")
+  schoolName            String?          @map("school_name")
+  generationsCount      Int              @default(0) @map("generations_count")
+  bonusGenerations      Int              @default(0) @map("bonus_generations")
+  stripeCustomerId      String?          @map("stripe_customer_id")
+  stripeSubscriptionId  String?          @map("stripe_subscription_id")
+  referralCode          String?          @unique @map("referral_code")
+  referredBy            String?          @map("referred_by")
+  referralCount         Int              @default(0) @map("referral_count")
+  freeCoursesRedeemed   Int              @default(0) @map("free_courses_redeemed")
+  locale                String           @default("en")
+  createdAt             DateTime         @default(now()) @map("created_at")
+  updatedAt             DateTime         @updatedAt @map("updated_at")
+  whiteLabelId          String?          @map("white_label_id")
+  whiteLabelRole        String?          @map("white_label_role") // admin | teacher
+  generations           Generation[]
+  accounts              Account[]
+  enrollments           Enrollment[]
+  sellerProfile         SellerProfile?
+  marketplaceProducts   MarketplaceProduct[]
+  coloringBooks         ColoringBook[]
+  badges                UserBadge[]
+  certificates          Certificate[]
+  progress              UserProgress?
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Generation {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  activityType String   @map("activity_type")
+  theme        String
+  createdAt    DateTime @default(now()) @map("created_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("generations")
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("landing")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("leads")
+}
+
+// ═══════════════════════════════════════════════════
+// NOOR ACADEMY — Video Courses
+// ═══════════════════════════════════════════════════
+
+model Course {
+  id           String         @id @default(cuid())
+  slug         String         @unique
+  title        String
+  titleAr      String         @default("") @map("title_ar")
+  description  String
+  thumbnail    String         @default("")
+  trailerUrl   String?        @map("trailer_url")
+  price        Float
+  currency     String         @default("USD")
+  languages    String         @default("EN") // comma-separated: "EN,NL,AR"
+  ageRange     String         @default("4-8") @map("age_range")
+  level        String         @default("beginner")
+  totalLessons Int            @default(0) @map("total_lessons")
+  totalMinutes Int            @default(0) @map("total_minutes")
+  isPublished  Boolean        @default(false) @map("is_published")
+  isFeatured   Boolean        @default(false) @map("is_featured")
+  category     String
+  createdAt    DateTime       @default(now()) @map("created_at")
+  lessons      Lesson[]
+  enrollments  Enrollment[]
+  reviews      CourseReview[]
+
+  @@map("courses")
+}
+
+model Lesson {
+  id          String           @id @default(cuid())
+  courseId    String           @map("course_id")
+  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  videoUrl    String           @default("") @map("video_url")
+  duration    Int              @default(0) // seconds
+  order       Int              @default(0)
+  isFree      Boolean          @default(false) @map("is_free")
+  transcript  String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  progress    LessonProgress[]
+
+  @@map("lessons")
+}
+
+model Enrollment {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId         String    @map("course_id")
+  course          Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  stripeSessionId String?   @map("stripe_session_id")
+  pricePaid       Float     @default(0) @map("price_paid")
+  completedAt     DateTime? @map("completed_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@unique([userId, courseId])
+  @@map("enrollments")
+}
+
+model LessonProgress {
+  id             String    @id @default(cuid())
+  userId         String    @map("user_id")
+  lessonId       String    @map("lesson_id")
+  lesson         Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  watchedSeconds Int       @default(0) @map("watched_seconds")
+  completed      Boolean   @default(false)
+  completedAt    DateTime? @map("completed_at")
+
+  @@unique([userId, lessonId])
+  @@map("lesson_progress")
+}
+
+model CourseReview {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  courseId   String   @map("course_id")
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  rating    Int // 1-5
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, courseId])
+  @@map("course_reviews")
+}
+
+// ═══════════════════════════════════════════════════
+// RAMADAN CHALLENGE — 30 Days Seasonal Product
+// ═══════════════════════════════════════════════════
+
+model RamadanChallenge {
+  id          String                @id @default(cuid())
+  year        Int                   @unique
+  title       String
+  price       Float                 @default(14.99)
+  earlyPrice  Float                 @default(9.99) @map("early_price")
+  startDate   DateTime              @map("start_date")
+  endDate     DateTime              @map("end_date")
+  isActive    Boolean               @default(false) @map("is_active")
+  createdAt   DateTime              @default(now()) @map("created_at")
+  enrollments ChallengeEnrollment[]
+  days        ChallengeDay[]
+
+  @@map("ramadan_challenges")
+}
+
+model ChallengeDay {
+  id           String          @id @default(cuid())
+  challengeId  String          @map("challenge_id")
+  challenge    RamadanChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  dayNumber    Int             @map("day_number")
+  title        String
+  titleAr      String          @default("") @map("title_ar")
+  theme        String
+  activityType String          @map("activity_type") // coloring | maze | wordsearch | tracing | special
+  duaOfDay     String?         @map("dua_of_day")
+  hadithOfDay  String?         @map("hadith_of_day")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  completions  DayCompletion[]
+
+  @@unique([challengeId, dayNumber])
+  @@map("challenge_days")
+}
+
+model ChallengeEnrollment {
+  id           String          @id @default(cuid())
+  userId       String          @map("user_id")
+  challengeId  String          @map("challenge_id")
+  challenge    RamadanChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  childName    String          @map("child_name")
+  childAge     Int             @default(6) @map("child_age")
+  pricePaid    Float           @default(0) @map("price_paid")
+  badgesEarned String          @default("") @map("badges_earned") // comma-separated
+  streakDays   Int             @default(0) @map("streak_days")
+  shareCount   Int             @default(0) @map("share_count")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  completions  DayCompletion[]
+
+  @@unique([userId, challengeId])
+  @@map("challenge_enrollments")
+}
+
+model DayCompletion {
+  id           String              @id @default(cuid())
+  enrollmentId String              @map("enrollment_id")
+  enrollment   ChallengeEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  dayId        String              @map("day_id")
+  day          ChallengeDay        @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  completedAt  DateTime            @default(now()) @map("completed_at")
+
+  @@unique([enrollmentId, dayId])
+  @@map("day_completions")
+}
+
+// ═══════════════════════════════════════════════════
+// NOOR MARKETPLACE — Teacher worksheet marketplace
+// ═══════════════════════════════════════════════════
+
+model MarketplaceProduct {
+  id          String   @id @default(cuid())
+  sellerId    String   @map("seller_id")
+  seller      User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  thumbnail   String   @default("")
+  fileUrl     String   @default("") @map("file_url")
+  previewUrl  String   @default("") @map("preview_url")
+  price       Float
+  currency    String   @default("USD")
+  category    String
+  ageRange    String   @default("4-8") @map("age_range")
+  languages   String   @default("EN") // comma-separated
+  tags        String   @default("") // comma-separated
+  pageCount   Int      @default(1) @map("page_count")
+  downloads   Int      @default(0)
+  rating      Float    @default(0)
+  reviewCount Int      @default(0) @map("review_count")
+  isApproved  Boolean  @default(false) @map("is_approved")
+  isFeatured  Boolean  @default(false) @map("is_featured")
+  isPublished Boolean  @default(false) @map("is_published")
+  createdAt   DateTime @default(now()) @map("created_at")
+  purchases   MarketplacePurchase[]
+  reviews     MarketplaceReview[]
+
+  @@map("marketplace_products")
+}
+
+model MarketplacePurchase {
+  id              String             @id @default(cuid())
+  buyerId         String             @map("buyer_id")
+  productId       String             @map("product_id")
+  product         MarketplaceProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  pricePaid       Float              @map("price_paid")
+  sellerAmount    Float              @map("seller_amount")
+  noorAmount      Float              @map("noor_amount")
+  stripeSessionId String             @default("") @map("stripe_session_id")
+  downloadCount   Int                @default(0) @map("download_count")
+  maxDownloads    Int                @default(5) @map("max_downloads")
+  createdAt       DateTime           @default(now()) @map("created_at")
+
+  @@unique([buyerId, productId])
+  @@map("marketplace_purchases")
+}
+
+model SellerProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique @map("user_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName     String   @map("display_name")
+  bio             String   @default("")
+  avatar          String?
+  country         String   @default("")
+  stripeAccountId String?  @map("stripe_account_id")
+  isVerified      Boolean  @default(false) @map("is_verified")
+  totalSales      Int      @default(0) @map("total_sales")
+  totalEarnings   Float    @default(0) @map("total_earnings")
+  payoutsPending  Float    @default(0) @map("payouts_pending")
+  payoutsPaid     Float    @default(0) @map("payouts_paid")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("seller_profiles")
+}
+
+model MarketplaceReview {
+  id        String             @id @default(cuid())
+  buyerId   String             @map("buyer_id")
+  productId String             @map("product_id")
+  product   MarketplaceProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String?
+  createdAt DateTime           @default(now()) @map("created_at")
+
+  @@unique([buyerId, productId])
+  @@map("marketplace_reviews")
+}
+
+model SellerPayout {
+  id               String   @id @default(cuid())
+  sellerId         String   @map("seller_id")
+  amount           Float
+  currency         String   @default("USD")
+  status           String   @default("pending") // pending / paid / failed
+  stripeTransferId String?  @map("stripe_transfer_id")
+  periodStart      DateTime @map("period_start")
+  periodEnd        DateTime @map("period_end")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@map("seller_payouts")
+}
+
+// ═══════════════════════════════════════════════════
+// WHITE LABEL — Branded school platforms
+// ═══════════════════════════════════════════════════
+
+model WhiteLabelAccount {
+  id              String    @id @default(cuid())
+  subdomain       String    @unique
+  customDomain    String?   @map("custom_domain")
+  adminUserId     String    @map("admin_user_id")
+  logoUrl         String?   @map("logo_url")
+  primaryColor    String    @default("#1a6b4a") @map("primary_color")
+  secondaryColor  String    @default("#c9920a") @map("secondary_color")
+  schoolName      String    @map("school_name")
+  schoolNameAr    String?   @map("school_name_ar")
+  welcomeMessage  String?   @map("welcome_message")
+  footerText      String?   @map("footer_text")
+  country         String    @default("")
+  city            String    @default("")
+  studentCount    Int       @default(0) @map("student_count")
+  plan            String    @default("basic") // basic | advanced
+  maxSeats        Int       @default(10) @map("max_seats")
+  isActive        Boolean   @default(true) @map("is_active")
+  stripeSubId     String?   @map("stripe_sub_id")
+  expiresAt       DateTime? @map("expires_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  invitations     WhiteLabelInvite[]
+
+  @@map("white_label_accounts")
+}
+
+model WhiteLabelInvite {
+  id          String           @id @default(cuid())
+  accountId   String           @map("account_id")
+  account     WhiteLabelAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  email       String
+  role        String           @default("teacher") // teacher | admin
+  accepted    Boolean          @default(false)
+  token       String           @unique
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  @@unique([accountId, email])
+  @@map("white_label_invites")
+}
+
+model WhiteLabelDemo {
+  id          String   @id @default(cuid())
+  schoolName  String   @map("school_name")
+  contactEmail String  @map("contact_email")
+  token       String   @unique
+  viewed      Boolean  @default(false)
+  converted   Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("white_label_demos")
+}
+
+// ═══════════════════════════════════════════════════
+// PRINTFUL — Print-on-demand coloring books
+// ═══════════════════════════════════════════════════
+
+model ColoringBook {
+  id              String      @id @default(cuid())
+  userId          String      @map("user_id")
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  childName       String      @map("child_name")
+  childAge        Int?        @map("child_age")
+  coverStyle      String      @default("classic") @map("cover_style")
+  coverColor      String      @default("#1a6b4a") @map("cover_color")
+  dedicationText  String?     @map("dedication_text")
+  language        String      @default("EN")
+  variant         String      @default("softcover_20") // softcover_20 | softcover_30 | hardcover_20
+  pageCount       Int         @default(0) @map("page_count")
+  worksheetIds    String      @default("") @map("worksheet_ids") // comma-separated
+  status          String      @default("draft") // draft | generating | ready | ordered | printing | shipped | delivered
+  printfulFileUrl String?     @map("printful_file_url")
+  previewUrl      String?     @map("preview_url")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  orders          BookOrder[]
+
+  @@map("coloring_books")
+}
+
+model BookOrder {
+  id                String       @id @default(cuid())
+  userId            String       @map("user_id")
+  bookId            String       @map("book_id")
+  book              ColoringBook @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  quantity          Int          @default(1)
+  unitPrice         Float        @map("unit_price")
+  totalPrice        Float        @map("total_price")
+  shippingCost      Float        @default(0) @map("shipping_cost")
+  currency          String       @default("EUR")
+  firstName         String       @default("") @map("first_name")
+  lastName          String       @default("") @map("last_name")
+  address1          String       @default("")
+  address2          String?
+  city              String       @default("")
+  state             String?
+  zip               String       @default("")
+  country           String       @default("")
+  phone             String?
+  status            String       @default("pending") // pending | paid | printing | shipped | delivered | failed
+  printfulOrderId   String?      @map("printful_order_id")
+  trackingUrl       String?      @map("tracking_url")
+  trackingNumber    String?      @map("tracking_number")
+  estimatedDelivery DateTime?    @map("estimated_delivery")
+  stripeSessionId   String?      @map("stripe_session_id")
+  pricePaid         Float        @default(0) @map("price_paid")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  @@map("book_orders")
+}
+
+model BookTemplate {
+  id            String   @id @default(cuid())
+  name          String
+  nameNl        String?  @map("name_nl")
+  description   String
+  coverImageUrl String   @default("") @map("cover_image_url")
+  theme         String
+  variant       String   @default("softcover_20")
+  price         Float
+  pageCount     Int      @default(20) @map("page_count")
+  worksheetIds  String   @default("") @map("worksheet_ids") // comma-separated
+  isActive      Boolean  @default(true) @map("is_active")
+  isFeatured    Boolean  @default(false) @map("is_featured")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("book_templates")
+}
+
+// ═══════════════════════════════════════════════════
+// ACHIEVEMENTS — Badges, Certificates, XP, Levels
+// ═══════════════════════════════════════════════════
+
+model Badge {
+  id           String      @id @default(cuid())
+  slug         String      @unique
+  name         String
+  nameNl       String?     @map("name_nl")
+  description  String
+  iconEmoji    String      @default("⭐") @map("icon_emoji")
+  color        String      @default("#c9920a")
+  category     String // alphabet | completion | streak | ramadan | theme | course | sharing | special
+  tier         String // bronze | silver | gold | platinum
+  requirement  String      @default("{}") // JSON: { type, count, theme, ... }
+  xpReward     Int         @default(10) @map("xp_reward")
+  isSecret     Boolean     @default(false) @map("is_secret")
+  isActive     Boolean     @default(true) @map("is_active")
+  displayOrder Int         @default(0) @map("display_order")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  earnedBy     UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String   @map("user_id")
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId  String   @map("badge_id")
+  badge    Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  earnedAt DateTime @default(now()) @map("earned_at")
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+model Certificate {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         String // badge | course | challenge | milestone
+  title        String
+  childName    String   @map("child_name")
+  description  String   @default("")
+  badgeId      String?  @map("badge_id")
+  publicToken  String   @unique @default(cuid()) @map("public_token")
+  downloadCount Int     @default(0) @map("download_count")
+  shareCount   Int      @default(0) @map("share_count")
+  issuedAt     DateTime @default(now()) @map("issued_at")
+
+  @@map("certificates")
+}
+
+model UserProgress {
+  id                  String    @id @default(cuid())
+  userId              String    @unique @map("user_id")
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalXp             Int       @default(0) @map("total_xp")
+  level               Int       @default(1)
+  worksheetsCompleted Int       @default(0) @map("worksheets_completed")
+  coursesCompleted    Int       @default(0) @map("courses_completed")
+  ramadanDaysComplete Int       @default(0) @map("ramadan_days_complete")
+  currentStreak       Int       @default(0) @map("current_streak")
+  longestStreak       Int       @default(0) @map("longest_streak")
+  lastActivityDate    DateTime? @map("last_activity_date")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  @@map("user_progress")
+}
