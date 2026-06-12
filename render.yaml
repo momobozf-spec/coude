@@ -1,0 +1,135 @@
+# Render Blueprint — zet alle projecten in deze repo online.
+# Gebruik: push deze repo naar GitHub -> Render Dashboard -> New + -> Blueprint -> kies deze repo.
+# Render leest dit bestand en maakt alle services hieronder automatisch aan.
+#
+# Gratis plan: web services "slapen" na ~15 min inactiviteit en starten daarna in ~30-60s weer op.
+# Let op: de 4 Next.js-apps gebruiken SQLite op een tijdelijke schijf -> data reset bij herstart.
+# Voor blijvende data later: Render Postgres koppelen (zie DEPLOY-RENDER.md).
+
+services:
+  # ---------- Statische sites ----------
+  - type: web
+    name: brandstofprijzen
+    runtime: static
+    staticPublishPath: ./sites/brandstofprijzen
+    pullRequestPreviewsEnabled: false
+
+  - type: web
+    name: noor-growth-funnel
+    runtime: static
+    staticPublishPath: ./noor-growth-funnel
+    pullRequestPreviewsEnabled: false
+
+  - type: web
+    name: simple-webapp
+    runtime: static
+    staticPublishPath: ./simple-webapp
+    pullRequestPreviewsEnabled: false
+
+  - type: web
+    name: webshop
+    runtime: static
+    rootDir: webshop
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # ---------- Node web services ----------
+  - type: web
+    name: marktonderzoek
+    runtime: node
+    plan: free
+    rootDir: marktonderzoek
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+
+  - type: web
+    name: resume-roaster
+    runtime: node
+    plan: free
+    rootDir: resume-roaster
+    buildCommand: npm install && npm run build
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      # Vul je eigen sleutel in voor de AI-roast (pagina werkt ook zonder).
+      - key: ANTHROPIC_API_KEY
+        sync: false
+
+  # ---------- Next.js apps (SQLite) ----------
+  - type: web
+    name: jamal-jamila
+    runtime: node
+    plan: free
+    rootDir: jamal-jamila
+    buildCommand: npm install && npx prisma generate && npx prisma db push && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: AUTH_TRUST_HOST
+        value: "true"
+      # Vul na de eerste deploy de https-URL van deze service in (bijv. https://jamal-jamila.onrender.com)
+      - key: NEXTAUTH_URL
+        sync: false
+
+  - type: web
+    name: luxe-store
+    runtime: node
+    plan: free
+    rootDir: luxe-store
+    buildCommand: npm install && npx prisma generate && npx prisma db push && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: AUTH_TRUST_HOST
+        value: "true"
+      - key: NEXTAUTH_URL
+        sync: false
+
+  - type: web
+    name: noor-tracker
+    runtime: node
+    plan: free
+    rootDir: noor-tracker
+    buildCommand: npm install && npx prisma generate && npx prisma db push && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: AUTH_TRUST_HOST
+        value: "true"
+      - key: NEXTAUTH_URL
+        sync: false
+
+  - type: web
+    name: printable-generator
+    runtime: node
+    plan: free
+    rootDir: printable-generator
+    buildCommand: npm install && npx prisma generate && npx prisma db push && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: AUTH_TRUST_HOST
+        value: "true"
+      - key: NEXTAUTH_URL
+        sync: false

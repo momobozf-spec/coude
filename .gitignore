@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Builds
+.next/
+**/.next/
+dist/
+**/dist/
+build/
+**/build/
+.expo/
+**/.expo/
+
+# Prisma local SQLite databases
+**/prisma/dev.db
+**/prisma/dev.db-journal
+*.db
+*.db-journal
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+
+# Logs / OS
+*.log
+.DS_Store
+Thumbs.db
+
+# Generated Prisma client
+**/src/generated/prisma/

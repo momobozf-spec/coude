@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TankSlim – Actuele brandstofprijzen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <style>
+/* ══════════════════════════════════════════════
+   DESIGN SYSTEM
+══════════════════════════════════════════════ */
+:root {
+  /* Brand */
+  --p:        #2563EB;
+  --p-d:      #1D4ED8;
+  --p-l:      #DBEAFE;
+  --p-ll:     #EFF6FF;
+
+  /* Semantic */
+  --green:    #059669;
+  --green-l:  #D1FAE5;
+  --green-ll: #ECFDF5;
+  --amber:    #D97706;
+  --amber-l:  #FEF3C7;
+  --red:      #DC2626;
+  --red-l:    #FEE2E2;
+
+  /* Neutrals */
+  --bg:       #F8FAFC;
+  --surface:  #FFFFFF;
+  --surface2: #F1F5F9;
+  --border:   #E2E8F0;
+  --border2:  #CBD5E1;
+  --text:     #0F172A;
+  --text2:    #334155;
+  --muted:    #64748B;
+  --faint:    #94A3B8;
+
+  /* Shadows */
+  --sh1: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --sh2: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+  --sh3: 0 8px 24px rgba(0,0,0,.10), 0 4px 8px rgba(0,0,0,.06);
+  --sh4: 0 20px 48px rgba(0,0,0,.14), 0 8px 16px rgba(0,0,0,.08);
+
+  /* Layout */
+  --hdr:      60px;
+  --side:     400px;
+  --r:        10px;
+  --r2:       14px;
+  --r3:       18px;
+}
+
+[data-theme="dark"] {
+  --bg:       #0B1120;
+  --surface:  #131C2E;
+  --surface2: #1A2540;
+  --border:   #1E2D4A;
+  --border2:  #243357;
+  --text:     #F0F4FF;
+  --text2:    #C8D3F0;
+  --muted:    #7B8EC8;
+  --faint:    #4A5B8A;
+  --p-ll:     #0F1E3A;
+  --green-ll: #0A1F18;
+  --amber-l:  #1F1500;
+  --sh1: 0 1px 3px rgba(0,0,0,.3);
+  --sh2: 0 4px 12px rgba(0,0,0,.35);
+  --sh3: 0 8px 24px rgba(0,0,0,.4);
+  --sh4: 0 20px 48px rgba(0,0,0,.5);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
+.hdr {
+  position: fixed; inset: 0 0 auto;
+  height: var(--hdr);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 16px; gap: 10px;
+  z-index: 900; box-shadow: var(--sh1);
+}
+
+.hdr-logo {
+  display: flex; align-items: center; gap: 9px;
+  text-decoration: none; flex-shrink: 0;
+}
+.hdr-logo-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: linear-gradient(135deg, #1D4ED8, #7C3AED);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; box-shadow: 0 2px 8px rgba(37,99,235,.4);
+}
+.hdr-logo-text {
+  font-size: 1.05rem; font-weight: 800;
+  color: var(--text); letter-spacing: -.4px;
+  line-height: 1;
+}
+.hdr-logo-text em { font-style: normal; color: var(--p); }
+.hdr-logo-sub { font-size: .65rem; color: var(--muted); font-weight: 500; margin-top: 1px; }
+
+.hdr-sep { width: 1px; height: 28px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+
+/* Fuel tabs */
+.fuel-tabs {
+  display: flex; gap: 3px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+}
+.fuel-tab {
+  padding: 5px 13px;
+  border-radius: 6px; border: none;
+  font-size: .78rem; font-weight: 600;
+  color: var(--muted); background: transparent;
+  cursor: pointer; transition: all .15s;
+  white-space: nowrap; font-family: inherit;
+}
+.fuel-tab:hover  { color: var(--text); background: var(--surface); }
+.fuel-tab.active {
+  background: var(--surface);
+  color: var(--p);
+  box-shadow: var(--sh1);
+  font-weight: 700;
+}
+
+.hdr-space { flex: 1; min-width: 0; }
+
+/* Header actions */
+.hdr-actions { display: flex; align-items: center; gap: 6px; }
+.hdr-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--text2);
+  font-size: .8rem; font-weight: 600;
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+  font-family: inherit;
+}
+.hdr-btn:hover { border-color: var(--p); color: var(--p); background: var(--p-ll); }
+.hdr-btn.primary { background: var(--p); color: #fff; border-color: var(--p); }
+.hdr-btn.primary:hover { background: var(--p-d); border-color: var(--p-d); color: #fff; }
+
+.theme-btn {
+  width: 34px; height: 34px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s; flex-shrink: 0;
+}
+.theme-btn:hover { border-color: var(--p); background: var(--p-ll); }
+
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--p), #7C3AED);
+  color: white; font-weight: 800; font-size: .82rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(37,99,235,.3);
+}
+
+/* ══════════════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════════════ */
+.app {
+  display: flex;
+  height: 100vh;
+  padding-top: var(--hdr);
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: var(--side); flex-shrink: 0;
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow: hidden; z-index: 10;
+}
+
+/* ── Map ── */
+.map-wrap { flex: 1; position: relative; }
+#map { width: 100%; height: 100%; }
+
+/* ══════════════════════════════════════════════
+   SIDEBAR – SEARCH
+══════════════════════════════════════════════ */
+.sb-top {
+  padding: 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.row { display: flex; gap: 7px; align-items: center; }
+
+.sel, .inp {
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: .82rem; font-weight: 500;
+  color: var(--text); background: var(--surface2);
+  font-family: inherit; transition: border-color .15s;
+  appearance: none;
+}
+.sel:focus, .inp:focus { outline: none; border-color: var(--p); background: var(--surface); }
+.sel { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2364748B'%3E%3Cpath d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 14px; padding-right: 28px; }
+
+.btn-search {
+  flex: 1; padding: 9px 14px;
+  background: var(--p); color: white;
+  border: none; border-radius: 8px;
+  font-size: .85rem; font-weight: 700;
+  cursor: pointer; transition: background .15s, transform .1s;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  font-family: inherit; box-shadow: 0 2px 8px rgba(37,99,235,.3);
+}
+.btn-search:hover    { background: var(--p-d); transform: translateY(-1px); }
+.btn-search:active   { transform: none; }
+.btn-search:disabled { background: var(--faint); box-shadow: none; transform: none; cursor: not-allowed; }
+
+.btn-filter {
+  padding: 8px 12px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--surface);
+  font-size: .78rem; font-weight: 600;
+  cursor: pointer; color: var(--muted);
+  transition: all .15s; font-family: inherit; white-space: nowrap;
+}
+.btn-filter:hover { border-color: var(--p); color: var(--p); background: var(--p-ll); }
+
+/* ══════════════════════════════════════════════
+   STATS BAR
+══════════════════════════════════════════════ */
+.stats-bar {
+  display: none; grid-template-columns: repeat(4,1fr);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+.stats-bar.show { display: grid; }
+
+.stat {
+  padding: 10px 6px; text-align: center;
+  border-right: 1px solid var(--border);
+  position: relative;
+}
+.stat:last-child { border-right: none; }
+
+.stat-v {
+  font-size: 1rem; font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1; margin-bottom: 3px;
+  transition: all .3s;
+}
+.stat-v.c-green  { color: var(--green); }
+.stat-v.c-amber  { color: var(--amber); }
+.stat-v.c-red    { color: var(--red); }
+.stat-v.c-blue   { color: var(--p); }
+.stat-l {
+  font-size: .64rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .6px;
+  color: var(--muted);
+}
+
+/* ══════════════════════════════════════════════
+   LIST
+══════════════════════════════════════════════ */
+.sb-list {
+  flex: 1; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.sb-list::-webkit-scrollbar { width: 4px; }
+.sb-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* List header */
+.list-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px 8px;
+  font-size: .7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .7px; color: var(--muted);
+  position: sticky; top: 0; background: var(--surface); z-index: 1;
+  border-bottom: 1px solid var(--border);
+}
+.live-badge {
+  display: flex; align-items: center; gap: 4px;
+  font-size: .68rem; font-weight: 700;
+  padding: 3px 8px; border-radius: 999px;
+}
+.live-badge.live   { background: var(--green-ll); color: var(--green); }
+.live-badge.demo   { background: var(--amber-l);  color: var(--amber); }
+.live-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* Placeholder */
+.placeholder {
+  padding: 48px 20px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.placeholder-icon {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; font-size: 24px;
+}
+.placeholder h3 { font-size: .9rem; font-weight: 700; color: var(--text2); }
+.placeholder p  { font-size: .8rem; color: var(--muted); line-height: 1.5; max-width: 240px; }
+
+/* ── Skeleton loader ── */
+.skel {
+  padding: 14px; border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.skel-row { display: flex; align-items: center; gap: 10px; }
+.skel-line {
+  height: 11px; border-radius: 6px;
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+.skel-circle { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Station card ── */
+.card {
+  padding: 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .12s;
+  position: relative;
+}
+.card::before {
+  content: ''; position: absolute; left: 0; inset-block: 0;
+  width: 3px; border-radius: 0 2px 2px 0;
+  background: transparent; transition: background .15s;
+}
+.card:hover { background: var(--surface2); }
+.card.active::before { background: var(--p); }
+.card.cheapest::before { background: var(--green); }
+.card.cheapest { background: var(--green-ll); }
+.card.cheapest:hover { background: var(--green-l); }
+
+.card-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 9px; }
+
+/* Rank badge */
+.rank {
+  width: 26px; height: 26px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 800; flex-shrink: 0;
+}
+.rank.r1 { background: #FEF9C3; color: #713F12; }
+.rank.r2 { background: #F1F5F9; color: #475569; }
+.rank.r3 { background: #FFF7ED; color: #7C2D12; }
+.rank.rn { background: var(--surface2); color: var(--faint); font-size: .68rem; }
+
+.card-meta { flex: 1; min-width: 0; }
+.card-name {
+  font-size: .9rem; font-weight: 700; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.card-addr {
+  font-size: .75rem; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.card-price-col { text-align: right; flex-shrink: 0; }
+.card-price {
+  font-size: 1.25rem; font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.card-price.best   { color: var(--green); }
+.card-price.mid    { color: var(--text); }
+.card-price.worst  { color: var(--red); }
+.card-dist {
+  font-size: .72rem; color: var(--muted);
+  font-weight: 500; margin-top: 2px; text-align: right;
+}
+.card-diff {
+  font-size: .68rem; color: var(--red);
+  font-weight: 700; text-align: right;
+}
+
+/* Price bar */
+.pbar { height: 3px; background: var(--border); border-radius: 999px; margin: 8px 0; overflow: hidden; }
+.pbar-fill { height: 100%; border-radius: 999px; transition: width .5s cubic-bezier(.4,0,.2,1); }
+
+/* Card footer */
+.card-foot { display: flex; gap: 6px; }
+.card-action {
+  flex: 1; padding: 6px 10px;
+  border-radius: 7px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--muted);
+  font-size: .74rem; font-weight: 600; cursor: pointer;
+  transition: all .12s; font-family: inherit; text-align: center;
+}
+.card-action:hover { border-color: var(--p); color: var(--p); background: var(--p-ll); }
+.card-action.fav.saved { border-color: #F43F5E; color: #F43F5E; background: #FFF1F2; }
+.card-action.nav {
+  background: var(--p); color: white; border-color: var(--p);
+  box-shadow: 0 1px 4px rgba(37,99,235,.25);
+}
+.card-action.nav:hover { background: var(--p-d); border-color: var(--p-d); color: white; }
+
+/* ══════════════════════════════════════════════
+   ALERT BAR (bottom of sidebar)
+══════════════════════════════════════════════ */
+.alert-bar {
+  display: none;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.alert-bar.show { display: block; }
+.alert-inner {
+  background: linear-gradient(135deg, var(--amber-l), #FFF7ED);
+  border: 1px solid #FCD34D;
+  border-radius: var(--r);
+  padding: 12px 14px;
+}
+[data-theme="dark"] .alert-inner { background: #1A1000; border-color: #5C4000; }
+.alert-inner-title {
+  font-size: .76rem; font-weight: 800;
+  color: #92400E; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+[data-theme="dark"] .alert-inner-title { color: #FCD34D; }
+.alert-row { display: flex; align-items: center; gap: 7px; }
+.alert-row label { font-size: .8rem; color: #78350F; flex: 1; font-weight: 500; }
+[data-theme="dark"] .alert-row label { color: #FDE68A; }
+.alert-row input {
+  width: 82px; padding: 6px 9px;
+  border: 1px solid #FCD34D; border-radius: 7px;
+  font-size: .85rem; font-weight: 700; color: #78350F;
+  background: white; font-family: inherit;
+}
+[data-theme="dark"] .alert-row input { background: #1A1000; color: #FDE68A; border-color: #5C4000; }
+.alert-row input:focus { outline: none; border-color: var(--amber); }
+.btn-alert {
+  padding: 6px 13px; background: var(--amber); color: white;
+  border: none; border-radius: 7px; font-size: .8rem;
+  font-weight: 700; cursor: pointer; transition: background .15s; font-family: inherit;
+}
+.btn-alert:hover { background: #B45309; }
+
+/* ══════════════════════════════════════════════
+   MAP PRICE MARKERS
+══════════════════════════════════════════════ */
+.pm {
+  background: white;
+  border: 2px solid #2563EB;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 11px; font-weight: 800;
+  color: #2563EB; white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18);
+  font-family: 'Inter', sans-serif;
+  position: relative; cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+.pm:hover { transform: scale(1.08); box-shadow: 0 4px 14px rgba(0,0,0,.22); }
+.pm::after {
+  content: ''; position: absolute;
+  bottom: -6px; left: 50%; transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #2563EB; border-bottom: none;
+}
+.pm.best {
+  background: #059669; border-color: #059669; color: white;
+  box-shadow: 0 3px 12px rgba(5,150,105,.4);
+}
+.pm.best::after { border-top-color: #059669; }
+.pm.worst { border-color: #DC2626; color: #DC2626; }
+.pm.worst::after { border-top-color: #DC2626; }
+.pm-user {
+  background: var(--p); color: white; border-color: var(--p);
+  font-size: 10px; padding: 3px 7px;
+}
+.pm-user::after { border-top-color: var(--p); }
+
+/* ══════════════════════════════════════════════
+   MAP FAB
+══════════════════════════════════════════════ */
+.map-fabs {
+  position: absolute; bottom: 80px; right: 14px;
+  display: flex; flex-direction: column; gap: 8px; z-index: 400;
+}
+.fab {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--surface); border: 1px solid var(--border);
+  box-shadow: var(--sh2); font-size: 1rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: transform .15s, box-shadow .15s;
+}
+.fab:hover { transform: scale(1.1); box-shadow: var(--sh3); }
+
+/* ══════════════════════════════════════════════
+   OVERLAYS & MODALS
+══════════════════════════════════════════════ */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(15,23,42,.55);
+  backdrop-filter: blur(6px) saturate(1.2);
+  z-index: 2000;
+  align-items: center; justify-content: center;
+  padding: 16px;
+}
+.overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r3);
+  padding: 28px;
+  width: 100%; max-width: 460px;
+  box-shadow: var(--sh4);
+  animation: modalIn .22s cubic-bezier(.34,1.56,.64,1);
+  max-height: 92vh; overflow-y: auto;
+}
+.modal.wide { max-width: 560px; }
+@keyframes modalIn { from { opacity:0; transform:scale(.94) translateY(10px); } to { opacity:1; transform:none; } }
+
+.modal-hdr { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 22px; }
+.modal-hdr-left h2 { font-size: 1.1rem; font-weight: 800; margin-bottom: 2px; }
+.modal-hdr-left p  { font-size: .8rem; color: var(--muted); }
+.modal-close {
+  width: 28px; height: 28px; border-radius: 7px;
+  border: 1px solid var(--border); background: var(--surface2);
+  cursor: pointer; font-size: .95rem; color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s; flex-shrink: 0;
+}
+.modal-close:hover { border-color: var(--red); color: var(--red); }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.tab {
+  flex: 1; padding: 10px; text-align: center;
+  font-size: .84rem; font-weight: 600; color: var(--muted);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  cursor: pointer; transition: all .15s;
+}
+.tab.on { color: var(--p); border-bottom-color: var(--p); }
+
+/* Fields */
+.field { margin-bottom: 14px; }
+.field label {
+  display: block; font-size: .75rem; font-weight: 700;
+  color: var(--text2); margin-bottom: 5px; letter-spacing: .1px;
+}
+.field input, .field select {
+  width: 100%; padding: 9px 12px;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-size: .88rem; color: var(--text); background: var(--surface2);
+  font-family: inherit; transition: border-color .15s, background .15s;
+}
+.field input:focus, .field select:focus {
+  outline: none; border-color: var(--p); background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+}
+.field-note { font-size: .72rem; color: var(--muted); margin-top: 5px; line-height: 1.4; }
+.field-note a { color: var(--p); }
+
+/* Btn primary */
+.btn-p {
+  width: 100%; padding: 11px;
+  background: var(--p); color: white; border: none;
+  border-radius: 9px; font-size: .9rem; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: background .15s, box-shadow .15s;
+  box-shadow: 0 2px 8px rgba(37,99,235,.3);
+  margin-top: 4px;
+}
+.btn-p:hover { background: var(--p-d); box-shadow: 0 4px 12px rgba(37,99,235,.4); }
+.btn-p.g { background: var(--green); box-shadow: 0 2px 8px rgba(5,150,105,.3); }
+.btn-p.g:hover { background: #047857; }
+
+/* Msg boxes */
+.msg { border-radius: 8px; padding: 10px 12px; font-size: .82rem; margin-bottom: 12px; display: none; font-weight: 500; }
+.msg.e { background: var(--red-l);   color: #991B1B; border: 1px solid #FCA5A5; }
+.msg.s { background: var(--green-ll);color: #14532D; border: 1px solid #6EE7B7; }
+
+/* Toggles */
+.tog-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.tog-row:last-child { border-bottom: none; }
+.tog-row span { font-size: .86rem; font-weight: 500; }
+.tog {
+  position: relative; width: 38px; height: 22px;
+  display: inline-block; flex-shrink: 0;
+}
+.tog input { opacity: 0; width: 0; height: 0; }
+.tog-sl {
+  position: absolute; inset: 0; background: var(--border2);
+  border-radius: 999px; cursor: pointer; transition: .2s;
+}
+.tog-sl::before {
+  content: ''; position: absolute;
+  width: 16px; height: 16px; left: 3px; top: 3px;
+  background: white; border-radius: 50%; transition: .2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.tog input:checked + .tog-sl { background: var(--p); }
+.tog input:checked + .tog-sl::before { transform: translateX(16px); }
+
+/* Section title */
+.sct {
+  font-size: .7rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .8px;
+  color: var(--muted); margin: 18px 0 10px;
+  padding-bottom: 7px; border-bottom: 1px solid var(--border);
+}
+
+.thresh-row { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+.thresh-row label { font-size: .82rem; flex: 1; color: var(--text2); font-weight: 500; }
+.thresh-row input[type=number] {
+  width: 86px; padding: 7px 10px;
+  border: 1px solid var(--border); border-radius: 7px;
+  font-size: .86rem; font-family: inherit;
+  background: var(--surface2); color: var(--text);
+}
+.thresh-row input:focus { outline: none; border-color: var(--p); }
+
+.hist-item {
+  font-size: .78rem; padding: 8px 10px; border-radius: 8px;
+  background: var(--surface2); margin-bottom: 5px;
+  border-left: 3px solid var(--border);
+  display: flex; justify-content: space-between; gap: 8px;
+  align-items: flex-start;
+}
+.hist-item.email  { border-left-color: var(--p); }
+.hist-item.wa     { border-left-color: #25D366; }
+.hist-item.browser{ border-left-color: #7C3AED; }
+.hist-time { font-size: .7rem; color: var(--muted); white-space: nowrap; }
+
+/* ══════════════════════════════════════════════
+   ALERT BANNER (map)
+══════════════════════════════════════════════ */
+.alert-banner {
+  position: fixed; bottom: 20px;
+  left: calc(var(--side) + 16px); right: 16px;
+  background: var(--surface); border: 1.5px solid var(--amber);
+  border-radius: var(--r2); padding: 14px 16px;
+  box-shadow: var(--sh3); z-index: 500;
+  display: none; align-items: center; gap: 12px;
+}
+.alert-banner.show { display: flex; animation: slideUp .3s cubic-bezier(.34,1.56,.64,1); }
+@keyframes slideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+.ab-icon { font-size: 1.5rem; }
+.ab-body { flex: 1; min-width: 0; }
+.ab-body strong { display: block; font-size: .88rem; font-weight: 700; margin-bottom: 2px; }
+.ab-body span   { font-size: .78rem; color: var(--muted); }
+.ab-acts { display: flex; gap: 7px; flex-shrink: 0; }
+.btn-wa { padding: 8px 14px; background: #25D366; color: white; border: none; border-radius: 8px; font-size: .8rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+.btn-mail { padding: 8px 14px; background: var(--p); color: white; border: none; border-radius: 8px; font-size: .8rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+.ab-close { background: none; border: none; font-size: 1rem; color: var(--muted); cursor: pointer; }
+
+/* ══════════════════════════════════════════════
+   TOASTS
+══════════════════════════════════════════════ */
+#toasts {
+  position: fixed; bottom: 20px; right: 20px;
+  z-index: 3000; display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: 9px;
+  padding: 12px 16px; border-radius: 10px;
+  background: var(--text); color: var(--surface);
+  font-size: .84rem; font-weight: 600; max-width: 300px;
+  box-shadow: var(--sh3); pointer-events: auto;
+  animation: toastIn .25s ease, toastOut .25s ease 3.75s forwards;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.toast.green  { background: var(--green); }
+.toast.red    { background: var(--red); }
+.toast.amber  { background: var(--amber); }
+@keyframes toastIn  { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:none; } }
+@keyframes toastOut { to   { opacity:0; transform:translateX(16px); } }
+
+/* ══════════════════════════════════════════════
+   SETUP BANNER
+══════════════════════════════════════════════ */
+.setup-banner {
+  background: linear-gradient(90deg, #1E1B4B, #312E81);
+  color: #C7D2FE; padding: 9px 16px;
+  font-size: .78rem; display: flex; align-items: center; gap: 10px;
+  position: fixed; top: var(--hdr); left: 0; right: 0; z-index: 800;
+}
+.setup-banner.hidden { display: none; }
+.setup-banner a { color: #A5B4FC; text-decoration: underline; cursor: pointer; }
+.setup-banner strong { color: white; }
+
+/* ══════════════════════════════════════════════
+   SPINNER
+══════════════════════════════════════════════ */
+.spin {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,.35); border-top-color: white;
+  border-radius: 50%; animation: rot .6s linear infinite;
+}
+@keyframes rot { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════════════════
+   COUNTRY SELECTOR
+══════════════════════════════════════════════ */
+.country-row {
+  display: flex; gap: 3px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 9px; padding: 3px;
+}
+.country-btn {
+  flex: 1; padding: 6px 2px;
+  border-radius: 7px; border: none;
+  font-size: .78rem; font-weight: 700;
+  color: var(--muted); background: transparent;
+  cursor: pointer; transition: all .15s; font-family: inherit;
+  text-align: center; line-height: 1.2;
+}
+.country-btn:hover  { color: var(--text); background: var(--surface); }
+.country-btn.active {
+  background: var(--surface); color: var(--text);
+  box-shadow: var(--sh1);
+}
+.country-btn .cflag { font-size: 1rem; display: block; }
+.country-btn .ccode { font-size: .65rem; letter-spacing: .3px; }
+
+.country-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: .68rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 999px;
+  background: var(--p-l); color: var(--p);
+  vertical-align: middle;
+}
+.api-src {
+  font-size: .68rem; padding: 2px 7px; border-radius: 999px;
+  font-weight: 700;
+}
+.api-src.live   { background: var(--green-ll); color: var(--green); }
+.api-src.demo   { background: var(--amber-l);  color: var(--amber); }
+.api-src.govt   { background: var(--p-ll);     color: var(--p); }
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+@media (max-width: 800px) {
+  :root { --side: 100%; }
+  .app { flex-direction: column; }
+  .sidebar { width: 100%; max-height: 52vh; }
+  .map-wrap { flex: 1; min-height: 48vh; }
+  .alert-banner { left: 8px; right: 8px; bottom: 8px; flex-wrap: wrap; }
+  .fuel-tabs { flex-wrap: wrap; }
+}
+  </style>
+</head>
+<body>
+
+<!-- ════════════ SETUP BANNER ════════════ -->
+<div class="setup-banner" id="setupBanner">
+  <span>🔧</span>
+  <span>
+    <strong>Firebase instellen:</strong> maak gratis een project op
+    <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a>
+    → activeer <strong>Auth + Firestore</strong>
+    → <a onclick="openModal('setupModal')">vul config in</a>
+  </span>
+  <button onclick="this.closest('.setup-banner').classList.add('hidden')"
+    style="margin-left:auto;background:none;border:none;color:#A5B4FC;font-size:1.1rem;cursor:pointer;padding:0 4px">×</button>
+</div>
+
+<!-- ════════════ HEADER ════════════ -->
+<header class="hdr">
+  <a class="hdr-logo" href="#">
+    <div class="hdr-logo-icon">⛽</div>
+    <div>
+      <div class="hdr-logo-text">Tank<em>Slim</em></div>
+      <div class="hdr-logo-sub">Actuele brandstofprijzen</div>
+    </div>
+  </a>
+
+  <div class="hdr-sep"></div>
+
+  <div class="fuel-tabs" id="fuelBar">
+    <button class="fuel-tab active" data-type="E10">Euro 95</button>
+    <button class="fuel-tab" data-type="E5">Euro 98</button>
+    <button class="fuel-tab" data-type="diesel">Diesel</button>
+    <button class="fuel-tab" data-type="lpg">LPG</button>
+    <button class="fuel-tab" data-type="cng">CNG</button>
+  </div>
+
+  <div class="hdr-space"></div>
+
+  <div class="hdr-actions">
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Donker/licht">🌙</button>
+    <div id="guestBar">
+      <button class="hdr-btn primary" onclick="openModal('authModal')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Inloggen
+      </button>
+    </div>
+    <div id="userBar" style="display:none;align-items:center;gap:6px;">
+      <button class="hdr-btn" onclick="openModal('settingsModal')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Alerts
+      </button>
+      <div class="avatar" id="avatarEl" onclick="openModal('settingsModal')">?</div>
+      <button class="hdr-btn" onclick="doLogout()">Uitloggen</button>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════ APP ════════════ -->
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- Search -->
+    <div class="sb-top">
+      <!-- Country selector -->
+      <div class="country-row" id="countryRow">
+        <button class="country-btn active" data-country="NL"><span class="cflag">🇳🇱</span><span class="ccode">NL</span></button>
+        <button class="country-btn" data-country="BE"><span class="cflag">🇧🇪</span><span class="ccode">BE</span></button>
+        <button class="country-btn" data-country="LU"><span class="cflag">🇱🇺</span><span class="ccode">LU</span></button>
+<button class="country-btn" data-country="FR"><span class="cflag">🇫🇷</span><span class="ccode">FR</span></button>
+      </div>
+      <div class="row">
+        <select class="sel" id="radius" style="width:100px">
+          <option value="2000">2 km</option>
+          <option value="5000" selected>5 km</option>
+          <option value="10000">10 km</option>
+          <option value="20000">20 km</option>
+        </select>
+        <button class="btn-search" id="searchBtn" onclick="findStations()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3m10-10h-3M5 12H2m15.5-7.5-2 2M8.5 15.5l-2 2m11 0-2-2M8.5 8.5l-2-2"/></svg>
+          Zoek in mijn buurt
+        </button>
+      </div>
+      <div class="row">
+        <select class="sel" id="filterBrand" style="flex:1"><option value="">Alle merken</option></select>
+        <input class="inp" type="number" id="filterMax" step="0.01" placeholder="Max €/L" style="width:90px" />
+        <select class="sel" id="sortBy">
+          <option value="price">Goedkoopst</option>
+          <option value="distance">Dichtsbij</option>
+          <option value="name">Naam A–Z</option>
+        </select>
+        <button class="btn-filter" onclick="applyFilters()">↻</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat">
+        <div class="stat-v c-green" id="statMin">–</div>
+        <div class="stat-l">Laagste</div>
+      </div>
+      <div class="stat">
+        <div class="stat-v c-amber" id="statAvg">–</div>
+        <div class="stat-l">Gemiddeld</div>
+      </div>
+      <div class="stat">
+        <div class="stat-v c-red" id="statMax">–</div>
+        <div class="stat-l">Hoogste</div>
+      </div>
+      <div class="stat">
+        <div class="stat-v c-blue" id="statCount">–</div>
+        <div class="stat-l">Stations</div>
+      </div>
+    </div>
+
+    <!-- List -->
+    <div class="sb-list" id="stationList">
+      <div class="placeholder">
+        <div class="placeholder-icon">🗺️</div>
+        <h3>Klaar om te zoeken</h3>
+        <p>Klik op <strong>"Zoek in mijn buurt"</strong> om actuele brandstofprijzen bij u in de buurt te zien.</p>
+      </div>
+    </div>
+
+    <!-- Alert bar -->
+    <div class="alert-bar" id="alertBar">
+      <div class="alert-inner">
+        <div class="alert-inner-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Prijs-alert instellen
+        </div>
+        <div class="alert-row">
+          <label>Alert onder:</label>
+          <input type="number" id="quickThresh" step="0.01" placeholder="€/L" />
+          <button class="btn-alert" onclick="saveQuickAlert()">Opslaan</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAP -->
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="map-fabs">
+      <button class="fab" onclick="findStations()" title="Vernieuwen">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ ALERT BANNER ════════════ -->
+<div class="alert-banner" id="alertBanner">
+  <div class="ab-icon">🚨</div>
+  <div class="ab-body">
+    <strong id="alertTitle"></strong>
+    <span id="alertSub"></span>
+  </div>
+  <div class="ab-acts">
+    <button class="btn-wa"   onclick="sendWhatsApp()">💬 WhatsApp</button>
+    <button class="btn-mail" onclick="sendEmail()">📧 E-mail</button>
+  </div>
+  <button class="ab-close" onclick="this.closest('.alert-banner').classList.remove('show')">✕</button>
+</div>
+
+<!-- ════════════ MODAL: AUTH ════════════ -->
+<div class="overlay" id="authModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-hdr-left"><h2>Welkom bij TankSlim</h2><p>Inloggen voor alerts, favorieten &amp; meer</p></div>
+      <button class="modal-close" onclick="closeModal('authModal')">✕</button>
+    </div>
+    <div class="tabs">
+      <div class="tab on"  id="t-login"  onclick="switchTab('login')">Inloggen</div>
+      <div class="tab"     id="t-signup" onclick="switchTab('signup')">Account aanmaken</div>
+    </div>
+
+    <div id="f-login">
+      <div class="msg e" id="login-err"></div>
+      <div class="msg s" id="login-ok"></div>
+      <div class="field"><label>E-mailadres</label><input type="email" id="l-email" placeholder="naam@voorbeeld.nl" /></div>
+      <div class="field"><label>Wachtwoord</label><input type="password" id="l-pass" placeholder="••••••••" /></div>
+      <button class="btn-p" onclick="doLogin()">Inloggen</button>
+    </div>
+
+    <div id="f-signup" style="display:none">
+      <div class="msg e" id="signup-err"></div>
+      <div class="msg s" id="signup-ok"></div>
+      <div class="field"><label>Naam</label><input type="text" id="s-name" placeholder="Jan de Vries" /></div>
+      <div class="field"><label>E-mailadres</label><input type="email" id="s-email" placeholder="naam@voorbeeld.nl" /></div>
+      <div class="field">
+        <label>WhatsApp nummer</label>
+        <input type="tel" id="s-phone" placeholder="+31 6 12345678" />
+        <div class="field-note">Inclusief landcode · bijv. +31 voor Nederland</div>
+      </div>
+      <div class="field"><label>Wachtwoord</label><input type="password" id="s-pass" placeholder="Minimaal 8 tekens" /></div>
+      <button class="btn-p" onclick="doSignup()">Account aanmaken</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ MODAL: FIREBASE SETUP ════════════ -->
+<div class="overlay" id="setupModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-hdr-left"><h2>🔧 Firebase instellen</h2><p>Gratis database voor accounts &amp; alerts</p></div>
+      <button class="modal-close" onclick="closeModal('setupModal')">✕</button>
+    </div>
+    <div class="field"><label>API Key</label><input type="text" id="fb-apiKey" placeholder="AIzaSy…" /></div>
+    <div class="field"><label>Auth Domain</label><input type="text" id="fb-authDomain" placeholder="project.firebaseapp.com" /></div>
+    <div class="field"><label>Project ID</label><input type="text" id="fb-projectId" placeholder="mijn-project" /></div>
+    <div class="field">
+      <label>App ID</label>
+      <input type="text" id="fb-appId" placeholder="1:123:web:abc" />
+      <div class="field-note">Maak gratis project aan op <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → Projectinstellingen → Uw apps → Web</div>
+    </div>
+    <button class="btn-p" onclick="saveFirebaseConfig()">Firebase verbinden</button>
+  </div>
+</div>
+
+<!-- ════════════ MODAL: SETTINGS ════════════ -->
+<div class="overlay" id="settingsModal">
+  <div class="modal wide">
+    <div class="modal-hdr">
+      <div class="modal-hdr-left"><h2>⚙️ Instellingen</h2><p>Beheer uw alerts en notificaties</p></div>
+      <button class="modal-close" onclick="closeModal('settingsModal')">✕</button>
+    </div>
+
+    <p class="sct">Notificatiemethodes</p>
+    <div class="tog-row"><span>📧 E-mail alerts</span>    <label class="tog"><input type="checkbox" id="tog-email" onchange="saveSettings()"><span class="tog-sl"></span></label></div>
+    <div class="tog-row"><span>💬 WhatsApp alerts</span>  <label class="tog"><input type="checkbox" id="tog-wa"    onchange="saveSettings()"><span class="tog-sl"></span></label></div>
+    <div class="tog-row"><span>🖥️ Browser-meldingen</span><label class="tog"><input type="checkbox" id="tog-br"   onchange="toggleBrowser()"><span class="tog-sl"></span></label></div>
+
+    <p class="sct">Contactgegevens</p>
+    <div class="field"><label>E-mailadres voor alerts</label><input type="email" id="set-email" oninput="saveSettings()" /></div>
+    <div class="field"><label>WhatsApp nummer</label><input type="tel" id="set-phone" placeholder="+31…" oninput="saveSettings()" /></div>
+
+    <p class="sct">Prijsdrempels — alert als prijs daalt onder:</p>
+    <div class="thresh-row"><label>🟢 Euro 95 (E10)</label><input type="number" id="th-E10"    step="0.001" placeholder="1.800"> €/L</div>
+    <div class="thresh-row"><label>🔵 Euro 98 (E5)</label> <input type="number" id="th-E5"     step="0.001" placeholder="1.900"> €/L</div>
+    <div class="thresh-row"><label>🟡 Diesel (B7)</label>  <input type="number" id="th-diesel" step="0.001" placeholder="1.700"> €/L</div>
+    <div class="thresh-row"><label>🟠 LPG</label>          <input type="number" id="th-lpg"    step="0.001" placeholder="0.900"> €/L</div>
+
+    <p class="sct">EmailJS (gratis e-mails versturen)</p>
+    <div class="field">
+      <label>Public Key</label>
+      <input type="text" id="ejs-key" oninput="saveSettings()" />
+      <div class="field-note">Gratis account op <a href="https://www.emailjs.com" target="_blank">emailjs.com</a></div>
+    </div>
+    <div class="field"><label>Service ID</label>  <input type="text" id="ejs-sid" placeholder="service_xxx" oninput="saveSettings()" /></div>
+    <div class="field"><label>Template ID</label> <input type="text" id="ejs-tid" placeholder="template_xxx" oninput="saveSettings()" /></div>
+
+    <p class="sct">Recente notificaties</p>
+    <div id="histList" style="max-height:160px;overflow-y:auto;margin-bottom:10px">
+      <p style="font-size:.8rem;color:var(--muted)">Nog geen notificaties.</p>
+    </div>
+    <button onclick="clearHistory()" style="font-size:.78rem;padding:6px 12px;border:1px solid var(--border);border-radius:7px;background:var(--surface2);cursor:pointer;color:var(--muted);font-family:inherit">🗑 Geschiedenis wissen</button>
+
+    <button class="btn-p g" style="margin-top:20px" onclick="closeModal('settingsModal')">✅ Opslaan &amp; sluiten</button>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<!-- ════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════ -->
+<script type="module">
+/* ──────────────────────────────────────
+   FIREBASE CONFIG
+────────────────────────────────────── */
+const FIREBASE_CONFIG = {
+  apiKey           : "AIzaSyCj5qgk8lJ-ZKUGb2rUUUjnt3fRjlKuAk4",
+  authDomain       : "brandstofprijzen-11c27.firebaseapp.com",
+  projectId        : "brandstofprijzen-11c27",
+  storageBucket    : "brandstofprijzen-11c27.firebasestorage.app",
+  messagingSenderId: "26669299024",
+  appId            : "1:26669299024:web:90da18391c9d73e13f2855",
+  measurementId    : "G-GSMCYPNNH3"
+};
+
+let db = null, auth = null, currentUser = null;
+
+if (FIREBASE_CONFIG.apiKey) {
+  try {
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js');
+    const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+            onAuthStateChanged, signOut } = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js');
+    const { getFirestore, doc, setDoc, getDoc, updateDoc,
+            collection, addDoc, getDocs, query, orderBy,
+            limit: fsLimit, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js');
+
+    const app = initializeApp(FIREBASE_CONFIG);
+    auth = getAuth(app);
+    db   = getFirestore(app);
+    document.getElementById('setupBanner').classList.add('hidden');
+
+    onAuthStateChanged(auth, async user => {
+      currentUser = user;
+      updateHeaderUI(user);
+      if (user) {
+        await ensureUserDoc(user);
+        await loadSettingsForm(user.uid);
+        document.getElementById('alertBar').classList.add('show');
+      } else {
+        document.getElementById('alertBar').classList.remove('show');
+      }
+    });
+
+    window.doLogin = async () => {
+      const email = v('l-email'), pass = v('l-pass');
+      hideMsg('login');
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        closeModal('authModal'); toast('✅ Welkom terug!', 'green');
+      } catch(e) { showMsg('login','err', friendlyError(e)); }
+    };
+
+    window.doSignup = async () => {
+      const name=v('s-name'), email=v('s-email'), phone=v('s-phone'), pass=v('s-pass');
+      hideMsg('signup');
+      if (!name||!email||!pass) { showMsg('signup','err','Vul alle verplichte velden in.'); return; }
+      if (pass.length<8)         { showMsg('signup','err','Wachtwoord minimaal 8 tekens.'); return; }
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        await setDoc(doc(db,'users',cred.user.uid), {
+          name, email, phone, createdAt: serverTimestamp(),
+          settings: { email:true, wa:false, browser:false, emailAddr:email, phone, thresholds:{}, emailjs:{} }
+        });
+        showMsg('signup','ok','Account aangemaakt!');
+        setTimeout(() => closeModal('authModal'), 1200);
+      } catch(e) { showMsg('signup','err', friendlyError(e)); }
+    };
+
+    window.doLogout = async () => {
+      await signOut(auth); updateHeaderUI(null); toast('Tot ziens!');
+    };
+
+    async function ensureUserDoc(user) {
+      const ref = doc(db,'users',user.uid);
+      if (!(await getDoc(ref)).exists()) {
+        await setDoc(ref, {
+          name: user.displayName || user.email.split('@')[0],
+          email: user.email, phone: '', createdAt: serverTimestamp(),
+          settings: { email:true, wa:false, browser:false, emailAddr:user.email, phone:'', thresholds:{}, emailjs:{} }
+        });
+      }
+    }
+
+    async function loadSettingsForm(uid) {
+      const snap = await getDoc(doc(db,'users',uid));
+      if (!snap.exists()) return;
+      const s = snap.data().settings || {};
+      setChk('tog-email', s.email); setChk('tog-wa', s.wa); setChk('tog-br', s.browser);
+      sv('set-email', s.emailAddr||''); sv('set-phone', s.phone||'');
+      sv('th-E10', s.thresholds?.E10||''); sv('th-E5', s.thresholds?.E5||'');
+      sv('th-diesel', s.thresholds?.diesel||''); sv('th-lpg', s.thresholds?.lpg||'');
+      sv('ejs-key', s.emailjs?.key||''); sv('ejs-sid', s.emailjs?.serviceId||''); sv('ejs-tid', s.emailjs?.templateId||'');
+
+      sv('quickThresh', s.thresholds?.[selectedFuel]||'');
+      await loadHistory(uid);
+    }
+
+    window.saveSettings = async () => {
+      if (!currentUser) return;
+      await updateDoc(doc(db,'users',currentUser.uid), { settings: {
+        email: chk('tog-email'), wa: chk('tog-wa'), browser: chk('tog-br'),
+        emailAddr: v('set-email'), phone: v('set-phone'),
+        thresholds: { E10:vn('th-E10'), E5:vn('th-E5'), diesel:vn('th-diesel'), lpg:vn('th-lpg') },
+        emailjs: { key:v('ejs-key'), serviceId:v('ejs-sid'), templateId:v('ejs-tid') },
+
+      }});
+    };
+
+    window.saveQuickAlert = async () => {
+      if (!currentUser) { toast('Log eerst in voor alerts.','amber'); openModal('authModal'); return; }
+      const val = parseFloat(v('quickThresh'));
+      if (isNaN(val)) { toast('Voer een geldige prijs in.','amber'); return; }
+      const snap = await getDoc(doc(db,'users',currentUser.uid));
+      const s = snap.data()?.settings||{};
+      s.thresholds = s.thresholds||{};
+      s.thresholds[selectedFuel] = val.toString();
+      await updateDoc(doc(db,'users',currentUser.uid), { settings: s });
+      toast(`🔔 Alert: ${FUEL_LABEL[selectedFuel]} onder €${val.toFixed(3)}`, 'green');
+    };
+
+    window.toggleBrowser = async () => {
+      if (chk('tog-br')) {
+        const p = await Notification.requestPermission();
+        if (p!=='granted') { setChk('tog-br',false); toast('Browser-meldingen geweigerd.','red'); return; }
+      }
+      await saveSettings();
+    };
+
+    window.clearHistory = async () => {
+      if (!currentUser) return;
+      const snaps = await getDocs(query(collection(db,'users',currentUser.uid,'notifications'), orderBy('timestamp','desc'), fsLimit(20)));
+      snaps.forEach(d => d.ref.delete());
+      document.getElementById('histList').innerHTML = '<p style="font-size:.8rem;color:var(--muted)">Nog geen notificaties.</p>';
+    };
+
+    async function loadHistory(uid) {
+      const snap = await getDocs(query(collection(db,'users',uid,'notifications'), orderBy('timestamp','desc'), fsLimit(15)));
+      const el = document.getElementById('histList');
+      if (snap.empty) { el.innerHTML = '<p style="font-size:.8rem;color:var(--muted)">Nog geen notificaties.</p>'; return; }
+      el.innerHTML = snap.docs.map(d => {
+        const n=d.data(), t=n.timestamp?.toDate?.()?.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})||'';
+        return `<div class="hist-item ${n.type}">${n.type==='email'?'📧':n.type==='wa'?'💬':'🖥️'} ${esc(n.message)}<span class="hist-time">${t}</span></div>`;
+      }).join('');
+    }
+
+    async function addHistory(type, message, price, station) {
+      if (!currentUser) return;
+      await addDoc(collection(db,'users',currentUser.uid,'notifications'), { type, message, price, station, fuelType:selectedFuel, timestamp:serverTimestamp() });
+      await loadHistory(currentUser.uid);
+    }
+
+    window.toggleFavorite = async (station, btn) => {
+      if (!currentUser) { toast('Log in om favorieten op te slaan.','amber'); openModal('authModal'); return; }
+      const ref = doc(db,'users',currentUser.uid,'favorites',String(station.id));
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        await snap.ref.delete();
+        btn.textContent='🤍 Favoriet'; btn.classList.remove('saved'); toast('Verwijderd.');
+      } else {
+        await setDoc(ref, { name:station.name, address:station.address, lat:station.lat, lon:station.lon, addedAt:serverTimestamp() });
+        btn.textContent='❤️ Opgeslagen'; btn.classList.add('saved'); toast('⭐ Favoriet opgeslagen!','green');
+      }
+    };
+
+    window.isFavorite = async id => {
+      if (!currentUser) return false;
+      return (await getDoc(doc(db,'users',currentUser.uid,'favorites',String(id)))).exists();
+    };
+
+    window.sendEmail = async () => {
+      if (!currentUser) { toast('Log eerst in.','amber'); return; }
+      const snap = await getDoc(doc(db,'users',currentUser.uid));
+      const s = snap.data()?.settings||{};
+      if (!s.emailjs?.key) { toast('Configureer EmailJS in Instellingen.','amber'); openModal('settingsModal'); return; }
+      const cheap = alertStations[0]; if (!cheap) return;
+      try {
+        window.emailjs.init(s.emailjs.key);
+        await window.emailjs.send(s.emailjs.serviceId, s.emailjs.templateId, {
+          to_name:snap.data().name, to_email:s.emailAddr,
+          fuel_type:FUEL_LABEL[selectedFuel], price:`€ ${cheap.price.toFixed(3)}`,
+          station_name:cheap.name, station_addr:cheap.address, distance:distFmt(cheap.distance)
+        });
+        toast('📧 E-mail verstuurd!','green');
+        await addHistory('email', `${FUEL_LABEL[selectedFuel]} €${cheap.price.toFixed(3)} → ${s.emailAddr}`, cheap.price, cheap.name);
+      } catch(e) { toast('E-mail mislukt: '+(e.text||e.message),'red'); }
+    };
+
+    window.sendWhatsApp = async () => {
+      if (!currentUser) { toast('Log eerst in.','amber'); return; }
+      const snap = await getDoc(doc(db,'users',currentUser.uid));
+      const phone = (snap.data()?.settings?.phone||'').replace(/\D/g,'');
+      if (!phone) { toast('Voeg uw WhatsApp-nummer toe in Instellingen.','amber'); openModal('settingsModal'); return; }
+      const cheap = alertStations[0]; if (!cheap) return;
+      const msg = encodeURIComponent(`⛽ *TankSlim Alert!*\n\nGoedkoopste *${FUEL_LABEL[selectedFuel]}*: *€ ${cheap.price.toFixed(3)}/L*\n📍 ${cheap.name}\n${cheap.address}\n🛣 ${distFmt(cheap.distance)} van u`);
+      window.open(`https://wa.me/${phone}?text=${msg}`,'_blank');
+      toast('💬 WhatsApp geopend!','green');
+      await addHistory('wa', `${FUEL_LABEL[selectedFuel]} €${cheap.price.toFixed(3)} → +${phone}`, cheap.price, cheap.name);
+    };
+
+    window.checkAlerts = async stations => {
+      if (!currentUser) return;
+      const snap = await getDoc(doc(db,'users',currentUser.uid));
+      const s = snap.data()?.settings||{};
+      const thresh = parseFloat(s.thresholds?.[selectedFuel]);
+      if (isNaN(thresh)) return;
+      const cheap = stations[0];
+      if (!cheap || cheap.price >= thresh) return;
+      alertStations = stations;
+      document.getElementById('alertTitle').textContent = `${FUEL_LABEL[selectedFuel]} €${cheap.price.toFixed(3)}/L — onder uw drempel €${thresh.toFixed(3)}!`;
+      document.getElementById('alertSub').textContent   = `${cheap.name} · ${distFmt(cheap.distance)}`;
+      document.getElementById('alertBanner').classList.add('show');
+      if (s.browser && Notification.permission==='granted') {
+        new Notification('⛽ TankSlim', { body:`${FUEL_LABEL[selectedFuel]}: €${cheap.price.toFixed(3)}/L bij ${cheap.name}` });
+        await addHistory('browser', `${FUEL_LABEL[selectedFuel]} €${cheap.price.toFixed(3)} bij ${cheap.name}`, cheap.price, cheap.name);
+      }
+    };
+
+  } catch(e) { console.error(e); toast('Firebase fout: '+e.message,'red'); }
+} else {
+  ['doLogin','doSignup','doLogout','saveSettings','saveQuickAlert','toggleFavorite',
+   'sendEmail','sendWhatsApp','checkAlerts','clearHistory','toggleBrowser']
+    .forEach(fn => window[fn] = () => toast('Firebase vereist.','amber'));
+  window.isFavorite = async () => false;
+}
+
+/* ──────────────────────────────────────
+   FIREBASE SETUP WIZARD
+────────────────────────────────────── */
+window.saveFirebaseConfig = () => {
+  const cfg = { apiKey:v('fb-apiKey'), authDomain:v('fb-authDomain'), projectId:v('fb-projectId'), appId:v('fb-appId'), storageBucket:v('fb-projectId')+'.appspot.com', messagingSenderId:'' };
+  if (!cfg.apiKey||!cfg.projectId) { toast('Vul alle Firebase velden in.','amber'); return; }
+  localStorage.setItem('ts_fb', JSON.stringify(cfg));
+  toast('✅ Firebase opgeslagen. Herladen…','green');
+  setTimeout(() => location.reload(), 1400);
+};
+
+/* ──────────────────────────────────────
+   CONSTANTS
+────────────────────────────────────── */
+const FUEL_LABEL = { E10:'Euro 95 (E10)', E5:'Euro 98 (E5)', diesel:'Diesel (B7)', lpg:'LPG', cng:'CNG' };
+
+/* ── Countries ── */
+const COUNTRIES = {
+  NL: { name:'Nederland',   flag:'🇳🇱', api:'anwb',  fuels:['E10','E5','diesel','lpg','cng'] },
+  BE: { name:'België',      flag:'🇧🇪', api:'carbu', fuels:['E10','E5','diesel','lpg'] },
+  LU: { name:'Luxemburg',   flag:'🇱🇺', api:'lu',    fuels:['E10','E5','diesel','lpg'] },
+  FR: { name:'France',      flag:'🇫🇷', api:'fr',    fuels:['E10','E5','diesel','lpg'] }
+};
+
+// Rough bounding boxes for auto-detection (check small countries first)
+const BOUNDS = [
+  ['LU', 49.44, 5.73, 50.18, 6.53],
+  ['NL', 50.75, 3.35, 53.55, 7.22],
+  ['BE', 49.50, 2.54, 51.50, 6.40],
+
+  ['FR', 41.33,-5.14, 51.09, 9.56]
+];
+
+function detectCountry(lat, lon) {
+  for (const [cc, minLat, minLon, maxLat, maxLon] of BOUNDS) {
+    if (lat>=minLat && lat<=maxLat && lon>=minLon && lon<=maxLon) return cc;
+  }
+  return 'NL';
+}
+
+function setCountry(cc) {
+  selectedCountry = cc;
+  document.querySelectorAll('.country-btn').forEach(b => b.classList.toggle('active', b.dataset.country===cc));
+  // Update fuel tabs: hide fuel types not available in this country
+  const avail = COUNTRIES[cc].fuels;
+  document.querySelectorAll('.fuel-tab').forEach(t => {
+    const visible = avail.includes(t.dataset.type);
+    t.style.display = visible ? '' : 'none';
+    if (!visible && t.classList.contains('active')) {
+      // Switch to first available fuel
+      const first = document.querySelector(`.fuel-tab[data-type="${avail[0]}"]`);
+      if (first) { document.querySelectorAll('.fuel-tab').forEach(x=>x.classList.remove('active')); first.classList.add('active'); selectedFuel = avail[0]; }
+    }
+  });
+}
+
+// Fuel type maps
+const ANWB_MAP = { 'Euro95':'E10','E10':'E10','euro95':'E10','SuperPlus':'E5','Euro98':'E5','E5':'E5','Super':'E5','Diesel':'diesel','diesel':'diesel','LPG':'lpg','lpg':'lpg','CNG':'cng','cng':'cng' };
+
+const FR_MAP   = { E10:['SP95-E10','SP95','Gazole_B10'], E5:['SP98'], diesel:['Gazole','Gazole_B7'], lpg:['GPLc'], cng:['GNV'] };
+const CARBU_FUEL = { E10:6, E5:10, diesel:2, lpg:3 };
+// Luxembourg base prices (government regulated max prices, updated periodically)
+const LU_BASE  = { E10:1.399, E5:1.499, diesel:1.319, lpg:0.649, cng:1.099 };
+const BASE_PRICES = { E10:1.849, E5:1.949, diesel:1.739, lpg:0.919, cng:1.359 };
+
+const ANWB_KEY = 'GNYXLHxCa14zfA1nVJkVV8ldQZHbPTcu';
+
+let selectedFuel = 'E10', selectedCountry = 'NL', allStations = [], alertStations = [], isLoading = false;
+
+// Country selector click handler
+document.getElementById('countryRow').addEventListener('click', e => {
+  const btn = e.target.closest('.country-btn');
+  if (btn) setCountry(btn.dataset.country);
+});
+
+/* ──────────────────────────────────────
+   DARK MODE
+────────────────────────────────────── */
+const savedTheme = localStorage.getItem('ts_theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+document.getElementById('themeBtn').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+window.toggleTheme = () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('ts_theme', next);
+  document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
+};
+
+/* ──────────────────────────────────────
+   MAP
+────────────────────────────────────── */
+const map = L.map('map', { zoomControl:false }).setView([52.3676,4.9041], 12);
+L.control.zoom({ position:'bottomright' }).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution:'© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom:19
+}).addTo(map);
+
+let mapMarkers=[], userMarker=null;
+
+/* ──────────────────────────────────────
+   FUEL TABS
+────────────────────────────────────── */
+document.getElementById('fuelBar').addEventListener('click', e => {
+  const tab = e.target.closest('.fuel-tab');
+  if (!tab) return;
+  document.querySelectorAll('.fuel-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  selectedFuel = tab.dataset.type;
+  if (allStations.length) applyFilters();
+});
+
+/* ──────────────────────────────────────
+   FIND STATIONS
+────────────────────────────────────── */
+window.findStations = async () => {
+  if (isLoading) return;
+  if (!navigator.geolocation) { toast('Geolocatie niet ondersteund.','red'); return; }
+  isLoading = true;
+  const btn = document.getElementById('searchBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Bezig…';
+  document.getElementById('alertBanner').classList.remove('show');
+  showSkeletons();
+
+  navigator.geolocation.getCurrentPosition(
+    pos => fetchPrices(pos.coords.latitude, pos.coords.longitude),
+    err => {
+      toast(['','Locatietoegang geweigerd.','Locatie onbekend.','Time-out.'][err.code]||'Locatiefout.','red');
+      resetBtn(); clearSkeletons();
+    },
+    { enableHighAccuracy:true, timeout:10000, maximumAge:60000 }
+  );
+};
+
+function showSkeletons() {
+  document.getElementById('stationList').innerHTML = Array.from({length:5}, () => `
+    <div class="skel">
+      <div class="skel-row">
+        <div class="skel-line skel-circle"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+          <div class="skel-line" style="width:65%"></div>
+          <div class="skel-line" style="width:45%"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+          <div class="skel-line" style="width:60px;height:18px"></div>
+          <div class="skel-line" style="width:40px"></div>
+        </div>
+      </div>
+      <div class="skel-line" style="height:3px;width:100%;margin:4px 0"></div>
+    </div>`).join('');
+}
+function clearSkeletons() { document.getElementById('stationList').innerHTML = ''; }
+
+/* ──────────────────────────────────────
+   ANWB API
+────────────────────────────────────── */
+async function fetchPrices(lat, lon) {
+  const radius = parseInt(document.getElementById('radius').value);
+
+  // Auto-detect country if not manually overridden
+  const auto = detectCountry(lat, lon);
+  if (auto !== selectedCountry) setCountry(auto);
+
+  let stations=[], isLive=false, apiName='';
+
+  try {
+    switch (selectedCountry) {
+      case 'NL': [stations, isLive, apiName] = await fetchNL(lat,lon,radius); break;
+      case 'BE': [stations, isLive, apiName] = await fetchBE(lat,lon,radius); break;
+      case 'LU': [stations, isLive, apiName] = await fetchLU(lat,lon,radius); break;
+
+      case 'FR': [stations, isLive, apiName] = await fetchFR(lat,lon,radius); break;
+      default:   [stations, isLive, apiName] = await fetchNL(lat,lon,radius);
+    }
+  } catch(e) { console.warn('Primary API fout:', e.message); }
+
+  // Universal fallback: Overpass + demo prices
+  if (!stations.length) {
+    try { stations = await fetchOverpass(lat,lon,radius); isLive=false; apiName='Overpass (indicatief)'; }
+    catch { toast('Geen stations gevonden. Controleer uw verbinding.','red'); resetBtn(); return; }
+  }
+  if (!stations.length) { toast('Geen stations gevonden. Vergroot de zoekstraal.','amber'); resetBtn(); return; }
+
+  allStations = stations;
+  populateBrandFilter(stations);
+  applyFilters(isLive, apiName);
+  resetBtn();
+}
+
+/* ─── NL: ANWB API ─── */
+async function fetchNL(lat, lon, radius) {
+  const delta = radius/111000;
+  const url = `https://api.anwb.nl/v1/fuel/stations?sw=${lat-delta},${lon-delta}&ne=${lat+delta},${lon+delta}&apiKey=${ANWB_KEY}`;
+  let resp;
+  try { resp = await fetch(url, { signal:AbortSignal.timeout(6000) }); }
+  catch { resp = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`, { signal:AbortSignal.timeout(8000) }); }
+  if (!resp.ok) return [[],false,''];
+  const data = await resp.json();
+  const items = data.items||data.Items||data||[];
+  if (!Array.isArray(items)||!items.length) return [[],false,''];
+  return [parseANWB(items,lat,lon,radius), true, 'ANWB'];
+}
+
+/* ─── BE: Carbu.com ─── */
+async function fetchBE(lat, lon, radius) {
+  const fuelId = CARBU_FUEL[selectedFuel];
+  if (!fuelId) return [[],false,''];
+  const url = `https://www.carbu.com/belgie/index.php/stationList?fuel=${fuelId}&lat=${lat}&lng=${lon}&dist=${Math.ceil(radius/1000)}`;
+  try {
+    const resp = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`, { signal:AbortSignal.timeout(10000) });
+    if (resp.ok) {
+      const data = await resp.json();
+      const items = data.stationList||data.stations||data||[];
+      if (Array.isArray(items)&&items.length) {
+        const st = items.map(s => {
+          const slat=parseFloat(s.lat||s.latitude||0), slon=parseFloat(s.lng||s.lon||s.longitude||0);
+          if (!slat||!slon) return null;
+          const price=parseFloat(s.price||s.prix||0);
+          if (!price) return null;
+          return { id:s.id||Math.random(), name:s.name||s.stationName||'Tankstation', brand:s.brand||s.ensigne||'',
+            address:`${s.street||s.adresse||''}, ${s.postalcode||s.cp||''} ${s.town||s.ville||''}`.trim(),
+            lat:slat, lon:slon, distance:haversine(lat,lon,slat,slon), price, isLive:true, uLat:lat, uLon:lon };
+        }).filter(s=>s&&s.distance<=radius*1.2);
+        if (st.length) return [st, true, 'Carbu.com'];
+      }
+    }
+  } catch(e) { console.warn('Carbu.com BE fout:', e.message); }
+  return [[],false,''];
+}
+
+/* ─── LU: Overpass + luxemburgse gemiddelde prijzen ─── */
+async function fetchLU(lat, lon, radius) {
+  const stations = await fetchOverpass(lat, lon, radius);
+  // Apply Luxembourg government max prices with small variation
+  stations.forEach(s => {
+    const base = LU_BASE[selectedFuel]||1.399;
+    s.price = Math.round((base + (Math.random()*.06-.02))*1000)/1000;
+    s.isLive = false;
+  });
+  return [stations, false, 'Schatting (LU)'];
+}
+
+/* ─── FR: Overheid API ─── */
+async function fetchFR(lat, lon, radius) {
+  const fuelNames = FR_MAP[selectedFuel];
+  if (!fuelNames) return [[],false,''];
+  const radiusKm = Math.ceil(radius/1000);
+  const url = `https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix_des_carburants_en_france_flux_instantane_v2/records?where=within_distance(geom,geom'POINT(${lon}%20${lat})',${radiusKm}km)&limit=80&order_by=distance(geom,geom'POINT(${lon}%20${lat})')`;
+  try {
+    const resp = await fetch(url, { signal:AbortSignal.timeout(10000) });
+    if (!resp.ok) return [[],false,''];
+    const data = await resp.json();
+    const results = data.results||[];
+    const stations=[];
+    for (const s of results) {
+      // Coordinates: latitude/longitude can be stored as integer*100000 or as geom object
+      let slat=0, slon=0;
+      if (s.geom) { slat=s.geom.lat||s.geom.latitude||0; slon=s.geom.lon||s.geom.longitude||0; }
+      if (!slat && s.latitude) { slat=parseFloat(s.latitude); if (Math.abs(slat)>1000) slat/=100000; }
+      if (!slon && s.longitude){ slon=parseFloat(s.longitude); if (Math.abs(slon)>1000) slon/=100000; }
+      if (!slat||!slon) continue;
+
+      // Find price for selected fuel (prix is an array of {nom, valeur})
+      let price=null;
+      const prixArr = Array.isArray(s.prix) ? s.prix : [];
+      for (const p of prixArr) {
+        if (fuelNames.includes(p.nom||p['@nom'])) {
+          price = parseFloat(p.valeur||p.prix||0);
+          break;
+        }
+      }
+      // Some records have prix_nom/prix_valeur (pivot format)
+      if (!price && s.prix_nom && fuelNames.includes(s.prix_nom)) {
+        price = parseFloat(s.prix_valeur||0);
+      }
+      if (!price||price<=0) continue;
+      // French API returns prices in euros
+      if (price > 10) price = price/1000; // sometimes in millieuros
+
+      stations.push({
+        id:s.id||Math.random(), name:s.nom||s.ensigne||s.adresse||'Station', brand:s.ensigne||'',
+        address:`${s.adresse||''}, ${s.cp||''} ${s.ville||''}`.replace(/\s+/g,' ').trim(),
+        lat:slat, lon:slon, distance:haversine(lat,lon,slat,slon), price, isLive:true, uLat:lat, uLon:lon
+      });
+    }
+    return [stations, true, 'Gouv.fr'];
+  } catch(e) { console.warn('FR API fout:', e.message); return [[],false,'']; }
+}
+
+function parseANWB(items, uLat, uLon, radius) {
+  return items.map(item => {
+    const loc  = item.Location||item.location||item.coordinates||{};
+    const slat = parseFloat(loc.Lat||loc.lat||loc.latitude||item.lat||0);
+    const slon = parseFloat(loc.Lng||loc.lng||loc.longitude||item.lon||0);
+    if (!slat||!slon) return null;
+    const dist = haversine(uLat,uLon,slat,slon);
+    if (dist > radius*1.2) return null;
+    const addr  = item.Address||item.address||{};
+    const address = [
+      addr.Street&&(addr.Street+' '+(addr.HouseNumber||'')).trim(),
+      addr.City||addr.city||''
+    ].filter(Boolean).join(', ')||'Adres onbekend';
+    const fuels = item.FuelTypes||item.fuelTypes||item.fuels||[];
+    let price=null;
+    for (const f of fuels) {
+      const code = f.Code||f.code||f.Type||f.type||'';
+      if ((ANWB_MAP[code]||ANWB_MAP[code.toLowerCase()])=== selectedFuel) {
+        const p=parseFloat(f.Price||f.price||0);
+        if (p>0) { price=p; break; }
+      }
+    }
+    if (price===null) return null;
+    return { id:item.Id||item.id||Math.random(), name:item.Name||item.name||'Tankstation',
+      brand:(item.Brand||item.brand||item.Name||'').split(' ')[0],
+      address, lat:slat, lon:slon, distance:dist, price, isLive:true, uLat, uLon };
+  }).filter(Boolean);
+}
+
+async function fetchOverpass(lat, lon, radius) {
+  const q = `[out:json][timeout:25];(node["amenity"="fuel"](around:${radius},${lat},${lon});way["amenity"="fuel"](around:${radius},${lat},${lon}););out center tags;`;
+  const resp = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', body:'data='+encodeURIComponent(q) });
+  if (!resp.ok) throw new Error('Overpass '+resp.status);
+  const data = await resp.json();
+  return data.elements.map(el => {
+    const slat=el.lat??el.center?.lat, slon=el.lon??el.center?.lon;
+    if (!slat||!slon) return null;
+    const t=el.tags||{}, addr=[t['addr:street']&&(t['addr:street']+' '+(t['addr:housenumber']||'')).trim(), t['addr:city']||''].filter(Boolean).join(', ')||'Adres onbekend';
+    const base=BASE_PRICES[selectedFuel]||1.849;
+    return { id:el.id, name:t.name||t.brand||'Tankstation', brand:t.brand||'',
+      address:addr, lat:slat, lon:slon, distance:haversine(lat,lon,slat,slon),
+      price:Math.round((base+(Math.random()*.18-.06))*1000)/1000, isLive:false, uLat:lat, uLon:lon };
+  }).filter(Boolean);
+}
+
+/* ──────────────────────────────────────
+   FILTERS
+────────────────────────────────────── */
+function populateBrandFilter(stations) {
+  const brands=[...new Set(stations.map(s=>s.brand).filter(Boolean).map(b=>b.toLowerCase()).sort())].map(b=>b[0].toUpperCase()+b.slice(1));
+  document.getElementById('filterBrand').innerHTML = '<option value="">Alle merken</option>'+brands.map(b=>`<option value="${esc(b.toLowerCase())}">${esc(b)}</option>`).join('');
+}
+
+let _lastApiName = '';
+
+window.applyFilters = (isLive, apiName) => {
+  if (!allStations.length) return;
+  if (apiName !== undefined) _lastApiName = apiName;
+  let list = [...allStations];
+  const brand=document.getElementById('filterBrand').value.toLowerCase();
+  if (brand) list=list.filter(s=>s.brand.toLowerCase()===brand);
+  const maxP=parseFloat(document.getElementById('filterMax').value);
+  if (!isNaN(maxP)) list=list.filter(s=>s.price<=maxP);
+  const sort=document.getElementById('sortBy').value;
+  list.sort((a,b)=>sort==='price'?a.price-b.price:sort==='distance'?a.distance-b.distance:a.name.localeCompare(b.name,'nl'));
+  const live = isLive!==undefined ? isLive : allStations[0]?.isLive;
+  updateStats(list);
+  renderMap(list, allStations[0].uLat, allStations[0].uLon);
+  renderList(list, live, _lastApiName);
+  if (typeof window.checkAlerts==='function') window.checkAlerts(list);
+};
+
+/* ──────────────────────────────────────
+   STATS (animated)
+────────────────────────────────────── */
+function updateStats(list) {
+  if (!list.length) return;
+  const prices=list.map(s=>s.price);
+  const min=Math.min(...prices), max=Math.max(...prices), avg=prices.reduce((a,b)=>a+b,0)/prices.length;
+  animateStat('statMin', min); animateStat('statAvg', avg); animateStat('statMax', max);
+  document.getElementById('statCount').textContent = list.length;
+  document.getElementById('statsBar').classList.add('show');
+}
+function animateStat(id, target) {
+  const el=document.getElementById(id);
+  el.style.transform='scale(1.15)'; el.textContent=`€${target.toFixed(3)}`;
+  setTimeout(()=>el.style.transform='', 250);
+}
+
+/* ──────────────────────────────────────
+   MAP RENDER (price badge markers)
+────────────────────────────────────── */
+function renderMap(stations, uLat, uLon) {
+  mapMarkers.forEach(m=>m.remove()); mapMarkers=[];
+  if (userMarker) { userMarker.remove(); userMarker=null; }
+
+  userMarker = L.marker([uLat,uLon], {
+    icon: L.divIcon({ html:`<div class="pm pm-user">U bent hier</div>`, iconSize:[80,24], iconAnchor:[40,30], className:'' })
+  }).addTo(map).bindPopup('<strong>Uw locatie</strong>');
+
+  const minP=Math.min(...stations.map(s=>s.price));
+  const maxP=Math.max(...stations.map(s=>s.price));
+
+  stations.forEach((s,i) => {
+    const isBest  = s.price===minP;
+    const isWorst = s.price===maxP && stations.length>2;
+    const cls = isBest?'best':isWorst?'worst':'';
+    const label = `€${s.price.toFixed(3)}`;
+
+    const m = L.marker([s.lat,s.lon], {
+      icon: L.divIcon({
+        html: `<div class="pm ${cls}" title="${esc(s.name)}">${label}</div>`,
+        iconSize: [70, 24], iconAnchor: [35, 30], className:''
+      })
+    }).addTo(map);
+
+    m.bindPopup(`
+      <div style="font-family:Inter,sans-serif;min-width:160px">
+        <div style="font-weight:800;font-size:.9rem;margin-bottom:3px">${esc(s.name)}</div>
+        <div style="font-size:.74rem;color:#64748B;margin-bottom:8px">${esc(s.address)}</div>
+        <div style="font-size:1.15rem;font-weight:900;color:${isBest?'#059669':'#1D4ED8'}">€ ${s.price.toFixed(3)} <span style="font-size:.75rem;font-weight:500;color:#64748B">/ liter</span></div>
+        <div style="font-size:.72rem;color:${s.isLive?'#059669':'#D97706'};margin-top:4px">${s.isLive?'✅ Actuele prijs':'⚠️ Indicatieve prijs'}</div>
+        <div style="font-size:.72rem;color:#64748B;margin-top:2px">📍 ${distFmt(s.distance)}</div>
+      </div>`);
+    m.on('click', () => highlightCard(i));
+    mapMarkers.push(m);
+  });
+
+  map.fitBounds(L.featureGroup([userMarker,...mapMarkers]).getBounds().pad(0.14));
+}
+
+/* ──────────────────────────────────────
+   LIST RENDER
+────────────────────────────────────── */
+function renderList(stations, isLive, apiName) {
+  const minP=Math.min(...stations.map(s=>s.price));
+  const maxP=Math.max(...stations.map(s=>s.price));
+  const range=maxP-minP||1;
+  const country = COUNTRIES[selectedCountry];
+  const srcLabel = apiName || (isLive ? 'Live' : 'Indicatief');
+
+  const badge = isLive
+    ? `<span class="live-badge live">${country?.flag||''} ${srcLabel}</span>`
+    : `<span class="live-badge demo">${country?.flag||''} ${srcLabel}</span>`;
+
+  let html = `<div class="list-hdr"><span>${stations.length} tankstations</span>${badge}</div>`;
+
+  html += stations.map((s,i) => {
+    const ratio = (s.price-minP)/range;
+    const barColor = `hsl(${Math.round((1-ratio)*128)},68%,${ratio>.7?38:42}%)`;
+    const rankTxt  = i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}`;
+    const rankCl   = i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+    const priceCl  = i===0?'best':ratio>.65?'worst':'mid';
+    const diff     = s.price>minP ? `+€${(s.price-minP).toFixed(3)}` : '';
+
+    return `
+    <div class="card ${i===0?'cheapest':''}" id="card-${i}" onclick="focusStation(${i},${s.lat},${s.lon})">
+      <div class="card-head">
+        <div class="rank ${rankCl}">${rankTxt}</div>
+        <div class="card-meta">
+          <div class="card-name">${esc(s.name)}</div>
+          <div class="card-addr">${esc(s.address)}</div>
+        </div>
+        <div class="card-price-col">
+          <div class="card-price ${priceCl}">€${s.price.toFixed(3)}</div>
+          <div class="card-dist">${distFmt(s.distance)}</div>
+          ${diff?`<div class="card-diff">${diff}</div>`:''}
+        </div>
+      </div>
+      <div class="pbar"><div class="pbar-fill" style="width:${Math.round(ratio*100)}%;background:${barColor}"></div></div>
+      <div class="card-foot">
+        <button class="card-action fav" id="fav-${i}" onclick="handleFav(event,${i})">🤍 Favoriet</button>
+        <button class="card-action nav" onclick="navigate(${s.lat},${s.lon})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Route
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('stationList').innerHTML = html;
+
+  // Async fav check
+  stations.forEach(async (s,i) => {
+    if (typeof window.isFavorite!=='function') return;
+    if (await window.isFavorite(s.id)) {
+      const btn=document.getElementById(`fav-${i}`);
+      if (btn) { btn.textContent='❤️ Opgeslagen'; btn.classList.add('saved'); }
+    }
+  });
+}
+
+window.handleFav = async (e,i) => {
+  e.stopPropagation();
+  const btn=document.getElementById(`fav-${i}`);
+  if (btn) await window.toggleFavorite(allStations[i], btn);
+};
+window.focusStation = (i,lat,lon) => {
+  map.setView([lat,lon],16);
+  mapMarkers[i]?.openPopup();
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+  document.getElementById('card-'+i)?.classList.add('active');
+};
+function highlightCard(i) {
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+  const card=document.getElementById('card-'+i);
+  if (card) { card.classList.add('active'); card.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+}
+window.navigate = (lat,lon) => window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`,'_blank');
+
+/* ──────────────────────────────────────
+   HELPERS
+────────────────────────────────────── */
+function haversine(a,b,c,d){const R=6371000,r=x=>x*Math.PI/180,dA=r(c-a),dB=r(d-b);return R*2*Math.atan2(Math.sqrt(Math.sin(dA/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dB/2)**2),Math.sqrt(1-(Math.sin(dA/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dB/2)**2)));}
+function distFmt(m){return m<1000?Math.round(m)+'m':(m/1000).toFixed(1)+' km';}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function v(id){return(document.getElementById(id)?.value||'').trim();}
+function vn(id){const val=v(id);return val===''?null:val;}
+function sv(id,val){const el=document.getElementById(id);if(el)el.value=val||'';}
+function chk(id){return!!document.getElementById(id)?.checked;}
+function setChk(id,val){const el=document.getElementById(id);if(el)el.checked=!!val;}
+function resetBtn(){isLoading=false;const b=document.getElementById('searchBtn');b.disabled=false;b.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3m10-10h-3M5 12H2m15.5-7.5-2 2M8.5 15.5l-2 2m11 0-2-2M8.5 8.5l-2-2"/></svg> Zoek in mijn buurt';}
+function friendlyError(e){return({'auth/user-not-found':'Geen account met dit e-mailadres.','auth/wrong-password':'Onjuist wachtwoord.','auth/email-already-in-use':'E-mailadres al in gebruik.','auth/weak-password':'Wachtwoord te zwak.'})[e.code]||e.message;}
+
+window.openModal  = id => document.getElementById(id)?.classList.add('open');
+window.closeModal = id => document.getElementById(id)?.classList.remove('open');
+window.switchTab  = tab => {
+  ['login','signup'].forEach(t=>{document.getElementById(`t-${t}`)?.classList.toggle('on',t===tab);document.getElementById(`f-${t}`).style.display=t===tab?'':'none';});
+};
+document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
+function showMsg(f,t,m){const el=document.getElementById(`${f}-${t}`);if(el){el.textContent=m;el.style.display='block';}}
+function hideMsg(f){['err','ok'].forEach(t=>{const el=document.getElementById(`${f}-${t}`);if(el)el.style.display='none';});}
+
+function updateHeaderUI(user) {
+  document.getElementById('guestBar').style.display = user?'none':'';
+  document.getElementById('userBar').style.display  = user?'flex':'none';
+  if(user) document.getElementById('avatarEl').textContent=(user.displayName||user.email||'?')[0].toUpperCase();
+}
+
+window.toast = (msg,type='') => {
+  const el=Object.assign(document.createElement('div'),{className:`toast ${type}`,textContent:msg});
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(),4100);
+};
+
+if(!window.saveSettings)  window.saveSettings=()=>{};
+if(!window.checkAlerts)   window.checkAlerts=()=>{};
+if(!window.isFavorite)    window.isFavorite=async()=>false;
+if(!window.toggleFavorite)window.toggleFavorite=()=>toast('Log in voor favorieten.','amber');
+if(!window.sendEmail)     window.sendEmail=()=>toast('Log in voor e-mailalerts.','amber');
+if(!window.sendWhatsApp)  window.sendWhatsApp=()=>toast('Log in voor WhatsApp-alerts.','amber');
+if(!window.clearHistory)  window.clearHistory=()=>{};
+if(!window.toggleBrowser) window.toggleBrowser=()=>{};
+if(!window.saveQuickAlert)window.saveQuickAlert=()=>toast('Log in voor alerts.','amber');
+</script>
+</body>
+</html>
