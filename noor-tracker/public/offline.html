@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Noor Tracker — Offline</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', system-ui, sans-serif;
+      background: #fafdf8;
+      color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .container {
+      text-align: center;
+      max-width: 400px;
+    }
+    .icon { font-size: 64px; margin-bottom: 16px; }
+    h1 { font-size: 24px; font-weight: 800; color: #1a6b4a; margin-bottom: 8px; }
+    p { color: #6b7280; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+    button {
+      background: #1a6b4a;
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    button:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">📡</div>
+    <h1>Je bent offline</h1>
+    <p>
+      Noor Tracker heeft een internetverbinding nodig om je gewoontes op te slaan.
+      Controleer je verbinding en probeer het opnieuw.
+    </p>
+    <button onclick="window.location.reload()">Opnieuw proberen</button>
+  </div>
+</body>
+</html>

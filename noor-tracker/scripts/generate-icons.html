@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head><title>Noor Tracker Icon Generator</title></head>
+<body>
+<h1>Noor Tracker Icon Generator</h1>
+<p>Open dit bestand in je browser, klik op de knoppen om de iconen te downloaden.</p>
+
+<canvas id="canvas" width="512" height="512" style="border:1px solid #ccc"></canvas>
+<br><br>
+<button onclick="download(512, false)">Download icon-512.png</button>
+<button onclick="download(192, false)">Download icon-192.png</button>
+<button onclick="download(512, true)">Download icon-maskable-512.png</button>
+<button onclick="download(192, true)">Download icon-maskable-192.png</button>
+<button onclick="downloadApple()">Download apple-touch-icon.png (180x180)</button>
+
+<script>
+function drawIcon(ctx, size, maskable) {
+  const s = size;
+  ctx.canvas.width = s;
+  ctx.canvas.height = s;
+
+  // Background
+  if (maskable) {
+    // Maskable: fill entire canvas, no rounded corners
+    ctx.fillStyle = '#1a6b4a';
+    ctx.fillRect(0, 0, s, s);
+  } else {
+    ctx.fillStyle = '#1a6b4a';
+    const r = s * 0.18;
+    ctx.beginPath();
+    ctx.moveTo(r, 0);
+    ctx.lineTo(s - r, 0);
+    ctx.quadraticCurveTo(s, 0, s, r);
+    ctx.lineTo(s, s - r);
+    ctx.quadraticCurveTo(s, s, s - r, s);
+    ctx.lineTo(r, s);
+    ctx.quadraticCurveTo(0, s, 0, s - r);
+    ctx.lineTo(0, r);
+    ctx.quadraticCurveTo(0, 0, r, 0);
+    ctx.fill();
+  }
+
+  // Glow circle
+  ctx.fillStyle = 'rgba(201, 146, 10, 0.15)';
+  ctx.beginPath();
+  ctx.arc(s/2, s*0.42, s*0.23, 0, Math.PI*2);
+  ctx.fill();
+
+  // Star emoji
+  ctx.font = `${s*0.38}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('⭐', s/2, s*0.42);
+
+  // Text
+  ctx.fillStyle = 'white';
+  ctx.font = `bold ${s*0.13}px sans-serif`;
+  ctx.fillText('NOOR', s/2, s*0.78);
+}
+
+function download(size, maskable) {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  drawIcon(ctx, size, maskable);
+
+  const prefix = maskable ? 'icon-maskable-' : 'icon-';
+  const link = document.createElement('a');
+  link.download = `${prefix}${size}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function downloadApple() {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  drawIcon(ctx, 180, false);
+
+  const link = document.createElement('a');
+  link.download = 'apple-touch-icon.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// Preview
+const canvas = document.getElementById('canvas');
+drawIcon(canvas.getContext('2d'), 512, false);
+</script>
+</body>
+</html>

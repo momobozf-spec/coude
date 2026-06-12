@@ -1,13 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { Toaster } from "@/components/ui/Toaster";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
   display: "swap",
+  variable: "--font-inter",
 });
 
 export const viewport: Viewport = {
@@ -19,48 +22,35 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Noor Printables — Islamic Activity Sheets for Kids Aged 4-8",
     template: "%s | Noor Printables",
+    default: "Noor Printables — Islamitisch Educatief Platform",
   },
   description:
-    "Generate printable Islamic educational activities for children aged 4-8. Coloring pages, mazes, word searches & digital coloring with Ramadan, Eid, Arabic letters themes. Used by 2,400+ Muslim parents & 180+ Islamic schools.",
-  keywords: [
-    "Islamic printables", "Islamic coloring pages", "Ramadan activities kids",
-    "Eid worksheets", "Arabic letters coloring", "Islamic school worksheets",
-    "Muslim kids activities", "Islamic education", "Quran activities children",
-  ],
+    "Islamitische werkbladen, spelletjes en video's voor kinderen van 4-8 jaar.",
+  keywords: ["islamitisch onderwijs", "kinderen", "werkbladen", "quran", "arabic",
+    "Islamic printables", "Ramadan activities", "Muslim kids activities"],
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://noorprintables.com"),
   openGraph: {
-    title: "Noor Printables — Islamic Activity Sheets for Kids",
-    description: "Generate coloring pages, mazes & word searches themed around Ramadan, Eid, Arabic letters & Islamic values. Ages 4-8.",
-    url: "/",
+    title: "Noor Printables — Islamitisch Educatief Platform",
+    description: "Islamitische werkbladen, spelletjes en video's voor kinderen van 4-8 jaar.",
     siteName: "Noor Printables",
     type: "website",
-    locale: "en_US",
-    images: ["/api/og?title=Noor+Printables&subtitle=Islamic+Educational+Activities+for+Kids"],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Noor Printables — Islamic Activity Sheets for Kids",
-    description: "Islamic coloring pages, mazes & word searches for children aged 4-8. Start free.",
-  },
-  robots: { index: true, follow: true, "max-image-preview": "large" as const },
+  robots: { index: true, follow: true },
   icons: { icon: "/favicon.ico" },
-  manifest: undefined,
 };
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className={`${geistSans.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="nl" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -70,20 +60,25 @@ export default function RootLayout({
               name: "Noor Printables",
               applicationCategory: "EducationalApplication",
               operatingSystem: "Web",
-              description: "Islamic educational printable activities for children aged 4-8",
+              description: "Islamic educational activities for children aged 4-8",
               offers: [
-                { "@type": "Offer", price: "0", priceCurrency: "USD", name: "Free Plan" },
-                { "@type": "Offer", price: "12", priceCurrency: "USD", name: "Pro Plan" },
-                { "@type": "Offer", price: "49", priceCurrency: "USD", name: "School Plan" },
+                { "@type": "Offer", price: "0", priceCurrency: "USD", name: "Free" },
+                { "@type": "Offer", price: "12", priceCurrency: "USD", name: "Pro" },
+                { "@type": "Offer", price: "49", priceCurrency: "USD", name: "School" },
               ],
-              aggregateRating: { "@type": "AggregateRating", ratingValue: "4.9", ratingCount: "312" },
             }),
           }}
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
-
+        <Providers>
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+          <Toaster />
+        </Providers>
         {GA_ID && GA_ID !== "G-XXXXXXXXXX" && (
           <>
             <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />

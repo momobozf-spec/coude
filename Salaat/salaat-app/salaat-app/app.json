@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Salaat",
+    "slug": "salaat-times",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#060d1a"
+    },
+    "ios": {
+      "bundleIdentifier": "com.yourname.salaat",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Salaat gebruikt je locatie om nauwkeurige gebedstijden te berekenen.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Salaat gebruikt je locatie om gebedstijden te berekenen en meldingen te sturen."
+      }
+    },
+    "android": {
+      "package": "com.yourname.salaat",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#060d1a"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Salaat gebruikt je locatie voor gebedstijden."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#c9a84c"
+        }
+      ]
+    ]
+  }
+}

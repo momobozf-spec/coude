@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Hikmar AI</title>
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#C9A84C"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Hikmar AI"/>
+<link rel="apple-touch-icon" href="/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png"/>
+
+<!-- SEO -->
+<meta name="description" content="Hikmar AI — Multi-model AI voice assistant. Claude + GPT-4o + Gemini in one app."/>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:         #080C14;
+  --surface:    #0D1220;
+  --surface2:   #131A2A;
+  --border:     rgba(255,255,255,0.07);
+  --gold:       #C9A84C;
+  --gold-dim:   rgba(201,168,76,0.15);
+  --gold-glow:  rgba(201,168,76,0.4);
+  --blue:       #4A9EFF;
+  --blue-dim:   rgba(74,158,255,0.12);
+  --green:      #3DD68C;
+  --green-dim:  rgba(61,214,140,0.12);
+  --red:        #FF5757;
+  --red-dim:    rgba(255,87,87,0.12);
+  --purple:     #9B7EFF;
+  --text:       #E8EAF0;
+  --text-dim:   rgba(232,234,240,0.5);
+  --text-muted: rgba(232,234,240,0.3);
+  --radius:     16px;
+  --radius-sm:  10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── MOBILE SAFE AREAS ── */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ── INSTALL BANNER ── */
+#install-banner {
+  display: none;
+  position: fixed; bottom: 80px; left: 16px; right: 16px; z-index: 200;
+  background: var(--surface2);
+  border: 1px solid var(--gold);
+  padding: 14px 16px;
+  align-items: center; gap: 12px;
+  animation: slideUp 0.3s ease;
+}
+#install-banner.show { display: flex; }
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.install-icon { font-size: 24px; flex-shrink: 0; }
+.install-text { flex: 1; }
+.install-text strong { display: block; font-size: 13px; color: var(--text); }
+.install-text span   { font-size: 11px; color: var(--text-dim); }
+.install-btn {
+  padding: 8px 14px; background: var(--gold); border: none;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px; font-weight: 600; color: #000; cursor: pointer;
+  flex-shrink: 0;
+}
+.install-close {
+  background: none; border: none; color: var(--text-dim);
+  font-size: 18px; cursor: pointer; padding: 4px; flex-shrink: 0;
+}
+
+/* ── MOBILE LAYOUT FIXES ── */
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr !important; }
+  .sidebar-left, .sidebar-right { display: none !important; }
+  .chat-area { border-radius: 0 !important; }
+  nav { padding: 12px 16px !important; }
+  .nav-subtitle { display: none; }
+  #messages { padding: 12px !important; }
+  .input-bar { padding: 10px 12px !important; }
+  .quick-actions { gap: 6px !important; padding: 8px 12px !important; }
+  .quick-btn { font-size: 11px !important; padding: 6px 10px !important; }
+}
+
+/* ── BACKGROUND EFFECTS ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 10%, rgba(201,168,76,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 80%, rgba(74,158,255,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(155,126,255,0.03) 0%, transparent 70%);
+  z-index: 0;
+}
+
+/* geometric bg pattern */
+body::after {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.03;
+  background-image:
+    linear-gradient(rgba(201,168,76,0.8) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.8) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ── LAYOUT ── */
+#app {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: 300px 1fr 280px;
+  grid-template-rows: 64px 1fr;
+  height: 100vh;
+  gap: 0;
+}
+
+/* ── HEADER ── */
+header {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(8,12,20,0.9);
+  backdrop-filter: blur(20px);
+}
+
+.logo {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.logo-mark {
+  width: 36px; height: 36px;
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+
+.logo-mark::before {
+  content: '';
+  position: absolute; inset: 3px;
+  border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 4px;
+  transform: rotate(45deg);
+}
+
+.logo-mark svg { position: relative; z-index: 1; }
+
+.logo-text {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 20px;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+.logo-text span { color: var(--gold); }
+
+.header-center {
+  display: flex; align-items: center; gap: 8px;
+}
+
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.status-text { font-size: 12px; color: var(--text-dim); letter-spacing: 0.05em; }
+
+.header-right { display: flex; align-items: center; gap: 12px; }
+
+.api-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 11px; color: var(--text-dim);
+  cursor: pointer; transition: all 0.2s;
+}
+.api-badge:hover { border-color: var(--gold); color: var(--gold); }
+.api-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+/* ── SIDEBAR LEFT: SMART HOME ── */
+#sidebar-left {
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  display: flex; flex-direction: column;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 16px;
+  gap: 12px;
+}
+
+.panel-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 8px 4px 4px;
+}
+
+/* Room Cards */
+.room-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+
+.room-card:hover { border-color: rgba(201,168,76,0.3); }
+.room-card.active { border-color: var(--gold); background: var(--gold-dim); }
+
+.room-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  opacity: 0; transition: opacity 0.2s;
+}
+.room-card.active::before { opacity: 1; }
+
+.room-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.room-name {
+  font-size: 13px; font-weight: 500; color: var(--text);
+}
+
+.room-icon { font-size: 16px; }
+
+.toggle-switch {
+  width: 36px; height: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative; cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-switch.on {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute; top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  background: white; border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.toggle-switch.on::after { transform: translateX(16px); }
+
+.brightness-slider {
+  width: 100%; appearance: none;
+  height: 3px; background: var(--border); border-radius: 2px;
+  outline: none; cursor: pointer; margin-top: 6px;
+}
+.brightness-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px; height: 12px;
+  background: var(--gold); border-radius: 50%;
+}
+
+/* Thermostat */
+.thermostat-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+}
+
+.thermo-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.temp-display {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px; font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.temp-unit { font-size: 16px; color: var(--text-dim); }
+
+.temp-controls { display: flex; gap: 6px; }
+
+.temp-btn {
+  width: 28px; height: 28px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text); font-size: 16px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.temp-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* Music */
+.music-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+}
+
+.music-info { margin-bottom: 10px; }
+.music-title { font-size: 13px; font-weight: 500; }
+.music-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+.music-controls {
+  display: flex; align-items: center; gap: 8px;
+}
+
+.music-btn {
+  width: 32px; height: 32px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 50%; color: var(--text); font-size: 14px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.music-btn.primary {
+  background: var(--gold); border-color: var(--gold);
+  color: #000; width: 36px; height: 36px;
+}
+.music-btn:hover { border-color: var(--gold); }
+
+.vol-slider {
+  flex: 1; appearance: none;
+  height: 3px; background: var(--border); border-radius: 2px;
+  outline: none; cursor: pointer;
+}
+.vol-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px; height: 12px;
+  background: var(--blue); border-radius: 50%;
+}
+
+/* Security */
+.security-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+}
+
+.security-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.security-row:last-child { border-bottom: none; }
+
+.lock-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.05em;
+}
+.lock-badge.locked   { background: var(--green-dim); color: var(--green); }
+.lock-badge.unlocked { background: var(--red-dim);   color: var(--red); }
+.lock-badge.armed    { background: var(--red-dim);   color: var(--red); }
+.lock-badge.disarmed { background: var(--green-dim); color: var(--green); }
+
+/* ── MAIN CHAT AREA ── */
+#chat-area {
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+#messages {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 24px; display: flex; flex-direction: column; gap: 16px;
+  scroll-behavior: smooth;
+}
+
+#messages::-webkit-scrollbar { width: 4px; }
+#messages::-webkit-scrollbar-track { background: transparent; }
+#messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Welcome */
+.welcome {
+  text-align: center; padding: 60px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  opacity: 1; transition: opacity 0.4s;
+}
+
+.welcome-logo {
+  width: 72px; height: 72px;
+  border: 2px solid var(--gold);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; margin-bottom: 8px;
+}
+
+.welcome-logo::before {
+  content: '';
+  position: absolute; inset: 6px;
+  border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 8px;
+  transform: rotate(45deg);
+}
+
+.welcome h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px; font-weight: 700;
+  color: var(--text);
+}
+
+.welcome p { font-size: 15px; color: var(--text-dim); max-width: 400px; line-height: 1.6; }
+
+.quick-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
+
+.quick-btn {
+  padding: 8px 14px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; font-size: 12px; color: var(--text-dim);
+  cursor: pointer; transition: all 0.2s; font-family: inherit;
+}
+.quick-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+/* Messages */
+.msg {
+  display: flex; gap: 10px; align-items: flex-start;
+  animation: msg-in 0.3s ease-out;
+}
+
+@keyframes msg-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.msg.user { flex-direction: row-reverse; }
+
+.msg-avatar {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0; border: 1px solid var(--border);
+}
+
+.msg.user .msg-avatar { background: var(--gold-dim); border-color: var(--gold); }
+.msg.assistant .msg-avatar { background: var(--blue-dim); border-color: var(--blue); }
+.msg.smart-home .msg-avatar { background: var(--green-dim); border-color: var(--green); }
+
+.msg-content { max-width: 70%; }
+
+.msg-bubble {
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px; line-height: 1.6;
+}
+
+.msg.user .msg-bubble {
+  background: var(--gold-dim);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-top-right-radius: 4px;
+  color: var(--text);
+}
+
+.msg.assistant .msg-bubble {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-top-left-radius: 4px;
+  color: var(--text);
+}
+
+.msg.smart-home .msg-bubble {
+  background: var(--green-dim);
+  border: 1px solid rgba(61,214,140,0.3);
+  border-top-left-radius: 4px;
+}
+
+.msg-meta {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 4px; padding: 0 2px;
+}
+
+.msg.user .msg-meta { justify-content: flex-end; }
+
+.model-tag {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.05em;
+  padding: 2px 7px; border-radius: 4px;
+}
+
+.model-claude  { background: var(--purple); color: white; opacity: 0.8; }
+.model-openai  { background: var(--green);  color: #000; opacity: 0.8; }
+.model-gemini  { background: var(--blue);   color: white; opacity: 0.8; }
+.model-local   { background: var(--gold);   color: #000; opacity: 0.8; }
+
+.msg-time { font-size: 10px; color: var(--text-muted); }
+
+/* Typing indicator */
+.typing {
+  display: flex; gap: 4px; padding: 14px 16px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 16px; border-top-left-radius: 4px;
+  width: fit-content;
+}
+.typing span {
+  width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%;
+  animation: bounce 1.2s ease-in-out infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+
+/* ── INPUT AREA ── */
+#input-area {
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--border);
+  background: rgba(8,12,20,0.8);
+  backdrop-filter: blur(20px);
+}
+
+.voice-indicator {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 8px; margin-bottom: 10px;
+  background: var(--red-dim); border: 1px solid var(--red);
+  border-radius: var(--radius-sm);
+  font-size: 12px; color: var(--red);
+  display: none;
+}
+
+.voice-indicator.active { display: flex; }
+.voice-bars { display: flex; gap: 2px; align-items: center; height: 16px; }
+.voice-bar {
+  width: 3px; background: var(--red); border-radius: 2px;
+  animation: voice-wave 0.8s ease-in-out infinite;
+}
+.voice-bar:nth-child(1) { animation-delay: 0s;    height: 6px; }
+.voice-bar:nth-child(2) { animation-delay: 0.1s;  height: 12px; }
+.voice-bar:nth-child(3) { animation-delay: 0.2s;  height: 8px; }
+.voice-bar:nth-child(4) { animation-delay: 0.15s; height: 14px; }
+.voice-bar:nth-child(5) { animation-delay: 0.05s; height: 6px; }
+@keyframes voice-wave {
+  0%, 100% { transform: scaleY(0.5); }
+  50%       { transform: scaleY(1.5); }
+}
+
+.input-row {
+  display: flex; align-items: flex-end; gap: 10px;
+}
+
+#text-input {
+  flex: 1; padding: 12px 16px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; color: var(--text); font-family: inherit; font-size: 14px;
+  resize: none; outline: none; max-height: 120px; min-height: 44px;
+  transition: border-color 0.2s;
+  line-height: 1.5;
+}
+#text-input:focus { border-color: rgba(201,168,76,0.5); }
+#text-input::placeholder { color: var(--text-muted); }
+
+.input-btn {
+  width: 44px; height: 44px;
+  border-radius: 12px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text-dim);
+  font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.input-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+#mic-btn.recording {
+  background: var(--red-dim); border-color: var(--red); color: var(--red);
+  animation: pulse-mic 1s ease-in-out infinite;
+}
+@keyframes pulse-mic {
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: 0 0 12px rgba(255,87,87,0.4); }
+}
+
+#send-btn {
+  background: var(--gold); border-color: var(--gold); color: #000;
+  font-size: 16px;
+}
+#send-btn:hover { background: #d4b05a; box-shadow: 0 0 16px var(--gold-glow); }
+
+.input-hint {
+  text-align: center; margin-top: 8px;
+  font-size: 11px; color: var(--text-muted);
+}
+
+/* ── SIDEBAR RIGHT: AI MODEL STATUS ── */
+#sidebar-right {
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  display: flex; flex-direction: column;
+  padding: 16px;
+  gap: 12px; overflow-y: auto;
+}
+
+.model-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px;
+  position: relative; overflow: hidden;
+  transition: all 0.3s;
+}
+
+.model-card.active-model {
+  border-color: var(--gold);
+}
+
+.model-card.active-model::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+
+.model-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.model-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--text);
+}
+
+.model-status {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.05em;
+  padding: 2px 8px; border-radius: 4px;
+}
+
+.model-status.ready    { background: var(--green-dim); color: var(--green); }
+.model-status.no-key   { background: var(--red-dim);   color: var(--red); }
+.model-status.routing  { background: var(--gold-dim);  color: var(--gold); }
+
+.model-desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+.model-use {
+  margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;
+}
+
+.use-tag {
+  font-size: 9px; font-weight: 600; letter-spacing: 0.04em;
+  padding: 2px 6px; border-radius: 3px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+/* Routing indicator */
+.routing-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px;
+}
+
+.routing-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 10px;
+}
+
+.routing-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 0; font-size: 12px; color: var(--text-dim);
+}
+
+.routing-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* Stats */
+.stats-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+
+.stat-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px; text-align: center;
+}
+
+.stat-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 700; color: var(--gold);
+  line-height: 1;
+}
+
+.stat-label { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 28px; width: 440px; max-width: 90vw;
+}
+
+.modal h3 {
+  font-family: 'Syne', sans-serif; font-size: 18px; margin-bottom: 4px;
+}
+.modal p { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; line-height: 1.5; }
+
+.input-group { margin-bottom: 14px; }
+.input-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; }
+.input-group input {
+  width: 100%; padding: 10px 14px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-size: 13px; font-family: inherit; outline: none;
+  transition: border-color 0.2s;
+}
+.input-group input:focus { border-color: var(--gold); }
+
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+.btn-primary {
+  flex: 1; padding: 10px;
+  background: var(--gold); border: none; border-radius: 8px;
+  color: #000; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit;
+  transition: all 0.2s;
+}
+.btn-primary:hover { box-shadow: 0 0 12px var(--gold-glow); }
+
+.btn-secondary {
+  padding: 10px 20px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text-dim); font-size: 13px; cursor: pointer; font-family: inherit;
+  transition: all 0.2s;
+}
+.btn-secondary:hover { border-color: var(--text-dim); color: var(--text); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 20px; font-size: 13px;
+  transition: transform 0.3s ease; z-index: 200;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: var(--green); color: var(--green); }
+.toast.error   { border-color: var(--red);   color: var(--red); }
+
+/* Scrollbar */
+#sidebar-left::-webkit-scrollbar,
+#sidebar-right::-webkit-scrollbar { width: 3px; }
+#sidebar-left::-webkit-scrollbar-thumb,
+#sidebar-right::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ── HEADER ── -->
+  <header>
+    <div class="logo">
+      <div class="logo-mark">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2L14 8L8 14L2 8Z" stroke="#C9A84C" stroke-width="1.5" fill="none"/>
+          <circle cx="8" cy="8" r="2" fill="#C9A84C"/>
+        </svg>
+      </div>
+      <span class="logo-text">HIKMAR<span>AI</span></span>
+    </div>
+
+    <div class="header-center">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-text" id="status-text">CONNECTING...</span>
+    </div>
+
+    <div class="header-right">
+      <div class="api-badge" onclick="openSettings()">
+        <div class="dot" id="api-dot" style="background: var(--red)"></div>
+        <span>API Keys</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── SIDEBAR LEFT: SMART HOME ── -->
+  <aside id="sidebar-left">
+    <div class="panel-title">Smart Home</div>
+
+    <!-- Lights -->
+    <div class="panel-title" style="font-size:9px; padding-top:4px;">💡 Lighting</div>
+
+    <div class="room-card" id="room-living_room">
+      <div class="room-header">
+        <span class="room-icon">🛋️</span>
+        <span class="room-name">Living Room</span>
+        <div class="toggle-switch" id="toggle-living_room" onclick="toggleLight('living_room')"></div>
+      </div>
+      <input type="range" class="brightness-slider" id="bright-living_room" min="10" max="100" value="80"
+             oninput="setBrightness('living_room', this.value)"/>
+    </div>
+
+    <div class="room-card" id="room-bedroom">
+      <div class="room-header">
+        <span class="room-icon">🛏️</span>
+        <span class="room-name">Bedroom</span>
+        <div class="toggle-switch" id="toggle-bedroom" onclick="toggleLight('bedroom')"></div>
+      </div>
+      <input type="range" class="brightness-slider" id="bright-bedroom" min="10" max="100" value="50"
+             oninput="setBrightness('bedroom', this.value)"/>
+    </div>
+
+    <div class="room-card" id="room-kitchen">
+      <div class="room-header">
+        <span class="room-icon">🍳</span>
+        <span class="room-name">Kitchen</span>
+        <div class="toggle-switch on" id="toggle-kitchen" onclick="toggleLight('kitchen')"></div>
+      </div>
+      <input type="range" class="brightness-slider" id="bright-kitchen" min="10" max="100" value="100"
+             oninput="setBrightness('kitchen', this.value)"/>
+    </div>
+
+    <div class="room-card" id="room-bathroom">
+      <div class="room-header">
+        <span class="room-icon">🚿</span>
+        <span class="room-name">Bathroom</span>
+        <div class="toggle-switch" id="toggle-bathroom" onclick="toggleLight('bathroom')"></div>
+      </div>
+      <input type="range" class="brightness-slider" id="bright-bathroom" min="10" max="100" value="70"
+             oninput="setBrightness('bathroom', this.value)"/>
+    </div>
+
+    <!-- Thermostat -->
+    <div class="panel-title" style="font-size:9px; padding-top:8px;">🌡️ Climate</div>
+    <div class="thermostat-card">
+      <div class="thermo-row">
+        <div>
+          <div style="font-size:11px; color: var(--text-muted); margin-bottom:2px;">Temperature</div>
+          <div class="temp-display" id="temp-display">21<span class="temp-unit">°C</span></div>
+        </div>
+        <div class="temp-controls">
+          <button class="temp-btn" onclick="adjustTemp(-1)">−</button>
+          <button class="temp-btn" onclick="adjustTemp(1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Music -->
+    <div class="panel-title" style="font-size:9px; padding-top:8px;">🎵 Music</div>
+    <div class="music-card">
+      <div class="music-info">
+        <div class="music-title" id="music-title">Hikmar Radio</div>
+        <div class="music-sub" id="music-status">Ready to play</div>
+      </div>
+      <div class="music-controls">
+        <button class="music-btn" onclick="prevTrack()">⏮</button>
+        <button class="music-btn primary" id="play-btn" onclick="toggleMusic()">▶</button>
+        <button class="music-btn" onclick="nextTrack()">⏭</button>
+        <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="60"
+               oninput="setVolume(this.value)"/>
+      </div>
+    </div>
+
+    <!-- Security -->
+    <div class="panel-title" style="font-size:9px; padding-top:8px;">🔒 Security</div>
+    <div class="security-card">
+      <div class="security-row">
+        <span>Alarm</span>
+        <span class="lock-badge disarmed" id="badge-alarm">DISARMED</span>
+      </div>
+      <div class="security-row">
+        <span>Front Door</span>
+        <span class="lock-badge locked" id="badge-front">LOCKED</span>
+      </div>
+      <div class="security-row">
+        <span>Back Door</span>
+        <span class="lock-badge locked" id="badge-back">LOCKED</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN CHAT ── -->
+  <main id="chat-area">
+    <div id="messages">
+      <div class="welcome" id="welcome">
+        <div class="welcome-logo">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 3L25 14L14 25L3 14Z" stroke="#C9A84C" stroke-width="2" fill="rgba(201,168,76,0.1)"/>
+            <circle cx="14" cy="14" r="3.5" fill="#C9A84C"/>
+          </svg>
+        </div>
+        <h2>Hello, I'm Hikmar</h2>
+        <p>Your intelligent multi-AI home assistant. I route every question to the best AI model automatically.</p>
+        <div class="quick-actions">
+          <button class="quick-btn" onclick="sendQuick('Turn on the living room lights')">💡 Living room lights on</button>
+          <button class="quick-btn" onclick="sendQuick('What is the weather today?')">☁️ Weather today</button>
+          <button class="quick-btn" onclick="sendQuick('Set thermostat to 22 degrees')">🌡️ Set thermostat 22°C</button>
+          <button class="quick-btn" onclick="sendQuick('Write me a Python hello world script')">🐍 Python script</button>
+          <button class="quick-btn" onclick="sendQuick('Turn off all lights')">🌙 All lights off</button>
+          <button class="quick-btn" onclick="sendQuick('Tell me something interesting about AI')">🤖 About AI</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="input-area">
+      <div class="voice-indicator" id="voice-indicator">
+        <div class="voice-bars">
+          <div class="voice-bar"></div><div class="voice-bar"></div>
+          <div class="voice-bar"></div><div class="voice-bar"></div>
+          <div class="voice-bar"></div>
+        </div>
+        <span>Listening... speak now</span>
+      </div>
+
+      <div class="input-row">
+        <button class="input-btn" id="mic-btn" onclick="toggleVoice()" title="Voice input">🎤</button>
+        <textarea id="text-input" placeholder="Ask Hikmar anything, or control your home..." rows="1"
+                  onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="input-btn" id="send-btn" onclick="sendMessage()" title="Send">➤</button>
+      </div>
+      <div class="input-hint">Press <kbd style="background:var(--surface2); padding:1px 5px; border-radius:3px; font-size:10px;">Enter</kbd> to send &nbsp;·&nbsp; <kbd style="background:var(--surface2); padding:1px 5px; border-radius:3px; font-size:10px;">Shift+Enter</kbd> for new line</div>
+    </div>
+  </main>
+
+  <!-- ── SIDEBAR RIGHT: AI STATUS ── -->
+  <aside id="sidebar-right">
+    <div class="panel-title">AI Routing Engine</div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-queries">0</div>
+        <div class="stat-label">Queries</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-commands">0</div>
+        <div class="stat-label">Home Cmds</div>
+      </div>
+    </div>
+
+    <div class="model-card" id="card-claude">
+      <div class="model-header">
+        <span class="model-name">Claude</span>
+        <span class="model-status no-key" id="status-claude">NO KEY</span>
+      </div>
+      <div class="model-desc">Anthropic's model for deep reasoning, analysis, and long-form writing.</div>
+      <div class="model-use">
+        <span class="use-tag">REASONING</span>
+        <span class="use-tag">WRITING</span>
+        <span class="use-tag">ANALYSIS</span>
+      </div>
+    </div>
+
+    <div class="model-card" id="card-openai">
+      <div class="model-header">
+        <span class="model-name">GPT-4o</span>
+        <span class="model-status no-key" id="status-openai">NO KEY</span>
+      </div>
+      <div class="model-desc">OpenAI's model for code, math, and structured tasks.</div>
+      <div class="model-use">
+        <span class="use-tag">CODE</span>
+        <span class="use-tag">MATH</span>
+        <span class="use-tag">STRUCTURED</span>
+      </div>
+    </div>
+
+    <div class="model-card" id="card-gemini">
+      <div class="model-header">
+        <span class="model-name">Gemini</span>
+        <span class="model-status no-key" id="status-gemini">NO KEY</span>
+      </div>
+      <div class="model-desc">Google's model for real-time search and current information.</div>
+      <div class="model-use">
+        <span class="use-tag">SEARCH</span>
+        <span class="use-tag">NEWS</span>
+        <span class="use-tag">REAL-TIME</span>
+      </div>
+    </div>
+
+    <div class="model-card">
+      <div class="model-header">
+        <span class="model-name">Hikmar Local</span>
+        <span class="model-status ready">READY</span>
+      </div>
+      <div class="model-desc">Local rule engine for smart home commands — no API key needed.</div>
+      <div class="model-use">
+        <span class="use-tag">LIGHTS</span>
+        <span class="use-tag">CLIMATE</span>
+        <span class="use-tag">SECURITY</span>
+      </div>
+    </div>
+
+    <div class="routing-card">
+      <div class="routing-title">Routing Logic</div>
+      <div class="routing-item">
+        <div class="routing-dot" style="background: #C9A84C"></div>
+        <span>Smart home commands → Local</span>
+      </div>
+      <div class="routing-item">
+        <div class="routing-dot" style="background: var(--blue)"></div>
+        <span>News / weather / search → Gemini</span>
+      </div>
+      <div class="routing-item">
+        <div class="routing-dot" style="background: var(--green)"></div>
+        <span>Code / math / SQL → GPT-4o</span>
+      </div>
+      <div class="routing-item">
+        <div class="routing-dot" style="background: var(--purple)"></div>
+        <span>Reasoning / writing → Claude</span>
+      </div>
+    </div>
+
+    <div style="padding: 8px 4px; font-size: 11px; color: var(--text-muted); line-height:1.6;">
+      💡 Add your API keys via the <span style="color:var(--gold); cursor:pointer;" onclick="openSettings()">API Keys</span> button to activate AI models.
+    </div>
+  </aside>
+</div>
+
+<!-- ── SETTINGS MODAL ── -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>🔑 API Keys</h3>
+    <p>Enter your API keys to activate each AI model. Keys are stored in your browser's memory for this session only.</p>
+
+    <div class="input-group">
+      <label>Anthropic (Claude)</label>
+      <input type="password" id="key-anthropic" placeholder="sk-ant-..." />
+    </div>
+    <div class="input-group">
+      <label>OpenAI (GPT-4o)</label>
+      <input type="password" id="key-openai" placeholder="sk-..." />
+    </div>
+    <div class="input-group">
+      <label>Google (Gemini)</label>
+      <input type="password" id="key-gemini" placeholder="AIza..." />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveKeys()">Save Keys</button>
+      <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── INSTALL BANNER ── -->
+<div id="install-banner">
+  <span class="install-icon">◆</span>
+  <div class="install-text">
+    <strong>Install Hikmar AI</strong>
+    <span>Add to your home screen for the best experience</span>
+  </div>
+  <button class="install-btn" onclick="installPWA()">Install</button>
+  <button class="install-close" onclick="dismissInstall()">✕</button>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+
+// ── BACKEND URL ────────────────────────────────────────────────────────────
+// In production: your Railway URL. In dev: localhost:8000
+const BACKEND = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:8000'
+  : window.location.origin;  // On Railway: same origin serves both backend + pwa
+
+let conversationHistory = [];
+let isRecording = false;
+let recognition  = null;
+let isSpeaking   = false;
+let stats = { queries: 0, commands: 0 };
+let lastActiveModel = null;
+
+// Smart home state (mirrors backend)
+let homeState = {
+  lights: {
+    living_room: { on: false, brightness: 80 },
+    bedroom:     { on: false, brightness: 50 },
+    kitchen:     { on: true,  brightness: 100 },
+    bathroom:    { on: false, brightness: 70 },
+  },
+  thermostat: { temperature: 21 },
+  music: { playing: false, volume: 60 },
+  security: { alarm: 'disarmed', front_door: 'locked', back_door: 'locked' }
+};
+
+// ── INIT ────────────────────────────────────────────────────────────────────
+
+window.addEventListener('load', async () => {
+  renderHomeState();
+  await checkBackend();
+  setupSpeechRecognition();
+  // Load saved keys from sessionStorage
+  if (sessionStorage.getItem('key_anthropic')) document.getElementById('key-anthropic').value = sessionStorage.getItem('key_anthropic');
+  if (sessionStorage.getItem('key_openai'))    document.getElementById('key-openai').value    = sessionStorage.getItem('key_openai');
+  if (sessionStorage.getItem('key_gemini'))    document.getElementById('key-gemini').value    = sessionStorage.getItem('key_gemini');
+  updateKeyStatus();
+});
+
+async function checkBackend() {
+  try {
+    const res = await fetch(`${BACKEND}/status`, { signal: AbortSignal.timeout(3000) });
+    if (res.ok) {
+      const data = await res.json();
+      setStatus(true, 'ONLINE');
+      // Update key status from backend
+      document.getElementById('status-claude').textContent  = data.api_keys.anthropic.includes('✅') ? 'READY' : 'NO KEY';
+      document.getElementById('status-claude').className    = 'model-status ' + (data.api_keys.anthropic.includes('✅') ? 'ready' : 'no-key');
+      document.getElementById('status-openai').textContent  = data.api_keys.openai.includes('✅')    ? 'READY' : 'NO KEY';
+      document.getElementById('status-openai').className    = 'model-status ' + (data.api_keys.openai.includes('✅')    ? 'ready' : 'no-key');
+      document.getElementById('status-gemini').textContent  = data.api_keys.gemini.includes('✅')    ? 'READY' : 'NO KEY';
+      document.getElementById('status-gemini').className    = 'model-status ' + (data.api_keys.gemini.includes('✅')    ? 'ready' : 'no-key');
+      // Update API dot
+      const anyReady = Object.values(data.api_keys).some(v => v.includes('✅'));
+      document.getElementById('api-dot').style.background = anyReady ? 'var(--green)' : 'var(--red)';
+    }
+  } catch {
+    setStatus(false, 'BACKEND OFFLINE — start uvicorn');
+  }
+}
+
+function setStatus(online, text) {
+  document.getElementById('status-dot').style.background     = online ? 'var(--green)' : 'var(--red)';
+  document.getElementById('status-dot').style.boxShadow      = online ? '0 0 8px var(--green)' : '0 0 8px var(--red)';
+  document.getElementById('status-text').textContent         = text;
+}
+
+// ── CHAT ────────────────────────────────────────────────────────────────────
+
+async function sendMessage() {
+  const input = document.getElementById('text-input');
+  const message = input.value.trim();
+  if (!message) return;
+  input.value = '';
+  input.style.height = '';
+  await processMessage(message);
+}
+
+async function sendQuick(text) {
+  await processMessage(text);
+}
+
+async function processMessage(message) {
+  // Hide welcome
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.style.display = 'none';
+
+  appendUserMessage(message);
+  const typingEl = appendTyping();
+
+  try {
+    const res = await fetch(`${BACKEND}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, conversation_history: conversationHistory })
+    });
+
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+
+    const data = await res.json();
+    typingEl.remove();
+
+    const isSmartHome = data.model === 'hikmar_local';
+    appendAssistantMessage(data.response, data.model_label, isSmartHome);
+
+    // Update stats
+    if (isSmartHome) stats.commands++;
+    else stats.queries++;
+    document.getElementById('stat-queries').textContent  = stats.queries;
+    document.getElementById('stat-commands').textContent = stats.commands;
+
+    // Highlight active model
+    highlightModel(data.model);
+
+    // Update home state
+    if (data.smart_home_state) {
+      homeState = data.smart_home_state;
+      renderHomeState();
+    }
+
+    // Save conversation history
+    conversationHistory.push({ role: 'user', content: message });
+    conversationHistory.push({ role: 'assistant', content: data.response });
+    if (conversationHistory.length > 40) conversationHistory = conversationHistory.slice(-40);
+
+    // Speak the response
+    speakText(data.response);
+
+  } catch (err) {
+    typingEl.remove();
+    appendAssistantMessage(
+      `⚠️ Could not connect to backend. Make sure the server is running:\n\ncd backend && uvicorn main:app --reload`,
+      'Error', false
+    );
+  }
+}
+
+function appendUserMessage(text) {
+  const msgs = document.getElementById('messages');
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `
+    <div class="msg-avatar">🧑</div>
+    <div class="msg-content">
+      <div class="msg-bubble">${escapeHtml(text)}</div>
+      <div class="msg-meta"><span class="msg-time">${time}</span></div>
+    </div>`;
+  msgs.appendChild(div);
+  scrollToBottom();
+}
+
+function appendAssistantMessage(text, modelLabel, isSmartHome) {
+  const msgs = document.getElementById('messages');
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const cls = isSmartHome ? 'smart-home' : 'assistant';
+  const avatar = isSmartHome ? '🏠' : '◆';
+
+  const modelClass = {
+    'Claude': 'model-claude', 'GPT-4o': 'model-openai',
+    'Gemini': 'model-gemini', 'Smart Home': 'model-local', 'Error': 'model-local'
+  }[modelLabel] || 'model-local';
+
+  const div = document.createElement('div');
+  div.className = `msg ${cls}`;
+  div.innerHTML = `
+    <div class="msg-avatar" style="${isSmartHome ? '' : 'font-size:12px; color:var(--gold);'}">${avatar}</div>
+    <div class="msg-content">
+      <div class="msg-bubble" style="white-space: pre-wrap;">${escapeHtml(text)}</div>
+      <div class="msg-meta">
+        <span class="model-tag ${modelClass}">${modelLabel}</span>
+        <span class="msg-time">${time}</span>
+      </div>
+    </div>`;
+  msgs.appendChild(div);
+  scrollToBottom();
+}
+
+function appendTyping() {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg assistant';
+  div.innerHTML = `
+    <div class="msg-avatar" style="font-size:12px; color:var(--gold);">◆</div>
+    <div class="msg-content">
+      <div class="typing"><span></span><span></span><span></span></div>
+    </div>`;
+  msgs.appendChild(div);
+  scrollToBottom();
+  return div;
+}
+
+function scrollToBottom() {
+  const msgs = document.getElementById('messages');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = '';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ── VOICE ───────────────────────────────────────────────────────────────────
+
+function setupSpeechRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'nl-NL'; // default Dutch, user can change
+  recognition.onresult = (e) => {
+    const text = e.results[0][0].transcript;
+    document.getElementById('text-input').value = text;
+    stopVoice();
+    setTimeout(() => sendMessage(), 300);
+  };
+  recognition.onerror = () => stopVoice();
+  recognition.onend   = () => { if (isRecording) stopVoice(); };
+}
+
+function toggleVoice() {
+  if (isRecording) stopVoice();
+  else startVoice();
+}
+
+function startVoice() {
+  if (!recognition) { showToast('Voice not supported in this browser. Use Chrome.', 'error'); return; }
+  isRecording = true;
+  document.getElementById('mic-btn').classList.add('recording');
+  document.getElementById('voice-indicator').classList.add('active');
+  recognition.start();
+}
+
+function stopVoice() {
+  isRecording = false;
+  document.getElementById('mic-btn').classList.remove('recording');
+  document.getElementById('voice-indicator').classList.remove('active');
+  try { recognition.stop(); } catch {}
+}
+
+function speakText(text) {
+  if (!window.speechSynthesis) return;
+  // Only speak short responses
+  if (text.length > 300) text = text.substring(0, 300) + '...';
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 1.0; utter.pitch = 1.0; utter.volume = 0.9;
+  window.speechSynthesis.speak(utter);
+}
+
+// ── SMART HOME UI ───────────────────────────────────────────────────────────
+
+function renderHomeState() {
+  // Lights
+  for (const [room, state] of Object.entries(homeState.lights)) {
+    const toggle = document.getElementById(`toggle-${room}`);
+    const bright = document.getElementById(`bright-${room}`);
+    const card   = document.getElementById(`room-${room}`);
+    if (!toggle) continue;
+    toggle.className = 'toggle-switch' + (state.on ? ' on' : '');
+    if (bright) bright.value = state.brightness;
+    if (card) card.classList.toggle('active', state.on);
+  }
+
+  // Thermostat
+  const td = document.getElementById('temp-display');
+  if (td) td.innerHTML = `${homeState.thermostat.temperature}<span class="temp-unit">°C</span>`;
+
+  // Music
+  const pb = document.getElementById('play-btn');
+  const ms = document.getElementById('music-status');
+  if (pb) pb.textContent = homeState.music.playing ? '⏸' : '▶';
+  if (ms) ms.textContent = homeState.music.playing ? '♪ Playing' : 'Ready to play';
+  const vs = document.getElementById('vol-slider');
+  if (vs) vs.value = homeState.music.volume;
+
+  // Security
+  const ba = document.getElementById('badge-alarm');
+  const bf = document.getElementById('badge-front');
+  const bb = document.getElementById('badge-back');
+  if (ba) { ba.textContent = homeState.security.alarm.toUpperCase(); ba.className = `lock-badge ${homeState.security.alarm}`; }
+  if (bf) { bf.textContent = homeState.security.front_door.toUpperCase(); bf.className = `lock-badge ${homeState.security.front_door}`; }
+  if (bb) { bb.textContent = homeState.security.back_door.toUpperCase(); bb.className = `lock-badge ${homeState.security.back_door}`; }
+}
+
+async function sendSmartHomeCommand(device, action, value = null) {
+  try {
+    const res = await fetch(`${BACKEND}/smart-home/command`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ device, action, value })
+    });
+    const data = await res.json();
+    homeState = data.state;
+    renderHomeState();
+  } catch {
+    // Optimistic UI update even if backend offline
+    renderHomeState();
+  }
+}
+
+function toggleLight(room) {
+  const isOn = homeState.lights[room].on;
+  homeState.lights[room].on = !isOn;
+  renderHomeState();
+  sendSmartHomeCommand(`lights.${room}`, isOn ? 'off' : 'on');
+}
+
+function setBrightness(room, val) {
+  homeState.lights[room].brightness = parseInt(val);
+  homeState.lights[room].on = true;
+  renderHomeState();
+  sendSmartHomeCommand(`lights.${room}`, 'brightness', parseInt(val));
+}
+
+function adjustTemp(delta) {
+  homeState.thermostat.temperature = Math.max(10, Math.min(35, homeState.thermostat.temperature + delta));
+  renderHomeState();
+  sendSmartHomeCommand('thermostat', 'set_temp', homeState.thermostat.temperature);
+}
+
+function toggleMusic() {
+  homeState.music.playing = !homeState.music.playing;
+  renderHomeState();
+  sendSmartHomeCommand('music', homeState.music.playing ? 'play' : 'pause');
+}
+
+function setVolume(val) {
+  homeState.music.volume = parseInt(val);
+  sendSmartHomeCommand('music', 'volume', parseInt(val));
+}
+
+function prevTrack() { showToast('Previous track', 'success'); }
+function nextTrack() { showToast('Next track', 'success'); }
+
+// ── MODEL HIGHLIGHT ──────────────────────────────────────────────────────────
+
+function highlightModel(model) {
+  ['claude','openai','gemini'].forEach(m => {
+    document.getElementById(`card-${m}`)?.classList.remove('active-model');
+  });
+  if (model && model !== 'local' && model !== 'hikmar_local') {
+    document.getElementById(`card-${model}`)?.classList.add('active-model');
+    const el = document.getElementById(`status-${model}`);
+    if (el) { el.textContent = 'ROUTING'; el.className = 'model-status routing'; }
+    setTimeout(() => {
+      if (el) { el.textContent = 'READY'; el.className = 'model-status ready'; }
+    }, 2000);
+  }
+}
+
+// ── SETTINGS ────────────────────────────────────────────────────────────────
+
+function openSettings() { document.getElementById('modal').classList.add('open'); }
+function closeSettings() { document.getElementById('modal').classList.remove('open'); }
+
+function saveKeys() {
+  const anthropic = document.getElementById('key-anthropic').value.trim();
+  const openai    = document.getElementById('key-openai').value.trim();
+  const gemini    = document.getElementById('key-gemini').value.trim();
+
+  if (anthropic) sessionStorage.setItem('key_anthropic', anthropic);
+  if (openai)    sessionStorage.setItem('key_openai',    openai);
+  if (gemini)    sessionStorage.setItem('key_gemini',    gemini);
+
+  // Send keys to backend for this session
+  // In production: backend reads from .env; in dev you can POST them
+  updateKeyStatus();
+  closeSettings();
+  showToast('Keys saved for this session ✓', 'success');
+  checkBackend();
+}
+
+function updateKeyStatus() {
+  const anthropic = sessionStorage.getItem('key_anthropic');
+  const openai    = sessionStorage.getItem('key_openai');
+  const gemini    = sessionStorage.getItem('key_gemini');
+  if (anthropic || openai || gemini) {
+    document.getElementById('api-dot').style.background = 'var(--green)';
+  }
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────────────
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Close modal on overlay click
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target.id === 'modal') closeSettings();
+});
+
+// ── SERVICE WORKER ──────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('Hikmar SW registered:', reg.scope))
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+
+// ── PWA INSTALL PROMPT ──────────────────────────────────────────────────────
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  // Show install banner after 10 seconds if user hasn't dismissed
+  setTimeout(() => {
+    if (!localStorage.getItem('hikmar_install_dismissed')) {
+      document.getElementById('install-banner').classList.add('show');
+    }
+  }, 10000);
+});
+
+async function installPWA() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  if (outcome === 'accepted') {
+    showToast('Hikmar AI installed! ✓', 'success');
+    document.getElementById('install-banner').classList.remove('show');
+  }
+  deferredInstallPrompt = null;
+}
+
+function dismissInstall() {
+  document.getElementById('install-banner').classList.remove('show');
+  localStorage.setItem('hikmar_install_dismissed', '1');
+}
+
+// iOS Safari — show manual install instructions
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+if (isIOS && !isStandalone && !localStorage.getItem('hikmar_install_dismissed')) {
+  setTimeout(() => {
+    showToast('Tap the Share button → Add to Home Screen to install Hikmar', '');
+  }, 5000);
+}
+</script>
+</body>
+</html>

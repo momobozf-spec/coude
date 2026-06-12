@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a1628">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Salaat">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Salaat — Gebedstijden</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/dist/adhan.min.js"></script>
+
+<style>
+  :root {
+    --midnight: #060d1a;
+    --navy: #0a1628;
+    --deep: #0f2040;
+    --mid: #1a3560;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-pale: #f5e6b8;
+    --cream: #faf6ec;
+    --text: #d4c5a0;
+    --text-dim: #8a7d63;
+    --active-glow: rgba(201,168,76,0.15);
+    --card-bg: rgba(15, 32, 64, 0.7);
+    --card-border: rgba(201,168,76,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    font-family: 'Lato', sans-serif;
+    background: var(--midnight);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+
+  /* ── BACKGROUND ── */
+  .bg {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% -10%, #1a3560 0%, #0a1628 45%, #060d1a 100%);
+    overflow: hidden;
+  }
+  .bg::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(201,168,76,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(26,53,96,0.4) 0%, transparent 50%);
+  }
+
+  /* Geometric Islamic pattern overlay */
+  .geo-pattern {
+    position: absolute; inset: 0; opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M40 0 L80 40 L40 80 L0 40Z' fill='none' stroke='%23c9a84c' stroke-width='0.5'/%3E%3Cpath d='M40 10 L70 40 L40 70 L10 40Z' fill='none' stroke='%23c9a84c' stroke-width='0.5'/%3E%3Ccircle cx='40' cy='40' r='15' fill='none' stroke='%23c9a84c' stroke-width='0.5'/%3E%3Cpath d='M40 0 L40 80 M0 40 L80 40' stroke='%23c9a84c' stroke-width='0.3'/%3E%3C/svg%3E");
+  }
+
+  /* Stars */
+  .stars { position: absolute; inset: 0; }
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle var(--d) ease-in-out infinite alternate;
+  }
+  @keyframes twinkle { from { opacity: var(--lo); } to { opacity: var(--hi); } }
+
+  /* ── LAYOUT ── */
+  .app {
+    position: relative; z-index: 1;
+    max-width: 440px;
+    margin: 0 auto;
+    padding: env(safe-area-inset-top, 20px) 20px env(safe-area-inset-bottom, 20px);
+    min-height: 100vh;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 8px;
+  }
+  .topbar-logo {
+    font-family: 'Scheherazade New', serif;
+    font-size: 22px; color: var(--gold);
+    letter-spacing: 1px;
+  }
+  .topbar-method {
+    font-size: 10px; color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 2px;
+    cursor: pointer;
+    border: 1px solid var(--card-border);
+    padding: 5px 10px;
+    border-radius: 20px;
+    transition: all 0.2s;
+  }
+  .topbar-method:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── DATE HEADER ── */
+  .date-header { text-align: center; }
+  .hijri-date {
+    font-family: 'Scheherazade New', serif;
+    font-size: 18px; color: var(--gold-light);
+    margin-bottom: 4px;
+  }
+  .gregorian-date {
+    font-size: 12px; color: var(--text-dim);
+    letter-spacing: 3px; text-transform: uppercase;
+  }
+  .location-row {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin-top: 8px;
+  }
+  .location-icon { font-size: 12px; color: var(--gold); }
+  .location-name { font-size: 12px; color: var(--text-dim); letter-spacing: 1px; }
+
+  /* ── NEXT PRAYER HERO ── */
+  .hero {
+    background: var(--card-bg);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 20px;
+    padding: 28px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -1px; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .hero-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 4px;
+    color: var(--text-dim); margin-bottom: 10px;
+  }
+  .hero-prayer {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px; color: var(--gold-light);
+    font-weight: 600; margin-bottom: 4px;
+  }
+  .hero-arabic {
+    font-family: 'Scheherazade New', serif;
+    font-size: 20px; color: var(--gold);
+    margin-bottom: 18px; opacity: 0.8;
+  }
+  .hero-countdown {
+    font-size: 42px; color: var(--cream);
+    font-family: 'Lato', sans-serif;
+    font-weight: 300; letter-spacing: 4px;
+    line-height: 1;
+  }
+  .hero-sub {
+    font-size: 11px; color: var(--text-dim);
+    margin-top: 8px; letter-spacing: 2px;
+  }
+
+  /* ── PROGRESS ARC ── */
+  .arc-wrap {
+    display: flex; justify-content: center; margin: -8px 0 4px;
+  }
+  .arc-svg { overflow: visible; }
+  .arc-bg { fill: none; stroke: rgba(201,168,76,0.1); stroke-width: 3; }
+  .arc-fill { fill: none; stroke: var(--gold); stroke-width: 3; stroke-linecap: round;
+    transition: stroke-dashoffset 1s ease; }
+
+  /* ── PRAYER LIST ── */
+  .prayer-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .prayer-card {
+    display: flex; align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 14px 18px;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .prayer-card.active {
+    border-color: rgba(201,168,76,0.5);
+    background: rgba(201,168,76,0.08);
+    box-shadow: 0 0 30px rgba(201,168,76,0.1), inset 0 0 20px rgba(201,168,76,0.05);
+  }
+  .prayer-card.active::before {
+    content: '';
+    position: absolute; left: 0; top: 10%; bottom: 10%;
+    width: 3px; border-radius: 2px;
+    background: linear-gradient(180deg, transparent, var(--gold), transparent);
+  }
+  .prayer-card.passed { opacity: 0.45; }
+
+  .prayer-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-right: 14px;
+    flex-shrink: 0;
+  }
+  .prayer-card.active .prayer-icon {
+    background: rgba(201,168,76,0.2);
+    border-color: rgba(201,168,76,0.4);
+  }
+
+  .prayer-info { flex: 1; }
+  .prayer-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px; color: var(--cream);
+    font-weight: 600; line-height: 1.2;
+  }
+  .prayer-card.active .prayer-name { color: var(--gold-light); }
+  .prayer-arabic-name {
+    font-family: 'Scheherazade New', serif;
+    font-size: 13px; color: var(--text-dim); margin-top: 1px;
+  }
+
+  .prayer-time {
+    font-size: 18px; color: var(--cream);
+    font-weight: 300; letter-spacing: 1px;
+  }
+  .prayer-card.active .prayer-time { color: var(--gold-light); font-weight: 400; }
+  .prayer-badge {
+    font-size: 9px; text-transform: uppercase; letter-spacing: 2px;
+    color: var(--gold); background: rgba(201,168,76,0.15);
+    padding: 2px 8px; border-radius: 10px; margin-top: 4px; text-align: right;
+  }
+
+  /* ── SETTINGS MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(6,13,26,0.85);
+    backdrop-filter: blur(4px);
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #0f2040;
+    border: 1px solid var(--card-border);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 24px env(safe-area-inset-bottom, 24px);
+    width: 100%; max-width: 440px;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-handle {
+    width: 40px; height: 4px; background: var(--card-border);
+    border-radius: 2px; margin: 0 auto 20px;
+  }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px; color: var(--gold-light); margin-bottom: 20px;
+  }
+  .modal-section { margin-bottom: 20px; }
+  .modal-section label {
+    display: block; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 2px; color: var(--text-dim); margin-bottom: 10px;
+  }
+  .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .method-btn {
+    padding: 10px 8px; border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: transparent; color: var(--text);
+    font-size: 11px; cursor: pointer; transition: all 0.2s;
+    text-align: center;
+  }
+  .method-btn.selected { border-color: var(--gold); background: rgba(201,168,76,0.1); color: var(--gold-light); }
+  .format-row { display: flex; gap: 8px; }
+  .format-btn {
+    flex: 1; padding: 10px; border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: transparent; color: var(--text);
+    font-size: 13px; cursor: pointer; transition: all 0.2s;
+  }
+  .format-btn.selected { border-color: var(--gold); background: rgba(201,168,76,0.1); color: var(--gold-light); }
+  .modal-close {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, var(--gold), #a87c30);
+    border: none; border-radius: 12px;
+    color: var(--midnight); font-size: 14px; font-weight: 700;
+    cursor: pointer; letter-spacing: 1px; margin-top: 8px;
+  }
+
+  /* ── LOADING / ERROR ── */
+  .state-screen {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; gap: 20px;
+    padding: 40px;
+  }
+  .state-icon { font-size: 64px; }
+  .state-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px; color: var(--gold-light);
+  }
+  .state-text { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+  .state-btn {
+    padding: 14px 32px;
+    background: linear-gradient(135deg, var(--gold), #a87c30);
+    border: none; border-radius: 12px;
+    color: var(--midnight); font-size: 14px; font-weight: 700;
+    cursor: pointer; letter-spacing: 1px;
+  }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 2px solid rgba(201,168,76,0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center; padding-bottom: 8px;
+  }
+  .footer-text {
+    font-size: 10px; color: var(--text-dim);
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+  .footer-arabic {
+    font-family: 'Scheherazade New', serif;
+    font-size: 16px; color: rgba(201,168,76,0.4);
+    margin-top: 4px;
+  }
+
+  /* ── PWA INSTALL BANNER ── */
+  .install-banner {
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 14px; padding: 14px 16px;
+    display: none; align-items: center; gap: 12px;
+  }
+  .install-banner.visible { display: flex; }
+  .install-banner-text { flex: 1; font-size: 12px; color: var(--text-dim); line-height: 1.4; }
+  .install-banner-title { color: var(--gold-light); font-weight: 700; font-size: 13px; }
+  .install-btn {
+    padding: 8px 16px;
+    background: var(--gold); border: none; border-radius: 8px;
+    color: var(--midnight); font-size: 12px; font-weight: 700;
+    cursor: pointer; white-space: nowrap;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root { --midnight: #060d1a; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg">
+  <div class="geo-pattern"></div>
+  <div class="stars" id="stars"></div>
+</div>
+
+<!-- App -->
+<div class="app" id="app">
+  <!-- Loading State -->
+  <div class="state-screen" id="loadingState">
+    <div class="spinner"></div>
+    <div class="state-title">Locatie bepalen…</div>
+    <div class="state-text">Even geduld terwijl we je locatie ophalen voor nauwkeurige gebedstijden.</div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚙️ Instellingen</div>
+
+    <div class="modal-section">
+      <label>Berekenings&shy;methode</label>
+      <div class="method-grid" id="methodGrid"></div>
+    </div>
+
+    <div class="modal-section">
+      <label>Tijdformaat</label>
+      <div class="format-row">
+        <button class="format-btn selected" id="fmt12" onclick="setFormat(12)">12-uurs</button>
+        <button class="format-btn" id="fmt24" onclick="setFormat(24)">24-uurs</button>
+      </div>
+    </div>
+
+    <button class="modal-close" onclick="closeSettings()">Opslaan</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+// CONSTANTS & CONFIG
+// ════════════════════════════════════════════════
+const PRAYERS = [
+  { key: 'fajr',    name: 'Fajr',    arabic: 'الفجر',    icon: '🌙', desc: 'Ochtendgebed' },
+  { key: 'sunrise', name: 'Zonsopgang', arabic: 'الشروق', icon: '🌅', desc: 'Zonsopkomst'  },
+  { key: 'dhuhr',   name: 'Dhuhr',   arabic: 'الظهر',    icon: '☀️', desc: 'Middaggebed'  },
+  { key: 'asr',     name: 'Asr',     arabic: 'العصر',    icon: '🌤', desc: 'Namiddaggebed'},
+  { key: 'maghrib', name: 'Maghrib', arabic: 'المغرب',   icon: '🌇', desc: 'Avondgebed'   },
+  { key: 'isha',    name: 'Isha',    arabic: 'العشاء',   icon: '🌃', desc: 'Nachtgebed'   },
+];
+
+const METHODS = [
+  { key: 'MuslimWorldLeague',       label: 'MWL',          full: 'Muslim World League' },
+  { key: 'Egyptian',                label: 'Egyptisch',    full: 'Egyptian Authority'  },
+  { key: 'Karachi',                 label: 'Karachi',      full: 'University of Karachi'},
+  { key: 'UmmAlQura',               label: 'Umm Al-Qura',  full: 'Umm Al-Qura (Mekka)' },
+  { key: 'Dubai',                   label: 'Dubai',        full: 'Dubai, VAE'           },
+  { key: 'MoonsightingCommittee',   label: 'Maansight.',   full: 'Moonsighting Committee'},
+  { key: 'NorthAmerica',            label: 'Noord-Am.',    full: 'ISNA Noord-Amerika'   },
+  { key: 'Kuwait',                  label: 'Koeweit',      full: 'Kuwait'               },
+  { key: 'Qatar',                   label: 'Qatar',        full: 'Qatar'                },
+  { key: 'Singapore',               label: 'Singapore',    full: 'MUIS Singapore'       },
+  { key: 'Turkey',                  label: 'Turkije',      full: 'Turkije (Diyanet)'    },
+  { key: 'Tehran',                  label: 'Teheran',      full: 'Inst. in Teheran'     },
+];
+
+let state = {
+  coords: null,
+  times: null,
+  locationName: '',
+  method: localStorage.getItem('prayerMethod') || 'MuslimWorldLeague',
+  format: parseInt(localStorage.getItem('prayerFormat') || '24'),
+  deferredInstall: null,
+};
+
+// ════════════════════════════════════════════════
+// STARS
+// ════════════════════════════════════════════════
+(function createStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2 + 0.5;
+    const lo = (Math.random() * 0.2).toFixed(2);
+    const hi = (Math.random() * 0.5 + 0.3).toFixed(2);
+    s.style.cssText = `
+      left:${Math.random()*100}%; top:${Math.random()*60}%;
+      width:${size}px; height:${size}px;
+      --lo:${lo}; --hi:${hi};
+      --d:${(Math.random()*3+1).toFixed(1)}s;
+      animation-delay:${(Math.random()*4).toFixed(1)}s;
+    `;
+    container.appendChild(s);
+  }
+})();
+
+// ════════════════════════════════════════════════
+// GEOLOCATION
+// ════════════════════════════════════════════════
+function init() {
+  if (!navigator.geolocation) {
+    showError('Locatie niet beschikbaar', 'Je browser ondersteunt geen geolocation. Probeer een moderne browser zoals Chrome of Safari.');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(onPosition, onGeoError, {
+    enableHighAccuracy: true, timeout: 15000, maximumAge: 300000
+  });
+}
+
+async function onPosition(pos) {
+  state.coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+  await reverseGeocode(state.coords.lat, state.coords.lng);
+  calculateAndRender();
+}
+
+function onGeoError(err) {
+  const msgs = {
+    1: 'Locatietoegang geweigerd. Sta locatie toe in je browserinstellingen.',
+    2: 'Locatie niet beschikbaar. Controleer je verbinding.',
+    3: 'Timeout bij ophalen locatie. Probeer opnieuw.',
+  };
+  showError('Locatie fout', msgs[err.code] || 'Onbekende fout.');
+}
+
+async function reverseGeocode(lat, lng) {
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+    const d = await r.json();
+    const a = d.address;
+    state.locationName = a.city || a.town || a.village || a.county || a.country || '';
+  } catch { state.locationName = ''; }
+}
+
+// ════════════════════════════════════════════════
+// PRAYER TIME CALCULATION
+// ════════════════════════════════════════════════
+function calculateTimes() {
+  const { lat, lng } = state.coords;
+  const coords = new adhan.Coordinates(lat, lng);
+  const params = adhan.CalculationMethod[state.method]();
+  const date = new Date();
+  const pt = new adhan.PrayerTimes(coords, date, params);
+  return {
+    fajr:    pt.fajr,
+    sunrise: pt.sunrise,
+    dhuhr:   pt.dhuhr,
+    asr:     pt.asr,
+    maghrib: pt.maghrib,
+    isha:    pt.isha,
+  };
+}
+
+function getCurrentAndNext(times) {
+  const now = new Date();
+  const order = ['fajr','sunrise','dhuhr','asr','maghrib','isha'];
+  let current = 'isha';
+  let next = null;
+
+  for (let i = 0; i < order.length; i++) {
+    if (now < times[order[i]]) {
+      next = order[i];
+      current = i === 0 ? 'isha' : order[i - 1];
+      break;
+    }
+  }
+  if (!next) {
+    // After Isha — next is tomorrow's Fajr
+    next = 'fajr_tomorrow';
+    current = 'isha';
+  }
+  return { current, next };
+}
+
+// ════════════════════════════════════════════════
+// TIME FORMATTING
+// ════════════════════════════════════════════════
+function fmt(date) {
+  if (!date) return '--:--';
+  const h = date.getHours(), m = date.getMinutes();
+  if (state.format === 12) {
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hh = h % 12 || 12;
+    return `${hh}:${String(m).padStart(2,'0')} ${ampm}`;
+  }
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+
+function formatCountdown(ms) {
+  if (ms < 0) ms = 0;
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+// ════════════════════════════════════════════════
+// HIJRI DATE
+// ════════════════════════════════════════════════
+function toHijri(date) {
+  const JD = Math.floor((date.getTime() / 86400000) + 2440587.5);
+  let l = JD - 1948440 + 10632;
+  const n = Math.floor((l - 1) / 10631);
+  l = l - 10631 * n + 354;
+  const j = Math.floor((10985 - l) / 5316) * Math.floor((50 * l) / 17719) +
+            Math.floor(l / 5670) * Math.floor((43 * l) / 15238);
+  l = l - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50) -
+      Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
+  const month = Math.floor((24 * l) / 709);
+  const day = l - Math.floor((709 * month) / 24);
+  const year = 30 * n + j - 30;
+  const months = ['Muharram','Safar','Rabi ul-Awwal','Rabi ul-Akhir','Jumada ul-Awwal',
+                  'Jumada ul-Akhir','Rajab',"Sha'ban",'Ramadan','Shawwal','Dhul Qa\'dah','Dhul Hijjah'];
+  return `${day} ${months[month - 1]} ${year}`;
+}
+
+// ════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════
+function calculateAndRender() {
+  state.times = calculateTimes();
+  renderApp();
+  startTick();
+}
+
+function renderApp() {
+  const app = document.getElementById('app');
+  const times = state.times;
+  const now = new Date();
+  const { current, next } = getCurrentAndNext(times);
+  const nextPrayerInfo = PRAYERS.find(p => p.key === next) || PRAYERS[0];
+
+  // Countdown target
+  let countdownTarget;
+  if (next === 'fajr_tomorrow') {
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const coords = new adhan.Coordinates(state.coords.lat, state.coords.lng);
+    const params = adhan.CalculationMethod[state.method]();
+    const pt = new adhan.PrayerTimes(coords, tomorrow, params);
+    countdownTarget = pt.fajr;
+  } else {
+    countdownTarget = times[next];
+  }
+
+  // Arc progress
+  const prevPrayer = current === 'isha' ? 'maghrib' : PRAYERS[PRAYERS.findIndex(p=>p.key===next)-2]?.key;
+  const prevTime = prevPrayer && times[prevPrayer] ? times[prevPrayer] : new Date(now.setHours(0,0,0,0));
+  const totalMs = countdownTarget - (times[current] || prevTime);
+  const elapsed = now - (times[current] || prevTime);
+  const progress = Math.max(0, Math.min(1, 1 - elapsed / totalMs));
+  const arcPct = progress;
+
+  // Build HTML
+  const weekdays = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
+  const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  const nowReal = new Date();
+  const gregorianStr = `${weekdays[nowReal.getDay()]}, ${nowReal.getDate()} ${months[nowReal.getMonth()]} ${nowReal.getFullYear()}`;
+  const hijriStr = toHijri(nowReal);
+
+  // Prayer cards
+  const cards = PRAYERS.map(p => {
+    const isActive = p.key === next || (next === 'fajr_tomorrow' && p.key === 'isha');
+    const isPassed = !isActive && times[p.key] && times[p.key] < nowReal;
+    return `
+    <div class="prayer-card ${isActive ? 'active' : ''} ${isPassed ? 'passed' : ''}">
+      <div class="prayer-icon">${p.icon}</div>
+      <div class="prayer-info">
+        <div class="prayer-name">${p.name}</div>
+        <div class="prayer-arabic-name">${p.arabic}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="prayer-time">${fmt(times[p.key])}</div>
+        ${isActive ? `<div class="prayer-badge">Volgend</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // SVG arc
+  const R = 54, CX = 64, CY = 64;
+  const circumference = 2 * Math.PI * R;
+  const startAngle = -90;
+  const endAngle = startAngle + arcPct * 360;
+  const rad = a => a * Math.PI / 180;
+  const x1 = CX + R * Math.cos(rad(startAngle));
+  const y1 = CY + R * Math.sin(rad(startAngle));
+  const x2 = CX + R * Math.cos(rad(endAngle));
+  const y2 = CY + R * Math.sin(rad(endAngle));
+  const large = arcPct > 0.5 ? 1 : 0;
+  const arcD = `M ${x1} ${y1} A ${R} ${R} 0 ${large} 1 ${x2} ${y2}`;
+
+  app.innerHTML = `
+    <div class="topbar">
+      <div class="topbar-logo">🕌 صلاة</div>
+      <div class="topbar-method" onclick="openSettings()">${METHODS.find(m=>m.key===state.method)?.label || 'MWL'}</div>
+    </div>
+
+    <div class="date-header">
+      <div class="hijri-date">${hijriStr}</div>
+      <div class="gregorian-date">${gregorianStr}</div>
+      <div class="location-row">
+        <span class="location-icon">📍</span>
+        <span class="location-name" id="locationName">${state.locationName || 'Locatie ophalen…'}</span>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="hero-label">Volgend gebed</div>
+      <div class="hero-prayer">${nextPrayerInfo.name}</div>
+      <div class="hero-arabic">${nextPrayerInfo.arabic}</div>
+      <div class="arc-wrap">
+        <svg class="arc-svg" width="128" height="68" viewBox="0 0 128 128" style="margin-bottom:-60px;clip-path:inset(0 0 50% 0)">
+          <circle class="arc-bg" cx="${CX}" cy="${CY}" r="${R}"/>
+          <path class="arc-fill" d="${arcD}" stroke-dasharray="${circumference}" stroke-dashoffset="0"/>
+        </svg>
+      </div>
+      <div class="hero-countdown" id="countdown">--:--:--</div>
+      <div class="hero-sub">om ${fmt(countdownTarget)}</div>
+    </div>
+
+    <div class="prayer-list">${cards}</div>
+
+    <div class="install-banner" id="installBanner">
+      <div class="prayer-icon" style="font-size:22px">📲</div>
+      <div class="install-banner-text">
+        <div class="install-banner-title">Installeer de app</div>
+        Voeg toe aan je startscherm voor snelle toegang
+      </div>
+      <button class="install-btn" onclick="installApp()">Installeer</button>
+    </div>
+
+    <div class="footer">
+      <div class="footer-text">Gebedstijden · ${METHODS.find(m=>m.key===state.method)?.full}</div>
+      <div class="footer-arabic">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+    </div>
+  `;
+
+  // Store countdown target for tick
+  window._countdownTarget = countdownTarget;
+  window._currentNext = next;
+}
+
+// ════════════════════════════════════════════════
+// TICK
+// ════════════════════════════════════════════════
+let tickTimer = null;
+function startTick() {
+  if (tickTimer) clearInterval(tickTimer);
+  updateCountdown();
+  tickTimer = setInterval(() => {
+    updateCountdown();
+    // Re-render every minute for time accuracy
+    if (new Date().getSeconds() === 0) {
+      state.times = calculateTimes();
+      renderApp();
+    }
+  }, 1000);
+}
+
+function updateCountdown() {
+  const el = document.getElementById('countdown');
+  if (!el || !window._countdownTarget) return;
+  const ms = window._countdownTarget - new Date();
+  if (ms <= 0) {
+    // Prayer just started — recalculate
+    state.times = calculateTimes();
+    renderApp();
+    return;
+  }
+  el.textContent = formatCountdown(ms);
+}
+
+// ════════════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════════════
+function openSettings() {
+  buildMethodGrid();
+  document.getElementById('fmt12').classList.toggle('selected', state.format === 12);
+  document.getElementById('fmt24').classList.toggle('selected', state.format === 24);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  localStorage.setItem('prayerMethod', state.method);
+  localStorage.setItem('prayerFormat', state.format);
+  if (state.coords) calculateAndRender();
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeSettings();
+}
+
+function buildMethodGrid() {
+  const grid = document.getElementById('methodGrid');
+  grid.innerHTML = METHODS.map(m => `
+    <button class="method-btn ${m.key === state.method ? 'selected' : ''}"
+      onclick="selectMethod('${m.key}', this)" title="${m.full}">
+      ${m.label}<br><small style="opacity:0.6;font-size:9px">${m.full.substring(0,20)}</small>
+    </button>
+  `).join('');
+}
+
+function selectMethod(key, btn) {
+  state.method = key;
+  document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function setFormat(f) {
+  state.format = f;
+  document.getElementById('fmt12').classList.toggle('selected', f === 12);
+  document.getElementById('fmt24').classList.toggle('selected', f === 24);
+}
+
+// ════════════════════════════════════════════════
+// ERROR STATE
+// ════════════════════════════════════════════════
+function showError(title, text) {
+  document.getElementById('app').innerHTML = `
+    <div class="topbar">
+      <div class="topbar-logo">🕌 صلاة</div>
+    </div>
+    <div class="state-screen">
+      <div class="state-icon">📍</div>
+      <div class="state-title">${title}</div>
+      <div class="state-text">${text}</div>
+      <button class="state-btn" onclick="location.reload()">Opnieuw proberen</button>
+    </div>
+    <div class="footer">
+      <div class="footer-arabic">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+    </div>
+  `;
+}
+
+// ════════════════════════════════════════════════
+// PWA INSTALL
+// ════════════════════════════════════════════════
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  state.deferredInstall = e;
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.classList.add('visible');
+});
+
+function installApp() {
+  if (state.deferredInstall) {
+    state.deferredInstall.prompt();
+    state.deferredInstall.userChoice.then(() => {
+      state.deferredInstall = null;
+      const banner = document.getElementById('installBanner');
+      if (banner) banner.classList.remove('visible');
+    });
+  }
+}
+
+// ════════════════════════════════════════════════
+// SERVICE WORKER (inline for PWA)
+// ════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'salaat-v1';
+    const ASSETS = [self.location.href];
+    self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS))));
+    self.addEventListener('fetch', e => e.respondWith(
+      caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match(e.request)))
+    ));
+  `;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+
+// ════════════════════════════════════════════════
+// START
+// ════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+import type { Category } from "@/types";
+
+export const categories: Category[] = [
+  {
+    id: "eid-gift-boxes",
+    name: "Eid pakketten",
+    slug: "eid-gift-boxes",
+    description: "Met liefde samengestelde pakketten om Eid te delen.",
+    icon: "🎁",
+    accent: "from-cream-200 via-cream-100 to-sand-200",
+  },
+  {
+    id: "islamic-home-decor",
+    name: "Voor in huis",
+    slug: "islamic-home-decor",
+    description: "Rustige stukken om je huis sereniteit te geven.",
+    icon: "🕌",
+    accent: "from-olive-100 via-cream-100 to-cream-200",
+  },
+  {
+    id: "dates-sweets",
+    name: "Dadels & zoetigheden",
+    slug: "dates-sweets",
+    description: "Ajwa, Medjool en Mabroom — uit Madinah, met zorg geselecteerd.",
+    icon: "🌴",
+    accent: "from-clay-100 via-cream-100 to-sand-200",
+  },
+  {
+    id: "musk-perfume",
+    name: "Musk & parfum",
+    slug: "musk-perfume",
+    description: "Authentieke oud, musk en oosterse geuren — alcoholvrij.",
+    icon: "✨",
+    accent: "from-warmbrown-300/40 via-cream-100 to-cream-200",
+  },
+  {
+    id: "self-care",
+    name: "Verzorging",
+    slug: "self-care",
+    description: "Natuurlijke rituelen, zoals onze grootouders ze deelden.",
+    icon: "🌿",
+    accent: "from-olive-100 via-cream-100 to-cream-200",
+  },
+  {
+    id: "gifts-for-him",
+    name: "Voor hem",
+    slug: "gifts-for-him",
+    description: "Eerlijke geschenken voor de mannen om wie je geeft.",
+    icon: "👨",
+    accent: "from-olive-200/60 via-cream-100 to-warmbrown-300/30",
+  },
+  {
+    id: "gifts-for-her",
+    name: "Voor haar",
+    slug: "gifts-for-her",
+    description: "Tedere geschenken, met aandacht uitgekozen.",
+    icon: "👩",
+    accent: "from-clay-100 via-cream-100 to-sand-200",
+  },
+  {
+    id: "gifts-for-kids",
+    name: "Voor de kleintjes",
+    slug: "gifts-for-kids",
+    description: "Iets dat een kindergezicht doet glimlachen, in shaa Allah.",
+    icon: "🧸",
+    accent: "from-cream-200 via-sand-100 to-cream-100",
+  },
+  {
+    id: "family-gifts",
+    name: "Voor het hele gezin",
+    slug: "family-gifts",
+    description: "Pakketten ruim genoeg om samen te delen.",
+    icon: "👪",
+    accent: "from-sand-200 via-cream-100 to-cream-200",
+  },
+  {
+    id: "prayer-essentials",
+    name: "Voor het gebed",
+    slug: "prayer-essentials",
+    description: "Mat, tasbih, Qur'an-stand — eenvoudig en zorgvuldig.",
+    icon: "📿",
+    accent: "from-olive-100 via-cream-100 to-cream-200",
+  },
+  {
+    id: "moroccan-lifestyle",
+    name: "Marokkaans",
+    slug: "moroccan-lifestyle",
+    description: "Theesets, lantaarns en eerlijk handwerk uit Marrakech.",
+    icon: "🫖",
+    accent: "from-clay-100 via-cream-100 to-cream-200",
+  },
+  {
+    id: "1001-nights",
+    name: "1001 Nachten",
+    slug: "1001-nights",
+    description: "Onze signatuurcollectie, geïnspireerd op de oosterse vertellingen.",
+    icon: "🌙",
+    accent: "from-olive-200/60 via-cream-100 to-warmbrown-300/40",
+  },
+];
+
+export const findCategory = (id: string) =>
+  categories.find((c) => c.id === id || c.slug === id);

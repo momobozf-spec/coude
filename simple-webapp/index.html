@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Web App</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero-card">
+      <p class="eyebrow">Simple web app starter</p>
+      <h1>Bouw snel een kleine app en breid hem daarna uit.</h1>
+      <p class="intro">
+        Dit voorbeeld is een simpele taken-app in plain HTML, CSS en JavaScript.
+        Alles wordt lokaal opgeslagen in je browser.
+      </p>
+      <form class="task-form" id="task-form">
+        <label class="sr-only" for="task-input">Nieuwe taak</label>
+        <input
+          id="task-input"
+          name="task"
+          type="text"
+          placeholder="Bijv. homepage afmaken"
+          maxlength="120"
+          required
+        >
+        <button type="submit">Toevoegen</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Jouw taken</h2>
+        <span id="task-count">0 taken</span>
+      </div>
+      <ul class="task-list" id="task-list"></ul>
+      <p class="empty-state" id="empty-state">Nog geen taken. Voeg hierboven je eerste taak toe.</p>
+    </section>
+  </main>
+
+  <template id="task-template">
+    <li class="task-item">
+      <label class="task-content">
+        <input class="task-toggle" type="checkbox">
+        <span class="task-text"></span>
+      </label>
+      <button class="delete-button" type="button" aria-label="Verwijder taak">Verwijder</button>
+    </li>
+  </template>
+
+  <script src="./app.js"></script>
+</body>
+</html>

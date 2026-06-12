@@ -1,0 +1,47 @@
+{
+  "name": "Noor Tracker — Islamitische gewoontes",
+  "short_name": "Noor Tracker",
+  "description": "Help je kind islamitische gewoontes opbouwen met sterren en streaks",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#fafdf8",
+  "theme_color": "#1a6b4a",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "nl",
+  "categories": ["education", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

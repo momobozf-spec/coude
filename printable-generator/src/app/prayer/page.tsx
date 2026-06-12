@@ -30,9 +30,11 @@ export default function PrayerPage() {
   const [locationName, setLocationName] = useState("");
   const [deviceHeading, setDeviceHeading] = useState<number | null>(null);
   const [countdown, setCountdown] = useState("");
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   const fetchPrayer = useCallback(async (lat: number, lng: number) => {
     setLoading(true);
+    setCoords({ lat, lng });
     try {
       const res = await fetch(`/api/prayer?lat=${lat}&lng=${lng}&method=${method}`);
       const d = await res.json();
@@ -211,6 +213,62 @@ export default function PrayerPage() {
               {deviceHeading === null && (
                 <p className="text-xs text-white/20 mt-2">Rotate your phone for live compass</p>
               )}
+            </div>
+
+            {/* Calendar Sync */}
+            <div className="rounded-2xl p-5 mb-8" style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <h2 className="text-sm font-bold text-white/60 uppercase tracking-wider mb-3">&#128197; Sync to Calendar</h2>
+              <p className="text-xs text-white/30 mb-4">Add prayer times with reminders to your calendar. Syncs the next 30 days.</p>
+
+              <div className="grid grid-cols-1 gap-2">
+                {/* Google Calendar */}
+                <button onClick={() => {
+                  // Google Calendar uses web import for ICS
+                  window.open(`/api/prayer/calendar?lat=${encodeURIComponent(String(data!.qibla ? "" : ""))}`, "_self");
+                  // Alternative: direct Google Calendar link for single day
+                  const prayers = [
+                    { name: "Fajr", time: data!.times.fajr },
+                    { name: "Dhuhr", time: data!.times.dhuhr },
+                    { name: "Asr", time: data!.times.asr },
+                    { name: "Maghrib", time: data!.times.maghrib },
+                    { name: "Isha", time: data!.times.isha },
+                  ];
+                  const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+                  const first = prayers[0];
+                  const [h, m] = first.time.split(":").map(Number);
+                  const startDt = `${today}T${String(h).padStart(2, "0")}${String(m).padStart(2, "0")}00`;
+                  window.open(`https://calendar.google.com/calendar/r/eventedit?text=${encodeURIComponent(first.name + " Prayer 🕌")}&dates=${startDt}/${startDt}&details=${encodeURIComponent("Prayer times by Noor Printables")}&recur=RRULE:FREQ=DAILY;COUNT=30`, "_blank");
+                }} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left transition-all hover:bg-white/10" style={{ backgroundColor: "rgba(255,255,255,0.06)" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12s4.48 10 10 10 10-4.48 10-10z" opacity=".1"/><path fill="#4285F4" d="M17 12h-4V8h-2v4H7v2h4v4h2v-4h4z"/></svg>
+                  <div>
+                    <p className="text-sm font-medium text-white">Google Calendar</p>
+                    <p className="text-xs text-white/30">Add prayer events with reminders</p>
+                  </div>
+                </button>
+
+                {/* Outlook / Apple — ICS download */}
+                <a href={`/api/prayer/calendar?lat=${coords?.lat || 0}&lng=${coords?.lng || 0}&method=${method}&days=30&location=${encodeURIComponent(locationName || "My Location")}`}
+                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left transition-all hover:bg-white/10" style={{ backgroundColor: "rgba(255,255,255,0.06)", textDecoration: "none" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" fill="none" stroke="#0078d4" strokeWidth="2"/><line x1="3" y1="10" x2="21" y2="10" stroke="#0078d4" strokeWidth="2"/><line x1="8" y1="2" x2="8" y2="6" stroke="#0078d4" strokeWidth="2"/><line x1="16" y1="2" x2="16" y2="6" stroke="#0078d4" strokeWidth="2"/></svg>
+                  <div>
+                    <p className="text-sm font-medium text-white">Outlook Calendar</p>
+                    <p className="text-xs text-white/30">Download .ics file — works with Outlook</p>
+                  </div>
+                </a>
+
+                <a href={`/api/prayer/calendar?lat=${coords?.lat || 0}&lng=${coords?.lng || 0}&method=${method}&days=30&location=${encodeURIComponent(locationName || "My Location")}`}
+                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left transition-all hover:bg-white/10" style={{ backgroundColor: "rgba(255,255,255,0.06)", textDecoration: "none" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83" fill="#999"/></svg>
+                  <div>
+                    <p className="text-sm font-medium text-white">Apple Calendar</p>
+                    <p className="text-xs text-white/30">Download .ics file — works with iPhone/Mac</p>
+                  </div>
+                </a>
+              </div>
+
+              <p className="text-[10px] text-white/20 mt-3 text-center">
+                &#128276; Includes 15-min reminders before each prayer &middot; 30 days of prayer times
+              </p>
             </div>
 
             {/* Quick info */}

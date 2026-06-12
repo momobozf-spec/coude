@@ -38,6 +38,8 @@ model User {
   badges                UserBadge[]
   certificates          Certificate[]
   progress              UserProgress?
+  gameScores            GameScore[]
+  gameStats             GameStats?
 
   @@map("users")
 }
@@ -537,4 +539,38 @@ model UserProgress {
   updatedAt           DateTime  @updatedAt @map("updated_at")
 
   @@map("user_progress")
+}
+
+// ═══════════════════════════════════════════════════
+// NOOR GAMES — Islamic mini-games
+// ═══════════════════════════════════════════════════
+
+model GameScore {
+  id       String   @id @default(cuid())
+  userId   String   @map("user_id")
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameSlug String   @map("game_slug") // memory | arabic | kaaba
+  score    Int
+  level    Int      @default(1)
+  metadata String   @default("{}") // JSON
+  playedAt DateTime @default(now()) @map("played_at")
+
+  @@map("game_scores")
+}
+
+model GameStats {
+  id              String   @id @default(cuid())
+  userId          String   @unique @map("user_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memoryPlays     Int      @default(0) @map("memory_plays")
+  memoryBest      Int      @default(0) @map("memory_best")
+  arabicPlays     Int      @default(0) @map("arabic_plays")
+  arabicBest      Int      @default(0) @map("arabic_best")
+  kaabaPlays      Int      @default(0) @map("kaaba_plays")
+  kaabaBest       Int      @default(0) @map("kaaba_best")
+  totalGameXp     Int      @default(0) @map("total_game_xp")
+  totalPlays      Int      @default(0) @map("total_plays")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("game_stats")
 }
