@@ -240,6 +240,7 @@ model Listing {
   events         ListingEvent[]
   sellerIdentity SellerIdentity?
   agencyIdentity AgencyIdentity?
+  opportunities  Opportunity[]
 
   @@unique([sourceId, sourceListingId])
   @@index([propertyId])
@@ -532,6 +533,7 @@ model Opportunity {
   propertyId String?
   property   Property?         @relation(fields: [propertyId], references: [id], onDelete: SetNull)
   listingId  String? // primary listing behind the market signal
+  listing    Listing?          @relation(fields: [listingId], references: [id], onDelete: SetNull)
   contactId  String?
   contact    CrmContact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
   crmMatchConfidence Float?
