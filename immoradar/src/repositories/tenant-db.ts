@@ -7,6 +7,10 @@
  * injects the agencyId filter, making cross-tenant reads a type-level
  * impossibility for callers. Shared market data (properties, listings,
  * events, sources) is accessed via `prisma` directly.
+ *
+ * Methods are generic over Prisma args so `include`/`select` result typing
+ * is preserved for callers; the `where` clause is always overridden with the
+ * tenant filter.
  */
 
 import type { Prisma, PrismaClient } from "@/generated/prisma";
@@ -20,21 +24,29 @@ export class TenantDb {
     if (!agencyId) throw new Error("TenantDb requires a non-empty agencyId");
   }
 
+  private scope<W extends object | undefined>(where: W): W & { agencyId: string } {
+    return { ...(where ?? {}), agencyId: this.agencyId } as W & { agencyId: string };
+  }
+
   // --- CRM contacts -------------------------------------------------------
 
-  crmContacts(args: Omit<Prisma.CrmContactFindManyArgs, "where"> & { where?: Prisma.CrmContactWhereInput } = {}) {
-    return this.db.crmContact.findMany({
-      ...args,
-      where: { ...(args.where ?? {}), agencyId: this.agencyId },
+  crmContacts<T extends Prisma.CrmContactFindManyArgs>(
+    args?: Prisma.SelectSubset<T, Prisma.CrmContactFindManyArgs>,
+  ) {
+    const base = args as Prisma.CrmContactFindManyArgs | undefined;
+    const merged = { ...base, where: this.scope(base?.where) };
+    return this.db.crmContact.findMany(merged as Prisma.SelectSubset<T, Prisma.CrmContactFindManyArgs>);
+  }
+
+  crmContactById<I extends Prisma.CrmContactInclude>(id: string, include?: I) {
+    return this.db.crmContact.findFirst({
+      where: { id, agencyId: this.agencyId },
+      include: include as I,
     });
   }
 
-  crmContactById(id: string, include?: Prisma.CrmContactInclude) {
-    return this.db.crmContact.findFirst({ where: { id, agencyId: this.agencyId }, include });
-  }
-
   countCrmContacts(where: Prisma.CrmContactWhereInput = {}) {
-    return this.db.crmContact.count({ where: { ...where, agencyId: this.agencyId } });
+    return this.db.crmContact.count({ where: this.scope(where) });
   }
 
   createCrmContact(data: Omit<Prisma.CrmContactUncheckedCreateInput, "agencyId">) {
@@ -75,19 +87,23 @@ export class TenantDb {
 
   // --- Opportunities ------------------------------------------------------
 
-  opportunities(args: Omit<Prisma.OpportunityFindManyArgs, "where"> & { where?: Prisma.OpportunityWhereInput } = {}) {
-    return this.db.opportunity.findMany({
-      ...args,
-      where: { ...(args.where ?? {}), agencyId: this.agencyId },
+  opportunities<T extends Prisma.OpportunityFindManyArgs>(
+    args?: Prisma.SelectSubset<T, Prisma.OpportunityFindManyArgs>,
+  ) {
+    const base = args as Prisma.OpportunityFindManyArgs | undefined;
+    const merged = { ...base, where: this.scope(base?.where) };
+    return this.db.opportunity.findMany(merged as Prisma.SelectSubset<T, Prisma.OpportunityFindManyArgs>);
+  }
+
+  opportunityById<I extends Prisma.OpportunityInclude>(id: string, include?: I) {
+    return this.db.opportunity.findFirst({
+      where: { id, agencyId: this.agencyId },
+      include: include as I,
     });
   }
 
-  opportunityById(id: string, include?: Prisma.OpportunityInclude) {
-    return this.db.opportunity.findFirst({ where: { id, agencyId: this.agencyId }, include });
-  }
-
   countOpportunities(where: Prisma.OpportunityWhereInput = {}) {
-    return this.db.opportunity.count({ where: { ...where, agencyId: this.agencyId } });
+    return this.db.opportunity.count({ where: this.scope(where) });
   }
 
   createOpportunity(data: Omit<Prisma.OpportunityUncheckedCreateInput, "agencyId">) {
@@ -104,24 +120,29 @@ export class TenantDb {
 
   // --- CRM imports --------------------------------------------------------
 
-  crmImports(args: Omit<Prisma.CrmImportFindManyArgs, "where"> & { where?: Prisma.CrmImportWhereInput } = {}) {
-    return this.db.crmImport.findMany({
-      ...args,
-      where: { ...(args.where ?? {}), agencyId: this.agencyId },
-    });
+  crmImports<T extends Prisma.CrmImportFindManyArgs>(
+    args?: Prisma.SelectSubset<T, Prisma.CrmImportFindManyArgs>,
+  ) {
+    const base = args as Prisma.CrmImportFindManyArgs | undefined;
+    const merged = { ...base, where: this.scope(base?.where) };
+    return this.db.crmImport.findMany(merged as Prisma.SelectSubset<T, Prisma.CrmImportFindManyArgs>);
   }
 
-  crmImportById(id: string, include?: Prisma.CrmImportInclude) {
-    return this.db.crmImport.findFirst({ where: { id, agencyId: this.agencyId }, include });
+  crmImportById<I extends Prisma.CrmImportInclude>(id: string, include?: I) {
+    return this.db.crmImport.findFirst({
+      where: { id, agencyId: this.agencyId },
+      include: include as I,
+    });
   }
 
   // --- Alerts -------------------------------------------------------------
 
-  alerts(args: Omit<Prisma.AlertFindManyArgs, "where"> & { where?: Prisma.AlertWhereInput } = {}) {
-    return this.db.alert.findMany({
-      ...args,
-      where: { ...(args.where ?? {}), agencyId: this.agencyId },
-    });
+  alerts<T extends Prisma.AlertFindManyArgs>(
+    args?: Prisma.SelectSubset<T, Prisma.AlertFindManyArgs>,
+  ) {
+    const base = args as Prisma.AlertFindManyArgs | undefined;
+    const merged = { ...base, where: this.scope(base?.where) };
+    return this.db.alert.findMany(merged as Prisma.SelectSubset<T, Prisma.AlertFindManyArgs>);
   }
 
   // --- Users (within the agency) -----------------------------------------
