@@ -1,0 +1,48 @@
+name: ImmoRadar CI
+
+on:
+  push:
+    paths:
+      - "immoradar/**"
+      - ".github/workflows/immoradar-ci.yml"
+  pull_request:
+    paths:
+      - "immoradar/**"
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: immoradar
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: immoradar
+          POSTGRES_PASSWORD: immoradar
+          POSTGRES_DB: immoradar_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U immoradar"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://immoradar:immoradar@localhost:5432/immoradar_test
+      TEST_DATABASE_URL: postgresql://immoradar:immoradar@localhost:5432/immoradar_test
+      SESSION_SECRET: ci-only-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: immoradar/package-lock.json
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
