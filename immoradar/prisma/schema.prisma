@@ -1,0 +1,699 @@
+// ImmoRadar — Real Estate Acquisition Intelligence
+// Multi-tenant data model. Every tenant-owned row carries an agencyId and all
+// repository access goes through tenant-scoped helpers (src/repositories).
+// Market data (Source, Property, Listing, snapshots, events) is shared;
+// CRM data, opportunities, territories, alerts and assignments are per-agency.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy & identity
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  PLATFORM_ADMIN
+  AGENCY_ADMIN
+  AGENT
+}
+
+model Agency {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Notification configuration
+  telegramChatId     String?
+  minAlertScore      Int      @default(85)
+  digestHourLocal    Int      @default(7) // hour of day (Europe/Brussels) for the morning brief
+  digestEnabled      Boolean  @default(true)
+  instantAlertsEnabled Boolean @default(true)
+
+  // Configurable data retention (days) for CRM data; null = keep indefinitely
+  crmRetentionDays Int?
+
+  users                User[]
+  territories          Territory[]
+  crmContacts          CrmContact[]
+  crmImports           CrmImport[]
+  opportunities        Opportunity[]
+  alertRules           AlertRule[]
+  alerts               Alert[]
+  auditLogs            AuditLog[]
+
+  @@map("agencies")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  agencyId     String?
+  agency       Agency?  @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         UserRole @default(AGENT)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  assignedContacts       CrmContact[]            @relation("AssignedAgent")
+  assignments            OpportunityAssignment[] @relation("AssignedTo")
+  assignmentsMade        OpportunityAssignment[] @relation("AssignedBy")
+  activities             OpportunityActivity[]
+  crmImports             CrmImport[]
+  auditLogs              AuditLog[]
+
+  @@index([agencyId])
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// Territories
+// ---------------------------------------------------------------------------
+
+enum TerritoryKind {
+  POSTAL_CODE
+  MUNICIPALITY
+  PROVINCE
+}
+
+model Territory {
+  id        String        @id @default(cuid())
+  agencyId  String
+  agency    Agency        @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  kind      TerritoryKind
+  value     String // "9000", "gent", "oost-vlaanderen" (normalized lowercase)
+  label     String
+  createdAt DateTime      @default(now())
+
+  @@unique([agencyId, kind, value])
+  @@index([agencyId])
+  @@map("territories")
+}
+
+// ---------------------------------------------------------------------------
+// Data collection (shared market infrastructure)
+// ---------------------------------------------------------------------------
+
+enum SourceStatus {
+  ACTIVE
+  PAUSED
+  ERROR
+}
+
+model Source {
+  id          String       @id @default(cuid())
+  code        String       @unique // e.g. "fixture-portal-a"
+  name        String
+  kind        String // "api" | "feed" | "structured" | "html" | "fixture"
+  baseUrl     String?
+  status      SourceStatus @default(ACTIVE)
+  // Polling / politeness configuration
+  pollIntervalMinutes Int  @default(60)
+  rateLimitPerMinute  Int  @default(30)
+  timeoutMs           Int  @default(15000)
+  maxRetries          Int  @default(3)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  listings      Listing[]
+  collectorRuns CollectorRun[]
+
+  @@map("sources")
+}
+
+enum CollectorRunStatus {
+  RUNNING
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+model CollectorRun {
+  id             String             @id @default(cuid())
+  sourceId       String
+  source         Source             @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  status         CollectorRunStatus @default(RUNNING)
+  startedAt      DateTime           @default(now())
+  finishedAt     DateTime?
+  listingsFound  Int                @default(0)
+  listingsNew    Int                @default(0)
+  listingsUpdated Int               @default(0)
+  errorCount     Int                @default(0)
+  errorMessage   String?
+  durationMs     Int?
+
+  @@index([sourceId, startedAt(sort: Desc)])
+  @@map("collector_runs")
+}
+
+// ---------------------------------------------------------------------------
+// Property intelligence (shared market data)
+// ---------------------------------------------------------------------------
+
+enum PropertyType {
+  HOUSE
+  APARTMENT
+  LAND
+  COMMERCIAL
+  OTHER
+  UNKNOWN
+}
+
+model Property {
+  id          String       @id @default(cuid())
+  // Normalized address parts
+  address     String? // full normalized display address
+  street      String?
+  houseNumber String?
+  postalCode  String?
+  city        String?
+  province    String?
+  latitude    Float?
+  longitude   Float?
+  propertyType PropertyType @default(UNKNOWN)
+  bedrooms    Int?
+  surfaceArea Int? // m²
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  listings              Listing[]
+  contactRelationships  ContactPropertyRelationship[]
+  opportunities         Opportunity[]
+
+  @@index([postalCode])
+  @@index([postalCode, street, houseNumber])
+  @@map("properties")
+}
+
+enum ListingType {
+  SALE
+  RENT
+}
+
+enum SellerType {
+  PRIVATE
+  PROFESSIONAL
+  UNKNOWN
+}
+
+enum ListingStatus {
+  ACTIVE
+  REMOVED
+  PENDING_REMOVAL // seen missing but below the confirmation threshold
+}
+
+model Listing {
+  id              String        @id @default(cuid())
+  propertyId      String?
+  property        Property?     @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  sourceId        String
+  source          Source        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  sourceListingId String
+  sourceUrl       String?
+  listingType     ListingType   @default(SALE)
+  title           String?
+  description     String?
+  sellerType      SellerType    @default(UNKNOWN)
+  sellerConfidence Float        @default(0)
+  currentPrice    Int?
+  currency        String        @default("EUR")
+  publishedAt     DateTime?
+  firstSeenAt     DateTime      @default(now())
+  lastSeenAt      DateTime      @default(now())
+  missingSince    DateTime? // first collector run in which the listing was absent
+  status          ListingStatus @default(ACTIVE)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  snapshots      ListingSnapshot[]
+  events         ListingEvent[]
+  sellerIdentity SellerIdentity?
+  agencyIdentity AgencyIdentity?
+
+  @@unique([sourceId, sourceListingId])
+  @@index([propertyId])
+  @@index([status, lastSeenAt])
+  @@map("listings")
+}
+
+model ListingSnapshot {
+  id          String   @id @default(cuid())
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  capturedAt  DateTime @default(now())
+  price       Int?
+  title       String?
+  description String?
+  sellerName  String?
+  sellerPhone String?
+  status      String? // raw status string from the source
+  rawData     Json? // original source payload for audit/debugging
+
+  @@index([listingId, capturedAt])
+  @@map("listing_snapshots")
+}
+
+enum ListingEventType {
+  NEW_LISTING
+  FSBO_DETECTED
+  PRICE_DROP
+  PRICE_INCREASE
+  STALE_30
+  STALE_60
+  STALE_90
+  LISTING_REMOVED
+  RELISTED
+  AGENCY_TO_PRIVATE
+  PRIVATE_TO_AGENCY
+}
+
+model ListingEvent {
+  id         String           @id @default(cuid())
+  listingId  String
+  listing    Listing          @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  type       ListingEventType
+  occurredAt DateTime         @default(now())
+  // Structured payload, e.g. { oldPrice, newPrice, difference, percentage }
+  payload    Json?
+  createdAt  DateTime         @default(now())
+
+  signals OpportunitySignal[]
+
+  @@unique([listingId, type, occurredAt])
+  @@index([listingId, occurredAt])
+  @@index([type, occurredAt])
+  @@map("listing_events")
+}
+
+// Extracted seller identity attached to a listing (from snapshots)
+model SellerIdentity {
+  id              String  @id @default(cuid())
+  listingId       String  @unique
+  listing         Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  name            String?
+  phone           String? // normalized E.164
+  email           String?
+  listingCountAtSource Int?
+
+  @@index([phone])
+  @@map("seller_identities")
+}
+
+// Professional agency identity detected on a listing
+model AgencyIdentity {
+  id        String  @id @default(cuid())
+  listingId String  @unique
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  name      String?
+  vatNumber String?
+  website   String?
+
+  @@map("agency_identities")
+}
+
+// ---------------------------------------------------------------------------
+// CRM (tenant-isolated)
+// ---------------------------------------------------------------------------
+
+enum CrmContactType {
+  BUYER
+  SELLER
+  LANDLORD
+  TENANT
+  VALUATION_LEAD
+  PROSPECT
+  FORMER_CLIENT
+  UNKNOWN
+}
+
+enum CrmContactStatus {
+  ACTIVE
+  DORMANT
+  LOST
+  WON
+  ARCHIVED
+  UNKNOWN
+}
+
+model CrmContact {
+  id                String           @id @default(cuid())
+  agencyId          String
+  agency            Agency           @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  externalContactId String?
+  firstName         String?
+  lastName          String?
+  // Normalized match keys
+  normalizedName    String?
+  email             String?
+  normalizedEmail   String?
+  phone             String?
+  normalizedPhone   String? // E.164
+  address           String?
+  postalCode        String?
+  city              String?
+  assignedAgentId   String?
+  assignedAgent     User?           @relation("AssignedAgent", fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  assignedAgentName String? // as imported, before/without user mapping
+  contactType       CrmContactType   @default(UNKNOWN)
+  leadType          String?
+  status            CrmContactStatus @default(UNKNOWN)
+  sourceCreatedAt   DateTime?
+  lastContactAt     DateTime?
+  notes             String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  importRows            CrmImportRow[]
+  interactions          CrmInteraction[]
+  propertyRelationships ContactPropertyRelationship[]
+  opportunities         Opportunity[]
+
+  @@unique([agencyId, externalContactId])
+  @@index([agencyId, normalizedPhone])
+  @@index([agencyId, normalizedEmail])
+  @@index([agencyId, normalizedName, postalCode])
+  @@index([agencyId, contactType, status])
+  @@map("crm_contacts")
+}
+
+model CrmInteraction {
+  id         String     @id @default(cuid())
+  contactId  String
+  contact    CrmContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  kind       String // "CALL" | "EMAIL" | "VISIT" | "VALUATION" | "NOTE" | ...
+  occurredAt DateTime
+  summary    String?
+  createdAt  DateTime   @default(now())
+
+  @@index([contactId, occurredAt])
+  @@map("crm_interactions")
+}
+
+enum CrmImportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model CrmImport {
+  id           String          @id @default(cuid())
+  agencyId     String
+  agency       Agency          @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  uploadedById String?
+  uploadedBy   User?          @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  fileName     String
+  adapter      String          @default("csv")
+  status       CrmImportStatus @default(PENDING)
+  totalRows    Int             @default(0)
+  importedRows Int             @default(0)
+  updatedRows  Int             @default(0)
+  skippedRows  Int             @default(0)
+  errorRows    Int             @default(0)
+  errorMessage String?
+  createdAt    DateTime        @default(now())
+  finishedAt   DateTime?
+
+  rows CrmImportRow[]
+
+  @@index([agencyId, createdAt(sort: Desc)])
+  @@map("crm_imports")
+}
+
+enum CrmImportRowOutcome {
+  CREATED
+  UPDATED
+  SKIPPED_DUPLICATE
+  SKIPPED_CONFLICT
+  ERROR
+}
+
+model CrmImportRow {
+  id        String              @id @default(cuid())
+  importId  String
+  import    CrmImport           @relation(fields: [importId], references: [id], onDelete: Cascade)
+  rowNumber Int
+  rawData   Json
+  outcome   CrmImportRowOutcome
+  message   String?
+  contactId String?
+  contact   CrmContact?         @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([importId])
+  @@map("crm_import_rows")
+}
+
+enum ContactPropertyRelationKind {
+  OWNER
+  PREVIOUS_OWNER
+  BOUGHT
+  SOLD
+  VALUATION_REQUESTED
+  RENTED
+  LANDLORD_OF
+  INTERESTED_IN
+  UNKNOWN
+}
+
+model ContactPropertyRelationship {
+  id         String                      @id @default(cuid())
+  contactId  String
+  contact    CrmContact                  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property                    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  kind       ContactPropertyRelationKind @default(UNKNOWN)
+  since      DateTime?
+  notes      String?
+  createdAt  DateTime                    @default(now())
+
+  @@unique([contactId, propertyId, kind])
+  @@index([propertyId])
+  @@map("contact_property_relationships")
+}
+
+// ---------------------------------------------------------------------------
+// Opportunities (tenant-isolated)
+// ---------------------------------------------------------------------------
+
+enum OpportunityType {
+  NEW_FSBO
+  STALE_FSBO
+  PRIVATE_PRICE_DROP
+  PRIVATE_MULTIPLE_PRICE_DROP
+  PRIVATE_RELIST
+  AGENCY_TO_PRIVATE
+  DORMANT_VALUATION_LEAD
+  FORMER_SELLER_PROSPECT
+  FORMER_CLIENT
+  OLD_BUYER
+  LOST_MANDATE
+  UNCONTACTED_LEAD
+  CRM_MARKET_MATCH
+}
+
+enum OpportunityStatus {
+  NEW
+  ASSIGNED
+  TO_CONTACT
+  CONTACTED
+  INTERESTED
+  VALUATION_BOOKED
+  MANDATE_PROPOSED
+  MANDATE_WON
+  LOST
+  DISMISSED
+  SNOOZED
+}
+
+enum OpportunityOrigin {
+  MARKET // ImmoRadar external signal
+  CRM // LeadRevive dormant contact
+  CROSS // CRM + market combined
+}
+
+model Opportunity {
+  id         String            @id @default(cuid())
+  agencyId   String
+  agency     Agency            @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  type       OpportunityType
+  origin     OpportunityOrigin @default(MARKET)
+  status     OpportunityStatus @default(NEW)
+  propertyId String?
+  property   Property?         @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  listingId  String? // primary listing behind the market signal
+  contactId  String?
+  contact    CrmContact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  crmMatchConfidence Float?
+  crmMatchReasons    Json? // string[]
+  detectedAt DateTime          @default(now())
+  snoozedUntil DateTime?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  signals     OpportunitySignal[]
+  scores      OpportunityScore[]
+  assignments OpportunityAssignment[]
+  activities  OpportunityActivity[]
+  alerts      Alert[]
+
+  // One live opportunity per (agency, type, listing) and per (agency, type, contact)
+  @@unique([agencyId, type, listingId, contactId])
+  @@index([agencyId, status, detectedAt(sort: Desc)])
+  @@index([agencyId, propertyId])
+  @@index([agencyId, contactId])
+  @@map("opportunities")
+}
+
+model OpportunitySignal {
+  id            String        @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity   @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  eventId       String?
+  event         ListingEvent? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  kind          String // e.g. "FSBO_DETECTED", "DORMANT_VALUATION", "CRM_MATCH"
+  description   String
+  weight        Float         @default(0)
+  createdAt     DateTime      @default(now())
+
+  @@index([opportunityId])
+  @@map("opportunity_signals")
+}
+
+model OpportunityScore {
+  id            String      @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  computedAt    DateTime    @default(now())
+  total         Int // 0-100
+  intentScore   Int
+  relationshipScore Int
+  timingScore   Int
+  territoryScore Int
+  confidenceScore Int
+  reasons       Json // string[]
+  breakdown     Json? // full component detail for the explanation UI
+
+  @@index([opportunityId, computedAt(sort: Desc)])
+  @@map("opportunity_scores")
+}
+
+model OpportunityAssignment {
+  id            String      @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  assignedToId  String
+  assignedTo    User       @relation("AssignedTo", fields: [assignedToId], references: [id], onDelete: Cascade)
+  assignedById  String?
+  assignedBy    User?      @relation("AssignedBy", fields: [assignedById], references: [id], onDelete: SetNull)
+  assignedAt    DateTime    @default(now())
+  active        Boolean     @default(true)
+
+  @@index([opportunityId])
+  @@index([assignedToId, active])
+  @@map("opportunity_assignments")
+}
+
+model OpportunityActivity {
+  id            String      @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  kind          String // "STATUS_CHANGE" | "NOTE" | "ASSIGNED" | "SNOOZED" | ...
+  fromStatus    OpportunityStatus?
+  toStatus      OpportunityStatus?
+  note          String?
+  occurredAt    DateTime    @default(now())
+
+  @@index([opportunityId, occurredAt])
+  @@map("opportunity_activities")
+}
+
+// ---------------------------------------------------------------------------
+// Alerts (tenant-isolated)
+// ---------------------------------------------------------------------------
+
+enum AlertChannel {
+  TELEGRAM
+  IN_APP
+}
+
+enum AlertKind {
+  HOT_OPPORTUNITY
+  CRM_MARKET_MATCH
+  MORNING_DIGEST
+}
+
+model AlertRule {
+  id        String       @id @default(cuid())
+  agencyId  String
+  agency    Agency       @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  kind      AlertKind
+  channel   AlertChannel @default(TELEGRAM)
+  minScore  Int          @default(85)
+  enabled   Boolean      @default(true)
+  createdAt DateTime     @default(now())
+
+  @@unique([agencyId, kind, channel])
+  @@map("alert_rules")
+}
+
+enum AlertStatus {
+  PENDING
+  SENT
+  FAILED
+  SUPPRESSED_DUPLICATE
+}
+
+model Alert {
+  id            String       @id @default(cuid())
+  agencyId      String
+  agency        Agency       @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  opportunityId String?
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  kind          AlertKind
+  channel       AlertChannel
+  // Deduplication key, e.g. "HOT:opportunityId" or "DIGEST:2026-08-16"
+  dedupeKey     String
+  title         String
+  body          String
+  status        AlertStatus  @default(PENDING)
+  sentAt        DateTime?
+  error         String?
+  createdAt     DateTime     @default(now())
+
+  @@unique([agencyId, dedupeKey])
+  @@index([agencyId, createdAt(sort: Desc)])
+  @@map("alerts")
+}
+
+// ---------------------------------------------------------------------------
+// Audit logging
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  agencyId  String?
+  agency    Agency?  @relation(fields: [agencyId], references: [id], onDelete: SetNull)
+  userId    String?
+  user      User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String // "LOGIN" | "CRM_IMPORT" | "OPPORTUNITY_STATUS" | "CONTACT_DELETE" | ...
+  entity    String?
+  entityId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([agencyId, createdAt(sort: Desc)])
+  @@map("audit_logs")
+}
