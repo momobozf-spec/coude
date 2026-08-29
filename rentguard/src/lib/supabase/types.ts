@@ -49,7 +49,7 @@ export type SendChannel =
 export type FindingSeverity = 'INFO' | 'WARNING' | 'CRITICAL';
 export type PebRating = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 
-export interface Profile {
+export type Profile = {
   id: string;
   user_id: string;
   full_name: string | null;
@@ -63,7 +63,7 @@ export interface Profile {
   updated_at: string;
 }
 
-export interface Property {
+export type Property = {
   id: string;
   user_id: string;
   address: string;
@@ -91,7 +91,7 @@ export interface Property {
   updated_at: string;
 }
 
-export interface Inspection {
+export type Inspection = {
   id: string;
   property_id: string;
   type: InspectionType;
@@ -109,7 +109,7 @@ export interface Inspection {
   updated_at: string;
 }
 
-export interface InspectionRoom {
+export type InspectionRoom = {
   id: string;
   inspection_id: string;
   room_key: string;
@@ -120,7 +120,7 @@ export interface InspectionRoom {
   created_at: string;
 }
 
-export interface InspectionPhoto {
+export type InspectionPhoto = {
   id: string;
   inspection_id: string;
   room_id: string | null;
@@ -137,7 +137,7 @@ export interface InspectionPhoto {
   created_at: string;
 }
 
-export interface PhotoComparison {
+export type PhotoComparison = {
   id: string;
   checkin_photo_id: string;
   checkout_photo_id: string;
@@ -157,7 +157,7 @@ export interface PhotoComparison {
   updated_at: string;
 }
 
-export interface LegalRule {
+export type LegalRule = {
   rule_key: string;
   description_nl: string;
   description_fr: string;
@@ -174,7 +174,7 @@ export interface LegalRule {
   updated_at: string;
 }
 
-export interface LetterTemplate {
+export type LetterTemplate = {
   id: string;
   template_key: string;
   language: AppLanguage;
@@ -190,7 +190,7 @@ export interface LetterTemplate {
   updated_at: string;
 }
 
-export interface DepositCase {
+export type DepositCase = {
   id: string;
   property_id: string;
   keys_returned_on: string;
@@ -208,7 +208,7 @@ export interface DepositCase {
   updated_at: string;
 }
 
-export interface LegalNotice {
+export type LegalNotice = {
   id: string;
   property_id: string;
   deposit_case_id: string | null;
@@ -235,7 +235,7 @@ export interface LegalNotice {
   updated_at: string;
 }
 
-export interface ContractScan {
+export type ContractScan = {
   id: string;
   property_id: string;
   storage_path: string;
@@ -249,7 +249,7 @@ export interface ContractScan {
   updated_at: string;
 }
 
-export interface ContractFinding {
+export type ContractFinding = {
   check_key: string;
   clause_quote: string;
   category: string;
@@ -259,7 +259,7 @@ export interface ContractFinding {
   user_dismissed?: boolean;
 }
 
-export interface RepairCostReference {
+export type RepairCostReference = {
   id: string;
   category: string;
   item_key: string;
@@ -274,7 +274,7 @@ export interface RepairCostReference {
   is_active: boolean;
 }
 
-export interface HealthIndexValue {
+export type HealthIndexValue = {
   id: string;
   year: number;
   month: number;
@@ -285,7 +285,7 @@ export interface HealthIndexValue {
   published_at: string | null;
 }
 
-export interface Entitlement {
+export type Entitlement = {
   id: string;
   user_id: string;
   plan_key: string;
@@ -297,7 +297,7 @@ export interface Entitlement {
   revoked_at: string | null;
 }
 
-export interface PricingConfig {
+export type PricingConfig = {
   id: string;
   plan_key: string;
   label_nl: string;
@@ -309,9 +309,16 @@ export interface PricingConfig {
   is_active: boolean;
 }
 
-type Row<T> = { Row: T; Insert: Partial<T>; Update: Partial<T> };
+type Row<T> = {
+  Row: T;
+  Insert: Partial<T>;
+  Update: Partial<T>;
+  // supabase-js verwacht dit veld op elke tabel; zonder dit valt de
+  // typeafleiding terug op `never` en verliezen alle queries hun types.
+  Relationships: [];
+};
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       profiles: Row<Profile>;

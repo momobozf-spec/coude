@@ -37,6 +37,19 @@ export const nl = {
     password: 'Wachtwoord',
     fullName: 'Volledige naam',
     checkYourEmail: 'Kijk uw e-mail na voor de bevestigingslink.',
+    passwordHint:
+      'Minstens 10 tekens. Achter deze login zitten foto’s van uw woning en uw ' +
+      'huurcontract.',
+    noAccountYet: 'Nog geen account?',
+    alreadyHaveAccount: 'Al een account?',
+    errors: {
+      INVALID_INPUT: 'Kijk de ingevulde gegevens na.',
+      INVALID_CREDENTIALS: 'Dit e-mailadres en wachtwoord horen niet samen.',
+      EMAIL_TAKEN: 'Er bestaat al een account met dit e-mailadres.',
+      WEAK_PASSWORD: 'Kies een langer of sterker wachtwoord.',
+      RATE_LIMITED: 'Te veel pogingen. Probeer het over enkele minuten opnieuw.',
+      UNKNOWN: 'Er ging iets mis. Probeer het opnieuw.',
+    },
   },
 
   property: {

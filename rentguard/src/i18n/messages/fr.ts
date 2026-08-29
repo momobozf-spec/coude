@@ -39,6 +39,19 @@ export const fr: Messages = {
     password: 'Mot de passe',
     fullName: 'Nom complet',
     checkYourEmail: 'Consultez votre e-mail pour le lien de confirmation.',
+    passwordHint:
+      'Au moins 10 caractères. Derrière cette connexion se trouvent des photos ' +
+      'de votre logement et votre bail.',
+    noAccountYet: 'Pas encore de compte ?',
+    alreadyHaveAccount: 'Vous avez déjà un compte ?',
+    errors: {
+      INVALID_INPUT: 'Vérifiez les données saisies.',
+      INVALID_CREDENTIALS: 'Cette adresse e-mail et ce mot de passe ne correspondent pas.',
+      EMAIL_TAKEN: 'Un compte existe déjà avec cette adresse e-mail.',
+      WEAK_PASSWORD: 'Choisissez un mot de passe plus long ou plus robuste.',
+      RATE_LIMITED: 'Trop de tentatives. Réessayez dans quelques minutes.',
+      UNKNOWN: 'Une erreur est survenue. Réessayez.',
+    },
   },
 
   property: {

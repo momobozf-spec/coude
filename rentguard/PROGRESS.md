@@ -69,19 +69,30 @@ npm run build       groen
 
 ---
 
-## Fase 1 — Accounts, woningen & check-in ⏳ volgende
+## Fase 1 — Accounts, woningen & check-in ⏳ bezig
 
 **Exit-criterium:** volledig check-in-rapport uit een echte testrun, tweetalig.
 
-- [ ] Auth-flows NL/FR (registratie, aanmelden, wachtwoordherstel)
-- [ ] Middleware voor sessieverversing en taalkeuze
-- [ ] UI-primitieven in shadcn-stijl (hand-geschreven, geen interactieve init)
-- [ ] Woningbeheer met postcodevalidatie 1000–1299
+- [x] Middleware voor sessieverversing en taalkeuze (`/nl`, `/fr`)
+- [x] UI-primitieven, handgeschreven — geen interactieve shadcn-init nodig
+- [x] Auth-flows NL/FR (registratie, aanmelden, afmelden, e-mailbevestiging)
+- [x] App-shell met navigatie en taalwissel
+- [x] Woningbeheer: aanmaken, bewerken, lijst, detail
+- [x] Postcodevalidatie 1000–1299 met gemeente-invulhulp (19 gemeenten, NL/FR)
+- [x] Signalering waarborg > 2 maanden huur, uitdrukkelijk als signalering
+- [x] Retentiekeuze per woning met waarschuwing over de tienjarige verjaring
+- [ ] Wachtwoordherstel
 - [ ] Check-in wizard: kamers, geleide fotochecklist, notities
 - [ ] Upload met SHA-256, EXIF en servertijdstempel
 - [ ] PDF-rapport NL/FR met hashes, tijdstempels en uitlegpagina bewijswaarde
 - [ ] Uitnodiging verhuurder + medeondertekenflow via token
 - [ ] Gratis check-in voor één woning (acquisitie)
+
+**Gate na deze tussenstap:** typecheck, lint, 120 tests, build — allemaal groen.
+
+**Opgelost onderweg:** `interface` krijgt in TypeScript geen impliciete
+index-signature, waardoor supabase-js alle querytypes op `never` zette. De
+tabeltypes zijn nu type-aliassen.
 
 ## Fase 2 — Check-out & AI-vergelijking
 
