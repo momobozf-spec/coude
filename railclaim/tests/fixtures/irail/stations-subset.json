@@ -1,0 +1,62 @@
+{
+ "version": "1.4",
+ "timestamp": "1787965451",
+ "station": [
+  {
+   "@id": "http://irail.be/stations/NMBS/008813003",
+   "id": "BE.NMBS.008813003",
+   "name": "Brussel-Centraal",
+   "locationX": "4.356801",
+   "locationY": "50.845658",
+   "standardname": "Brussel-Centraal/Bruxelles-Central"
+  },
+  {
+   "@id": "http://irail.be/stations/NMBS/008812005",
+   "id": "BE.NMBS.008812005",
+   "name": "Brussel-Noord",
+   "locationX": "4.360846",
+   "locationY": "50.859663",
+   "standardname": "Brussel-Noord/Bruxelles-Nord"
+  },
+  {
+   "@id": "http://irail.be/stations/NMBS/008814001",
+   "id": "BE.NMBS.008814001",
+   "name": "Brussel-Zuid",
+   "locationX": "4.336531",
+   "locationY": "50.835707",
+   "standardname": "Brussel-Zuid/Bruxelles-Midi"
+  },
+  {
+   "@id": "http://irail.be/stations/NMBS/008831765",
+   "id": "BE.NMBS.008831765",
+   "name": "Genk",
+   "locationX": "5.497685",
+   "locationY": "50.967057",
+   "standardname": "Genk"
+  },
+  {
+   "@id": "http://irail.be/stations/NMBS/008892007",
+   "id": "BE.NMBS.008892007",
+   "name": "Gent-Sint-Pieters",
+   "locationX": "3.710675",
+   "locationY": "51.035896",
+   "standardname": "Gent-Sint-Pieters"
+  },
+  {
+   "@id": "http://irail.be/stations/NMBS/008841004",
+   "id": "BE.NMBS.008841004",
+   "name": "Luik-Guillemins",
+   "locationX": "5.566695",
+   "locationY": "50.62455",
+   "standardname": "Liège-Guillemins"
+  },
+  {
+   "@id": "http://irail.be/stations/NMBS/008891702",
+   "id": "BE.NMBS.008891702",
+   "name": "Oostende",
+   "locationX": "2.925809",
+   "locationY": "51.228212",
+   "standardname": "Oostende"
+  }
+ ]
+}

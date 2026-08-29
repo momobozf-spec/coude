@@ -1,0 +1,84 @@
+{
+  "app": {
+    "name": "RailClaim",
+    "tagline": "Vous ne manquez plus aucune compensation à laquelle vous avez droit.",
+    "disclaimer": "RailClaim est un service indépendant, non affilié à la SNCB/NMBS, ni approuvé par elle.",
+    "attribution": "Données de retard via l'API ouverte iRail (iRail asbl / Open Knowledge Belgium), sur la base des données ouvertes de la SNCB."
+  },
+  "landing": {
+    "headline": "Les retards sur votre trajet habituel, suivis automatiquement",
+    "subheadline": "Nous suivons vos trajets domicile-travail via les données ouvertes iRail et calculons, trajet par trajet, si vous avez droit à une compensation. Vous confirmez les trajets que vous avez réellement effectués, et nous préparons le dossier complet.",
+    "howItWorksTitle": "Comment ça marche",
+    "step1Title": "Vous encodez votre trajet",
+    "step1Body": "Gare de départ, gare d'arrivée, votre heure de départ habituelle et les jours où vous voyagez.",
+    "step2Title": "Nous mesurons le retard à l'arrivée",
+    "step2Body": "Chaque jour de trajet, nous vérifions ce qu'a réellement fait votre train à votre gare d'arrivée. C'est ce retard-là qui compte pour la SNCB.",
+    "step3Title": "Vous confirmez le trajet",
+    "step3Body": "Si un trajet atteint le seuil, nous ne vous demandons qu'une chose : étiez-vous dans ce train ? Sans votre confirmation, rien ne se passe.",
+    "step4Title": "Nous préparons votre dossier",
+    "step4Body": "Tous les champs complétés selon les exigences de la SNCB, en néerlandais ou en français, avec un PDF. C'est vous qui l'introduisez — cela vous prend une demi-minute.",
+    "honestyTitle": "Ce que nous faisons et ne faisons pas",
+    "honestyDoTitle": "Ce que nous faisons",
+    "honestyDo1": "Mesurer chaque jour votre retard à l'arrivée et le conserver comme preuve.",
+    "honestyDo2": "Tenir le compteur pour le régime des retards répétés — 10 retards de 30 minutes en 6 mois, à introduire entre 6 et 9 mois après le premier. Pratiquement personne ne tient cela à jour soi-même.",
+    "honestyDo3": "Vous avertir à temps avant l'expiration d'un délai d'introduction.",
+    "honestyDo4": "Compléter intégralement votre dossier selon les conditions officielles de la SNCB.",
+    "honestyDontTitle": "Ce que nous ne faisons pas",
+    "honestyDont1": "Nous n'introduisons pas la demande à votre place auprès de la SNCB. Il n'existe aucun canal officiel permettant de le faire.",
+    "honestyDont2": "Nous ne demandons jamais vos identifiants My SNCB et ne nous connectons jamais à votre compte.",
+    "honestyDont3": "Nous ne préparons jamais un dossier pour un trajet que vous n'avez pas confirmé.",
+    "rulesSourceNote": "Tous les seuils, pourcentages et délais de cette application proviennent des conditions officielles de la SNCB, avec mention de la source et de la date de vérification.",
+    "ctaPrimary": "Encodez votre premier trajet",
+    "ctaSecondary": "Voyez comment la compensation est calculée"
+  },
+  "compensation": {
+    "singleDelayTitle": "Retard de 60 minutes ou plus",
+    "singleDelayBody": "Compensation de 100 % de la valeur de votre trajet. À demander dans les 3 mois suivant votre voyage.",
+    "frequentDelaysTitle": "Retards répétés (abonnés)",
+    "frequentDelaysBody": "À partir de 10 retards d'au moins 30 minutes sur le même trajet en 6 mois : 50 % par retard. À introduire entre 6 et 9 mois après le premier retard.",
+    "amountIndicative": "Ce montant est indicatif. Le montant définitif est déterminé par la SNCB.",
+    "amountLabel": "Compensation attendue",
+    "ourPriceLabel": "Nos frais",
+    "netLabel": "Ce qu'il vous reste net",
+    "verifiedOn": "Règles vérifiées le {date}",
+    "source": "Source"
+  },
+  "claim": {
+    "statusDETECTED": "Détecté",
+    "statusAWAITING_USER_CONFIRMATION": "En attente de votre confirmation",
+    "statusCONFIRMED": "Confirmé",
+    "statusIN_ADMIN_REVIEW": "En cours de vérification",
+    "statusSUBMITTED": "Introduit",
+    "statusAWAITING_NMBS": "En attente de la SNCB",
+    "statusAPPROVED": "Approuvé",
+    "statusREJECTED": "Refusé",
+    "statusEXPIRED": "Délai expiré",
+    "statusCANCELLED": "Annulé",
+    "confirmTitle": "Étiez-vous dans ce train ?",
+    "confirmBody": "Nous avons constaté un retard de {minutes} minutes sur votre trajet {route} du {date}. Ne confirmez que si vous avez réellement effectué ce trajet.",
+    "confirmWarning": "Demander une compensation pour un trajet que vous n'avez pas effectué constitue une fraude en votre nom. C'est pourquoi nous ne préparons rien sans votre confirmation.",
+    "confirmAction": "Oui, j'étais dans ce train",
+    "declineAction": "Non, je n'ai pas fait ce trajet",
+    "deadlineNotice": "À confirmer avant le {date}.",
+    "preparedDossierTitle": "Votre dossier est prêt",
+    "preparedDossierBody": "Tous les champs ci-dessous sont complétés selon les exigences de la SNCB. Copiez-les dans le formulaire My SNCB, ou utilisez le PDF pour le guichet ou l'envoi postal."
+  },
+  "mandate": {
+    "title": "Autorisation de préparer votre dossier",
+    "placeholderNotice": "PLACEHOLDER — ce texte doit encore être validé par un juriste avant la mise en production.",
+    "accept": "J'autorise RailClaim à préparer des dossiers de compensation sur la base de mes données.",
+    "recordedNotice": "Nous enregistrons l'heure et votre adresse IP comme preuve de cette autorisation."
+  },
+  "privacy": {
+    "ibanWhy": "Votre IBAN est nécessaire parce que la SNCB ne verse la compensation par virement qu'en cas de retard d'au moins 60 minutes, et demande alors votre numéro de compte.",
+    "mobibWhy": "Votre numéro de carte MoBIB est le numéro par lequel la SNCB identifie votre abonnement. Sans ce numéro, un abonné ne peut pas demander de compensation.",
+    "encryptedNotice": "L'IBAN et le numéro MoBIB sont stockés chiffrés et affichés masqués par défaut.",
+    "reveal": "Afficher en entier",
+    "hide": "Masquer"
+  },
+  "errors": {
+    "generic": "Une erreur est survenue. Veuillez réessayer.",
+    "notFound": "Introuvable.",
+    "unauthorized": "Vous devez être connecté."
+  }
+}
