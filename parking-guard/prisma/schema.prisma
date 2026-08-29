@@ -1,0 +1,718 @@
+// Parking Guard Brussel — datamodel
+//
+// Leidende principes in dit schema:
+//
+//  1. Documenten staan NOOIT in de database. Alleen een `storageKey` die naar de
+//     DocumentStore wijst. Zie ADR 0003.
+//  2. Een dossier kan alleen verzonden worden naar een gemeente die op het
+//     moment van verzenden VERIFIED is. Dat wordt in de verzendlaag afgedwongen;
+//     het schema houdt de gegevens bij die die controle mogelijk maken.
+//  3. Alles wat met identiteitsdocumenten gebeurt, is achteraf reconstrueerbaar:
+//     wie keek wanneer naar welk document, en wanneer is het verwijderd.
+//  4. Gevoelige velden (rijksregisternummer) worden versleuteld opgeslagen en
+//     hebben een aparte kolom, zodat ze nooit per ongeluk in een `extractedData`
+//     JSON-blob meeliften.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  Auth & gebruikers
+// ───────────────────────────────────────────────────────────────────────────
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Language {
+  NL
+  FR
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  // scrypt-hash, zelfbeschrijvend formaat (scrypt$N$r$p$salt$hash) zodat de
+  // parameters later verhoogd kunnen worden zonder bestaande hashes te breken.
+  passwordHash  String?
+  name          String?
+  language      Language  @default(NL)
+  role          Role      @default(USER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // Zachte verwijdering: de gebruiker is weg voor de applicatie, maar de
+  // betaaladministratie blijft bestaan zolang de wet dat vereist. Zie docs/privacy.md.
+  deletedAt DateTime?
+
+  accounts      Account[]
+  sessions      Session[]
+  dossiers      Dossier[]
+  mandates      Mandate[]
+  consents      Consent[]
+  payments      Payment[]
+  entitlements  Entitlement[]
+  documentViews DocumentAccessLog[]
+  auditEntries  AuditLog[]          @relation("AuditActor")
+
+  @@index([deletedAt])
+}
+
+// Auth.js-tabellen. Account en Session hebben we nu niet strikt nodig
+// (credentials + JWT), maar de adapter verwacht ze en een latere OAuth-provider
+// of database-sessie zou anders een migration op het kritieke pad zetten.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum VerificationTokenPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+model VerificationToken {
+  identifier String
+  // Alleen de hash van het token staat hier. Wie de database leest, kan geen
+  // account overnemen.
+  tokenHash  String                   @unique
+  purpose    VerificationTokenPurpose
+  expires    DateTime
+  consumedAt DateTime?
+  createdAt  DateTime                 @default(now())
+
+  @@unique([identifier, purpose, tokenHash])
+  @@index([expires])
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  Gemeente-registry
+// ───────────────────────────────────────────────────────────────────────────
+
+enum VerificationStatus {
+  VERIFIED
+  UNVERIFIED
+  STALE
+}
+
+/// Wie de bewonerskaarten voor deze gemeente uitgeeft.
+enum CardManager {
+  PARKING_BRUSSELS
+  MUNICIPALITY
+}
+
+/// Hoe een dossier bij deze administratie terecht kan komen.
+///
+/// Dit is geen theoretische opsomming: het onderzoek in docs/gemeenten.md laat
+/// zien dat het per gemeente echt verschilt, en dat het kanaal bepaalt of wij
+/// namens de gebruiker kunnen indienen of alleen het dossier kunnen aanleveren.
+enum SubmissionChannelType {
+  /// Wij kunnen zelf verzenden vanaf het dossieradres.
+  EMAIL
+  /// Portaal met persoonlijke authenticatie (e-loket, IRISbox, eID+pincode).
+  /// De gebruiker dient zelf in; wij leveren het dossier aan.
+  ONLINE_PORTAL
+  /// Papieren post. Delegeerbaar met volmacht.
+  POST
+  /// Fysiek loket, in persoon.
+  COUNTER
+}
+
+enum DossierType {
+  NEW_CARD
+  PLATE_CHANGE
+  ADDRESS_CHANGE
+  TEMPORARY_VEHICLE
+}
+
+model MunicipalityConfig {
+  id   String @id @default(cuid())
+  /// Stabiele sleutel voor code en seed, bv. "schaarbeek".
+  slug String @unique
+
+  nameNl    String
+  nameFr    String
+  postcodes String[]
+  languages Language[]
+
+  cardManager CardManager
+
+  /// Het kanaal waarlangs wij mogen indienen, als dat er is.
+  primaryChannel SubmissionChannelType?
+  /// Alleen gevuld als primaryChannel EMAIL is en het adres officieel
+  /// gepubliceerd staat. Nooit geraden, nooit afgeleid.
+  submissionEmail String?
+  /// Portaal-URL (e-loket, IRISbox) waar de gebruiker zelf indient.
+  portalUrl       String?
+  /// Postadres voor papieren indiening.
+  postalAddress   String?
+  /// Loketadres en openingsuren, vrije tekst.
+  counterInfo     String?
+
+  /// Tarieven en geldigheidsduur, alleen ingevuld waar officieel gestaafd.
+  /// Bedragen in eurocent, om afrondingsfouten te vermijden.
+  firstCardPriceCents  Int?
+  secondCardPriceCents Int?
+  validityMonths       Int?
+  maxCardsPerHousehold Int?
+
+  /// Bijzonderheden in NL en FR, bv. "maximaal 2 kaarten per gezin, nooit meer
+  /// dan het aantal rijbewijzen in het gezin".
+  notesNl String?
+  notesFr String?
+
+  // ── Verificatie ──────────────────────────────────────────────────────────
+  // Zonder VERIFIED is verzenden technisch geblokkeerd. Zie ADR 0005.
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  sourceUrls         String[]
+  verifiedAt         DateTime?
+  verifiedBy         String?
+  /// Waarom deze entry niet (volledig) geverifieerd is. Verplicht te vullen bij
+  /// UNVERIFIED, zodat "we weten het niet" onderscheiden blijft van "we hebben
+  /// het niet onderzocht".
+  verificationNote   String?
+
+  /// Per gemeente aan te zetten door een admin. Default uit: supervised mode.
+  autoSendEnabled Boolean @default(false)
+
+  requiredDocuments MunicipalityRequiredDocument[]
+  dossiers          Dossier[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([verificationStatus])
+  @@index([postcodes])
+}
+
+enum DocType {
+  ID_CARD
+  VEHICLE_REGISTRATION
+  LEASE_CONTRACT
+  RENTAL_CONTRACT
+  INSURANCE_POLICY
+  EMPLOYER_CERTIFICATE
+  GARAGE_CERTIFICATE
+  RESIDENCE_PROOF
+  SECONDARY_RESIDENCE_TAX
+  OTHER
+}
+
+/// Welke documenten deze gemeente vraagt, per aanvraagtype.
+model MunicipalityRequiredDocument {
+  id             String @id @default(cuid())
+  municipalityId String
+
+  dossierType DossierType
+  docType     DocType
+  required    Boolean     @default(true)
+  /// Uitleg voor de gebruiker, bv. "recto-verso".
+  hintNl      String?
+  hintFr      String?
+  sourceUrl   String?
+
+  municipality MunicipalityConfig @relation(fields: [municipalityId], references: [id], onDelete: Cascade)
+
+  @@unique([municipalityId, dossierType, docType])
+  @@index([municipalityId, dossierType])
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  Dossiers
+// ───────────────────────────────────────────────────────────────────────────
+
+enum DossierStatus {
+  DRAFT
+  DOCS_UPLOADED
+  EXTRACTED
+  NEEDS_USER_REVIEW
+  READY_FOR_SUBMISSION
+  IN_ADMIN_REVIEW
+  SUBMITTED
+  AWAITING_MUNICIPALITY
+  INFO_REQUESTED
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model Dossier {
+  id     String @id @default(cuid())
+  /// Menselijke referentie in mailonderwerpen, bv. "PG-2026-000123". Hierop
+  /// worden inkomende antwoorden aan het dossier gekoppeld.
+  reference String @unique
+
+  userId         String
+  municipalityId String
+
+  type   DossierType
+  status DossierStatus @default(DRAFT)
+
+  language Language @default(NL)
+
+  /// Door de gebruiker gecontroleerde en gecorrigeerde gegevens. Bevat NOOIT het
+  /// rijksregisternummer — dat staat versleuteld in nationalNumberEncrypted.
+  extractedData Json?
+
+  /// Versleuteld (AES-256-GCM) en alleen gevuld als de gemeente het aantoonbaar
+  /// vereist. Zie docs/privacy.md.
+  nationalNumberEncrypted String?
+
+  /// Alleen voor TEMPORARY_VEHICLE, dan verplicht (afgedwongen in de applicatie).
+  temporaryFrom DateTime?
+  temporaryTo   DateTime?
+
+  submittedAt DateTime?
+  completedAt DateTime?
+  /// Wanneer de brondocumenten opgeruimd zijn door de retentie-job.
+  documentsPurgedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  municipality MunicipalityConfig @relation(fields: [municipalityId], references: [id], onDelete: Restrict)
+
+  documents     DossierDocument[]
+  statusEvents  DossierStatusEvent[]
+  mandate       Mandate?
+  consents      Consent[]
+  payment       Payment?
+  submissions   Submission[]
+  inboundEmails InboundEmail[]
+  accessLogs    DocumentAccessLog[]
+
+  @@index([userId, status])
+  @@index([status, updatedAt])
+  @@index([municipalityId, status])
+  // De retentie-job zoekt op afgeronde dossiers waarvan de documenten er nog zijn.
+  @@index([completedAt, documentsPurgedAt])
+}
+
+model DossierDocument {
+  id        String  @id @default(cuid())
+  dossierId String
+
+  docType    DocType
+  /// Sleutel in de DocumentStore. Bevat geen persoonsgegevens: een UUID plus
+  /// extensie, nooit "jan-janssens-identiteitskaart.jpg".
+  storageKey String  @unique
+  mimeType   String
+  sizeBytes  Int
+  /// SHA-256 van de inhoud, om duplicaten en corruptie te herkennen.
+  sha256     String?
+  /// Oorspronkelijke bestandsnaam, alleen om aan de gebruiker te tonen.
+  originalFilename String?
+
+  uploadedAt DateTime  @default(now())
+  deletedAt  DateTime?
+
+  dossier     Dossier             @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  extractions ExtractionResult[]
+  accessLogs  DocumentAccessLog[]
+
+  @@index([dossierId, deletedAt])
+  @@index([deletedAt])
+}
+
+model ExtractionResult {
+  id         String @id @default(cuid())
+  documentId String
+
+  provider String
+  model    String
+
+  /// Geëxtraheerde velden als { veld: waarde }.
+  fields      Json
+  /// Confidence per veld als { veld: 0-100 }. Apart gehouden van `fields` zodat
+  /// de correctie-UI beide onafhankelijk kan lezen.
+  confidence  Json
+  /// Laagste confidence over alle velden; hierop filtert de UI snel.
+  minConfidence Int?
+
+  /// Verwijzing naar de ruwe provider-response in de DocumentStore. De response
+  /// bevat documentinhoud en hoort dus niet in de database.
+  rawResponseRef String?
+
+  /// Gevuld als de extractie mislukte. Dan gaat de gebruiker handmatig invullen;
+  /// er wordt nooit stilzwijgend doorgegaan.
+  error String?
+
+  createdAt DateTime @default(now())
+
+  document DossierDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, createdAt])
+}
+
+model DossierStatusEvent {
+  id        String @id @default(cuid())
+  dossierId String
+
+  status DossierStatus
+  source StatusEventSource
+  /// Wie de wijziging deed, als het een mens was.
+  actorId String?
+  note    String?
+
+  createdAt DateTime @default(now())
+
+  dossier Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+
+  @@index([dossierId, createdAt])
+}
+
+enum StatusEventSource {
+  SYSTEM
+  ADMIN
+  INBOUND_EMAIL
+  USER
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  Volmacht & consent
+// ───────────────────────────────────────────────────────────────────────────
+
+/// De digitale volmacht waarmee de gebruiker ons machtigt namens hem/haar in te
+/// dienen. Eén per dossier; zonder volmacht is verzenden geblokkeerd.
+model Mandate {
+  id        String @id @default(cuid())
+  userId    String
+  dossierId String @unique
+
+  /// Naam zoals de gebruiker die zelf intypte bij het ondertekenen.
+  signedName String
+  acceptedAt DateTime @default(now())
+  ip         String
+  userAgent  String?
+  /// Versie van de juridische tekst, zodat achteraf vaststaat wát er getekend is.
+  textVersion String
+  /// Hash van de exacte tekst die getoond werd. Bewijs dat de tekst nadien niet
+  /// gewijzigd is.
+  textHash    String
+
+  /// De gegenereerde volmacht-PDF in de DocumentStore.
+  pdfStorageKey String?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dossier Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum ConsentType {
+  ID_DOCUMENT_PROCESSING
+  AI_EXTRACTION
+  SUBMISSION_TO_ADMINISTRATION
+}
+
+/// Aparte, expliciete toestemming per doel. Nooit voorgevinkt; intrekking wordt
+/// als aparte rij vastgelegd zodat de geschiedenis intact blijft.
+model Consent {
+  id        String  @id @default(cuid())
+  userId    String
+  dossierId String?
+
+  type        ConsentType
+  granted     Boolean
+  textVersion String
+  textHash    String
+  ip          String
+  createdAt   DateTime    @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dossier Dossier? @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type, createdAt])
+  @@index([dossierId])
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  Verzending & inkomende post
+// ───────────────────────────────────────────────────────────────────────────
+
+enum SubmissionStatus {
+  QUEUED
+  SENT
+  FAILED
+  /// Kanaal is niet automatiseerbaar: de gebruiker heeft het dossier zelf
+  /// gedownload om in te dienen.
+  HANDED_TO_USER
+}
+
+/// Eén verzendpoging. Bewaard ook bij mislukking: als een dossier met
+/// identiteitsdocumenten ergens heen ging, moet dat achteraf vaststaan.
+model Submission {
+  id        String @id @default(cuid())
+  dossierId String
+
+  channel SubmissionChannelType
+  status  SubmissionStatus      @default(QUEUED)
+
+  /// Ontvanger zoals die op het moment van verzenden in de registry stond.
+  recipient String?
+  subject   String?
+  /// Message-ID van de uitgaande mail, voor koppeling met antwoorden.
+  messageId String?
+
+  /// Het verzonden dossier-PDF in de DocumentStore.
+  packageStorageKey String?
+
+  /// Snapshot van de verificatiestatus op het moment van verzenden. Als een
+  /// gemeente later STALE wordt, blijft zichtbaar waarop we destijds vertrouwden.
+  municipalityVerifiedAt DateTime?
+
+  error String?
+
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  dossier Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+
+  @@index([dossierId, createdAt])
+  @@index([messageId])
+  @@index([status])
+}
+
+/// Antwoord van een administratie op het dossieradres.
+model InboundEmail {
+  id        String  @id @default(cuid())
+  dossierId String?
+
+  fromAddress String
+  toAddress   String
+  subject     String?
+  /// Alleen de platte tekst, voor de admin-review. Bijlagen gaan naar de
+  /// DocumentStore, niet hierheen.
+  bodyText    String?
+  messageId   String? @unique
+  inReplyTo   String?
+
+  /// Optionele AI-suggestie voor de nieuwe status. Nadrukkelijk een suggestie:
+  /// een statuswijziging vereist altijd admin-bevestiging.
+  suggestedStatus     DossierStatus?
+  suggestedConfidence Int?
+
+  /// Gezet zodra een admin de mail behandeld heeft.
+  handledAt DateTime?
+  handledBy String?
+
+  receivedAt DateTime @default(now())
+
+  dossier Dossier? @relation(fields: [dossierId], references: [id], onDelete: SetNull)
+
+  @@index([dossierId, receivedAt])
+  @@index([handledAt])
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  Betalingen & entitlements
+// ───────────────────────────────────────────────────────────────────────────
+
+enum PaymentStatus {
+  OPEN
+  PAID
+  FAILED
+  EXPIRED
+  CANCELED
+  REFUNDED
+}
+
+enum ProductType {
+  SINGLE_SERVICE
+  PRO_SUBSCRIPTION
+}
+
+model Payment {
+  id        String  @id @default(cuid())
+  userId    String
+  dossierId String? @unique
+
+  product     ProductType
+  amountCents Int
+  currency    String        @default("EUR")
+  status      PaymentStatus @default(OPEN)
+
+  molliePaymentId String? @unique
+  mollieCustomerId String?
+  checkoutUrl     String?
+
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  dossier Dossier? @relation(fields: [dossierId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+}
+
+/// Wat een gebruiker mag. Server-side afgedwongen; de frontend leest dit alleen.
+model Entitlement {
+  id     String @id @default(cuid())
+  userId String
+
+  product ProductType
+  /// Null = onbeperkt geldig (bv. een afgerond eenmalig dossier).
+  expiresAt DateTime?
+  /// Voor SINGLE_SERVICE: hoeveel dossiers dit recht nog dekt.
+  remainingUses Int?
+
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, active])
+}
+
+/// Ruwe webhook-events, voor idempotentie en om achteraf te kunnen herleiden wat
+/// Mollie ons precies stuurde.
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  provider    String
+  externalId  String
+  payload     Json
+  processedAt DateTime?
+  error       String?
+  receivedAt  DateTime @default(now())
+
+  @@unique([provider, externalId])
+  @@index([processedAt])
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  Achtergrondtaken (Postgres-driver, zie ADR 0002)
+// ───────────────────────────────────────────────────────────────────────────
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  DONE
+  FAILED
+  DEAD
+}
+
+model Job {
+  id   String @id @default(cuid())
+  name String
+
+  payload  Json
+  status   JobStatus @default(PENDING)
+  attempts Int       @default(0)
+  maxAttempts Int    @default(5)
+
+  /// Wanneer deze job ten vroegste mag draaien. Draagt zowel uitstel als backoff.
+  runAt      DateTime  @default(now())
+  lockedAt   DateTime?
+  lockedBy   String?
+  lastError  String?
+  finishedAt DateTime?
+
+  /// Voor jobs die maar één keer tegelijk mogen bestaan, bv. een dagelijkse
+  /// retentierun. Null = geen ontdubbeling.
+  dedupeKey String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // De worker haalt werk op met deze volgorde; SKIP LOCKED doet de rest.
+  @@index([status, runAt])
+  @@unique([dedupeKey])
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  Auditing
+// ───────────────────────────────────────────────────────────────────────────
+
+/// Elk documentbezoek. Ook door admins — juist door admins.
+model DocumentAccessLog {
+  id         String  @id @default(cuid())
+  documentId String
+  dossierId  String
+  /// Null als het bezoek door een achtergrondjob gebeurde.
+  actorId    String?
+  actorRole  Role
+
+  action    String
+  ip        String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  document DossierDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  dossier  Dossier         @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  actor    User?           @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([documentId, createdAt])
+  @@index([dossierId, createdAt])
+  @@index([actorId, createdAt])
+}
+
+/// Algemene audittrail voor beslissingen die niet over documenten gaan:
+/// registry-wijzigingen, auto-send aanzetten, dossier afwijzen, verwijdering.
+model AuditLog {
+  id String @id @default(cuid())
+
+  actorId    String?
+  actorRole  Role?
+  action     String
+  entityType String
+  entityId   String?
+  /// Voor en na, alleen voor velden die veranderden. Nooit documentinhoud.
+  changes    Json?
+  ip         String?
+
+  createdAt DateTime @default(now())
+
+  actor User? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([action, createdAt])
+}
+
+/// Beheerderinstellingen die zonder deploy aanpasbaar moeten zijn: prijzen,
+/// retentietermijn, drempelwaarden.
+model AppSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}

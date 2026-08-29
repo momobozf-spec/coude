@@ -1,0 +1,84 @@
+{
+  "app": {
+    "name": "RailClaim",
+    "tagline": "Jij mist geen enkele compensatie meer waar je recht op hebt.",
+    "disclaimer": "RailClaim is een onafhankelijke dienst en is niet verbonden aan, goedgekeurd door of gelieerd aan NMBS/SNCB.",
+    "attribution": "Vertragingsgegevens via de open iRail API (iRail vzw / Open Knowledge Belgium), op basis van NMBS-open data."
+  },
+  "landing": {
+    "headline": "Vertragingen op je vaste traject, automatisch bijgehouden",
+    "subheadline": "Wij volgen je pendeltrajecten via de open iRail-data en berekenen per rit of je recht hebt op compensatie. Jij bevestigt welke ritten je echt gemaakt hebt, en wij zetten het volledige dossier voor je klaar.",
+    "howItWorksTitle": "Hoe het werkt",
+    "step1Title": "Je zet je traject in",
+    "step1Body": "Vertrekstation, aankomststation, je gebruikelijke vertrekuur en de dagen waarop je pendelt.",
+    "step2Title": "Wij meten de aankomstvertraging",
+    "step2Body": "Elke pendeldag kijken we wat je trein werkelijk deed op je aankomststation. Dat is de vertraging die voor NMBS telt.",
+    "step3Title": "Jij bevestigt de rit",
+    "step3Body": "Haalt een rit de drempel, dan vragen we je één ding: zat je op deze trein? Zonder jouw bevestiging gebeurt er niets.",
+    "step4Title": "Wij bereiden je dossier voor",
+    "step4Body": "Alle velden ingevuld volgens de eisen van NMBS, in het Nederlands of Frans, plus een PDF. Jij dient het in — dat kost je nog een halve minuut.",
+    "honestyTitle": "Wat wij wel en niet doen",
+    "honestyDoTitle": "Wat wij doen",
+    "honestyDo1": "Elke pendeldag je aankomstvertraging meten en bewaren als bewijs.",
+    "honestyDo2": "De teller bijhouden voor de regeling herhaaldelijke vertragingen — 10 vertragingen van 30 minuten binnen 6 maanden, in te dienen tussen 6 en 9 maanden na de eerste. Dat houdt vrijwel niemand zelf bij.",
+    "honestyDo3": "Je op tijd verwittigen vóór een indieningstermijn verstrijkt.",
+    "honestyDo4": "Je dossier volledig invullen volgens de officiële NMBS-voorwaarden.",
+    "honestyDontTitle": "Wat wij niet doen",
+    "honestyDont1": "Wij dienen niet in jouw plaats in bij NMBS. Er bestaat geen officieel kanaal waarlangs dat kan.",
+    "honestyDont2": "Wij vragen nooit je My NMBS-logingegevens en loggen nooit in op jouw account.",
+    "honestyDont3": "Wij maken nooit een dossier op voor een rit die jij niet bevestigd hebt.",
+    "rulesSourceNote": "Alle drempels, percentages en termijnen in deze app komen uit de officiële NMBS-voorwaarden, met bronvermelding en datum van verificatie.",
+    "ctaPrimary": "Begin met je eerste traject",
+    "ctaSecondary": "Bekijk hoe de compensatie berekend wordt"
+  },
+  "compensation": {
+    "singleDelayTitle": "Vertraging van 60 minuten of meer",
+    "singleDelayBody": "Compensatie van 100 % van de waarde van je traject. Aan te vragen binnen 3 maanden na je treinreis.",
+    "frequentDelaysTitle": "Herhaaldelijke vertragingen (abonnees)",
+    "frequentDelaysBody": "Vanaf 10 vertragingen van minstens 30 minuten op hetzelfde traject binnen 6 maanden: 50 % per vertraging. In te dienen tussen 6 en 9 maanden na de eerste vertraging.",
+    "amountIndicative": "Dit bedrag is indicatief. Het definitieve bedrag bepaalt NMBS.",
+    "amountLabel": "Verwachte compensatie",
+    "ourPriceLabel": "Onze kosten",
+    "netLabel": "Wat je netto overhoudt",
+    "verifiedOn": "Regels geverifieerd op {date}",
+    "source": "Bron"
+  },
+  "claim": {
+    "statusDETECTED": "Gedetecteerd",
+    "statusAWAITING_USER_CONFIRMATION": "Wacht op jouw bevestiging",
+    "statusCONFIRMED": "Bevestigd",
+    "statusIN_ADMIN_REVIEW": "In nazicht",
+    "statusSUBMITTED": "Ingediend",
+    "statusAWAITING_NMBS": "Wacht op NMBS",
+    "statusAPPROVED": "Goedgekeurd",
+    "statusREJECTED": "Afgewezen",
+    "statusEXPIRED": "Termijn verstreken",
+    "statusCANCELLED": "Geannuleerd",
+    "confirmTitle": "Zat je op deze trein?",
+    "confirmBody": "Wij stelden een vertraging van {minutes} minuten vast op je rit {route} van {date}. Bevestig alleen als je deze rit echt gemaakt hebt.",
+    "confirmWarning": "Een compensatie aanvragen voor een rit die je niet gemaakt hebt, is fraude op jouw naam. Wij bereiden daarom niets voor zonder jouw bevestiging.",
+    "confirmAction": "Ja, ik zat op deze trein",
+    "declineAction": "Nee, deze rit heb ik niet gemaakt",
+    "deadlineNotice": "Te bevestigen vóór {date}.",
+    "preparedDossierTitle": "Je dossier staat klaar",
+    "preparedDossierBody": "Alle velden hieronder zijn ingevuld volgens de eisen van NMBS. Kopieer ze naar het formulier in My NMBS, of gebruik de PDF voor het loket of per post."
+  },
+  "mandate": {
+    "title": "Toestemming om je dossier voor te bereiden",
+    "placeholderNotice": "PLACEHOLDER — deze tekst moet nog door een jurist nagekeken worden vóór productie.",
+    "accept": "Ik geef RailClaim toestemming om op basis van mijn gegevens compensatiedossiers voor te bereiden.",
+    "recordedNotice": "Wij leggen het tijdstip en je IP-adres vast als bewijs van deze toestemming."
+  },
+  "privacy": {
+    "ibanWhy": "Je IBAN is nodig omdat NMBS compensatie enkel per overschrijving uitbetaalt bij vertragingen van minstens 60 minuten, en dan je rekeningnummer vraagt.",
+    "mobibWhy": "Je MoBIB-kaartnummer is het nummer waarmee NMBS je abonnement identificeert. Zonder dat nummer kan een abonnee geen compensatie aanvragen.",
+    "encryptedNotice": "IBAN en MoBIB-nummer worden versleuteld opgeslagen en standaard gemaskeerd getoond.",
+    "reveal": "Toon volledig",
+    "hide": "Verberg"
+  },
+  "errors": {
+    "generic": "Er ging iets mis. Probeer het opnieuw.",
+    "notFound": "Niet gevonden.",
+    "unauthorized": "Je moet aangemeld zijn."
+  }
+}
