@@ -25,6 +25,7 @@ Laatst bijgewerkt: **2026-08-29** (einde Fase 0).
 | Aangetekende zending (DigiConnect) | **CONFIGURATION REQUIRED** | Verzending via de app | "Verstuur zelf"-fallback met stappenplan |
 | Sentry | **CONFIGURATION REQUIRED** | Foutopvolging in productie | Alles; fouten gaan naar de serverlogs |
 | Officiële huurrooster-berekening | **NOT AVAILABLE** | — | Begeleide flow naar de officiële tool |
+| Herstelkosten-referentietabel | **NOT AVAILABLE** | Automatische kostenbandbreedte | Kostenverdeling op basis van een offerte die de gebruiker invoert |
 
 ---
 
@@ -71,7 +72,22 @@ en classificeert het verschil als normale slijtage, schade of onduidelijk.
 - De gebruiker bevestigt of corrigeert elke classificatie. Het rapport toont het
   gebruikersoordeel; de AI-analyse staat in de bijlage.
 
-**Kosten** — één aanroep per fotopaar. Gelogd in `vision_usage`.
+**Model en kosten — beslissing die jij kunt bijstellen**
+
+Standaard staat `VISION_MODEL=claude-opus-5`. Per fotopaar gaat er één aanroep
+met twee afbeeldingen naar het model; verbruik wordt per analyse gelogd in
+`vision_usage`.
+
+Ruwe orde van grootte bij veertig fotoparen in één uitcheckdossier: enkele
+tienden van een euro tot ongeveer een euro aan modelkosten, afhankelijk van de
+resolutie van de foto's. Dat past ruim binnen Deposit Recovery (€ 29,99).
+
+Wil je goedkoper: zet `VISION_MODEL=claude-sonnet-5`. Dat scheelt ongeveer een
+factor twee à drie op de modelkost. Wij hebben dat **niet** als standaard
+genomen omdat een verkeerde classificatie de gebruiker rechtstreeks geld kost —
+maar het is jouw afweging, en de code hoeft er niet voor te wijzigen.
+
+Foto's worden vóór verzending verkleind, wat de kost per aanroep drukt.
 
 Zie `docs/decisions/0004-vision-provider.md`.
 
@@ -187,3 +203,20 @@ Deze punten zijn geen integratie maar blokkeren wel een echte lancering:
       staat op `UNVERIFIED` en draagt geen enkele brief.
 - [ ] **`repair_cost_reference` vullen** met onderbouwde herstelkosten en bron.
 - [ ] **Privacyverantwoording** afwerken en laten nakijken (`docs/privacy.md`).
+
+---
+
+## Herstelkosten-referentietabel — NOT AVAILABLE
+
+**Waarom niet.** Wij hebben geen bron gevonden die indicatieve herstelkosten
+voor Belgische huurwoningen publiceert op een manier die wij kunnen
+verantwoorden. Zelf bedragen bedenken zou precies zijn wat de opdracht verbiedt.
+
+**Wat er in de plaats komt.** De tabel `repair_cost_reference` bestaat en is
+admin-beheerd, maar staat leeg. De kostenverdeling werkt zonder haar: de
+gebruiker voert een bedrag uit een **offerte** in, en de app verdeelt dat volgens
+de Waalse slijtagegrille (40 posten, officieel, wél aanwezig). Zolang er geen
+bedrag is, toont de app geen bedrag.
+
+**Om dit te activeren:** vul `repair_cost_reference` met posten waarvan je de
+bron kunt noemen. Elke rij vraagt `source_name` en bij voorkeur `source_url`.

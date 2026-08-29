@@ -167,6 +167,27 @@ export default async function InspectionPage({
             </p>
           </Card>
 
+          {inspection.type === 'CHECK_OUT' ? (
+            <Card>
+              <CardHeader
+                title={t.comparison.title}
+                description={
+                  locale === 'nl'
+                    ? 'Vergelijk elke vertrekfoto met de overeenkomstige ' +
+                      'intrekfoto en leg uw oordeel vast.'
+                    : 'Comparez chaque photo de sortie à la photo d’entrée ' +
+                      'correspondante et consignez votre appréciation.'
+                }
+              />
+              <Link
+                href={`/${locale}/inspections/${id}/comparison`}
+                className={cn(buttonVariants({ size: 'lg' }))}
+              >
+                {t.comparison.title}
+              </Link>
+            </Card>
+          ) : null}
+
           {!isSigned ? (
             <Card>
               <CardHeader

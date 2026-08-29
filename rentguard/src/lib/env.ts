@@ -22,7 +22,7 @@ const serverSchema = z.object({
 
   // Optioneel — elk hiervan schakelt één integratie in.
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
-  VISION_MODEL: z.string().default('claude-sonnet-5'),
+  VISION_MODEL: z.string().default('claude-opus-5'),
   VISION_CONFIDENCE_THRESHOLD: z.coerce.number().min(0).max(1).default(0.7),
 
   RESEND_API_KEY: z.string().min(1).optional(),

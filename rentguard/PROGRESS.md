@@ -96,7 +96,29 @@ npm run build       groen
 index-signature, waardoor supabase-js alle querytypes op `never` zette. De
 tabeltypes zijn nu type-aliassen.
 
-## Fase 2 — Check-out & AI-vergelijking
+## Fase 2 — Check-out & AI-vergelijking ✅
+
+**Exit-criterium:** fotopaar in → gereviewd vergelijkingsrapport uit.
+
+- [x] Uitcheckwizard (hergebruikt de check-in wizard; koppelt op kamer + label)
+- [x] `VisionAnalyzer`-interface + volledig geïmplementeerde Claude-adapter
+- [x] Gestructureerde uitvoer via `messages.parse()` met Zod-schema
+- [x] Zekerheidsdrempel forceert onzekere uitkomsten naar UNCLEAR
+- [x] Model mag geen bedragen noemen en geen juridische uitspraken doen
+- [x] Voorgestelde herstelposten worden gefilterd op een gesloten lijst
+- [x] Weigering van het model = UNCLEAR met uitleg, geen storing
+- [x] Analyse in batches, hervatbaar, met voortgang in de UI
+- [x] Gebruikersreview per fotopaar; het gebruikersoordeel is leidend
+- [x] Slijtageverdeling volgens de officiële Waalse methode
+- [x] Vergelijkend PDF-rapport met AI-analyses als bijlage
+- [x] Foto's zonder tegenhanger worden vermeld, niet weggelaten
+
+**Gate:** typecheck, lint, 159 tests, build — allemaal groen.
+
+**Beslissing:** `repair_cost_reference` blijft leeg — geen verantwoordbare bron
+gevonden voor Belgische herstelkosten. De verdeling werkt op een bedrag uit een
+offerte dat de gebruiker invoert. Zie INTEGRATIONS.md.
+
 
 ## Fase 3 — Waarborg-engine & brieven
 
