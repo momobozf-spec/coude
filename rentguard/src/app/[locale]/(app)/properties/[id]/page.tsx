@@ -26,6 +26,81 @@ function Row({
   );
 }
 
+interface InspectionSummary {
+  id: string;
+  type: 'CHECK_IN' | 'CHECK_OUT';
+  status: 'DRAFT' | 'COMPLETED' | 'SIGNED_BY_LANDLORD';
+  inspection_date: string;
+  landlord_signed_at: string | null;
+}
+
+function InspectionRow({
+  locale,
+  propertyId,
+  type,
+  title,
+  startLabel,
+  inspection,
+  blockedReason,
+}: {
+  locale: Locale;
+  propertyId: string;
+  type: 'CHECK_IN' | 'CHECK_OUT';
+  title: string;
+  startLabel: string;
+  inspection: InspectionSummary | null;
+  blockedReason: string | null;
+}) {
+  const statusLabel = inspection
+    ? inspection.status === 'DRAFT'
+      ? locale === 'nl'
+        ? 'In opmaak'
+        : 'En cours'
+      : inspection.status === 'SIGNED_BY_LANDLORD'
+        ? locale === 'nl'
+          ? 'Medeondertekend'
+          : 'Cosigné'
+        : locale === 'nl'
+          ? 'Afgerond'
+          : 'Clôturé'
+    : null;
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 p-3">
+      <div>
+        <p className="font-medium text-slate-900">{title}</p>
+        {inspection ? (
+          <p className="text-sm text-slate-600">
+            {formatDate(inspection.inspection_date, locale)} — {statusLabel}
+          </p>
+        ) : blockedReason ? (
+          <p className="text-sm text-slate-600">{blockedReason}</p>
+        ) : (
+          <p className="text-sm text-slate-600">
+            {locale === 'nl' ? 'Nog niet gestart' : 'Pas encore démarré'}
+          </p>
+        )}
+      </div>
+
+      {inspection ? (
+        <Link
+          href={`/${locale}/inspections/${inspection.id}`}
+          className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }))}
+        >
+          {locale === 'nl' ? 'Openen' : 'Ouvrir'}
+        </Link>
+      ) : blockedReason ? null : (
+        <Link
+          href={`/${locale}/inspections/new?property=${propertyId}&type=${type}`}
+          className={cn(buttonVariants({ size: 'sm' }))}
+        >
+          {startLabel}
+        </Link>
+      )}
+    </div>
+  );
+}
+
 function yesNo(value: boolean | null, locale: Locale): string {
   if (value === null) return locale === 'nl' ? 'Onbekend' : 'Inconnu';
   if (locale === 'nl') return value ? 'Ja' : 'Nee';
@@ -52,6 +127,14 @@ export default async function PropertyDetailPage({
 
   if (!data) notFound();
   const property: Property = data;
+
+  const { data: inspections } = await supabase
+    .from('inspections')
+    .select('id, type, status, inspection_date, landlord_signed_at')
+    .eq('property_id', id);
+
+  const checkIn = inspections?.find((row) => row.type === 'CHECK_IN') ?? null;
+  const checkOut = inspections?.find((row) => row.type === 'CHECK_OUT') ?? null;
 
   const depositWarning = depositExceedsTwoMonths(
     property.monthly_rent,
@@ -116,6 +199,43 @@ export default async function PropertyDetailPage({
           </p>
         </Alert>
       ) : null}
+
+      <Card>
+        <CardHeader
+          title={t.nav.inspections}
+          description={
+            locale === 'nl'
+              ? 'Documenteer de staat van de woning bij intrek en bij vertrek.'
+              : 'Documentez l’état du logement à l’entrée et à la sortie.'
+          }
+        />
+        <div className="space-y-3">
+          <InspectionRow
+            locale={locale}
+            propertyId={property.id}
+            type="CHECK_IN"
+            title={t.inspection.checkIn}
+            startLabel={t.inspection.startCheckIn}
+            inspection={checkIn}
+            blockedReason={null}
+          />
+          <InspectionRow
+            locale={locale}
+            propertyId={property.id}
+            type="CHECK_OUT"
+            title={t.inspection.checkOut}
+            startLabel={t.inspection.startCheckOut}
+            inspection={checkOut}
+            blockedReason={
+              !checkIn || checkIn.status === 'DRAFT'
+                ? locale === 'nl'
+                  ? 'Rond eerst het intrekdossier af.'
+                  : 'Clôturez d’abord le dossier d’entrée.'
+                : null
+            }
+          />
+        </div>
+      </Card>
 
       <Card>
         <CardHeader

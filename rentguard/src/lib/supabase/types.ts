@@ -309,6 +309,137 @@ export type PricingConfig = {
   is_active: boolean;
 }
 
+
+export type AuditAction =
+  | 'DOCUMENT_VIEW'
+  | 'DOCUMENT_DOWNLOAD'
+  | 'PHOTO_VIEW'
+  | 'NOTICE_SENT'
+  | 'NOTICE_APPROVED'
+  | 'DATA_EXPORT'
+  | 'DATA_DELETION'
+  | 'LANDLORD_REPORT_VIEW'
+  | 'LANDLORD_SIGNED';
+
+export type AuditLog = {
+  id: number;
+  user_id: string | null;
+  action: AuditAction;
+  resource_type: string;
+  resource_id: string | null;
+  metadata: Record<string, unknown>;
+  ip: string | null;
+  user_agent: string | null;
+  created_at: string;
+}
+
+export type DepositReminder = {
+  id: string;
+  deposit_case_id: string;
+  remind_at: string;
+  kind: string;
+  sent_at: string | null;
+  created_at: string;
+}
+
+export type RentAudit = {
+  id: string;
+  property_id: string;
+  kind: 'RENT_GRID' | 'INDEXATION';
+  inputs: Record<string, unknown>;
+  result: Record<string, unknown>;
+  rule_snapshot: Record<string, unknown>;
+  needs_verification: boolean;
+  created_at: string;
+}
+
+export type VetusteReference = {
+  id: string;
+  item_key: string;
+  category: string;
+  label_source_fr: string;
+  label_nl: string;
+  label_fr: string;
+  lifetime_years: number;
+  abattement_pct: number;
+  franchise_years: number;
+  residual_value_pct: number;
+  source_name: string;
+  source_url: string | null;
+  source_region: string;
+  is_binding_in_brussels: boolean;
+  created_at: string;
+}
+
+export type ContractClauseCheck = {
+  id: string;
+  check_key: string;
+  category: string;
+  label_nl: string;
+  label_fr: string;
+  explanation_nl: string;
+  explanation_fr: string;
+  patterns_nl: string[];
+  patterns_fr: string[];
+  rule_key: string | null;
+  severity: FindingSeverity;
+  is_active: boolean;
+  created_at: string;
+}
+
+export type KbDocument = {
+  id: string;
+  doc_key: string;
+  title_nl: string;
+  title_fr: string;
+  source_name: string;
+  source_url: string;
+  source_is_official: boolean;
+  language: AppLanguage;
+  retrieved_at: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export type KbChunk = {
+  id: string;
+  document_id: string;
+  position: number;
+  content: string;
+  created_at: string;
+}
+
+export type StripeEvent = {
+  id: string;
+  type: string;
+  payload: Record<string, unknown>;
+  processed_at: string | null;
+  error: string | null;
+  received_at: string;
+}
+
+export type VisionUsage = {
+  id: string;
+  user_id: string;
+  comparison_id: string | null;
+  provider: string;
+  model: string;
+  input_tokens: number | null;
+  output_tokens: number | null;
+  cost_estimate_cents: number | null;
+  created_at: string;
+}
+
+export type DeletionRequest = {
+  id: string;
+  user_id: string;
+  requested_at: string;
+  execute_after: string;
+  executed_at: string | null;
+  cancelled_at: string | null;
+  created_at: string;
+}
+
 type Row<T> = {
   Row: T;
   Insert: Partial<T>;
@@ -336,6 +467,16 @@ export type Database = {
       health_index_values: Row<HealthIndexValue>;
       entitlements: Row<Entitlement>;
       pricing_config: Row<PricingConfig>;
+      audit_log: Row<AuditLog>;
+      deposit_reminders: Row<DepositReminder>;
+      rent_audits: Row<RentAudit>;
+      vetuste_reference: Row<VetusteReference>;
+      contract_clause_checks: Row<ContractClauseCheck>;
+      kb_documents: Row<KbDocument>;
+      kb_chunks: Row<KbChunk>;
+      stripe_events: Row<StripeEvent>;
+      vision_usage: Row<VisionUsage>;
+      deletion_requests: Row<DeletionRequest>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

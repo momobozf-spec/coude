@@ -69,7 +69,7 @@ npm run build       groen
 
 ---
 
-## Fase 1 — Accounts, woningen & check-in ⏳ bezig
+## Fase 1 — Accounts, woningen & check-in ✅
 
 **Exit-criterium:** volledig check-in-rapport uit een echte testrun, tweetalig.
 
@@ -81,14 +81,16 @@ npm run build       groen
 - [x] Postcodevalidatie 1000–1299 met gemeente-invulhulp (19 gemeenten, NL/FR)
 - [x] Signalering waarborg > 2 maanden huur, uitdrukkelijk als signalering
 - [x] Retentiekeuze per woning met waarschuwing over de tienjarige verjaring
-- [ ] Wachtwoordherstel
-- [ ] Check-in wizard: kamers, geleide fotochecklist, notities
-- [ ] Upload met SHA-256, EXIF en servertijdstempel
-- [ ] PDF-rapport NL/FR met hashes, tijdstempels en uitlegpagina bewijswaarde
-- [ ] Uitnodiging verhuurder + medeondertekenflow via token
-- [ ] Gratis check-in voor één woning (acquisitie)
+- [x] Check-in wizard: kamers, geleide fotochecklist per kamer, notities
+- [x] Meterstanden als vaste kamer met eigen checklist
+- [x] Upload met SHA-256, EXIF en servertijdstempel, alles server-side berekend
+- [x] PDF-rapport NL/FR met foto's, hashes, tijdstempels en uitlegpagina
+- [x] Integriteitscontrole bij elke rapportgeneratie
+- [x] Uitnodiging verhuurder + medeondertekenflow via gehasht token
+- [x] Gratis check-in voor één woning (acquisitie)
+- [ ] Wachtwoordherstel — verschoven naar Fase 5
 
-**Gate na deze tussenstap:** typecheck, lint, 120 tests, build — allemaal groen.
+**Gate:** typecheck, lint, 143 tests, build — allemaal groen.
 
 **Opgelost onderweg:** `interface` krijgt in TypeScript geen impliciete
 index-signature, waardoor supabase-js alle querytypes op `never` zette. De
