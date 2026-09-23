@@ -6,6 +6,7 @@ import {
   seedReferenceData,
   shoppingListItems,
   shoppingLists,
+  subscriptions,
   listMembers,
   retailers,
   userRetailerPreferences,
@@ -80,6 +81,12 @@ export async function seedDevelopmentData(db: Database, options: DevSeedOptions)
   const demoId = await ensureUser(db, 'demo@superrette.local', 'Mohamed', 'USER', options.demoPassword);
   const partnerId = await ensureUser(db, 'sara@superrette.local', 'Sara', 'USER', options.demoPassword);
   await ensureUser(db, 'admin@superrette.local', 'Admin', 'ADMIN', options.demoPassword);
+
+  // Demo user gets a MANUAL Plus subscription so every feature can be demoed; Sara stays on Free.
+  const [sub] = await db.select({ id: subscriptions.id }).from(subscriptions).where(eq(subscriptions.userId, demoId));
+  if (!sub) {
+    await db.insert(subscriptions).values({ userId: demoId, planKey: 'plus', store: 'MANUAL', status: 'ACTIVE', originalTransactionId: `dev-${demoId}` });
+  }
 
   const beRetailers = await db.select({ id: retailers.id, slug: retailers.slug }).from(retailers);
   for (const userId of [demoId, partnerId]) {

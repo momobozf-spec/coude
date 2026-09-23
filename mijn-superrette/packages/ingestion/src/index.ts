@@ -5,3 +5,4 @@ export * from './equivalences.js';
 export * from './alerts.js';
 export * from './push.js';
 export * from './seed-dev.js';
+export * from './queues.js';

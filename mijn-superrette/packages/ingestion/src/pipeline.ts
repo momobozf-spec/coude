@@ -14,7 +14,7 @@ import {
   type Database,
 } from '@superrette/database';
 import type { DataOrigin, SyncKind, SyncStatus } from '@superrette/domain';
-import { DEFAULT_MATCHING_POLICY, ProductMatchingEngine, type ProductNormalizer } from '@superrette/product-matching';
+import { DEFAULT_MATCHING_POLICY, ProductMatchingEngine, type NormalizedProduct, type ProductNormalizer } from '@superrette/product-matching';
 import {
   providerPriceSchema,
   providerProductSchema,
@@ -66,6 +66,8 @@ interface Counters {
   updated: number;
   failed: number;
 }
+
+type Tx = Parameters<Parameters<Database['transaction']>[0]>[0];
 
 class RecordError extends Error {
   constructor(
@@ -137,9 +139,11 @@ export class IngestionPipeline {
         throw new Error(`Provider "${providerKey}" is UNSUPPORTED: ${provider.info.reason ?? ''}`);
       }
       await this.loadRetailers();
-      if (kind === 'CATALOG' || kind === 'FULL') await this.syncCatalog(provider, syncId, counters);
-      if (kind === 'PRICES' || kind === 'FULL') await this.syncPrices(provider, syncId, counters, changed, options.since);
-      if (kind === 'PROMOTIONS' || kind === 'FULL') await this.syncPromotions(provider, syncId, counters, changed);
+      // A FULL sync runs the stages the provider declares; an explicit kind must be supported.
+      const can = (c: 'listCatalog' | 'getPrices' | 'getPromotions'): boolean => kind !== 'FULL' || provider.info.capabilities.includes(c);
+      if ((kind === 'CATALOG' || kind === 'FULL') && can('listCatalog')) await this.syncCatalog(provider, syncId, counters);
+      if ((kind === 'PRICES' || kind === 'FULL') && can('getPrices')) await this.syncPrices(provider, syncId, counters, changed, options.since);
+      if ((kind === 'PROMOTIONS' || kind === 'FULL') && can('getPromotions')) await this.syncPromotions(provider, syncId, counters, changed);
     } catch (error) {
       fatal = error instanceof Error ? error.message : String(error);
       this.log.error('provider sync failed', { providerKey, syncId, error: fatal });
@@ -299,47 +303,94 @@ export class IngestionPipeline {
         retailerProductId = row!.id;
       }
 
-      const memory = await mappingMemory(tx, retailerProductId);
-      const candidates = await findCandidates(tx, normalized);
-      const result = this.matcher.match(normalized, candidates, memory);
-
-      let variantId: string | null = null;
-      if (result.status === 'CREATE_CANONICAL') {
-        variantId = await createCanonical(tx, {
-          title: product.title,
-          normalized,
-          quantitySource: normalized.quantitySource,
-          dataOrigin,
-          sourceProvider: providerKey,
-          imageUrl: product.imageUrl ?? null,
-        });
-        await recordMatch(tx, {
-          retailerProductId,
-          variantId,
-          confidence: 'EXACT',
-          method: 'ATTRIBUTES',
-          score: 1,
-          status: 'AUTO_ACCEPTED',
-          reasons: ['canonical:created-from-retailer-product'],
-          alternatives: [],
-        });
-      } else if (result.productId && result.method) {
-        await recordMatch(tx, {
-          retailerProductId,
-          variantId: result.productId,
-          confidence: result.confidence,
-          method: result.method,
-          score: result.score,
-          status: result.status,
-          reasons: result.reasons,
-          alternatives: result.alternatives.map((a) => ({ variantId: a.productId, score: a.score, confidence: a.confidence })),
-        });
-        // Only EXACT/HIGH (auto-accepted) and human-confirmed matches link prices to a canonical product.
-        if (result.status === 'AUTO_ACCEPTED' || result.status === 'CONFIRMED') variantId = result.productId;
-      }
-      await linkRetailerProduct(tx, retailerProductId, variantId);
+      const variantId = await this.matchAndLink(tx, {
+        retailerProductId,
+        normalized,
+        title: product.title,
+        imageUrl: product.imageUrl ?? null,
+        dataOrigin,
+        providerKey,
+      });
       return { retailerProductId, variantId, created: !existing };
     });
+  }
+
+  /**
+   * Match a normalised retailer product against canonical variants and link
+   * it according to the matching policy (EXACT/HIGH auto, MEDIUM/LOW review,
+   * UNMATCHED creates a canonical product). Human decisions always win.
+   */
+  async matchAndLink(
+    tx: Tx,
+    input: { retailerProductId: string; normalized: NormalizedProduct; title: string; imageUrl: string | null; dataOrigin: DataOrigin; providerKey: string },
+  ): Promise<string | null> {
+    const { retailerProductId, normalized } = input;
+    const memory = await mappingMemory(tx, retailerProductId);
+    const candidates = await findCandidates(tx, normalized);
+    const result = this.matcher.match(normalized, candidates, memory);
+
+    let variantId: string | null = null;
+    if (result.status === 'CREATE_CANONICAL') {
+      variantId = await createCanonical(tx, {
+        title: input.title,
+        normalized,
+        quantitySource: normalized.quantitySource,
+        dataOrigin: input.dataOrigin,
+        sourceProvider: input.providerKey,
+        imageUrl: input.imageUrl,
+      });
+      await recordMatch(tx, {
+        retailerProductId,
+        variantId,
+        confidence: 'EXACT',
+        method: 'ATTRIBUTES',
+        score: 1,
+        status: 'AUTO_ACCEPTED',
+        reasons: ['canonical:created-from-retailer-product'],
+        alternatives: [],
+      });
+    } else if (result.productId && result.method) {
+      await recordMatch(tx, {
+        retailerProductId,
+        variantId: result.productId,
+        confidence: result.confidence,
+        method: result.method,
+        score: result.score,
+        status: result.status,
+        reasons: result.reasons,
+        alternatives: result.alternatives.map((a) => ({ variantId: a.productId, score: a.score, confidence: a.confidence })),
+      });
+      // Only EXACT/HIGH (auto-accepted) and human-confirmed matches link prices to a canonical product.
+      if (result.status === 'AUTO_ACCEPTED' || result.status === 'CONFIRMED') variantId = result.productId;
+    }
+    await linkRetailerProduct(tx, retailerProductId, variantId);
+    return variantId;
+  }
+
+  /** Re-run matching for a stored retailer product (e.g. after an admin rejected a proposal). */
+  async rematch(retailerProductId: string): Promise<string | null> {
+    const [rp] = await this.db
+      .select({
+        id: retailerProducts.id,
+        title: retailerProducts.title,
+        normalized: retailerProducts.normalized,
+        imageUrl: retailerProducts.imageUrl,
+        dataOrigin: retailerProducts.dataOrigin,
+        sourceProvider: retailerProducts.sourceProvider,
+      })
+      .from(retailerProducts)
+      .where(eq(retailerProducts.id, retailerProductId));
+    if (!rp || !rp.normalized) throw new Error(`Retailer product ${retailerProductId} not found`);
+    return this.db.transaction((tx) =>
+      this.matchAndLink(tx, {
+        retailerProductId: rp.id,
+        normalized: rp.normalized as unknown as NormalizedProduct,
+        title: rp.title,
+        imageUrl: rp.imageUrl,
+        dataOrigin: rp.dataOrigin,
+        providerKey: rp.sourceProvider,
+      }),
+    );
   }
 
   // ── Prices ─────────────────────────────────────────────────────────────
@@ -367,6 +418,7 @@ export class IngestionPipeline {
 
   /** Persist one observation. Returns true when a new observation was stored. */
   async recordPrice(price: ValidProviderPrice, provider: StoreProvider, syncId: string | null, changed: Set<string>): Promise<boolean> {
+    if (this.retailerIds.size === 0) await this.loadRetailers();
     const retailerId = this.retailerId(price.retailerSlug);
     let rp = await this.findRetailerProduct(retailerId, price.externalId);
     if (!rp && price.product) {

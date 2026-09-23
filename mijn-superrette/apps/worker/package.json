@@ -1,0 +1,23 @@
+{
+  "name": "@superrette/worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mijn Superrette background worker (BullMQ): provider syncs, price alert evaluation, schedules",
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput & node --env-file-if-exists=../../.env --watch dist/main.js",
+    "start": "node --env-file-if-exists=../../.env dist/main.js"
+  },
+  "dependencies": {
+    "@superrette/database": "workspace:*",
+    "@superrette/domain": "workspace:*",
+    "@superrette/ingestion": "workspace:*",
+    "@superrette/store-providers": "workspace:*",
+    "bullmq": "^6.3.8",
+    "zod": "^4.6.5",
+    "ioredis": "^5.8.0"
+  }
+}

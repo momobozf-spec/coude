@@ -274,6 +274,8 @@ export interface BasketComparisonDto {
   itemCount: number;
   cheapestCompleteRetailerId: string | null;
   retailers: RetailerBasketDto[];
+  /** Plan limit on compared retailers (null = unlimited); extra retailers were left out. */
+  retailerLimit: number | null;
   dataOrigins: DataOrigin[];
   computedAt: string;
 }
@@ -368,6 +370,14 @@ export interface HomeDto {
 export interface EntitlementsDto {
   plans: string[];
   entitlements: EntitlementSet;
+}
+
+export interface InvitePreviewDto {
+  listId: string;
+  listName: string;
+  invitedBy: string;
+  role: ListMemberRole;
+  valid: boolean;
 }
 
 export interface InviteDto {

@@ -80,7 +80,7 @@ export class ProductNormalizer {
 
   /** Resolve synonyms in free text and return canonical tokens (used for search queries too). */
   canonicalizeText(text: string): string[] {
-    let normalized = ` ${normalizeText(text)} `;
+    let normalized = ` ${this.decompound(normalizeText(text))} `;
     const found: string[] = [];
     for (const { pattern, token } of this.synonyms) {
       normalized = normalized.replace(pattern, () => {
@@ -92,6 +92,20 @@ export class ProductNormalizer {
       .split(' ')
       .filter((t) => t.length > 0 && !this.stopwords.has(t) && !/^\d+([.,]\d+)?$/.test(t));
     return [...new Set([...found, ...rest])];
+  }
+
+  /** Split Dutch compounds on known heads, unless the whole word is itself a known synonym. */
+  decompound(text: string): string {
+    return text
+      .split(' ')
+      .map((word) => {
+        if (this.dictionary.synonyms[word] !== undefined) return word;
+        for (const head of this.dictionary.compoundHeads) {
+          if (word.length - head.length >= 3 && word.endsWith(head)) return `${word.slice(0, -head.length)} ${head}`;
+        }
+        return word;
+      })
+      .join(' ');
   }
 
   detectBrand(title: string, explicitBrand?: string | null): NormalizedProduct['brand'] {

@@ -36,6 +36,11 @@ export interface NormalizerDictionary {
   dietary: Record<string, DietaryAttribute>;
   /** Tokens without meaning for matching (packaging, filler words). */
   stopwords: string[];
+  /**
+   * Dutch compound heads: "volkorenbrood" → "volkoren brood",
+   * "scharreleieren" → "scharrel eieren". Only split when the rest is ≥ 3 letters.
+   */
+  compoundHeads: string[];
 }
 
 export const DEFAULT_DICTIONARY: NormalizerDictionary = {
@@ -169,6 +174,7 @@ export const DEFAULT_DICTIONARY: NormalizerDictionary = {
     'des', 'en', 'et', 'and', 'the', 'van', 'met', 'avec', 'with', 'x', 'pack', 'multipack', 'per', 'maat',
     'taille', 'size', 'selection', 'classic', 'original', 'origineel',
   ],
+  compoundHeads: ['brood', 'eieren', 'melk', 'filet', 'koffie', 'yoghurt', 'kaas', 'sap', 'pasta', 'chips', 'koek', 'koekjes'],
 };
 
 /** Merge DB-provided entries into a dictionary (later entries win by slug/key). */
@@ -185,5 +191,6 @@ export function extendDictionary(
     brands: [...brands.values()],
     synonyms: { ...base.synonyms, ...(extra.synonyms ?? {}) },
     productTypes: [...types.values()],
+    compoundHeads: base.compoundHeads,
   };
 }

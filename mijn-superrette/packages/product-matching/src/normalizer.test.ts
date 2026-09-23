@@ -95,6 +95,16 @@ describe('ProductNormalizer', () => {
     expect(p.productType).toBe('toothpaste');
   });
 
+  it('splits Dutch compounds', () => {
+    const bread = n.normalize({ title: 'Boni volkorenbrood gesneden 800g' });
+    expect(bread.productType).toBe('bread-wholemeal');
+    const eggs = n.normalize({ title: 'AH Scharreleieren 12 stuks' });
+    expect(eggs.productType).toBe('eggs');
+    expect(eggs.variants).toContain('scharrel');
+    // A compound that is itself a known word stays intact.
+    expect(n.normalize({ title: 'AH Kipfilet 500 g' }).tokens).toContain('kipfilet');
+  });
+
   it('canonicalises search queries with synonyms', () => {
     expect(n.canonicalizeText('lait demi-écrémé').sort()).toEqual(['halfvol', 'melk']);
     expect(n.canonicalizeText('cola zero').sort()).toEqual(['cola', 'zero']);
