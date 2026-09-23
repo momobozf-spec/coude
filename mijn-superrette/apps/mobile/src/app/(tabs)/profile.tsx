@@ -13,7 +13,7 @@ export default function Profile(): ReactNode {
   const ents = useQuery({ queryKey: ['entitlements'], queryFn: api.entitlements });
   const isPlus = ents.data?.plans.includes('plus');
   return (
-    <Screen title={t('profile.title')}>
+    <Screen narrow title={t('profile.title')}>
       <Card style={{ marginBottom: 16 }}>
         <Text variant="heading">{user?.displayName}</Text>
         <Text tone="muted">{user?.email}</Text>

@@ -15,7 +15,7 @@ export default function Sources(): ReactNode {
     queryFn: () => api.retailers(user?.countryCode ?? undefined),
   });
   return (
-    <Screen title={t('profile.dataSources')} back>
+    <Screen narrow title={t('profile.dataSources')} back>
       <Card style={{ marginBottom: 12, gap: 8 }}>
         <Text>{t('dataOrigin.CROWDSOURCED')}: Open Prices — Open Food Facts (ODbL).</Text>
         <Text variant="caption" tone="muted">

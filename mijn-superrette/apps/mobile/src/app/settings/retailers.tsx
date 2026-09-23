@@ -11,7 +11,7 @@ export default function RetailerSettings(): ReactNode {
   const { user } = useSession();
   const qc = useQueryClient();
   return (
-    <Screen title={t('profile.retailers')} back>
+    <Screen narrow title={t('profile.retailers')} back>
       <RetailerPicker
         country={user?.countryCode ?? 'BE'}
         cta={t('common.save')}

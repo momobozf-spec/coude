@@ -24,7 +24,7 @@ export default function AddToList(): ReactNode {
   });
 
   return (
-    <Screen title={t('product.addToList')} back edges={['top', 'bottom']}>
+    <Screen narrow title={t('product.addToList')} back edges={['top', 'bottom']}>
       <Text variant="heading" style={{ marginBottom: 12 }}>
         {name}
       </Text>

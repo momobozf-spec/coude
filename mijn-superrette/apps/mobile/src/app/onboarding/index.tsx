@@ -31,7 +31,7 @@ export default function OnboardingCountry(): ReactNode {
   };
 
   return (
-    <Screen>
+    <Screen narrow>
       <View style={{ gap: 12, marginTop: 24 }}>
         <Text variant="display">{t('onboarding.countryTitle')}</Text>
         <Text tone="muted">{t('onboarding.countryBody')}</Text>

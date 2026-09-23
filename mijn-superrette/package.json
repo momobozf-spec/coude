@@ -25,7 +25,9 @@
     "dev:api": "pnpm --filter @superrette/api dev",
     "dev:worker": "pnpm --filter @superrette/worker dev",
     "dev:admin": "pnpm --filter @superrette/admin dev",
-    "dev:mobile": "pnpm --filter @superrette/mobile start"
+    "dev:mobile": "pnpm --filter @superrette/mobile start",
+    "build:web": "pnpm --filter @superrette/mobile build:web",
+    "dev:web": "pnpm --filter @superrette/mobile web"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

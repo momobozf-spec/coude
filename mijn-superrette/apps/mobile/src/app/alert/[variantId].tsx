@@ -31,7 +31,7 @@ export default function CreateAlert(): ReactNode {
 
   const current = product.data?.cheapest?.priceCents;
   return (
-    <Screen title={t('alerts.create')} back edges={['top', 'bottom']}>
+    <Screen narrow title={t('alerts.create')} back edges={['top', 'bottom']}>
       <Text variant="heading">{product.data?.name}</Text>
       {current != null ? (
         <Text tone="muted" style={{ marginBottom: 16 }}>

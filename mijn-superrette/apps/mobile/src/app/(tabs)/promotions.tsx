@@ -7,6 +7,7 @@ import { PromotionCard } from '../../components/PromotionCard';
 import { ErrorState, Loading, Screen } from '../../components/Screen';
 import { useI18n } from '../../state/i18n';
 import { useApi } from '../../state/session';
+import { Grid } from '../../components/Grid';
 
 type Section = 'for_you' | 'favorites' | 'retailer' | 'category' | 'ending_soon';
 type Sort = 'largest_discount' | 'lowest_price' | 'ending_soon' | 'recent';
@@ -111,9 +112,11 @@ export default function Promotions(): ReactNode {
       {promos.error ? <ErrorState error={promos.error} onRetry={() => void promos.refetch()} /> : null}
       {promos.data ? <DataNotice origins={promos.data.map((p) => p.dataOrigin)} /> : null}
       {promos.data?.length === 0 ? <ErrorState error={new Error(t('promotions.none'))} /> : null}
-      {promos.data?.map((p) => (
-        <PromotionCard key={`${p.id}-${p.variantId}`} promo={p} />
-      ))}
+      <Grid>
+        {promos.data?.map((p) => (
+          <PromotionCard key={`${p.id}-${p.variantId}`} promo={p} />
+        ))}
+      </Grid>
     </Screen>
   );
 }

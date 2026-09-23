@@ -19,6 +19,7 @@ import { DataNotice } from '../../../components/DataNotice';
 import { ErrorState, Loading, Screen } from '../../../components/Screen';
 import { useI18n } from '../../../state/i18n';
 import { useApi } from '../../../state/session';
+import { Grid } from '../../../components/Grid';
 
 function statusBadge(line: BasketLineDto, t: ReturnType<typeof useI18n>['t']): { label: string; tone: BadgeTone } {
   switch (line.status) {
@@ -146,14 +147,16 @@ export default function Compare(): ReactNode {
               {t('basket.locked')}
             </Text>
           ) : null}
-          {data.retailers.map((r) => (
-            <RetailerReceipt
-              key={r.retailer.id}
-              basket={r}
-              listId={id}
-              cheapest={r.retailer.id === data.cheapestCompleteRetailerId}
-            />
-          ))}
+          <Grid max={2}>
+            {data.retailers.map((r) => (
+              <RetailerReceipt
+                key={r.retailer.id}
+                basket={r}
+                listId={id}
+                cheapest={r.retailer.id === data.cheapestCompleteRetailerId}
+              />
+            ))}
+          </Grid>
         </>
       ) : null}
     </Screen>

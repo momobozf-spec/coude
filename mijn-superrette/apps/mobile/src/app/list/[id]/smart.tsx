@@ -21,7 +21,7 @@ export default function Smart(): ReactNode {
   });
   const s = smart.data;
   return (
-    <Screen title={t('smart.title')} back>
+    <Screen narrow title={t('smart.title')} back>
       <Text variant="heading" tone="muted" style={{ marginBottom: 12 }}>
         {t('smart.question')}
       </Text>

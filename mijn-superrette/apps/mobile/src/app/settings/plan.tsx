@@ -26,7 +26,7 @@ export default function Plan(): ReactNode {
   const plans = useQuery({ queryKey: ['plans'], queryFn: api.plans });
   const mine = useQuery({ queryKey: ['entitlements'], queryFn: api.entitlements });
   return (
-    <Screen title={t('profile.subscription')} back>
+    <Screen narrow title={t('profile.subscription')} back>
       {plans.isLoading ? <Loading /> : null}
       {plans.data?.map((p) => (
         <Card key={p.key} style={{ marginBottom: 12, borderColor: p.key === 'plus' ? colors.accent : colors.border }}>

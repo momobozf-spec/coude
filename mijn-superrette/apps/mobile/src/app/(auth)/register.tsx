@@ -36,7 +36,7 @@ export default function Register(): ReactNode {
   };
 
   return (
-    <Screen title={t('auth.createAccount')} back>
+    <Screen narrow title={t('auth.createAccount')} back>
       <View style={{ gap: 16 }}>
         <TextField
           label={t('auth.displayName')}

@@ -38,6 +38,7 @@ pnpm dev:api                         # http://localhost:3000
 pnpm dev:worker                      # only needed with REDIS_URL (otherwise jobs run in the API)
 pnpm dev:admin                       # http://localhost:5173
 pnpm dev:mobile                      # Expo; press i / a / w
+pnpm dev:web                         # web version in the browser
 ```
 
 Demo accounts (development only; password `superrette-dev` or `DEV_SEED_PASSWORD`):
@@ -65,7 +66,7 @@ apps/
   api/        NestJS API (+ Socket.IO gateway)       → docs/ARCHITECTURE.md
   worker/     BullMQ worker and schedules            → docs/DATA_INGESTION.md
   admin/      admin web app (match review, syncs)
-  mobile/     Expo app                               → docs/MOBILE.md
+  mobile/     Expo app for iOS, Android and web      → docs/MOBILE.md, docs/WEB.md
 packages/
   shared/            money (integer cents), quantities, GTIN, text utils
   domain/            enums, entities, entitlement keys
@@ -84,4 +85,4 @@ docs/                architecture and operations documentation
 
 ## Documentation
 
-[ARCHITECTURE](docs/ARCHITECTURE.md) · [DATABASE](docs/DATABASE.md) · [PRODUCT_MATCHING](docs/PRODUCT_MATCHING.md) · [PRICING_ENGINE](docs/PRICING_ENGINE.md) · [BASKET_COMPARISON](docs/BASKET_COMPARISON.md) · [STORE_PROVIDERS](docs/STORE_PROVIDERS.md) · [DATA_INGESTION](docs/DATA_INGESTION.md) · [MOBILE](docs/MOBILE.md) · [SECURITY](docs/SECURITY.md) · [PRIVACY_ARCHITECTURE](docs/PRIVACY_ARCHITECTURE.md) · [DEPLOYMENT](docs/DEPLOYMENT.md) · [STATUS](docs/STATUS.md)
+[ARCHITECTURE](docs/ARCHITECTURE.md) · [DATABASE](docs/DATABASE.md) · [PRODUCT_MATCHING](docs/PRODUCT_MATCHING.md) · [PRICING_ENGINE](docs/PRICING_ENGINE.md) · [BASKET_COMPARISON](docs/BASKET_COMPARISON.md) · [STORE_PROVIDERS](docs/STORE_PROVIDERS.md) · [DATA_INGESTION](docs/DATA_INGESTION.md) · [MOBILE](docs/MOBILE.md) · [WEB](docs/WEB.md) · [SECURITY](docs/SECURITY.md) · [PRIVACY_ARCHITECTURE](docs/PRIVACY_ARCHITECTURE.md) · [DEPLOYMENT](docs/DEPLOYMENT.md) · [STATUS](docs/STATUS.md)

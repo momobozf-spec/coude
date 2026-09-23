@@ -29,7 +29,7 @@ export default function Login(): ReactNode {
   };
 
   return (
-    <Screen title={t('auth.login')} back>
+    <Screen narrow title={t('auth.login')} back>
       <View style={{ gap: 16 }}>
         <TextField
           label={t('auth.email')}

@@ -5,6 +5,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import type { SearchSort } from '@superrette/validation';
 import { Chip, Row, SearchField, SectionHeader, Text } from '@superrette/ui';
 import { DataNotice } from '../../components/DataNotice';
+import { Grid } from '../../components/Grid';
 import { ProductCard } from '../../components/ProductCard';
 import { ErrorState, Loading, Screen } from '../../components/Screen';
 import { useI18n } from '../../state/i18n';
@@ -142,7 +143,11 @@ export default function Search(): ReactNode {
                   ) : null}
                 </View>
               ) : (
-                results.data.items.map((p) => <ProductCard key={p.variantId} product={p} />)
+                <Grid>
+                  {results.data.items.map((p) => (
+                    <ProductCard key={p.variantId} product={p} />
+                  ))}
+                </Grid>
               )}
             </>
           ) : null}

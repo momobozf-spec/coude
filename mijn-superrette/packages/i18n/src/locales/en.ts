@@ -6,6 +6,7 @@ export const en: Messages = {
     tagline: 'Where do I shop cheapest today?',
   },
   common: {
+    copied: 'Copied to the clipboard.',
     save: 'Save',
     cancel: 'Cancel',
     delete: 'Delete',
@@ -241,6 +242,11 @@ export const en: Messages = {
     permissionBody: "You'll know right away when a price alert goes off.",
   },
   scanner: {
+    manualTitle: 'Type the barcode',
+    manualPlaceholder: 'e.g. 5449000131805',
+    lookup: 'Look up',
+    useCamera: 'Use camera',
+    noCamera: 'No camera? Type the digits below the barcode.',
     title: 'Scan barcode',
     hint: 'Point your camera at the barcode',
     unknown: "We don't know this product yet.",

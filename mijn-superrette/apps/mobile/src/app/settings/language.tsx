@@ -16,7 +16,7 @@ export default function LanguageSettings(): ReactNode {
   const api = useApi();
   const { refreshUser } = useSession();
   return (
-    <Screen title={t('profile.language')} back>
+    <Screen narrow title={t('profile.language')} back>
       <Card>
         {LANGUAGES.map(([code, name], i) => (
           <ListRowWithDivider key={code} first={i === 0}>

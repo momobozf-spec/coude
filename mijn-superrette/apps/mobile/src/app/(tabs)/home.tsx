@@ -10,6 +10,8 @@ import { PromotionCard } from '../../components/PromotionCard';
 import { ErrorState, Loading, Screen } from '../../components/Screen';
 import { useI18n } from '../../state/i18n';
 import { useApi } from '../../state/session';
+import { Grid } from '../../components/Grid';
+import { useLayout } from '../../lib/layout';
 
 function FavoriteTile({ fav }: { fav: FavoriteDto }): ReactNode {
   const { t, price, unitPrice } = useI18n();
@@ -65,6 +67,7 @@ export default function Home(): ReactNode {
   const api = useApi();
   const { t } = useI18n();
   const { colors } = useTheme();
+  const { isWide } = useLayout();
   const home = useQuery({ queryKey: ['home'], queryFn: api.home });
   const data = home.data;
 
@@ -136,7 +139,11 @@ export default function Home(): ReactNode {
           {data.favorites.length === 0 ? (
             <Text tone="muted">{t('home.noFavorites')}</Text>
           ) : (
-            data.favorites.slice(0, 4).map((f) => <FavoriteTile key={f.product.variantId} fav={f} />)
+            <Grid max={2}>
+              {data.favorites.slice(0, 4).map((f) => (
+                <FavoriteTile key={f.product.variantId} fav={f} />
+              ))}
+            </Grid>
           )}
 
           {data.promotionsForYou.length > 0 ? (
@@ -146,16 +153,24 @@ export default function Home(): ReactNode {
                 action={t('common.seeAll')}
                 onAction={() => router.push('/promotions')}
               />
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={{ marginHorizontal: -16 }}
-                contentContainerStyle={{ paddingHorizontal: 16 }}
-              >
-                {data.promotionsForYou.map((p) => (
-                  <PromotionCard key={`${p.id}-${p.variantId}`} promo={p} compact />
-                ))}
-              </ScrollView>
+              {isWide ? (
+                <Grid>
+                  {data.promotionsForYou.slice(0, 6).map((p) => (
+                    <PromotionCard key={`${p.id}-${p.variantId}`} promo={p} />
+                  ))}
+                </Grid>
+              ) : (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={{ marginHorizontal: -16 }}
+                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                >
+                  {data.promotionsForYou.map((p) => (
+                    <PromotionCard key={`${p.id}-${p.variantId}`} promo={p} compact />
+                  ))}
+                </ScrollView>
+              )}
             </>
           ) : null}
 

@@ -1,5 +1,7 @@
 # Mobile app
 
+The same app also ships as a responsive **web version**; see [WEB.md](WEB.md).
+
 `apps/mobile`: Expo SDK 57, React Native 0.86, React 19.2, expo-router, TanStack Query, Socket.IO client.
 
 ## Navigation

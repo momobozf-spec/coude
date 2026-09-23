@@ -133,3 +133,58 @@ services:
         value: "true"
       - key: NEXTAUTH_URL
         sync: false
+
+  # ---------- Mijn Superrette (demo-omgeving met VOORBEELDDATA) ----------
+  # API + web-app. Draait als "staging" met fictieve voorbeelddata (duidelijk gelabeld),
+  # omdat er geen toegestane live supermarkt-API's bestaan (zie mijn-superrette/docs/STORE_PROVIDERS.md).
+  - type: web
+    name: mijn-superrette-api
+    runtime: node
+    plan: free
+    rootDir: mijn-superrette
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build:packages && pnpm --filter @superrette/api build
+    # Migraties + voorbeelddata (idempotent; weigert in productie) en daarna de API starten.
+    startCommand: pnpm db:seed:dev && node apps/api/dist/main.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: APP_ENV
+        value: staging
+      - key: ALLOW_DEVELOPMENT_DATA
+        value: "true"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mijn-superrette-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DEV_SEED_PASSWORD
+        generateValue: true
+      # Vul na de eerste deploy de https-URL van mijn-superrette-web in (voor CORS en uitnodigingslinks).
+      - key: CORS_ORIGINS
+        sync: false
+      - key: PUBLIC_APP_URL
+        sync: false
+
+  - type: web
+    name: mijn-superrette-web
+    runtime: static
+    rootDir: mijn-superrette
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build:web
+    staticPublishPath: ./apps/mobile/dist-web
+    pullRequestPreviewsEnabled: false
+    envVars:
+      # Vul na de eerste deploy de https-URL van mijn-superrette-api in (bv. https://mijn-superrette-api.onrender.com).
+      - key: EXPO_PUBLIC_API_URL
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+databases:
+  - name: mijn-superrette-db
+    plan: free
+    databaseName: superrette
+    user: superrette

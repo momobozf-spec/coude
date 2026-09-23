@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState, type ReactNode } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import type { ShoppingListDetailDto, ShoppingListItemDto } from '@superrette/validation';
 import { Badge, Button, Card, Divider, Icon, IconButton, Row, SearchField, Text, useTheme } from '@superrette/ui';
 import { ApiError } from '../../../api/client';
 import { ErrorState, Loading, Screen } from '../../../components/Screen';
+import { notify } from '../../../lib/platform';
 import { useListRealtime } from '../../../lib/realtime';
 import { useI18n } from '../../../state/i18n';
 import { useApi } from '../../../state/session';
@@ -92,7 +93,7 @@ export default function ListScreen(): ReactNode {
       ),
     onError: (error) => {
       // Conflict: someone changed the item meanwhile; show their version.
-      if (error instanceof ApiError && error.code === 'VERSION_CONFLICT') Alert.alert(t('lists.conflict'));
+      if (error instanceof ApiError && error.code === 'VERSION_CONFLICT') notify(t('lists.conflict'));
       void qc.invalidateQueries({ queryKey: key });
     },
   });
@@ -132,6 +133,7 @@ export default function ListScreen(): ReactNode {
 
   return (
     <Screen
+      narrow
       title={l?.name}
       back
       right={

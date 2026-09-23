@@ -51,3 +51,5 @@ jobs:
       - run: pnpm --filter @superrette/api build && pnpm --filter @superrette/worker build && pnpm --filter @superrette/admin build
       - name: Mobile production bundles (Android + iOS, Hermes)
         run: pnpm --filter @superrette/mobile build
+      - name: Web version (static export)
+        run: pnpm build:web

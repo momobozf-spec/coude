@@ -6,6 +6,7 @@ export const fr: Messages = {
     tagline: "Où faire mes courses au meilleur prix aujourd'hui ?",
   },
   common: {
+    copied: 'Copié dans le presse-papiers.',
     save: 'Enregistrer',
     cancel: 'Annuler',
     delete: 'Supprimer',
@@ -241,6 +242,11 @@ export const fr: Messages = {
     permissionBody: 'Vous saurez tout de suite quand une alerte prix se déclenche.',
   },
   scanner: {
+    manualTitle: 'Saisissez le code-barres',
+    manualPlaceholder: 'p. ex. 5449000131805',
+    lookup: 'Rechercher',
+    useCamera: 'Utiliser la caméra',
+    noCamera: 'Pas de caméra ? Saisissez les chiffres sous le code-barres.',
     title: 'Scanner un code-barres',
     hint: 'Pointez votre caméra vers le code-barres',
     unknown: 'Nous ne connaissons pas encore ce produit.',

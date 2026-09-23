@@ -14,7 +14,7 @@ export default function OnboardingRetailers(): ReactNode {
   const params = useLocalSearchParams<{ country?: string }>();
   const country = params.country ?? user?.countryCode ?? 'BE';
   return (
-    <Screen back>
+    <Screen narrow back>
       <View style={{ gap: 8, marginBottom: 16 }}>
         <Text variant="display">{t('onboarding.retailersTitle')}</Text>
         <Text tone="muted">{t('onboarding.retailersBody')}</Text>

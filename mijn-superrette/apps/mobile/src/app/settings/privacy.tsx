@@ -1,8 +1,8 @@
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
-import { Alert, Share } from 'react-native';
 import { Button, Card, Text } from '@superrette/ui';
 import { Screen } from '../../components/Screen';
+import { confirmAsync, saveJson } from '../../lib/platform';
 import { useI18n } from '../../state/i18n';
 import { useApi, useSession } from '../../state/session';
 
@@ -13,7 +13,7 @@ export default function Privacy(): ReactNode {
   const { t } = useI18n();
   const [message, setMessage] = useState<string | null>(null);
   return (
-    <Screen title={t('profile.privacy')} back>
+    <Screen narrow title={t('profile.privacy')} back>
       <Card style={{ gap: 12 }}>
         <Button
           title={t('profile.exportData')}
@@ -21,7 +21,7 @@ export default function Privacy(): ReactNode {
           variant="secondary"
           onPress={async () => {
             const data = await api.exportData();
-            await Share.share({ message: JSON.stringify(data, null, 2), title: 'mijn-superrette-export.json' });
+            await saveJson('mijn-superrette-export.json', data);
           }}
         />
         <Button
@@ -40,20 +40,16 @@ export default function Privacy(): ReactNode {
           title={t('profile.deleteAccount')}
           variant="danger"
           icon="trash"
-          onPress={() =>
-            Alert.alert(t('profile.deleteAccount'), t('profile.deleteAccountConfirm'), [
-              { text: t('common.cancel'), style: 'cancel' },
-              {
-                text: t('common.delete'),
-                style: 'destructive',
-                onPress: async () => {
-                  await api.deleteAccount();
-                  await signOut();
-                  router.replace('/welcome');
-                },
-              },
-            ])
-          }
+          onPress={async () => {
+            const ok = await confirmAsync(t('profile.deleteAccount'), t('profile.deleteAccountConfirm'), {
+              confirm: t('common.delete'),
+              cancel: t('common.cancel'),
+            });
+            if (!ok) return;
+            await api.deleteAccount();
+            await signOut();
+            router.replace('/welcome');
+          }}
         />
       </Card>
     </Screen>

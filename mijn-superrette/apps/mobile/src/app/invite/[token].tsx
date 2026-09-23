@@ -27,7 +27,7 @@ export default function AcceptInvite(): ReactNode {
   });
   if (status === 'signed-out') return <Redirect href="/welcome" />;
   return (
-    <Screen title={t('sharing.accept')} back>
+    <Screen narrow title={t('sharing.accept')} back>
       {preview.isLoading ? <Loading /> : null}
       {preview.data && preview.data.valid ? (
         <Card>

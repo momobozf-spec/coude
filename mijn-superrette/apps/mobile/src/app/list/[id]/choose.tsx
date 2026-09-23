@@ -27,7 +27,7 @@ export default function ChooseProduct(): ReactNode {
   });
 
   return (
-    <Screen title={t('basket.chooseProduct')} back edges={['top', 'bottom']}>
+    <Screen narrow title={t('basket.chooseProduct')} back edges={['top', 'bottom']}>
       {compare.isLoading ? <Loading /> : null}
       {line && basket ? (
         <>

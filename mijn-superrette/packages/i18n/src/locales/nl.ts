@@ -9,6 +9,7 @@ export const nl = {
     tagline: 'Waar doe ik vandaag het voordeligst mijn boodschappen?',
   },
   common: {
+    copied: 'Gekopieerd naar het klembord.',
     save: 'Opslaan',
     cancel: 'Annuleren',
     delete: 'Verwijderen',
@@ -244,6 +245,11 @@ export const nl = {
     permissionBody: 'Zo hoor je meteen wanneer een prijsalarm afgaat.',
   },
   scanner: {
+    manualTitle: 'Typ de barcode in',
+    manualPlaceholder: 'bv. 5449000131805',
+    lookup: 'Opzoeken',
+    useCamera: 'Camera gebruiken',
+    noCamera: 'Geen camera beschikbaar? Typ de cijfers onder de streepjescode in.',
     title: 'Scan barcode',
     hint: 'Richt je camera op de streepjescode',
     unknown: 'Dit product kennen we nog niet.',

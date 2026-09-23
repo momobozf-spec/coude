@@ -6,6 +6,7 @@ import { ProductCard } from '../components/ProductCard';
 import { ErrorState, Loading, Screen } from '../components/Screen';
 import { useI18n } from '../state/i18n';
 import { useApi } from '../state/session';
+import { Grid } from '../components/Grid';
 
 export default function Favorites(): ReactNode {
   const api = useApi();
@@ -22,9 +23,11 @@ export default function Favorites(): ReactNode {
       {favorites.error ? <ErrorState error={favorites.error} /> : null}
       {favorites.data ? <DataNotice origins={favorites.data.map((f) => f.product.dataOrigin)} /> : null}
       {favorites.data?.length === 0 ? <EmptyState icon="heart" title={t('home.noFavorites')} /> : null}
-      {favorites.data?.map((f) => (
-        <ProductCard key={f.product.variantId} product={f.product} />
-      ))}
+      <Grid>
+        {favorites.data?.map((f) => (
+          <ProductCard key={f.product.variantId} product={f.product} />
+        ))}
+      </Grid>
     </Screen>
   );
 }

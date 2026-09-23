@@ -4,6 +4,7 @@ import { ActivityIndicator, RefreshControl, ScrollView, View } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, EmptyState, IconButton, Row, Text, useTheme } from '@superrette/ui';
 import { ApiError } from '../api/client';
+import { useLayout } from '../lib/layout';
 import { useI18n } from '../state/i18n';
 
 export function Screen({
@@ -15,6 +16,7 @@ export function Screen({
   refreshing,
   onRefresh,
   edges = ['top'],
+  narrow = false,
 }: {
   children: ReactNode;
   title?: string;
@@ -24,12 +26,22 @@ export function Screen({
   refreshing?: boolean;
   onRefresh?: () => void;
   edges?: ('top' | 'bottom')[];
+  /** Forms and dialogs: keep a readable width on large screens. */
+  narrow?: boolean;
 }): ReactNode {
   const { colors } = useTheme();
   const { t } = useI18n();
+  const { isWide, contentMaxWidth } = useLayout();
+  const maxWidth = narrow ? 560 : contentMaxWidth;
+  const column = { width: '100%' as const, maxWidth, alignSelf: 'center' as const };
   const header =
     title || back ? (
-      <Row style={{ paddingHorizontal: 12, paddingVertical: 8, justifyContent: 'space-between' }}>
+      <Row
+        style={[
+          { paddingHorizontal: isWide ? 28 : 12, paddingVertical: isWide ? 16 : 8, justifyContent: 'space-between' },
+          column,
+        ]}
+      >
         <Row gap={4} style={{ flex: 1 }}>
           {back ? (
             <IconButton
@@ -52,7 +64,7 @@ export function Screen({
       {header}
       {scroll ? (
         <ScrollView
-          contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
+          contentContainerStyle={[{ padding: isWide ? 32 : 16, paddingBottom: 48 }, column]}
           keyboardShouldPersistTaps="handled"
           refreshControl={
             onRefresh ? <RefreshControl refreshing={Boolean(refreshing)} onRefresh={onRefresh} /> : undefined
@@ -61,7 +73,7 @@ export function Screen({
           {children}
         </ScrollView>
       ) : (
-        <View style={{ flex: 1 }}>{children}</View>
+        <View style={[{ flex: 1 }, column]}>{children}</View>
       )}
     </SafeAreaView>
   );

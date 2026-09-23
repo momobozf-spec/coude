@@ -6,6 +6,7 @@ import { Badge, Button, Card, Chip, EmptyState, Icon, Row, SectionHeader, Text, 
 import { ErrorState, Loading, Screen } from '../../components/Screen';
 import { useI18n } from '../../state/i18n';
 import { useApi } from '../../state/session';
+import { Grid } from '../../components/Grid';
 
 const PRESETS = ['weekly', 'thisWeek', 'weekend', 'ramadan', 'family'] as const;
 
@@ -30,21 +31,23 @@ export default function Lists(): ReactNode {
     <Screen title={t('lists.title')} refreshing={lists.isRefetching} onRefresh={() => void lists.refetch()}>
       {lists.isLoading ? <Loading /> : null}
       {lists.data?.length === 0 ? <EmptyState icon="list" title={t('lists.empty')} /> : null}
-      {lists.data?.map((l) => (
-        <Card key={l.id} onPress={() => router.push(`/list/${l.id}`)} style={{ marginBottom: 10 }}>
-          <Row style={{ justifyContent: 'space-between' }}>
-            <View style={{ flex: 1 }}>
-              <Text variant="heading">{l.name}</Text>
-              <Text variant="caption" tone="muted">
-                {t('lists.items', { count: l.itemCount })}
-                {l.checkedCount ? ` · ${l.checkedCount} ${t('lists.checked').toLowerCase()}` : ''}
-              </Text>
-            </View>
-            {l.memberCount > 1 ? <Badge label={`${l.memberCount}`} tone="info" icon="user" /> : null}
-            <Icon name="chevron-right" size={18} />
-          </Row>
-        </Card>
-      ))}
+      <Grid>
+        {lists.data?.map((l) => (
+          <Card key={l.id} onPress={() => router.push(`/list/${l.id}`)} style={{ marginBottom: 10 }}>
+            <Row style={{ justifyContent: 'space-between' }}>
+              <View style={{ flex: 1 }}>
+                <Text variant="heading">{l.name}</Text>
+                <Text variant="caption" tone="muted">
+                  {t('lists.items', { count: l.itemCount })}
+                  {l.checkedCount ? ` · ${l.checkedCount} ${t('lists.checked').toLowerCase()}` : ''}
+                </Text>
+              </View>
+              {l.memberCount > 1 ? <Badge label={`${l.memberCount}`} tone="info" icon="user" /> : null}
+              <Icon name="chevron-right" size={18} />
+            </Row>
+          </Card>
+        ))}
+      </Grid>
 
       <SectionHeader title={t('lists.newList')} />
       <Card>

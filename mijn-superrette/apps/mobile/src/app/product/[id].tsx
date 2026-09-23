@@ -21,6 +21,7 @@ import {
 } from '@superrette/ui';
 import { ApiError } from '../../api/client';
 import { DataNotice } from '../../components/DataNotice';
+import { Columns } from '../../components/Grid';
 import { ErrorState, Loading, Screen } from '../../components/Screen';
 import { useI18n } from '../../state/i18n';
 import { useApi } from '../../state/session';
@@ -181,140 +182,151 @@ export default function ProductScreen(): ReactNode {
       {product.error ? <ErrorState error={product.error} onRetry={() => void product.refetch()} /> : null}
       {p ? (
         <>
-          {p.brand ? (
-            <Text variant="micro" tone="muted">
-              {p.brand.toUpperCase()}
-            </Text>
-          ) : null}
-          <Text variant="title">{p.name}</Text>
-          <Row gap={6} style={{ marginTop: 6, flexWrap: 'wrap' }}>
-            {p.sizeLabel ? <Badge label={p.sizeLabel} /> : null}
-            {p.category ? <Badge label={p.category.name} tone="info" /> : null}
-            {p.dietary.map((d) => (
-              <Badge key={d} label={t(`dietary.${d}`)} tone="success" />
-            ))}
-          </Row>
-
-          <Row gap={8} style={{ marginVertical: 16, flexWrap: 'wrap' }}>
-            <Button
-              title={p.isFavorite ? t('product.favorited') : t('product.favorite')}
-              icon={p.isFavorite ? 'heart-filled' : 'heart'}
-              variant={p.isFavorite ? 'accent' : 'secondary'}
-              size="sm"
-              onPress={() => favorite.mutate(!p.isFavorite)}
-            />
-            <Button
-              title={t('product.addToList')}
-              icon="plus"
-              variant="secondary"
-              size="sm"
-              onPress={() => router.push(`/add-to-list/${p.variantId}?name=${encodeURIComponent(p.name)}`)}
-            />
-            <Button
-              title={t('product.priceAlert')}
-              icon="bell"
-              variant="secondary"
-              size="sm"
-              onPress={() => router.push(`/alert/${p.variantId}`)}
-            />
-          </Row>
-
-          <DataNotice origins={p.dataOrigins} />
-
-          {p.cheapest ? (
-            <Card style={{ backgroundColor: colors.successSoft, borderColor: colors.successSoft, marginBottom: 8 }}>
-              <Text variant="micro" tone="success">
-                {t('product.cheapest').toUpperCase()}
-              </Text>
-              <Row style={{ justifyContent: 'space-between', marginTop: 4 }}>
-                <Text variant="heading">{p.cheapest.retailer.name}</Text>
-                <Text variant="price" tone="success">
-                  {price(p.cheapest.priceCents)}
-                </Text>
-              </Row>
-              {p.cheapest.unitPrice ? (
-                <Row style={{ justifyContent: 'space-between', marginTop: 4 }}>
-                  <Text variant="caption" tone="muted">
-                    {t('product.unitPrice', {
-                      unit:
-                        p.cheapest.unitPrice.per === 'piece'
-                          ? t('units.piece', { count: 1 })
-                          : t(`units.${p.cheapest.unitPrice.per}`),
-                    })}
+          <Columns
+            main={
+              <>
+                {p.brand ? (
+                  <Text variant="micro" tone="muted">
+                    {p.brand.toUpperCase()}
                   </Text>
-                  <Text variant="bodyStrong">{unitPrice(p.cheapest.unitPrice)}</Text>
+                ) : null}
+                <Text variant="title">{p.name}</Text>
+                <Row gap={6} style={{ marginTop: 6, flexWrap: 'wrap' }}>
+                  {p.sizeLabel ? <Badge label={p.sizeLabel} /> : null}
+                  {p.category ? <Badge label={p.category.name} tone="info" /> : null}
+                  {p.dietary.map((d) => (
+                    <Badge key={d} label={t(`dietary.${d}`)} tone="success" />
+                  ))}
                 </Row>
-              ) : null}
-            </Card>
-          ) : (
-            <Text tone="muted">{t('product.noPrices')}</Text>
-          )}
 
-          <SectionHeader
-            title={t('product.prices')}
-            action={scope === 'mine' ? t('common.seeAll') : undefined}
-            onAction={() => setScope('all')}
-          />
-          {p.offers.length > 0 ? (
-            <ReceiptCard>
-              {p.offers.map((o, i) => (
-                <View key={o.retailerProductId}>
-                  {i > 0 ? <Divider dashed /> : null}
-                  <OfferLine offer={o} />
-                </View>
-              ))}
-              {p.offers[0] ? (
-                <Text variant="caption" tone="muted" style={{ marginTop: 6 }}>
-                  {t('product.lastUpdated', { date: date(p.offers[0].observedAt) })}
-                </Text>
-              ) : null}
-            </ReceiptCard>
-          ) : null}
-
-          {p.otherSizes.length > 0 ? (
-            <>
-              <SectionHeader title={t('product.otherSizes')} />
-              <Row gap={8} style={{ flexWrap: 'wrap' }}>
-                {p.otherSizes.map((s) => (
-                  <Chip
-                    key={s.variantId}
-                    label={s.sizeLabel ?? s.name}
-                    onPress={() => router.push(`/product/${s.variantId}`)}
+                <Row gap={8} style={{ marginVertical: 16, flexWrap: 'wrap' }}>
+                  <Button
+                    title={p.isFavorite ? t('product.favorited') : t('product.favorite')}
+                    icon={p.isFavorite ? 'heart-filled' : 'heart'}
+                    variant={p.isFavorite ? 'accent' : 'secondary'}
+                    size="sm"
+                    onPress={() => favorite.mutate(!p.isFavorite)}
                   />
-                ))}
-              </Row>
-            </>
-          ) : null}
+                  <Button
+                    title={t('product.addToList')}
+                    icon="plus"
+                    variant="secondary"
+                    size="sm"
+                    onPress={() => router.push(`/add-to-list/${p.variantId}?name=${encodeURIComponent(p.name)}`)}
+                  />
+                  <Button
+                    title={t('product.priceAlert')}
+                    icon="bell"
+                    variant="secondary"
+                    size="sm"
+                    onPress={() => router.push(`/alert/${p.variantId}`)}
+                  />
+                </Row>
 
-          {equivalents.data && equivalents.data.length > 0 ? (
-            <>
-              <SectionHeader title={t('product.equivalents')} />
-              <Card>
-                {equivalents.data.slice(0, 6).map((e, i) => (
-                  <Pressable key={e.variantId} onPress={() => router.push(`/product/${e.variantId}`)}>
-                    {i > 0 ? <Divider /> : null}
-                    <Row style={{ justifyContent: 'space-between', paddingVertical: 6 }}>
-                      <View style={{ flex: 1, gap: 4 }}>
-                        <Text variant="bodyStrong" numberOfLines={2}>
-                          {e.name}
-                        </Text>
-                        <ConfidenceMeter
-                          value={e.confidence}
-                          label={t('basket.confidence', { percent: Math.round(e.confidence * 100) })}
-                        />
-                      </View>
-                      <Text variant="priceSmall">
-                        {e.cheapestPriceCents != null ? price(e.cheapestPriceCents) : '—'}
+                <DataNotice origins={p.dataOrigins} />
+
+                {p.cheapest ? (
+                  <Card
+                    style={{ backgroundColor: colors.successSoft, borderColor: colors.successSoft, marginBottom: 8 }}
+                  >
+                    <Text variant="micro" tone="success">
+                      {t('product.cheapest').toUpperCase()}
+                    </Text>
+                    <Row style={{ justifyContent: 'space-between', marginTop: 4 }}>
+                      <Text variant="heading">{p.cheapest.retailer.name}</Text>
+                      <Text variant="price" tone="success">
+                        {price(p.cheapest.priceCents)}
                       </Text>
                     </Row>
-                  </Pressable>
-                ))}
-              </Card>
-            </>
-          ) : null}
+                    {p.cheapest.unitPrice ? (
+                      <Row style={{ justifyContent: 'space-between', marginTop: 4 }}>
+                        <Text variant="caption" tone="muted">
+                          {t('product.unitPrice', {
+                            unit:
+                              p.cheapest.unitPrice.per === 'piece'
+                                ? t('units.piece', { count: 1 })
+                                : t(`units.${p.cheapest.unitPrice.per}`),
+                          })}
+                        </Text>
+                        <Text variant="bodyStrong">{unitPrice(p.cheapest.unitPrice)}</Text>
+                      </Row>
+                    ) : null}
+                  </Card>
+                ) : (
+                  <Text tone="muted">{t('product.noPrices')}</Text>
+                )}
 
-          <SectionHeader title={t('product.history')} />
-          <History variantId={p.variantId} />
+                <SectionHeader
+                  title={t('product.prices')}
+                  action={scope === 'mine' ? t('common.seeAll') : undefined}
+                  onAction={() => setScope('all')}
+                />
+                {p.offers.length > 0 ? (
+                  <ReceiptCard>
+                    {p.offers.map((o, i) => (
+                      <View key={o.retailerProductId}>
+                        {i > 0 ? <Divider dashed /> : null}
+                        <OfferLine offer={o} />
+                      </View>
+                    ))}
+                    {p.offers[0] ? (
+                      <Text variant="caption" tone="muted" style={{ marginTop: 6 }}>
+                        {t('product.lastUpdated', { date: date(p.offers[0].observedAt) })}
+                      </Text>
+                    ) : null}
+                  </ReceiptCard>
+                ) : null}
+              </>
+            }
+            side={
+              <>
+                {p.otherSizes.length > 0 ? (
+                  <>
+                    <SectionHeader title={t('product.otherSizes')} />
+                    <Row gap={8} style={{ flexWrap: 'wrap' }}>
+                      {p.otherSizes.map((s) => (
+                        <Chip
+                          key={s.variantId}
+                          label={s.sizeLabel ?? s.name}
+                          onPress={() => router.push(`/product/${s.variantId}`)}
+                        />
+                      ))}
+                    </Row>
+                  </>
+                ) : null}
+
+                {equivalents.data && equivalents.data.length > 0 ? (
+                  <>
+                    <SectionHeader title={t('product.equivalents')} />
+                    <Card>
+                      {equivalents.data.slice(0, 6).map((e, i) => (
+                        <Pressable key={e.variantId} onPress={() => router.push(`/product/${e.variantId}`)}>
+                          {i > 0 ? <Divider /> : null}
+                          <Row style={{ justifyContent: 'space-between', paddingVertical: 6 }}>
+                            <View style={{ flex: 1, gap: 4 }}>
+                              <Text variant="bodyStrong" numberOfLines={2}>
+                                {e.name}
+                              </Text>
+                              <ConfidenceMeter
+                                value={e.confidence}
+                                label={t('basket.confidence', { percent: Math.round(e.confidence * 100) })}
+                              />
+                            </View>
+                            <Text variant="priceSmall">
+                              {e.cheapestPriceCents != null ? price(e.cheapestPriceCents) : '—'}
+                            </Text>
+                          </Row>
+                        </Pressable>
+                      ))}
+                    </Card>
+                  </>
+                ) : null}
+
+                <SectionHeader title={t('product.history')} />
+                <History variantId={p.variantId} />
+              </>
+            }
+          />
         </>
       ) : null}
     </Screen>
