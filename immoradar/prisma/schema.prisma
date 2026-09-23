@@ -1,0 +1,865 @@
+// ImmoRadar — Real Estate Acquisition Intelligence
+// Core data model. See docs/data-model.md for a narrative walkthrough.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  PLATFORM_ADMIN
+  AGENCY_ADMIN
+  AGENT
+}
+
+enum TerritoryType {
+  POSTAL_CODE
+  MUNICIPALITY
+  PROVINCE
+}
+
+enum SourceKind {
+  API
+  FEED
+  STRUCTURED_DATA
+  PUBLIC_HTML
+  FIXTURE
+}
+
+enum SourceHealth {
+  HEALTHY
+  DEGRADED
+  DOWN
+  DISABLED
+}
+
+enum CollectorRunStatus {
+  RUNNING
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+enum PropertyType {
+  HOUSE
+  APARTMENT
+  LAND
+  COMMERCIAL
+  OTHER
+  UNKNOWN
+}
+
+enum ListingType {
+  SALE
+  RENT
+}
+
+enum SellerType {
+  PRIVATE
+  PROFESSIONAL
+  UNKNOWN
+}
+
+enum ListingStatus {
+  ACTIVE
+  MISSING
+  REMOVED
+}
+
+enum MatchDecision {
+  AUTO_MATCH
+  REVIEW
+  NO_MATCH
+}
+
+enum ListingEventType {
+  NEW_LISTING
+  FSBO_DETECTED
+  PRICE_DROP
+  PRICE_INCREASE
+  STALE_30
+  STALE_60
+  STALE_90
+  LISTING_REMOVED
+  RELISTED
+  AGENCY_TO_PRIVATE
+  PRIVATE_TO_AGENCY
+}
+
+enum CrmContactType {
+  BUYER
+  SELLER
+  LANDLORD
+  TENANT
+  VALUATION_LEAD
+  PROSPECT
+  FORMER_CLIENT
+  UNKNOWN
+}
+
+enum CrmContactStatus {
+  ACTIVE
+  WON
+  LOST
+  CLOSED
+  INACTIVE
+  UNKNOWN
+}
+
+enum CrmImportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum CrmImportRowStatus {
+  CREATED
+  UPDATED
+  DUPLICATE
+  CONFLICT
+  INVALID
+}
+
+enum CrmInteractionType {
+  CALL
+  EMAIL
+  MEETING
+  VALUATION
+  VIEWING
+  NOTE
+  IMPORT
+  OTHER
+}
+
+enum PropertyRelationshipType {
+  OWNER
+  FORMER_OWNER
+  BOUGHT
+  SOLD
+  VALUATION_REQUESTED
+  TENANT
+  LANDLORD
+  INTERESTED
+  UNKNOWN
+}
+
+enum OpportunityEngine {
+  IMMORADAR
+  LEADREVIVE
+}
+
+enum OpportunityType {
+  // ImmoRadar (market)
+  NEW_FSBO
+  STALE_FSBO
+  PRIVATE_PRICE_DROP
+  PRIVATE_MULTIPLE_PRICE_DROP
+  PRIVATE_RELIST
+  AGENCY_TO_PRIVATE
+  // LeadRevive (CRM)
+  DORMANT_VALUATION_LEAD
+  FORMER_SELLER_PROSPECT
+  FORMER_CLIENT
+  OLD_BUYER
+  LOST_MANDATE
+  UNCONTACTED_LEAD
+}
+
+enum OpportunityStatus {
+  NEW
+  ASSIGNED
+  TO_CONTACT
+  CONTACTED
+  INTERESTED
+  VALUATION_BOOKED
+  MANDATE_PROPOSED
+  MANDATE_WON
+  LOST
+  DISMISSED
+}
+
+enum OpportunitySignalKind {
+  MARKET
+  RELATIONSHIP
+  TIMING
+  TERRITORY
+  CONFIDENCE
+}
+
+enum OpportunityActivityType {
+  CREATED
+  ASSIGNED
+  UNASSIGNED
+  STATUS_CHANGED
+  CONTACTED
+  SNOOZED
+  DISMISSED
+  NOTE
+  ALERT_SENT
+  RESCORED
+  CRM_MATCHED
+}
+
+enum AlertType {
+  HOT_OPPORTUNITY
+  CRM_MARKET_MATCH
+  MORNING_DIGEST
+}
+
+enum AlertChannel {
+  TELEGRAM
+  IN_APP
+}
+
+enum AlertStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy & identity
+// ---------------------------------------------------------------------------
+
+model Agency {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  city      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Configuration (tenant-scoped)
+  telegramChatId       String?
+  alertMinScore        Int     @default(80)
+  digestEnabled        Boolean @default(true)
+  digestHourLocal      Int     @default(7)
+  timezone             String  @default("Europe/Brussels")
+  crmRetentionDays     Int?    // null = keep until deleted
+  dormantMonths        Int     @default(12)
+  autoAssignByAgent    Boolean @default(true)
+
+  users                   User[]
+  territories             Territory[]
+  crmContacts             CrmContact[]
+  crmInteractions         CrmInteraction[]
+  crmImports              CrmImport[]
+  crmImportRows           CrmImportRow[]
+  contactRelationships    ContactPropertyRelationship[]
+  opportunities           Opportunity[]
+  alertRules              AlertRule[]
+  alerts                  Alert[]
+  assignments             OpportunityAssignment[]
+  activities              OpportunityActivity[]
+  auditLogs               AuditLog[]
+}
+
+model User {
+  id             String   @id @default(cuid())
+  agencyId       String?
+  email          String   @unique
+  passwordHash   String
+  name           String
+  role           Role     @default(AGENT)
+  telegramChatId String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  agency               Agency?                 @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  sessions             Session[]
+  assignedContacts     CrmContact[]            @relation("ContactAssignedUser")
+  assignedOpportunities Opportunity[]          @relation("OpportunityAssignee")
+  assignmentsMade      OpportunityAssignment[] @relation("AssignmentBy")
+  assignments          OpportunityAssignment[] @relation("AssignmentTo")
+  activities           OpportunityActivity[]
+  alerts               Alert[]
+  imports              CrmImport[]
+  auditLogs            AuditLog[]
+
+  @@index([agencyId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userAgent String?
+  ip        String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Territory {
+  id              String        @id @default(cuid())
+  agencyId        String
+  type            TerritoryType
+  value           String // original value, e.g. "9000", "Gent", "Oost-Vlaanderen"
+  normalizedValue String // normalized for matching
+  label           String?
+  createdAt       DateTime      @default(now())
+
+  agency Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  @@unique([agencyId, type, normalizedValue])
+  @@index([type, normalizedValue])
+}
+
+// ---------------------------------------------------------------------------
+// Data collection
+// ---------------------------------------------------------------------------
+
+model Source {
+  id                  String       @id @default(cuid())
+  key                 String       @unique
+  name                String
+  kind                SourceKind
+  baseUrl             String?
+  termsUrl            String?
+  accessNote          String? // how access has been authorised
+  enabled             Boolean      @default(true)
+  pollIntervalMinutes Int          @default(60)
+  rateLimitPerMinute  Int          @default(30)
+  timeoutMs           Int          @default(15000)
+  maxRetries          Int          @default(3)
+  health              SourceHealth @default(HEALTHY)
+  consecutiveFailures Int          @default(0)
+  lastSuccessAt       DateTime?
+  lastFailureAt       DateTime?
+  lastRunAt           DateTime?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  runs     CollectorRun[]
+  listings Listing[]
+}
+
+model CollectorRun {
+  id                String             @id @default(cuid())
+  sourceId          String
+  status            CollectorRunStatus @default(RUNNING)
+  startedAt         DateTime           @default(now())
+  finishedAt        DateTime?
+  durationMs        Int?
+  attempts          Int                @default(1)
+  listingsCollected Int                @default(0)
+  listingsNew       Int                @default(0)
+  listingsUpdated   Int                @default(0)
+  listingsUnchanged Int                @default(0)
+  eventsGenerated   Int                @default(0)
+  errorsCount       Int                @default(0)
+  errorMessage      String?
+  metrics           Json?
+
+  source    Source            @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  snapshots ListingSnapshot[]
+
+  @@index([sourceId, startedAt(sort: Desc)])
+}
+
+// ---------------------------------------------------------------------------
+// Property intelligence (shared market data)
+// ---------------------------------------------------------------------------
+
+model Property {
+  id                   String       @id @default(cuid())
+  addressLine          String?
+  street               String?
+  houseNumber          String?
+  boxNumber            String?
+  postalCode           String?
+  city                 String?
+  municipality         String?
+  province             String?
+  latitude             Float?
+  longitude            Float?
+  propertyType         PropertyType @default(UNKNOWN)
+  bedrooms             Int?
+  surfaceArea          Int?
+  landArea             Int?
+  normalizedAddressKey String?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+
+  listings      Listing[]
+  events        ListingEvent[]
+  relationships ContactPropertyRelationship[]
+  opportunities Opportunity[]
+
+  @@index([normalizedAddressKey])
+  @@index([postalCode])
+  @@index([postalCode, street])
+}
+
+model AgencyIdentity {
+  id             String   @id @default(cuid())
+  name           String
+  normalizedName String   @unique
+  website        String?
+  phone          String?
+  vatNumber      String?
+  createdAt      DateTime @default(now())
+
+  sellers SellerIdentity[]
+}
+
+model SellerIdentity {
+  id               String     @id @default(cuid())
+  displayName      String?
+  normalizedName   String?
+  normalizedPhone  String?
+  normalizedEmail  String?
+  classifiedType   SellerType @default(UNKNOWN)
+  listingCount     Int        @default(0)
+  agencyIdentityId String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  agencyIdentity AgencyIdentity? @relation(fields: [agencyIdentityId], references: [id], onDelete: SetNull)
+  listings       Listing[]
+
+  @@index([normalizedPhone])
+  @@index([normalizedEmail])
+  @@index([normalizedName])
+}
+
+model Listing {
+  id               String        @id @default(cuid())
+  propertyId       String?
+  sourceId         String
+  sourceListingId  String
+  sourceUrl        String?
+  listingType      ListingType
+  title            String?
+  description      String?
+  sellerType       SellerType    @default(UNKNOWN)
+  sellerConfidence Float         @default(0)
+  sellerReasons    Json?
+  sellerIdentityId String?
+  currentPrice     Int?
+  initialPrice     Int?
+  currency         String        @default("EUR")
+  publishedAt      DateTime?
+  firstSeenAt      DateTime
+  lastSeenAt       DateTime
+  removedAt        DateTime?
+  relistedAt       DateTime?
+  missingCount     Int           @default(0)
+  status           ListingStatus @default(ACTIVE)
+  priceDropCount   Int           @default(0)
+  matchConfidence  Float?
+  matchDecision    MatchDecision?
+  matchReasons     Json?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  property       Property?       @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  source         Source          @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  sellerIdentity SellerIdentity? @relation(fields: [sellerIdentityId], references: [id], onDelete: SetNull)
+  snapshots      ListingSnapshot[]
+  events         ListingEvent[]
+  opportunities  Opportunity[]
+
+  @@unique([sourceId, sourceListingId])
+  @@index([propertyId])
+  @@index([status, lastSeenAt])
+  @@index([sellerType, status])
+  @@index([matchDecision])
+}
+
+model ListingSnapshot {
+  id             String        @id @default(cuid())
+  listingId      String
+  collectorRunId String?
+  capturedAt     DateTime      @default(now())
+  price          Int?
+  title          String?
+  description    String?
+  sellerName     String?
+  sellerPhone    String?
+  sellerEmail    String?
+  sellerType     SellerType    @default(UNKNOWN)
+  status         ListingStatus @default(ACTIVE)
+  contentHash    String
+  rawData        Json
+
+  listing      Listing       @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  collectorRun CollectorRun? @relation(fields: [collectorRunId], references: [id], onDelete: SetNull)
+
+  @@index([listingId, capturedAt(sort: Desc)])
+}
+
+model ListingEvent {
+  id         String           @id @default(cuid())
+  listingId  String
+  propertyId String?
+  type       ListingEventType
+  occurredAt DateTime         @default(now())
+  oldPrice   Int?
+  newPrice   Int?
+  difference Int?
+  percentage Float?
+  dedupeKey  String           @unique
+  payload    Json?
+  processedAt DateTime?
+  createdAt  DateTime         @default(now())
+
+  listing  Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  signals  OpportunitySignal[]
+
+  @@index([listingId, occurredAt])
+  @@index([type, occurredAt(sort: Desc)])
+  @@index([processedAt])
+}
+
+// ---------------------------------------------------------------------------
+// LeadRevive — tenant-isolated CRM data
+// ---------------------------------------------------------------------------
+
+model CrmImport {
+  id            String          @id @default(cuid())
+  agencyId      String
+  userId        String?
+  adapter       String          @default("csv")
+  fileName      String?
+  status        CrmImportStatus @default(PENDING)
+  totalRows     Int             @default(0)
+  createdCount  Int             @default(0)
+  updatedCount  Int             @default(0)
+  duplicateCount Int            @default(0)
+  conflictCount Int             @default(0)
+  invalidCount  Int             @default(0)
+  errorMessage  String?
+  startedAt     DateTime        @default(now())
+  finishedAt    DateTime?
+
+  agency   Agency         @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  user     User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  rows     CrmImportRow[]
+  contacts CrmContact[]
+
+  @@index([agencyId, startedAt(sort: Desc)])
+}
+
+model CrmImportRow {
+  id        String             @id @default(cuid())
+  importId  String
+  agencyId  String
+  rowNumber Int
+  status    CrmImportRowStatus
+  message   String?
+  contactId String?
+  rawData   Json
+  conflicts Json?
+  createdAt DateTime           @default(now())
+
+  import  CrmImport   @relation(fields: [importId], references: [id], onDelete: Cascade)
+  agency  Agency      @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  contact CrmContact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([importId, rowNumber])
+  @@index([agencyId])
+}
+
+model CrmContact {
+  id                   String           @id @default(cuid())
+  agencyId             String
+  externalContactId    String?
+  firstName            String?
+  lastName             String?
+  normalizedName       String?
+  email                String?
+  normalizedEmail      String?
+  phone                String?
+  normalizedPhone      String?
+  address              String?
+  normalizedAddressKey String?
+  postalCode           String?
+  city                 String?
+  assignedAgentName    String?
+  assignedUserId       String?
+  contactType          CrmContactType   @default(UNKNOWN)
+  leadType             String?
+  status               CrmContactStatus @default(UNKNOWN)
+  crmCreatedAt         DateTime?
+  lastContactAt        DateTime?
+  notes                String?
+  dedupeKey            String
+  importId             String?
+  sourceValues         Json? // original imported values for audit
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  deletedAt            DateTime?
+
+  agency        Agency                        @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  assignedUser  User?                         @relation("ContactAssignedUser", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  import        CrmImport?                    @relation(fields: [importId], references: [id], onDelete: SetNull)
+  interactions  CrmInteraction[]
+  relationships ContactPropertyRelationship[]
+  opportunities Opportunity[]
+  importRows    CrmImportRow[]
+
+  @@unique([agencyId, dedupeKey])
+  @@index([agencyId, externalContactId])
+  @@index([agencyId, normalizedPhone])
+  @@index([agencyId, normalizedEmail])
+  @@index([agencyId, normalizedName])
+  @@index([agencyId, normalizedAddressKey])
+  @@index([agencyId, postalCode])
+  @@index([agencyId, contactType, status])
+  @@index([agencyId, lastContactAt])
+}
+
+model CrmInteraction {
+  id         String             @id @default(cuid())
+  agencyId   String
+  contactId  String
+  type       CrmInteractionType @default(NOTE)
+  occurredAt DateTime
+  summary    String?
+  importId   String?
+  createdAt  DateTime           @default(now())
+
+  agency  Agency     @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  contact CrmContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId, contactId, occurredAt(sort: Desc)])
+}
+
+model ContactPropertyRelationship {
+  id               String                   @id @default(cuid())
+  agencyId         String
+  contactId        String
+  propertyId       String?
+  addressKey       String? // normalized address key even when no Property row exists yet
+  postalCode       String?
+  relationshipType PropertyRelationshipType @default(UNKNOWN)
+  year             Int?
+  source           String? // e.g. "csv-import", "manual"
+  note             String?
+  createdAt        DateTime                 @default(now())
+
+  agency   Agency     @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  contact  CrmContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  property Property?  @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  @@index([agencyId, addressKey])
+  @@index([agencyId, propertyId])
+  @@index([agencyId, contactId])
+}
+
+// ---------------------------------------------------------------------------
+// Opportunities
+// ---------------------------------------------------------------------------
+
+model Opportunity {
+  id                 String            @id @default(cuid())
+  agencyId           String
+  engine             OpportunityEngine
+  type               OpportunityType
+  status             OpportunityStatus @default(NEW)
+  dedupeKey          String
+  headline           String
+  summary            String?
+  propertyId         String?
+  listingId          String?
+  contactId          String?
+  crmMatched         Boolean           @default(false)
+  crmMatchConfidence Float?
+  crmMatchReasons    Json?
+  score              Int               @default(0)
+  intentScore        Int               @default(0)
+  relationshipScore  Int               @default(0)
+  timingScore        Int               @default(0)
+  territoryScore     Int               @default(0)
+  confidenceScore    Int               @default(0)
+  scoreReasons       Json?
+  priceAtDetection   Int?
+  detectedAt         DateTime          @default(now())
+  lastSignalAt       DateTime          @default(now())
+  assignedUserId     String?
+  snoozedUntil       DateTime?
+  contactedAt        DateTime?
+  closedAt           DateTime?
+  lastScoredAt       DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  agency       Agency                  @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  property     Property?               @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  listing      Listing?                @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  contact      CrmContact?             @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  assignedUser User?                   @relation("OpportunityAssignee", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  signals      OpportunitySignal[]
+  scores       OpportunityScore[]
+  assignments  OpportunityAssignment[]
+  activities   OpportunityActivity[]
+  alerts       Alert[]
+
+  @@unique([agencyId, dedupeKey])
+  @@index([agencyId, status, score(sort: Desc)])
+  @@index([agencyId, assignedUserId, status])
+  @@index([agencyId, engine, type])
+  @@index([agencyId, detectedAt(sort: Desc)])
+  @@index([listingId])
+  @@index([contactId])
+}
+
+model OpportunitySignal {
+  id             String                @id @default(cuid())
+  opportunityId  String
+  kind           OpportunitySignalKind
+  code           String
+  label          String
+  weight         Int
+  listingEventId String?
+  detail         Json?
+  occurredAt     DateTime              @default(now())
+
+  opportunity  Opportunity   @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  listingEvent ListingEvent? @relation(fields: [listingEventId], references: [id], onDelete: SetNull)
+
+  @@unique([opportunityId, code])
+  @@index([opportunityId])
+}
+
+model OpportunityScore {
+  id            String   @id @default(cuid())
+  opportunityId String
+  computedAt    DateTime @default(now())
+  total         Int
+  intent        Int
+  relationship  Int
+  timing        Int
+  territory     Int
+  confidence    Int
+  reasons       Json
+  configVersion String
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@index([opportunityId, computedAt(sort: Desc)])
+}
+
+model OpportunityAssignment {
+  id            String    @id @default(cuid())
+  opportunityId String
+  agencyId      String
+  userId        String
+  assignedById  String?
+  assignedAt    DateTime  @default(now())
+  unassignedAt  DateTime?
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  agency      Agency      @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  user        User        @relation("AssignmentTo", fields: [userId], references: [id], onDelete: Cascade)
+  assignedBy  User?       @relation("AssignmentBy", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  @@index([agencyId, userId])
+  @@index([opportunityId])
+}
+
+model OpportunityActivity {
+  id            String                  @id @default(cuid())
+  opportunityId String
+  agencyId      String
+  userId        String?
+  type          OpportunityActivityType
+  fromStatus    OpportunityStatus?
+  toStatus      OpportunityStatus?
+  note          String?
+  payload       Json?
+  createdAt     DateTime                @default(now())
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  agency      Agency      @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([opportunityId, createdAt(sort: Desc)])
+  @@index([agencyId, createdAt(sort: Desc)])
+  @@index([agencyId, type, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Alerts
+// ---------------------------------------------------------------------------
+
+model AlertRule {
+  id              String       @id @default(cuid())
+  agencyId        String
+  type            AlertType
+  channel         AlertChannel @default(TELEGRAM)
+  enabled         Boolean      @default(true)
+  minScore        Int          @default(80)
+  requireCrmMatch Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  agency Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  @@unique([agencyId, type, channel])
+}
+
+model Alert {
+  id            String       @id @default(cuid())
+  agencyId      String
+  opportunityId String?
+  userId        String?
+  type          AlertType
+  channel       AlertChannel
+  status        AlertStatus  @default(PENDING)
+  dedupeKey     String       @unique
+  title         String
+  body          String
+  payload       Json?
+  recipient     String? // chat id (never logged in clear)
+  sentAt        DateTime?
+  error         String?
+  createdAt     DateTime     @default(now())
+
+  agency      Agency       @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  opportunity Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([agencyId, createdAt(sort: Desc)])
+  @@index([agencyId, status])
+}
+
+// ---------------------------------------------------------------------------
+// Audit
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  agencyId   String?
+  userId     String?
+  action     String
+  entityType String?
+  entityId   String?
+  metadata   Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  agency Agency? @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([agencyId, createdAt(sort: Desc)])
+  @@index([entityType, entityId])
+}

@@ -1,0 +1,60 @@
+{
+  "name": "immoradar",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ImmoRadar — Real Estate Acquisition Intelligence for Belgian agencies",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:watch": "vitest",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:reset": "prisma migrate reset --force",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "jobs:collect": "tsx src/jobs/cli.ts collect",
+    "jobs:leadrevive": "tsx src/jobs/cli.ts leadrevive",
+    "jobs:digest": "tsx src/jobs/cli.ts digest",
+    "jobs:retention": "tsx src/jobs/cli.ts retention",
+    "jobs:all": "tsx src/jobs/cli.ts all",
+    "demo": "tsx scripts/demo-scenario.ts",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "bcryptjs": "^3.0.3",
+    "lucide-react": "^1.47.0",
+    "next": "16.3.6",
+    "pg": "^8.20.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "^4.3.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^22",
+    "@types/pg": "^8.20.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "dotenv": "^17.4.1",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.6",
+    "prisma": "7.10.0",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5",
+    "vitest": "^4.1.11"
+  }
+}
