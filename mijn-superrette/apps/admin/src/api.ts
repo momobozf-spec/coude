@@ -28,7 +28,11 @@ export const session = {
 async function refresh(): Promise<boolean> {
   const current = session.get();
   if (!current) return false;
-  const res = await fetch(`${API_URL}/v1/auth/refresh`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: current.refreshToken }) });
+  const res = await fetch(`${API_URL}/v1/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken: current.refreshToken }),
+  });
   if (!res.ok) {
     session.set(null);
     return false;
@@ -41,7 +45,11 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
   const token = session.get()?.accessToken;
   const res = await fetch(`${API_URL}${path}`, {
     method: init.method ?? 'GET',
-    headers: { Accept: 'application/json', ...(init.body !== undefined ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    headers: {
+      Accept: 'application/json',
+      ...(init.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     ...(init.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
   });
   if (res.status === 401 && retry && (await refresh())) return api<T>(path, init, false);

@@ -272,7 +272,8 @@ export const en: Messages = {
     exportData: 'Download my data',
     deleteHistory: 'Clear search history',
     deleteAccount: 'Delete account',
-    deleteAccountConfirm: "Your account, lists, favourites and alerts will be permanently deleted. Other people's shared lists remain.",
+    deleteAccountConfirm:
+      "Your account, lists, favourites and alerts will be permanently deleted. Other people's shared lists remain.",
     historyDeleted: 'Your search history has been cleared.',
     about: 'About Mijn Superrette',
     dataSources: 'Data sources',

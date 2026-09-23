@@ -21,7 +21,9 @@ export function PromotionCard({ promo, compact }: { promo: PromotionDto; compact
           <Text variant="bodyStrong" numberOfLines={2}>
             {promo.productName}
           </Text>
-          {promo.loyaltyProgram ? <Badge label={t('promotions.loyaltyOnly', { program: promo.loyaltyProgram })} tone="info" /> : null}
+          {promo.loyaltyProgram ? (
+            <Badge label={t('promotions.loyaltyOnly', { program: promo.loyaltyProgram })} tone="info" />
+          ) : null}
           {promo.minimumQuantity > 1 ? (
             <Text variant="caption" tone="muted">
               {t('product.buyQuantity', { price: price(promo.promoPerItemCents), count: promo.minimumQuantity })}

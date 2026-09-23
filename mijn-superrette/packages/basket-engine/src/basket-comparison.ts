@@ -110,7 +110,9 @@ function toChoice(c: BasketCandidate, price: EffectivePrice): BasketLineChoice {
 }
 
 const byPriceThenConfidence = (a: BasketLineChoice, b: BasketLineChoice): number =>
-  a.price.totalCents - b.price.totalCents || b.confidence - a.confidence || a.retailerProductId.localeCompare(b.retailerProductId);
+  a.price.totalCents - b.price.totalCents ||
+  b.confidence - a.confidence ||
+  a.retailerProductId.localeCompare(b.retailerProductId);
 
 /**
  * BasketComparisonEngine prices a whole shopping list at every retailer and
@@ -196,7 +198,9 @@ export const BasketComparisonEngine = {
         equivalentCount: lines.filter((l) => l.status === 'EQUIVALENT' || l.status === 'GENERIC').length,
         missingItemIds: lines.filter((l) => !l.selected).map((l) => l.itemId),
         averageConfidence:
-          found.length > 0 ? Math.round((found.reduce((s, l) => s + l.selected!.confidence, 0) / found.length) * 100) / 100 : null,
+          found.length > 0
+            ? Math.round((found.reduce((s, l) => s + l.selected!.confidence, 0) / found.length) * 100) / 100
+            : null,
         lines,
       };
     });

@@ -35,7 +35,8 @@ const RATE_LIMIT = 'superrette:rate-limit';
 export const Public = (): MethodDecorator & ClassDecorator => SetMetadata(IS_PUBLIC, true);
 export const Roles = (...roles: UserRole[]): MethodDecorator & ClassDecorator => SetMetadata(ROLES, roles);
 /** Limit requests per client IP: `limit` per `windowSeconds`. */
-export const RateLimit = (limit: number, windowSeconds: number): MethodDecorator => SetMetadata(RATE_LIMIT, { limit, windowSeconds });
+export const RateLimit = (limit: number, windowSeconds: number): MethodDecorator =>
+  SetMetadata(RATE_LIMIT, { limit, windowSeconds });
 
 export const CurrentUser = createParamDecorator((_data: unknown, ctx: ExecutionContext): AuthUser => {
   const req = ctx.switchToHttp().getRequest<AuthedRequest>();
@@ -64,7 +65,11 @@ export class TokenService {
   }
 
   async verifyAccessToken(token: string): Promise<AuthUser> {
-    const { payload } = await jwtVerify(token, this.config.jwtSecret, { issuer: 'mijn-superrette', audience: 'mijn-superrette-app', algorithms: ['HS256'] });
+    const { payload } = await jwtVerify(token, this.config.jwtSecret, {
+      issuer: 'mijn-superrette',
+      audience: 'mijn-superrette-app',
+      algorithms: ['HS256'],
+    });
     if (!payload.sub) throw new UnauthorizedException();
     return { id: payload.sub, role: payload.role === 'ADMIN' ? 'ADMIN' : 'USER' };
   }
@@ -91,7 +96,10 @@ export class AuthGuard implements CanActivate {
     const req = context.switchToHttp().getRequest<AuthedRequest>();
     const targets = [context.getHandler(), context.getClass()];
 
-    const rate = this.reflector.getAllAndOverride<{ limit: number; windowSeconds: number } | undefined>(RATE_LIMIT, targets);
+    const rate = this.reflector.getAllAndOverride<{ limit: number; windowSeconds: number } | undefined>(
+      RATE_LIMIT,
+      targets,
+    );
     if (rate) {
       const key = `superrette:rl:${context.getClass().name}.${context.getHandler().name}:${req.ip ?? 'unknown'}`;
       if ((await this.cache.hit(key, rate.windowSeconds)) > rate.limit) {
@@ -109,7 +117,8 @@ export class AuthGuard implements CanActivate {
     }
 
     const isPublic = this.reflector.getAllAndOverride<boolean | undefined>(IS_PUBLIC, targets);
-    if (!isPublic && !req.user) throw new UnauthorizedException({ code: 'UNAUTHENTICATED', message: 'Authentication required' });
+    if (!isPublic && !req.user)
+      throw new UnauthorizedException({ code: 'UNAUTHENTICATED', message: 'Authentication required' });
 
     const roles = this.reflector.getAllAndOverride<UserRole[] | undefined>(ROLES, targets);
     if (roles && (!req.user || !roles.includes(req.user.role))) {

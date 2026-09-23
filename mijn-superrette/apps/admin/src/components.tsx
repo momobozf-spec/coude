@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react';
 
-export function Badge({ children, tone }: { children: ReactNode; tone?: 'success' | 'warning' | 'danger' | 'info' | 'promo' }): ReactNode {
+export function Badge({
+  children,
+  tone,
+}: {
+  children: ReactNode;
+  tone?: 'success' | 'warning' | 'danger' | 'info' | 'promo';
+}): ReactNode {
   return <span className={`badge ${tone ?? ''}`}>{children}</span>;
 }
 
@@ -13,7 +19,17 @@ export function Meter({ value }: { value: number }): ReactNode {
   );
 }
 
-export function Page({ title, subtitle, children, actions }: { title: string; subtitle?: string; children: ReactNode; actions?: ReactNode }): ReactNode {
+export function Page({
+  title,
+  subtitle,
+  children,
+  actions,
+}: {
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+  actions?: ReactNode;
+}): ReactNode {
   return (
     <section>
       <div className="row" style={{ justifyContent: 'space-between' }}>
@@ -33,4 +49,20 @@ export function State({ loading, error }: { loading: boolean; error: string | nu
 }
 
 export const statusTone = (s: string): 'success' | 'warning' | 'danger' | 'info' | undefined =>
-  ({ SUCCESS: 'success', SUPPORTED: 'success', CONFIRMED: 'success', AUTO_ACCEPTED: 'info', PARTIAL: 'warning', EXPERIMENTAL: 'warning', PENDING_REVIEW: 'warning', SUGGESTED: 'info', RUNNING: 'info', QUEUED: 'info', FAILED: 'danger', REJECTED: 'danger', UNSUPPORTED: undefined } as const)[s] ?? undefined;
+  (
+    ({
+      SUCCESS: 'success',
+      SUPPORTED: 'success',
+      CONFIRMED: 'success',
+      AUTO_ACCEPTED: 'info',
+      PARTIAL: 'warning',
+      EXPERIMENTAL: 'warning',
+      PENDING_REVIEW: 'warning',
+      SUGGESTED: 'info',
+      RUNNING: 'info',
+      QUEUED: 'info',
+      FAILED: 'danger',
+      REJECTED: 'danger',
+      UNSUPPORTED: undefined,
+    }) as const
+  )[s] ?? undefined;

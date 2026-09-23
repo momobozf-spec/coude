@@ -14,7 +14,12 @@ import {
   type Database,
 } from '@superrette/database';
 import type { DataOrigin, SyncKind, SyncStatus } from '@superrette/domain';
-import { DEFAULT_MATCHING_POLICY, ProductMatchingEngine, type NormalizedProduct, type ProductNormalizer } from '@superrette/product-matching';
+import {
+  DEFAULT_MATCHING_POLICY,
+  ProductMatchingEngine,
+  type NormalizedProduct,
+  type ProductNormalizer,
+} from '@superrette/product-matching';
 import {
   providerPriceSchema,
   providerProductSchema,
@@ -24,13 +29,7 @@ import {
   type ValidProviderPrice,
   type ValidProviderProduct,
 } from '@superrette/store-providers';
-import {
-  createCanonical,
-  findCandidates,
-  linkRetailerProduct,
-  mappingMemory,
-  recordMatch,
-} from './catalog-writer.js';
+import { createCanonical, findCandidates, linkRetailerProduct, mappingMemory, recordMatch } from './catalog-writer.js';
 
 export type IngestStage = 'FETCH' | 'VALIDATION' | 'NORMALIZATION' | 'MATCHING' | 'PERSIST' | 'ALERTS';
 
@@ -114,7 +113,10 @@ export class IngestionPipeline {
 
   /** Create a QUEUED sync record (used when the API enqueues a job). */
   async createSync(providerKey: string, kind: SyncKind, triggeredBy: string): Promise<string> {
-    const [row] = await this.db.insert(providerSyncs).values({ providerKey, kind, triggeredBy, status: 'QUEUED' }).returning({ id: providerSyncs.id });
+    const [row] = await this.db
+      .insert(providerSyncs)
+      .values({ providerKey, kind, triggeredBy, status: 'QUEUED' })
+      .returning({ id: providerSyncs.id });
     return row!.id;
   }
 
@@ -126,9 +128,20 @@ export class IngestionPipeline {
     const syncId = options.syncId ?? (await this.createSync(providerKey, kind, options.triggeredBy ?? 'manual'));
     const counters: Counters = { read: 0, created: 0, updated: 0, failed: 0 };
     const changed = new Set<string>();
-    await this.db.update(providerSyncs).set({ status: 'RUNNING', startedAt: new Date() }).where(eq(providerSyncs.id, syncId));
+    await this.db
+      .update(providerSyncs)
+      .set({ status: 'RUNNING', startedAt: new Date() })
+      .where(eq(providerSyncs.id, syncId));
     if (options.jobId) {
-      await this.db.insert(importJobs).values({ syncId, queue: 'provider-sync', jobName: kind, externalJobId: options.jobId, status: 'RUNNING', attempts: 1, payload: { providerKey, kind } });
+      await this.db.insert(importJobs).values({
+        syncId,
+        queue: 'provider-sync',
+        jobName: kind,
+        externalJobId: options.jobId,
+        status: 'RUNNING',
+        attempts: 1,
+        payload: { providerKey, kind },
+      });
     }
 
     let fatal: string | null = null;
@@ -140,10 +153,14 @@ export class IngestionPipeline {
       }
       await this.loadRetailers();
       // A FULL sync runs the stages the provider declares; an explicit kind must be supported.
-      const can = (c: 'listCatalog' | 'getPrices' | 'getPromotions'): boolean => kind !== 'FULL' || provider.info.capabilities.includes(c);
-      if ((kind === 'CATALOG' || kind === 'FULL') && can('listCatalog')) await this.syncCatalog(provider, syncId, counters);
-      if ((kind === 'PRICES' || kind === 'FULL') && can('getPrices')) await this.syncPrices(provider, syncId, counters, changed, options.since);
-      if ((kind === 'PROMOTIONS' || kind === 'FULL') && can('getPromotions')) await this.syncPromotions(provider, syncId, counters, changed);
+      const can = (c: 'listCatalog' | 'getPrices' | 'getPromotions'): boolean =>
+        kind !== 'FULL' || provider.info.capabilities.includes(c);
+      if ((kind === 'CATALOG' || kind === 'FULL') && can('listCatalog'))
+        await this.syncCatalog(provider, syncId, counters);
+      if ((kind === 'PRICES' || kind === 'FULL') && can('getPrices'))
+        await this.syncPrices(provider, syncId, counters, changed, options.since);
+      if ((kind === 'PROMOTIONS' || kind === 'FULL') && can('getPromotions'))
+        await this.syncPromotions(provider, syncId, counters, changed);
     } catch (error) {
       fatal = error instanceof Error ? error.message : String(error);
       this.log.error('provider sync failed', { providerKey, syncId, error: fatal });
@@ -160,7 +177,8 @@ export class IngestionPipeline {
           ? 'PARTIAL'
           : 'FAILED'
         : 'SUCCESS';
-    const errorSummary = fatal ?? (counters.failed > 0 ? `${counters.failed} record(s) failed; see provider errors` : null);
+    const errorSummary =
+      fatal ?? (counters.failed > 0 ? `${counters.failed} record(s) failed; see provider errors` : null);
 
     await this.db
       .update(providerSyncs)
@@ -205,7 +223,14 @@ export class IngestionPipeline {
     return id;
   }
 
-  private async recordError(syncId: string, providerKey: string, stage: IngestStage, externalId: string | null, message: string, raw: unknown): Promise<void> {
+  private async recordError(
+    syncId: string,
+    providerKey: string,
+    stage: IngestStage,
+    externalId: string | null,
+    message: string,
+    raw: unknown,
+  ): Promise<void> {
     await this.db.insert(providerErrors).values({
       syncId,
       providerKey,
@@ -216,7 +241,14 @@ export class IngestionPipeline {
     });
   }
 
-  private async guard(syncId: string, provider: StoreProvider, externalId: string | null, raw: unknown, counters: Counters, fn: () => Promise<void>): Promise<void> {
+  private async guard(
+    syncId: string,
+    provider: StoreProvider,
+    externalId: string | null,
+    raw: unknown,
+    counters: Counters,
+    fn: () => Promise<void>,
+  ): Promise<void> {
     try {
       await fn();
     } catch (error) {
@@ -250,7 +282,10 @@ export class IngestionPipeline {
     providerKey: string,
     dataOrigin: DataOrigin,
   ): Promise<{ retailerProductId: string; variantId: string | null; created: boolean }> {
-    const retailerId = this.retailerIds.size > 0 ? this.retailerId(product.retailerSlug) : (await this.loadRetailers(), this.retailerId(product.retailerSlug));
+    const retailerId =
+      this.retailerIds.size > 0
+        ? this.retailerId(product.retailerSlug)
+        : (await this.loadRetailers(), this.retailerId(product.retailerSlug));
     let normalized;
     try {
       normalized = this.deps.normalizer.normalize({
@@ -322,7 +357,14 @@ export class IngestionPipeline {
    */
   async matchAndLink(
     tx: Tx,
-    input: { retailerProductId: string; normalized: NormalizedProduct; title: string; imageUrl: string | null; dataOrigin: DataOrigin; providerKey: string },
+    input: {
+      retailerProductId: string;
+      normalized: NormalizedProduct;
+      title: string;
+      imageUrl: string | null;
+      dataOrigin: DataOrigin;
+      providerKey: string;
+    },
   ): Promise<string | null> {
     const { retailerProductId, normalized } = input;
     const memory = await mappingMemory(tx, retailerProductId);
@@ -358,7 +400,11 @@ export class IngestionPipeline {
         score: result.score,
         status: result.status,
         reasons: result.reasons,
-        alternatives: result.alternatives.map((a) => ({ variantId: a.productId, score: a.score, confidence: a.confidence })),
+        alternatives: result.alternatives.map((a) => ({
+          variantId: a.productId,
+          score: a.score,
+          confidence: a.confidence,
+        })),
       });
       // Only EXACT/HIGH (auto-accepted) and human-confirmed matches link prices to a canonical product.
       if (result.status === 'AUTO_ACCEPTED' || result.status === 'CONFIRMED') variantId = result.productId;
@@ -395,17 +441,30 @@ export class IngestionPipeline {
 
   // ── Prices ─────────────────────────────────────────────────────────────
 
-  private async syncPrices(provider: StoreProvider, syncId: string, counters: Counters, changed: Set<string>, since?: Date): Promise<void> {
+  private async syncPrices(
+    provider: StoreProvider,
+    syncId: string,
+    counters: Counters,
+    changed: Set<string>,
+    since?: Date,
+  ): Promise<void> {
     const request = await this.priceRequestFor(provider, since);
     for await (const raw of provider.getPrices(request)) {
       counters.read++;
       const parsed = providerPriceSchema.safeParse(raw);
-      await this.guard(syncId, provider, typeof raw?.externalId === 'string' ? raw.externalId : null, raw, counters, async () => {
-        if (!parsed.success) throw new RecordError('VALIDATION', parsed.error.message);
-        const inserted = await this.recordPrice(parsed.data, provider, syncId, changed);
-        if (inserted) counters.created++;
-        else counters.updated++;
-      });
+      await this.guard(
+        syncId,
+        provider,
+        typeof raw?.externalId === 'string' ? raw.externalId : null,
+        raw,
+        counters,
+        async () => {
+          if (!parsed.success) throw new RecordError('VALIDATION', parsed.error.message);
+          const inserted = await this.recordPrice(parsed.data, provider, syncId, changed);
+          if (inserted) counters.created++;
+          else counters.updated++;
+        },
+      );
     }
   }
 
@@ -417,7 +476,12 @@ export class IngestionPipeline {
   }
 
   /** Persist one observation. Returns true when a new observation was stored. */
-  async recordPrice(price: ValidProviderPrice, provider: StoreProvider, syncId: string | null, changed: Set<string>): Promise<boolean> {
+  async recordPrice(
+    price: ValidProviderPrice,
+    provider: StoreProvider,
+    syncId: string | null,
+    changed: Set<string>,
+  ): Promise<boolean> {
     if (this.retailerIds.size === 0) await this.loadRetailers();
     const retailerId = this.retailerId(price.retailerSlug);
     let rp = await this.findRetailerProduct(retailerId, price.externalId);
@@ -429,7 +493,10 @@ export class IngestionPipeline {
 
     let storeLocationId: string | null = null;
     if (price.storeOsmId) {
-      const [loc] = await this.db.select({ id: storeLocations.id }).from(storeLocations).where(eq(storeLocations.osmId, price.storeOsmId));
+      const [loc] = await this.db
+        .select({ id: storeLocations.id })
+        .from(storeLocations)
+        .where(eq(storeLocations.osmId, price.storeOsmId));
       storeLocationId = loc?.id ?? null;
     }
 
@@ -479,7 +546,10 @@ export class IngestionPipeline {
     return inserted.length > 0;
   }
 
-  private async findRetailerProduct(retailerId: string, sku: string): Promise<{ id: string; variantId: string | null } | undefined> {
+  private async findRetailerProduct(
+    retailerId: string,
+    sku: string,
+  ): Promise<{ id: string; variantId: string | null } | undefined> {
     const [row] = await this.db
       .select({ id: retailerProducts.id, variantId: retailerProducts.variantId })
       .from(retailerProducts)
@@ -489,69 +559,101 @@ export class IngestionPipeline {
 
   // ── Promotions ─────────────────────────────────────────────────────────
 
-  private async syncPromotions(provider: StoreProvider, syncId: string, counters: Counters, changed: Set<string>): Promise<void> {
+  private async syncPromotions(
+    provider: StoreProvider,
+    syncId: string,
+    counters: Counters,
+    changed: Set<string>,
+  ): Promise<void> {
     for await (const raw of provider.getPromotions()) {
       counters.read++;
       const parsed = providerPromotionSchema.safeParse(raw);
-      await this.guard(syncId, provider, typeof raw?.externalId === 'string' ? raw.externalId : null, raw, counters, async () => {
-        if (!parsed.success) throw new RecordError('VALIDATION', parsed.error.message);
-        const promo = parsed.data;
-        const retailerId = this.retailerId(promo.retailerSlug);
-        const rps = await this.db
-          .select({ id: retailerProducts.id, sku: retailerProducts.retailerSku, variantId: retailerProducts.variantId })
-          .from(retailerProducts)
-          .where(and(eq(retailerProducts.retailerId, retailerId), inArray(retailerProducts.retailerSku, promo.productExternalIds)));
-        if (rps.length === 0) throw new RecordError('MATCHING', `Promotion ${promo.externalId} references no known products`);
+      await this.guard(
+        syncId,
+        provider,
+        typeof raw?.externalId === 'string' ? raw.externalId : null,
+        raw,
+        counters,
+        async () => {
+          if (!parsed.success) throw new RecordError('VALIDATION', parsed.error.message);
+          const promo = parsed.data;
+          const retailerId = this.retailerId(promo.retailerSlug);
+          const rps = await this.db
+            .select({
+              id: retailerProducts.id,
+              sku: retailerProducts.retailerSku,
+              variantId: retailerProducts.variantId,
+            })
+            .from(retailerProducts)
+            .where(
+              and(
+                eq(retailerProducts.retailerId, retailerId),
+                inArray(retailerProducts.retailerSku, promo.productExternalIds),
+              ),
+            );
+          if (rps.length === 0)
+            throw new RecordError('MATCHING', `Promotion ${promo.externalId} references no known products`);
 
-        const created = await this.db.transaction(async (tx) => {
-          const [existing] = await tx
-            .select({ id: promotions.id })
-            .from(promotions)
-            .where(and(eq(promotions.retailerId, retailerId), eq(promotions.externalId, promo.externalId)));
-          const values = {
-            mechanic: promo.params.mechanic,
-            params: promo.params,
-            label: promo.label,
-            description: promo.description ?? null,
-            startsAt: promo.startsAt ?? null,
-            endsAt: promo.endsAt ?? null,
-            dataOrigin: provider.info.dataOrigin,
-            sourceProvider: provider.info.key,
-            updatedAt: new Date(),
-          };
-          let promotionId: string;
-          if (existing) {
-            await tx.update(promotions).set(values).where(eq(promotions.id, existing.id));
-            promotionId = existing.id;
-          } else {
-            const [row] = await tx.insert(promotions).values({ retailerId, externalId: promo.externalId, ...values }).returning({ id: promotions.id });
-            promotionId = row!.id;
+          const created = await this.db.transaction(async (tx) => {
+            const [existing] = await tx
+              .select({ id: promotions.id })
+              .from(promotions)
+              .where(and(eq(promotions.retailerId, retailerId), eq(promotions.externalId, promo.externalId)));
+            const values = {
+              mechanic: promo.params.mechanic,
+              params: promo.params,
+              label: promo.label,
+              description: promo.description ?? null,
+              startsAt: promo.startsAt ?? null,
+              endsAt: promo.endsAt ?? null,
+              dataOrigin: provider.info.dataOrigin,
+              sourceProvider: provider.info.key,
+              updatedAt: new Date(),
+            };
+            let promotionId: string;
+            if (existing) {
+              await tx.update(promotions).set(values).where(eq(promotions.id, existing.id));
+              promotionId = existing.id;
+            } else {
+              const [row] = await tx
+                .insert(promotions)
+                .values({ retailerId, externalId: promo.externalId, ...values })
+                .returning({ id: promotions.id });
+              promotionId = row!.id;
+            }
+            const c = promo.conditions;
+            const conditionValues = {
+              loyaltyCardRequired: c.loyaltyCardRequired,
+              loyaltyProgram: c.loyaltyProgram ?? null,
+              minQuantity: c.minQuantity ?? null,
+              maxQuantityPerCustomer: c.maxQuantityPerCustomer ?? null,
+              onlineOnly: c.onlineOnly,
+              regionCodes: c.regionCodes,
+            };
+            await tx
+              .insert(promotionConditions)
+              .values({ promotionId, ...conditionValues })
+              .onConflictDoUpdate({ target: promotionConditions.promotionId, set: conditionValues });
+            await tx.delete(promotionProducts).where(eq(promotionProducts.promotionId, promotionId));
+            await tx.insert(promotionProducts).values(rps.map((rp) => ({ promotionId, retailerProductId: rp.id })));
+            return !existing;
+          });
+          for (const rp of rps) if (rp.variantId) changed.add(rp.variantId);
+          const missing = promo.productExternalIds.filter((sku) => !rps.some((r) => r.sku === sku));
+          if (missing.length > 0) {
+            await this.recordError(
+              syncId,
+              provider.info.key,
+              'MATCHING',
+              promo.externalId,
+              `Unknown products in promotion: ${missing.join(', ')}`,
+              null,
+            );
           }
-          const c = promo.conditions;
-          const conditionValues = {
-            loyaltyCardRequired: c.loyaltyCardRequired,
-            loyaltyProgram: c.loyaltyProgram ?? null,
-            minQuantity: c.minQuantity ?? null,
-            maxQuantityPerCustomer: c.maxQuantityPerCustomer ?? null,
-            onlineOnly: c.onlineOnly,
-            regionCodes: c.regionCodes,
-          };
-          await tx
-            .insert(promotionConditions)
-            .values({ promotionId, ...conditionValues })
-            .onConflictDoUpdate({ target: promotionConditions.promotionId, set: conditionValues });
-          await tx.delete(promotionProducts).where(eq(promotionProducts.promotionId, promotionId));
-          await tx.insert(promotionProducts).values(rps.map((rp) => ({ promotionId, retailerProductId: rp.id })));
-          return !existing;
-        });
-        for (const rp of rps) if (rp.variantId) changed.add(rp.variantId);
-        const missing = promo.productExternalIds.filter((sku) => !rps.some((r) => r.sku === sku));
-        if (missing.length > 0) {
-          await this.recordError(syncId, provider.info.key, 'MATCHING', promo.externalId, `Unknown products in promotion: ${missing.join(', ')}`, null);
-        }
-        if (created) counters.created++;
-        else counters.updated++;
-      });
+          if (created) counters.created++;
+          else counters.updated++;
+        },
+      );
     }
   }
 }

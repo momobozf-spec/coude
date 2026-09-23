@@ -3,7 +3,18 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 import type { BasketLineDto, RetailerBasketDto } from '@superrette/validation';
-import { Badge, ConfidenceMeter, Divider, Icon, ReceiptCard, RetailerBadge, Row, Text, useTheme, type BadgeTone } from '@superrette/ui';
+import {
+  Badge,
+  ConfidenceMeter,
+  Divider,
+  Icon,
+  ReceiptCard,
+  RetailerBadge,
+  Row,
+  Text,
+  useTheme,
+  type BadgeTone,
+} from '@superrette/ui';
 import { DataNotice } from '../../../components/DataNotice';
 import { ErrorState, Loading, Screen } from '../../../components/Screen';
 import { useI18n } from '../../../state/i18n';
@@ -24,7 +35,15 @@ function statusBadge(line: BasketLineDto, t: ReturnType<typeof useI18n>['t']): {
   }
 }
 
-function RetailerReceipt({ basket, listId, cheapest }: { basket: RetailerBasketDto; listId: string; cheapest: boolean }): ReactNode {
+function RetailerReceipt({
+  basket,
+  listId,
+  cheapest,
+}: {
+  basket: RetailerBasketDto;
+  listId: string;
+  cheapest: boolean;
+}): ReactNode {
   const { t, price } = useI18n();
   const { colors } = useTheme();
   const [open, setOpen] = useState(cheapest);
@@ -38,7 +57,10 @@ function RetailerReceipt({ basket, listId, cheapest }: { basket: RetailerBasketD
           </Text>
         </Row>
         <Row gap={6} style={{ flexWrap: 'wrap', marginTop: 8 }}>
-          <Badge label={t('basket.found', { found: basket.foundCount, total: basket.itemCount })} tone={basket.isComplete ? 'success' : 'warning'} />
+          <Badge
+            label={t('basket.found', { found: basket.foundCount, total: basket.itemCount })}
+            tone={basket.isComplete ? 'success' : 'warning'}
+          />
           {cheapest ? <Badge label={t('basket.cheapestComplete')} tone="success" icon="check" /> : null}
         </Row>
         {basket.savingsCents > 0 ? (
@@ -56,7 +78,12 @@ function RetailerReceipt({ basket, listId, cheapest }: { basket: RetailerBasketD
                 <Divider dashed />
                 <Pressable
                   accessibilityRole="button"
-                  onPress={() => router.push({ pathname: '/list/[id]/choose', params: { id: listId, itemId: line.itemId, retailerId: basket.retailer.id } })}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/list/[id]/choose',
+                      params: { id: listId, itemId: line.itemId, retailerId: basket.retailer.id },
+                    })
+                  }
                   style={{ paddingVertical: 6 }}
                 >
                   <Row style={{ justifyContent: 'space-between' }} align="flex-start">
@@ -74,7 +101,10 @@ function RetailerReceipt({ basket, listId, cheapest }: { basket: RetailerBasketD
                       <Row gap={8}>
                         <Badge label={badge.label} tone={badge.tone} />
                         {line.confidence != null && line.status !== 'EXACT' ? (
-                          <ConfidenceMeter value={line.confidence} label={t('basket.confidence', { percent: Math.round(line.confidence * 100) })} />
+                          <ConfidenceMeter
+                            value={line.confidence}
+                            label={t('basket.confidence', { percent: Math.round(line.confidence * 100) })}
+                          />
                         ) : null}
                       </Row>
                     </View>
@@ -105,7 +135,9 @@ export default function Compare(): ReactNode {
   return (
     <Screen title={t('basket.title')} back refreshing={compare.isRefetching} onRefresh={() => void compare.refetch()}>
       {compare.isLoading ? <Loading /> : null}
-      {compare.error ? <ErrorState error={compare.error} onRetry={() => void compare.refetch()} lockedMessage={t('basket.locked')} /> : null}
+      {compare.error ? (
+        <ErrorState error={compare.error} onRetry={() => void compare.refetch()} lockedMessage={t('basket.locked')} />
+      ) : null}
       {data ? (
         <>
           <DataNotice origins={data.dataOrigins} />
@@ -115,7 +147,12 @@ export default function Compare(): ReactNode {
             </Text>
           ) : null}
           {data.retailers.map((r) => (
-            <RetailerReceipt key={r.retailer.id} basket={r} listId={id} cheapest={r.retailer.id === data.cheapestCompleteRetailerId} />
+            <RetailerReceipt
+              key={r.retailer.id}
+              basket={r}
+              listId={id}
+              cheapest={r.retailer.id === data.cheapestCompleteRetailerId}
+            />
           ))}
         </>
       ) : null}

@@ -24,7 +24,13 @@ import {
   type ProductDetailDto,
 } from '@superrette/validation';
 import { CurrentUser, OptionalUser, Public, type AuthUser } from '../common/auth.js';
-import { CatalogService, EntitlementsService, offerDto, ShopperContextService, type ShopperContext } from '../common/core.services.js';
+import {
+  CatalogService,
+  EntitlementsService,
+  offerDto,
+  ShopperContextService,
+  type ShopperContext,
+} from '../common/core.services.js';
 import { OFF_CLIENT } from '../common/core.module.js';
 import { notFound } from '../common/errors.js';
 import { DB } from '../common/tokens.js';
@@ -45,19 +51,41 @@ export class ProductsService {
     const basics = (await this.catalog.basics([variantId])).get(variantId);
     if (!basics) throw notFound('Product');
     const retailerIds = await this.retailersInScope(shopper, scope);
-    const offers = (await this.catalog.pricedOffers([variantId], shopper, retailerIds ? { retailerIds } : { retailerIds: await this.allRetailerIds() })).get(variantId) ?? [];
+    const offers =
+      (
+        await this.catalog.pricedOffers(
+          [variantId],
+          shopper,
+          retailerIds ? { retailerIds } : { retailerIds: await this.allRetailerIds() },
+        )
+      ).get(variantId) ?? [];
     const available = offers.filter((o) => o.row.retailerProduct.isAvailable);
     const best = available[0] ? Math.round(available[0].price.perItemCents) : null;
-    const offerDtos = offers.map((o) => offerDto(o, o.row.retailerProduct.isAvailable && best !== null && Math.round(o.price.perItemCents) === best));
+    const offerDtos = offers.map((o) =>
+      offerDto(o, o.row.retailerProduct.isAvailable && best !== null && Math.round(o.price.perItemCents) === best),
+    );
     const siblings = await this.db
-      .select({ variantId: productVariants.id, sizeLabel: productVariants.sizeLabel, name: productVariants.displayName })
+      .select({
+        variantId: productVariants.id,
+        sizeLabel: productVariants.sizeLabel,
+        name: productVariants.displayName,
+      })
       .from(productVariants)
-      .where(and(eq(productVariants.productId, basics.productId), ne(productVariants.id, variantId), inArray(productVariants.dataOrigin, this.catalog.origins)))
+      .where(
+        and(
+          eq(productVariants.productId, basics.productId),
+          ne(productVariants.id, variantId),
+          inArray(productVariants.dataOrigin, this.catalog.origins),
+        ),
+      )
       .orderBy(asc(productVariants.netContentAmount));
     let isFavorite = false;
     let alerts: PriceAlertDto[] = [];
     if (shopper.userId) {
-      const [fav] = await this.db.select().from(favorites).where(and(eq(favorites.userId, shopper.userId), eq(favorites.variantId, variantId)));
+      const [fav] = await this.db
+        .select()
+        .from(favorites)
+        .where(and(eq(favorites.userId, shopper.userId), eq(favorites.variantId, variantId)));
       isFavorite = Boolean(fav);
       const rows = await this.db
         .select({ a: priceAlerts, retailerName: retailers.name })
@@ -86,9 +114,12 @@ export class ProductsService {
       brand: basics.brand,
       isPrivateLabel: basics.isPrivateLabel,
       sizeLabel: basics.sizeLabel,
-      netContent: basics.netAmount != null && basics.netUnit ? { amount: basics.netAmount, unit: basics.netUnit } : null,
+      netContent:
+        basics.netAmount != null && basics.netUnit ? { amount: basics.netAmount, unit: basics.netUnit } : null,
       imageUrl: basics.imageUrl,
-      category: basics.categorySlug ? { slug: basics.categorySlug, name: basics.categoryName?.[shopper.locale] ?? basics.categorySlug } : null,
+      category: basics.categorySlug
+        ? { slug: basics.categorySlug, name: basics.categoryName?.[shopper.locale] ?? basics.categorySlug }
+        : null,
       dietary: basics.dietary,
       gtins: await this.catalog.gtins(variantId),
       offers: offerDtos,
@@ -105,7 +136,12 @@ export class ProductsService {
     return rows.map((r) => r.id);
   }
 
-  async history(variantId: string, shopper: ShopperContext, days: number, retailerId?: string): Promise<PriceHistoryDto> {
+  async history(
+    variantId: string,
+    shopper: ShopperContext,
+    days: number,
+    retailerId?: string,
+  ): Promise<PriceHistoryDto> {
     const now = new Date();
     const since = new Date(now.getTime() - (days + 7) * 86_400_000);
     const rows = await this.db
@@ -136,17 +172,25 @@ export class ProductsService {
       entry.points.push({ observedAt: r.observedAt, regularPriceCents: r.regular, promoPriceCents: r.promo });
       byRetailer.set(r.retailerId, entry);
     }
-    const summaries = [...byRetailer.entries()].map(([id, e]) => ({ id, name: e.name, summary: summarizePriceHistory(e.points, { now, windowDays: days }) }));
+    const summaries = [...byRetailer.entries()].map(([id, e]) => ({
+      id,
+      name: e.name,
+      summary: summarizePriceHistory(e.points, { now, windowDays: days }),
+    }));
     // Summarise the requested retailer, or the one that is currently cheapest.
     const chosen =
       summaries.find((s) => s.id === retailerId) ??
-      summaries.filter((s) => s.summary.current).sort((a, b) => a.summary.current!.cents - b.summary.current!.cents)[0] ??
+      summaries
+        .filter((s) => s.summary.current)
+        .sort((a, b) => a.summary.current!.cents - b.summary.current!.cents)[0] ??
       summaries[0];
     const s = chosen?.summary;
     return {
       variantId,
       windowDays: days,
-      current: s?.current ? { cents: s.current.cents, isPromo: s.current.isPromo, observedAt: s.current.observedAt.toISOString() } : null,
+      current: s?.current
+        ? { cents: s.current.cents, isPromo: s.current.isPromo, observedAt: s.current.observedAt.toISOString() }
+        : null,
       lowest: s?.lowest ? { cents: s.lowest.cents, observedAt: s.lowest.observedAt.toISOString() } : null,
       highest: s?.highest ? { cents: s.highest.cents, observedAt: s.highest.observedAt.toISOString() } : null,
       averageCents: s?.averageCents ?? null,
@@ -161,7 +205,11 @@ export class ProductsService {
 
   async equivalents(variantId: string, shopper: ShopperContext): Promise<EquivalentDto[]> {
     const rows = await this.db
-      .select({ target: productEquivalences.targetVariantId, confidence: productEquivalences.confidence, status: productEquivalences.status })
+      .select({
+        target: productEquivalences.targetVariantId,
+        confidence: productEquivalences.confidence,
+        status: productEquivalences.status,
+      })
       .from(productEquivalences)
       .where(and(eq(productEquivalences.sourceVariantId, variantId), ne(productEquivalences.status, 'REJECTED')));
     const ids = rows.map((r) => r.target);
@@ -186,7 +234,10 @@ export class ProductsService {
   }
 
   async variantForGtin(gtin: string): Promise<string | null> {
-    const [row] = await this.db.select({ variantId: productBarcodes.variantId }).from(productBarcodes).where(eq(productBarcodes.gtin, gtin));
+    const [row] = await this.db
+      .select({ variantId: productBarcodes.variantId })
+      .from(productBarcodes)
+      .where(eq(productBarcodes.gtin, gtin));
     return row?.variantId ?? null;
   }
 }
@@ -202,7 +253,11 @@ export class ProductsController {
 
   @Public()
   @Get('products/:variantId')
-  async detail(@Param('variantId', ParseUUIDPipe) id: string, @OptionalUser() user: AuthUser | null, @Query('scope') scope?: string): Promise<ProductDetailDto> {
+  async detail(
+    @Param('variantId', ParseUUIDPipe) id: string,
+    @OptionalUser() user: AuthUser | null,
+    @Query('scope') scope?: string,
+  ): Promise<ProductDetailDto> {
     return this.products.detail(id, await this.shoppers.get(user?.id ?? null), scope === 'all' ? 'all' : 'mine');
   }
 
@@ -219,7 +274,10 @@ export class ProductsController {
 
   @Public()
   @Get('products/:variantId/equivalents')
-  async equivalents(@Param('variantId', ParseUUIDPipe) id: string, @OptionalUser() user: AuthUser | null): Promise<EquivalentDto[]> {
+  async equivalents(
+    @Param('variantId', ParseUUIDPipe) id: string,
+    @OptionalUser() user: AuthUser | null,
+  ): Promise<EquivalentDto[]> {
     return this.products.equivalents(id, await this.shoppers.get(user?.id ?? null));
   }
 
@@ -231,14 +289,27 @@ export class ProductsController {
     if (!gtin) return { gtin: code, status: 'INVALID', product: null, external: null };
     const variantId = await this.products.variantForGtin(gtin);
     if (variantId) {
-      return { gtin, status: 'FOUND', product: await this.products.detail(variantId, await this.shoppers.get(user?.id ?? null)), external: null };
+      return {
+        gtin,
+        status: 'FOUND',
+        product: await this.products.detail(variantId, await this.shoppers.get(user?.id ?? null)),
+        external: null,
+      };
     }
     const meta = this.off ? await this.off.lookup(gtin) : null;
     return {
       gtin,
       status: 'UNKNOWN',
       product: null,
-      external: meta ? { source: 'open-food-facts', name: meta.name, brand: meta.brand, quantity: meta.quantity, imageUrl: meta.imageUrl } : null,
+      external: meta
+        ? {
+            source: 'open-food-facts',
+            name: meta.name,
+            brand: meta.brand,
+            quantity: meta.quantity,
+            imageUrl: meta.imageUrl,
+          }
+        : null,
     };
   }
 }

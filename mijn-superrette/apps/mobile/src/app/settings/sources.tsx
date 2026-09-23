@@ -10,7 +10,10 @@ export default function Sources(): ReactNode {
   const api = useApi();
   const { user } = useSession();
   const { t } = useI18n();
-  const retailers = useQuery({ queryKey: ['retailers', user?.countryCode], queryFn: () => api.retailers(user?.countryCode ?? undefined) });
+  const retailers = useQuery({
+    queryKey: ['retailers', user?.countryCode],
+    queryFn: () => api.retailers(user?.countryCode ?? undefined),
+  });
   return (
     <Screen title={t('profile.dataSources')} back>
       <Card style={{ marginBottom: 12, gap: 8 }}>
@@ -34,7 +37,10 @@ function SourceRow({ first, name, status }: { first: boolean; name: string; stat
       {first ? null : <Divider />}
       <Row style={{ justifyContent: 'space-between', paddingVertical: 6 }}>
         <Text variant="bodyStrong">{name}</Text>
-        <Badge label={status} tone={status === 'SUPPORTED' ? 'success' : status === 'EXPERIMENTAL' ? 'warning' : 'neutral'} />
+        <Badge
+          label={status}
+          tone={status === 'SUPPORTED' ? 'success' : status === 'EXPERIMENTAL' ? 'warning' : 'neutral'}
+        />
       </Row>
     </>
   );

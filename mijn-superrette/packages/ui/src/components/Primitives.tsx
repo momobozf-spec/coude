@@ -30,10 +30,32 @@ export interface ButtonProps extends Omit<PressableProps, 'style' | 'children'> 
   style?: StyleProp<ViewStyle>;
 }
 
-export function Button({ title, variant = 'primary', size = 'md', icon, loading, fullWidth, disabled, style, ...rest }: ButtonProps): ReactNode {
+export function Button({
+  title,
+  variant = 'primary',
+  size = 'md',
+  icon,
+  loading,
+  fullWidth,
+  disabled,
+  style,
+  ...rest
+}: ButtonProps): ReactNode {
   const { colors, radii, spacing } = useTheme();
-  const bg = { primary: colors.primary, secondary: colors.surfaceAlt, accent: colors.accent, ghost: 'transparent', danger: colors.dangerSoft }[variant];
-  const fg = { primary: colors.onPrimary, secondary: colors.text, accent: colors.onAccent, ghost: colors.text, danger: colors.danger }[variant];
+  const bg = {
+    primary: colors.primary,
+    secondary: colors.surfaceAlt,
+    accent: colors.accent,
+    ghost: 'transparent',
+    danger: colors.dangerSoft,
+  }[variant];
+  const fg = {
+    primary: colors.onPrimary,
+    secondary: colors.text,
+    accent: colors.onAccent,
+    ghost: colors.text,
+    danger: colors.danger,
+  }[variant];
   const pad = { sm: spacing.sm, md: spacing.md, lg: spacing.lg }[size];
   return (
     <Pressable
@@ -67,10 +89,32 @@ export function Button({ title, variant = 'primary', size = 'md', icon, loading,
   );
 }
 
-export function IconButton({ icon, onPress, label, color, size = 22 }: { icon: IconName; onPress?: () => void; label: string; color?: string; size?: number }): ReactNode {
+export function IconButton({
+  icon,
+  onPress,
+  label,
+  color,
+  size = 22,
+}: {
+  icon: IconName;
+  onPress?: () => void;
+  label: string;
+  color?: string;
+  size?: number;
+}): ReactNode {
   const { colors } = useTheme();
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={label} hitSlop={10} onPress={onPress} style={({ pressed }) => ({ padding: 6, borderRadius: 999, backgroundColor: pressed ? colors.surfaceAlt : 'transparent' })}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      hitSlop={10}
+      onPress={onPress}
+      style={({ pressed }) => ({
+        padding: 6,
+        borderRadius: 999,
+        backgroundColor: pressed ? colors.surfaceAlt : 'transparent',
+      })}
+    >
       <Icon name={icon} size={size} color={color ?? colors.text} />
     </Pressable>
   );
@@ -78,27 +122,76 @@ export function IconButton({ icon, onPress, label, color, size = 22 }: { icon: I
 
 // ─── Card & layout ───────────────────────────────────────────────────────────
 
-export function Card({ children, style, onPress, padded = true }: { children: ReactNode; style?: StyleProp<ViewStyle>; onPress?: () => void; padded?: boolean }): ReactNode {
+export function Card({
+  children,
+  style,
+  onPress,
+  padded = true,
+}: {
+  children: ReactNode;
+  style?: StyleProp<ViewStyle>;
+  onPress?: () => void;
+  padded?: boolean;
+}): ReactNode {
   const { colors, radii, spacing, elevation } = useTheme();
-  const base: ViewStyle = { backgroundColor: colors.surface, borderRadius: radii.lg, padding: padded ? spacing.lg : 0, borderWidth: 1, borderColor: colors.border, ...elevation.card };
+  const base: ViewStyle = {
+    backgroundColor: colors.surface,
+    borderRadius: radii.lg,
+    padding: padded ? spacing.lg : 0,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...elevation.card,
+  };
   if (!onPress) return <View style={[base, style]}>{children}</View>;
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [base, { opacity: pressed ? 0.9 : 1 }, style]}>
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [base, { opacity: pressed ? 0.9 : 1 }, style]}
+    >
       {children}
     </Pressable>
   );
 }
 
-export function Row({ children, gap = 8, style, align = 'center' }: { children: ReactNode; gap?: number; style?: StyleProp<ViewStyle>; align?: ViewStyle['alignItems'] }): ReactNode {
+export function Row({
+  children,
+  gap = 8,
+  style,
+  align = 'center',
+}: {
+  children: ReactNode;
+  gap?: number;
+  style?: StyleProp<ViewStyle>;
+  align?: ViewStyle['alignItems'];
+}): ReactNode {
   return <View style={[{ flexDirection: 'row', alignItems: align, gap }, style]}>{children}</View>;
 }
 
 export function Divider({ dashed = false }: { dashed?: boolean }): ReactNode {
   const { colors } = useTheme();
-  return <View style={{ height: 0, borderTopWidth: 1, borderColor: colors.border, borderStyle: dashed ? 'dashed' : 'solid', marginVertical: 8 }} />;
+  return (
+    <View
+      style={{
+        height: 0,
+        borderTopWidth: 1,
+        borderColor: colors.border,
+        borderStyle: dashed ? 'dashed' : 'solid',
+        marginVertical: 8,
+      }}
+    />
+  );
 }
 
-export function SectionHeader({ title, action, onAction }: { title: string; action?: string; onAction?: () => void }): ReactNode {
+export function SectionHeader({
+  title,
+  action,
+  onAction,
+}: {
+  title: string;
+  action?: string;
+  onAction?: () => void;
+}): ReactNode {
   return (
     <Row style={{ justifyContent: 'space-between', marginTop: 24, marginBottom: 10 }}>
       <Text variant="micro" tone="muted">
@@ -119,7 +212,15 @@ export function SectionHeader({ title, action, onAction }: { title: string; acti
 
 export type BadgeTone = 'promo' | 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 
-export function Badge({ label, tone = 'neutral', icon }: { label: string; tone?: BadgeTone; icon?: IconName }): ReactNode {
+export function Badge({
+  label,
+  tone = 'neutral',
+  icon,
+}: {
+  label: string;
+  tone?: BadgeTone;
+  icon?: IconName;
+}): ReactNode {
   const { colors, radii } = useTheme();
   const map = {
     promo: [colors.accent, colors.onAccent],
@@ -131,7 +232,18 @@ export function Badge({ label, tone = 'neutral', icon }: { label: string; tone?:
   } as const;
   const [bg, fg] = map[tone];
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: bg, borderRadius: radii.sm, paddingHorizontal: 7, paddingVertical: 3, alignSelf: 'flex-start' }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        backgroundColor: bg,
+        borderRadius: radii.sm,
+        paddingHorizontal: 7,
+        paddingVertical: 3,
+        alignSelf: 'flex-start',
+      }}
+    >
       {icon ? <Icon name={icon} size={12} color={fg} strokeWidth={2.4} /> : null}
       <Text variant="micro" color={fg}>
         {label}
@@ -140,7 +252,17 @@ export function Badge({ label, tone = 'neutral', icon }: { label: string; tone?:
   );
 }
 
-export function Chip({ label, selected, onPress, color }: { label: string; selected?: boolean; onPress?: () => void; color?: string }): ReactNode {
+export function Chip({
+  label,
+  selected,
+  onPress,
+  color,
+}: {
+  label: string;
+  selected?: boolean;
+  onPress?: () => void;
+  color?: string;
+}): ReactNode {
   const { colors, radii } = useTheme();
   return (
     <Pressable
@@ -168,10 +290,26 @@ export function Chip({ label, selected, onPress, color }: { label: string; selec
 }
 
 /** Retailer identity: name on a pill in the retailer's colour (no third-party logos). */
-export function RetailerBadge({ name, color, size = 'md' }: { name: string; color: string; size?: 'sm' | 'md' }): ReactNode {
+export function RetailerBadge({
+  name,
+  color,
+  size = 'md',
+}: {
+  name: string;
+  color: string;
+  size?: 'sm' | 'md';
+}): ReactNode {
   const { radii } = useTheme();
   return (
-    <View style={{ backgroundColor: color, borderRadius: radii.sm, paddingHorizontal: size === 'sm' ? 6 : 9, paddingVertical: size === 'sm' ? 2 : 4, alignSelf: 'flex-start' }}>
+    <View
+      style={{
+        backgroundColor: color,
+        borderRadius: radii.sm,
+        paddingHorizontal: size === 'sm' ? 6 : 9,
+        paddingVertical: size === 'sm' ? 2 : 4,
+        alignSelf: 'flex-start',
+      }}
+    >
       <Text variant={size === 'sm' ? 'micro' : 'caption'} color={onColor(color)} style={{ fontWeight: '700' }}>
         {name}
       </Text>
@@ -181,7 +319,19 @@ export function RetailerBadge({ name, color, size = 'md' }: { name: string; colo
 
 // ─── Price display (values are pre-formatted by the app) ────────────────────
 
-export function PriceTag({ price, regular, unit, highlight, promo }: { price: string; regular?: string | null; unit?: string | null; highlight?: boolean; promo?: boolean }): ReactNode {
+export function PriceTag({
+  price,
+  regular,
+  unit,
+  highlight,
+  promo,
+}: {
+  price: string;
+  regular?: string | null;
+  unit?: string | null;
+  highlight?: boolean;
+  promo?: boolean;
+}): ReactNode {
   const { colors } = useTheme();
   return (
     <View style={{ alignItems: 'flex-end' }}>
@@ -210,19 +360,37 @@ function ZigZag({ color, flip }: { color: string; flip?: boolean }): ReactNode {
   for (let i = 0; i < teeth; i++) d += `L${(i + 0.5) * (100 / teeth)} 6 L${(i + 1) * (100 / teeth)} 0 `;
   d += 'Z';
   return (
-    <Svg width="100%" height={7} viewBox="0 0 100 6" preserveAspectRatio="none" style={flip ? { transform: [{ scaleY: -1 }] } : undefined}>
+    <Svg
+      width="100%"
+      height={7}
+      viewBox="0 0 100 6"
+      preserveAspectRatio="none"
+      style={flip ? { transform: [{ scaleY: -1 }] } : undefined}
+    >
       <Path d={d} fill={color} />
     </Svg>
   );
 }
 
-export function ReceiptCard({ children, highlight, style, onPress }: { children: ReactNode; highlight?: boolean; style?: StyleProp<ViewStyle>; onPress?: () => void }): ReactNode {
+export function ReceiptCard({
+  children,
+  highlight,
+  style,
+  onPress,
+}: {
+  children: ReactNode;
+  highlight?: boolean;
+  style?: StyleProp<ViewStyle>;
+  onPress?: () => void;
+}): ReactNode {
   const { colors, spacing } = useTheme();
   const bg = colors.surface;
   const content = (
     <View style={[{ borderLeftWidth: highlight ? 4 : 0, borderLeftColor: colors.success }, style]}>
       <ZigZag color={bg} flip />
-      <View style={{ backgroundColor: bg, paddingHorizontal: spacing.lg, paddingVertical: spacing.md }}>{children}</View>
+      <View style={{ backgroundColor: bg, paddingHorizontal: spacing.lg, paddingVertical: spacing.md }}>
+        {children}
+      </View>
       <ZigZag color={bg} />
     </View>
   );
@@ -237,7 +405,12 @@ export function ReceiptCard({ children, highlight, style, onPress }: { children:
 
 // ─── Inputs ──────────────────────────────────────────────────────────────────
 
-export function TextField({ label, error, style, ...rest }: TextInputProps & { label?: string; error?: string | null }): ReactNode {
+export function TextField({
+  label,
+  error,
+  style,
+  ...rest
+}: TextInputProps & { label?: string; error?: string | null }): ReactNode {
   const { colors, radii, typography } = useTheme();
   return (
     <View style={{ gap: 6 }}>
@@ -250,7 +423,15 @@ export function TextField({ label, error, style, ...rest }: TextInputProps & { l
         placeholderTextColor={colors.textMuted}
         style={[
           typography.body,
-          { color: colors.text, backgroundColor: colors.surface, borderColor: error ? colors.danger : colors.border, borderWidth: 1, borderRadius: radii.md, paddingHorizontal: 14, paddingVertical: 12 },
+          {
+            color: colors.text,
+            backgroundColor: colors.surface,
+            borderColor: error ? colors.danger : colors.border,
+            borderWidth: 1,
+            borderRadius: radii.md,
+            paddingHorizontal: 14,
+            paddingVertical: 12,
+          },
           style,
         ]}
         {...rest}
@@ -264,10 +445,36 @@ export function TextField({ label, error, style, ...rest }: TextInputProps & { l
   );
 }
 
-export function SearchField({ value, onChangeText, placeholder, onSubmit, onScan, autoFocus }: { value: string; onChangeText: (v: string) => void; placeholder: string; onSubmit?: () => void; onScan?: () => void; autoFocus?: boolean }): ReactNode {
+export function SearchField({
+  value,
+  onChangeText,
+  placeholder,
+  onSubmit,
+  onScan,
+  autoFocus,
+}: {
+  value: string;
+  onChangeText: (v: string) => void;
+  placeholder: string;
+  onSubmit?: () => void;
+  onScan?: () => void;
+  autoFocus?: boolean;
+}): ReactNode {
   const { colors, radii, typography } = useTheme();
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radii.pill, borderWidth: 1, borderColor: colors.border, paddingLeft: 14, paddingRight: 6, gap: 8 }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.surface,
+        borderRadius: radii.pill,
+        borderWidth: 1,
+        borderColor: colors.border,
+        paddingLeft: 14,
+        paddingRight: 6,
+        gap: 8,
+      }}
+    >
       <Icon name="search" size={20} color={colors.textMuted} />
       <TextInput
         value={value}
@@ -286,7 +493,17 @@ export function SearchField({ value, onChangeText, placeholder, onSubmit, onScan
   );
 }
 
-export function ToggleRow({ label, description, value, onValueChange }: { label: string; description?: string; value: boolean; onValueChange: (v: boolean) => void }): ReactNode {
+export function ToggleRow({
+  label,
+  description,
+  value,
+  onValueChange,
+}: {
+  label: string;
+  description?: string;
+  value: boolean;
+  onValueChange: (v: boolean) => void;
+}): ReactNode {
   const { colors } = useTheme();
   return (
     <Row style={{ justifyContent: 'space-between', paddingVertical: 10 }}>
@@ -298,15 +515,43 @@ export function ToggleRow({ label, description, value, onValueChange }: { label:
           </Text>
         ) : null}
       </View>
-      <Switch value={value} onValueChange={onValueChange} trackColor={{ true: colors.success, false: colors.border }} accessibilityLabel={label} />
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ true: colors.success, false: colors.border }}
+        accessibilityLabel={label}
+      />
     </Row>
   );
 }
 
-export function ListRow({ title, subtitle, left, right, onPress }: { title: string; subtitle?: string | null; left?: ReactNode; right?: ReactNode; onPress?: () => void }): ReactNode {
+export function ListRow({
+  title,
+  subtitle,
+  left,
+  right,
+  onPress,
+}: {
+  title: string;
+  subtitle?: string | null;
+  left?: ReactNode;
+  right?: ReactNode;
+  onPress?: () => void;
+}): ReactNode {
   const { colors } = useTheme();
   return (
-    <Pressable accessibilityRole={onPress ? 'button' : undefined} onPress={onPress} disabled={!onPress} style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, opacity: pressed ? 0.7 : 1 })}>
+    <Pressable
+      accessibilityRole={onPress ? 'button' : undefined}
+      onPress={onPress}
+      disabled={!onPress}
+      style={({ pressed }) => ({
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        paddingVertical: 12,
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
       {left}
       <View style={{ flex: 1 }}>
         <Text variant="bodyStrong" numberOfLines={2}>
@@ -329,7 +574,18 @@ export function ListRow({ title, subtitle, left, right, onPress }: { title: stri
 export function SampleDataBanner({ label }: { label: string }): ReactNode {
   const { colors } = useTheme();
   return (
-    <View accessibilityRole="alert" style={{ backgroundColor: colors.warningSoft, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8, flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+    <View
+      accessibilityRole="alert"
+      style={{
+        backgroundColor: colors.warningSoft,
+        borderRadius: 10,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        flexDirection: 'row',
+        gap: 8,
+        alignItems: 'center',
+      }}
+    >
       <Icon name="info" size={16} color={colors.warning} />
       <Text variant="caption" color={colors.warning} style={{ flex: 1, fontWeight: '700' }}>
         {label}
@@ -338,7 +594,17 @@ export function SampleDataBanner({ label }: { label: string }): ReactNode {
   );
 }
 
-export function EmptyState({ title, body, icon = 'basket', action }: { title: string; body?: string; icon?: IconName; action?: ReactNode }): ReactNode {
+export function EmptyState({
+  title,
+  body,
+  icon = 'basket',
+  action,
+}: {
+  title: string;
+  body?: string;
+  icon?: IconName;
+  action?: ReactNode;
+}): ReactNode {
   const { colors } = useTheme();
   return (
     <View style={{ alignItems: 'center', paddingVertical: 40, paddingHorizontal: 24, gap: 10 }}>
@@ -364,7 +630,9 @@ export function ConfidenceMeter({ value, label }: { value: number; label?: strin
   return (
     <Row gap={6}>
       <View style={{ width: 44, height: 5, backgroundColor: colors.surfaceAlt, borderRadius: 3, overflow: 'hidden' }}>
-        <View style={{ width: `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%`, height: 5, backgroundColor: color }} />
+        <View
+          style={{ width: `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%`, height: 5, backgroundColor: color }}
+        />
       </View>
       {label ? (
         <Text variant="caption" tone="muted">
@@ -375,12 +643,30 @@ export function ConfidenceMeter({ value, label }: { value: number; label?: strin
   );
 }
 
-export function Skeleton({ height = 16, width = '100%', radius = 8 }: { height?: number; width?: number | `${number}%`; radius?: number }): ReactNode {
+export function Skeleton({
+  height = 16,
+  width = '100%',
+  radius = 8,
+}: {
+  height?: number;
+  width?: number | `${number}%`;
+  radius?: number;
+}): ReactNode {
   const { colors } = useTheme();
   return <View style={{ height, width, borderRadius: radius, backgroundColor: colors.surfaceAlt }} />;
 }
 
-export function Stepper({ value, onChange, min = 1, max = 99 }: { value: number; onChange: (v: number) => void; min?: number; max?: number }): ReactNode {
+export function Stepper({
+  value,
+  onChange,
+  min = 1,
+  max = 99,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+  min?: number;
+  max?: number;
+}): ReactNode {
   const { colors, radii } = useTheme();
   return (
     <Row gap={4} style={{ backgroundColor: colors.surfaceAlt, borderRadius: radii.pill, paddingHorizontal: 4 }}>

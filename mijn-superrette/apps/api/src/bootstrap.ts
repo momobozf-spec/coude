@@ -34,11 +34,17 @@ class RedisIoAdapter extends IoAdapter {
 }
 
 export async function createApp(): Promise<INestApplication> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: false, logger: process.env.APP_ENV === 'test' ? ['error', 'warn'] : undefined });
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: false,
+    logger: process.env.APP_ENV === 'test' ? ['error', 'warn'] : undefined,
+  });
   const config = app.get<AppConfig>(CONFIG);
   app.enableCors({ origin: config.corsOrigins, credentials: true });
   app.enableShutdownHooks();
-  const expressApp = app.getHttpAdapter().getInstance() as { set(k: string, v: unknown): void; disable(k: string): void };
+  const expressApp = app.getHttpAdapter().getInstance() as {
+    set(k: string, v: unknown): void;
+    disable(k: string): void;
+  };
   expressApp.set('trust proxy', 1);
   expressApp.disable('x-powered-by');
   if (config.redisUrl) {

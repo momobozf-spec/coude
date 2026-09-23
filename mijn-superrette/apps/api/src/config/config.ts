@@ -46,7 +46,9 @@ export interface AppConfig {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const parsed = envSchema.safeParse(env);
   if (!parsed.success) {
-    throw new Error(`Invalid configuration: ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`);
+    throw new Error(
+      `Invalid configuration: ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`,
+    );
   }
   const e = parsed.data;
   const isProduction = e.APP_ENV === 'production';
@@ -68,7 +70,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     expoAccessToken: e.EXPO_ACCESS_TOKEN ?? null,
     pushMode: e.PUSH_MODE ?? (isProduction ? 'expo' : 'log'),
     publicAppUrl: e.PUBLIC_APP_URL.replace(/\/$/, ''),
-    corsOrigins: e.CORS_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean),
+    corsOrigins: e.CORS_ORIGINS.split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
     jobsMode: e.JOBS_MODE ?? (e.REDIS_URL ? 'queue' : 'inline'),
   };
 }

@@ -31,7 +31,13 @@ const config: ExpoConfig = {
     'expo-router',
     'expo-secure-store',
     'expo-localization',
-    ['expo-camera', { cameraPermission: 'Mijn Superrette gebruikt je camera om streepjescodes van producten te scannen.', recordAudioAndroid: false }],
+    [
+      'expo-camera',
+      {
+        cameraPermission: 'Mijn Superrette gebruikt je camera om streepjescodes van producten te scannen.',
+        recordAudioAndroid: false,
+      },
+    ],
     ['expo-notifications', { color: '#F08A4B', defaultChannel: 'price-alerts' }],
     ['expo-splash-screen', { backgroundColor: '#17323A', image: './assets/splash.png', imageWidth: 160 }],
   ],

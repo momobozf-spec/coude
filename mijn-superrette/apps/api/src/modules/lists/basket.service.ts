@@ -16,7 +16,12 @@ import type {
   SmartBasketInput,
   SmartPlanDto,
 } from '@superrette/validation';
-import { CatalogService, EntitlementsService, ShopperContextService, unitPriceDto } from '../../common/core.services.js';
+import {
+  CatalogService,
+  EntitlementsService,
+  ShopperContextService,
+  unitPriceDto,
+} from '../../common/core.services.js';
 import { DB } from '../../common/tokens.js';
 import { SearchService } from '../search.module.js';
 import { ListsService } from './lists.service.js';
@@ -64,12 +69,25 @@ export class BasketService {
   private async candidateVariants(item: ItemRow): Promise<ItemCandidateVariant[]> {
     if (item.preferredVariantId) {
       const eq2 = await this.db
-        .select({ target: productEquivalences.targetVariantId, confidence: productEquivalences.confidence, status: productEquivalences.status })
+        .select({
+          target: productEquivalences.targetVariantId,
+          confidence: productEquivalences.confidence,
+          status: productEquivalences.status,
+        })
         .from(productEquivalences)
-        .where(and(eq(productEquivalences.sourceVariantId, item.preferredVariantId), ne(productEquivalences.status, 'REJECTED')));
+        .where(
+          and(
+            eq(productEquivalences.sourceVariantId, item.preferredVariantId),
+            ne(productEquivalences.status, 'REJECTED'),
+          ),
+        );
       return [
         { variantId: item.preferredVariantId, matchType: 'EXACT', confidence: 1 },
-        ...eq2.map((e) => ({ variantId: e.target, matchType: 'EQUIVALENT' as const, confidence: e.status === 'CONFIRMED' ? Math.max(0.95, e.confidence) : e.confidence })),
+        ...eq2.map((e) => ({
+          variantId: e.target,
+          matchType: 'EQUIVALENT' as const,
+          confidence: e.status === 'CONFIRMED' ? Math.max(0.95, e.confidence) : e.confidence,
+        })),
       ];
     }
     const { ranked } = await this.search.rank(item.title, 40);
@@ -84,7 +102,11 @@ export class BasketService {
     });
   }
 
-  async compute(listId: string, userId: string, requestedRetailerIds?: string[]): Promise<{ comparison: BasketComparison; dto: BasketComparisonDto }> {
+  async compute(
+    listId: string,
+    userId: string,
+    requestedRetailerIds?: string[],
+  ): Promise<{ comparison: BasketComparison; dto: BasketComparisonDto }> {
     await this.lists.requireRole(listId, userId, 'VIEWER');
     const shopper = await this.shoppers.get(userId);
     const limit = await this.entitlements.limit(userId, 'basket_comparison');
@@ -94,8 +116,15 @@ export class BasketService {
     if (limit !== null && retailerIds.length > limit) retailerIds = retailerIds.slice(0, limit);
 
     // Checked items stay in the comparison: ticking off while shopping must not change totals.
-    const items = await this.db.select().from(shoppingListItems).where(eq(shoppingListItems.listId, listId)).orderBy(asc(shoppingListItems.position));
-    const retailerRows = await this.db.select({ id: retailers.id, name: retailers.name, brandColor: retailers.brandColor }).from(retailers).where(inArray(retailers.id, retailerIds));
+    const items = await this.db
+      .select()
+      .from(shoppingListItems)
+      .where(eq(shoppingListItems.listId, listId))
+      .orderBy(asc(shoppingListItems.position));
+    const retailerRows = await this.db
+      .select({ id: retailers.id, name: retailers.name, brandColor: retailers.brandColor })
+      .from(retailers)
+      .where(inArray(retailers.id, retailerIds));
 
     const perItem = new Map<string, ItemCandidateVariant[]>();
     for (const item of items) perItem.set(item.id, await this.candidateVariants(item));
@@ -189,7 +218,12 @@ export class BasketService {
     });
     const plan = (p: SmartPlan | null): SmartPlanDto | null =>
       p && {
-        retailers: p.perRetailer.map((r) => ({ id: r.retailerId, name: names.get(r.retailerId) ?? '', subtotalCents: r.subtotalCents, itemIds: r.itemIds })),
+        retailers: p.perRetailer.map((r) => ({
+          id: r.retailerId,
+          name: names.get(r.retailerId) ?? '',
+          subtotalCents: r.subtotalCents,
+          itemIds: r.itemIds,
+        })),
         totalCents: p.totalCents,
         adjustedTotalCents: p.adjustedTotalCents,
         foundCount: p.foundCount,

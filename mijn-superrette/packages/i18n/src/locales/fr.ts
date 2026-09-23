@@ -191,7 +191,7 @@ export const fr: Messages = {
     total: 'Total',
     youSave: 'Vous économisez',
     maxStores: 'Nombre maximum de supermarchés',
-    noBenefit: "Combiner ne rapporte pas assez : un seul supermarché est plus pratique.",
+    noBenefit: 'Combiner ne rapporte pas assez : un seul supermarché est plus pratique.',
     locked: 'Smart Basket est disponible avec Mijn Superrette Plus.',
   },
   promotions: {
@@ -238,7 +238,7 @@ export const fr: Messages = {
     empty: 'Pas encore de notifications.',
     markAllRead: 'Tout marquer comme lu',
     permissionTitle: 'Activer les notifications ?',
-    permissionBody: "Vous saurez tout de suite quand une alerte prix se déclenche.",
+    permissionBody: 'Vous saurez tout de suite quand une alerte prix se déclenche.',
   },
   scanner: {
     title: 'Scanner un code-barres',
@@ -272,7 +272,8 @@ export const fr: Messages = {
     exportData: 'Télécharger mes données',
     deleteHistory: "Effacer l'historique de recherche",
     deleteAccount: 'Supprimer le compte',
-    deleteAccountConfirm: "Votre compte, vos listes, favoris et alertes seront définitivement supprimés. Les listes partagées d'autres personnes sont conservées.",
+    deleteAccountConfirm:
+      "Votre compte, vos listes, favoris et alertes seront définitivement supprimés. Les listes partagées d'autres personnes sont conservées.",
     historyDeleted: 'Votre historique de recherche a été effacé.',
     about: 'À propos de Mijn Superrette',
     dataSources: 'Sources de données',

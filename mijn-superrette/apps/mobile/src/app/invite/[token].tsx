@@ -13,7 +13,11 @@ export default function AcceptInvite(): ReactNode {
   const api = useApi();
   const qc = useQueryClient();
   const { t } = useI18n();
-  const preview = useQuery({ queryKey: ['invite', token], queryFn: () => api.previewInvite(token), enabled: status === 'signed-in' });
+  const preview = useQuery({
+    queryKey: ['invite', token],
+    queryFn: () => api.previewInvite(token),
+    enabled: status === 'signed-in',
+  });
   const accept = useMutation({
     mutationFn: () => api.acceptInvite(token),
     onSuccess: (list) => {
@@ -29,7 +33,13 @@ export default function AcceptInvite(): ReactNode {
         <Card>
           <Text variant="heading">{preview.data.listName}</Text>
           <Text tone="muted">{preview.data.invitedBy}</Text>
-          <Button title={t('sharing.accept')} size="lg" style={{ marginTop: 16 }} loading={accept.isPending} onPress={() => accept.mutate()} />
+          <Button
+            title={t('sharing.accept')}
+            size="lg"
+            style={{ marginTop: 16 }}
+            loading={accept.isPending}
+            onPress={() => accept.mutate()}
+          />
         </Card>
       ) : null}
       {preview.data && !preview.data.valid ? <EmptyState icon="info" title={t('sharing.expired')} /> : null}

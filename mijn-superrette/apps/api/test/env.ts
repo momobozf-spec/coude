@@ -1,5 +1,6 @@
 /** Environment for integration tests (real PostgreSQL, no Redis, in-process jobs). */
-export const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL ?? 'postgres://superrette:superrette@localhost:5432/superrette_test';
+export const TEST_DATABASE_URL =
+  process.env.TEST_DATABASE_URL ?? 'postgres://superrette:superrette@localhost:5432/superrette_test';
 
 export function applyTestEnv(): void {
   process.env.APP_ENV = 'test';

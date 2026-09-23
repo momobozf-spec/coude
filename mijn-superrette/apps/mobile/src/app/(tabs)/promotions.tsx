@@ -11,7 +11,18 @@ import { useApi } from '../../state/session';
 type Section = 'for_you' | 'favorites' | 'retailer' | 'category' | 'ending_soon';
 type Sort = 'largest_discount' | 'lowest_price' | 'ending_soon' | 'recent';
 
-const CATEGORY_SLUGS = ['zuivel', 'frisdrank', 'brood', 'eieren', 'vlees', 'fruit', 'verzorging', 'baby', 'voorraad', 'diepvries'] as const;
+const CATEGORY_SLUGS = [
+  'zuivel',
+  'frisdrank',
+  'brood',
+  'eieren',
+  'vlees',
+  'fruit',
+  'verzorging',
+  'baby',
+  'voorraad',
+  'diepvries',
+] as const;
 
 export default function Promotions(): ReactNode {
   const api = useApi();
@@ -20,13 +31,22 @@ export default function Promotions(): ReactNode {
   const [sort, setSort] = useState<Sort>('largest_discount');
   const [retailerId, setRetailerId] = useState<string | undefined>();
   const [category, setCategory] = useState<string | undefined>();
-  const retailers = useQuery({ queryKey: ['my-retailers-full'], queryFn: async () => {
-    const [mine, all] = await Promise.all([api.myRetailers(), api.retailers()]);
-    return all.filter((r) => mine.some((m) => m.retailerId === r.id));
-  } });
+  const retailers = useQuery({
+    queryKey: ['my-retailers-full'],
+    queryFn: async () => {
+      const [mine, all] = await Promise.all([api.myRetailers(), api.retailers()]);
+      return all.filter((r) => mine.some((m) => m.retailerId === r.id));
+    },
+  });
   const promos = useQuery({
     queryKey: ['promotions', section, sort, retailerId, category],
-    queryFn: () => api.promotions({ section, sort, ...(section === 'retailer' && retailerId ? { retailerId } : {}), ...(section === 'category' && category ? { category } : {}) }),
+    queryFn: () =>
+      api.promotions({
+        section,
+        sort,
+        ...(section === 'retailer' && retailerId ? { retailerId } : {}),
+        ...(section === 'category' && category ? { category } : {}),
+      }),
   });
 
   const sections: [Section, string][] = [
@@ -53,14 +73,30 @@ export default function Promotions(): ReactNode {
         ))}
       </ScrollView>
       {section === 'retailer' ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={chipRow} contentContainerStyle={chipContent}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={chipRow}
+          contentContainerStyle={chipContent}
+        >
           {retailers.data?.map((r) => (
-            <Chip key={r.id} label={r.name} color={r.brandColor} selected={retailerId === r.id} onPress={() => setRetailerId(r.id)} />
+            <Chip
+              key={r.id}
+              label={r.name}
+              color={r.brandColor}
+              selected={retailerId === r.id}
+              onPress={() => setRetailerId(r.id)}
+            />
           ))}
         </ScrollView>
       ) : null}
       {section === 'category' ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={chipRow} contentContainerStyle={chipContent}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={chipRow}
+          contentContainerStyle={chipContent}
+        >
           {CATEGORY_SLUGS.map((c) => (
             <Chip key={c} label={t(`categories.${c}`)} selected={category === c} onPress={() => setCategory(c)} />
           ))}
@@ -75,7 +111,9 @@ export default function Promotions(): ReactNode {
       {promos.error ? <ErrorState error={promos.error} onRetry={() => void promos.refetch()} /> : null}
       {promos.data ? <DataNotice origins={promos.data.map((p) => p.dataOrigin)} /> : null}
       {promos.data?.length === 0 ? <ErrorState error={new Error(t('promotions.none'))} /> : null}
-      {promos.data?.map((p) => <PromotionCard key={`${p.id}-${p.variantId}`} promo={p} />)}
+      {promos.data?.map((p) => (
+        <PromotionCard key={`${p.id}-${p.variantId}`} promo={p} />
+      ))}
     </Screen>
   );
 }

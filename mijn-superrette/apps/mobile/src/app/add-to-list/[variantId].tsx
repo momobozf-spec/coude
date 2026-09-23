@@ -39,10 +39,20 @@ export default function AddToList(): ReactNode {
         </Card>
       ) : null}
       {lists.isLoading ? <Loading /> : null}
-      {lists.data?.length === 0 ? <EmptyState title={t('lists.empty')} action={<Button title={t('lists.newList')} onPress={() => router.push('/lists')} />} /> : null}
+      {lists.data?.length === 0 ? (
+        <EmptyState
+          title={t('lists.empty')}
+          action={<Button title={t('lists.newList')} onPress={() => router.push('/lists')} />}
+        />
+      ) : null}
       <Card>
         {lists.data?.map((l) => (
-          <ListRow key={l.id} title={l.name} subtitle={t('lists.items', { count: l.itemCount })} onPress={() => add.mutate(l.id)} />
+          <ListRow
+            key={l.id}
+            title={l.name}
+            subtitle={t('lists.items', { count: l.itemCount })}
+            onPress={() => add.mutate(l.id)}
+          />
         ))}
       </Card>
       {add.error ? <ErrorState error={add.error} /> : null}

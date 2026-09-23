@@ -85,7 +85,8 @@ export const SmartBasketOptimizer = {
         for (const rid of ids) {
           const choice = lineIndex.get(rid)?.get(itemId);
           if (!choice) continue;
-          if (!best || choice.price.totalCents < best.choice.price.totalCents) best = { itemId, retailerId: rid, choice };
+          if (!best || choice.price.totalCents < best.choice.price.totalCents)
+            best = { itemId, retailerId: rid, choice };
         }
         if (best) assignments.push(best);
         else missing.push(itemId);

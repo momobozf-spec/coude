@@ -83,18 +83,43 @@ interface SimpleRetailer {
 }
 
 const OTHER_RETAILERS: SimpleRetailer[] = [
-  { key: 'lidl', displayName: 'Lidl', retailerSlugs: ['lidl'], note: 'Terms require prior written permission; bot protection is in place. The Lidl-shop affiliate datafeed covers non-food only.' },
+  {
+    key: 'lidl',
+    displayName: 'Lidl',
+    retailerSlugs: ['lidl'],
+    note: 'Terms require prior written permission; bot protection is in place. The Lidl-shop affiliate datafeed covers non-food only.',
+  },
   { key: 'aldi', displayName: 'ALDI', retailerSlugs: ['aldi'], note: 'No API or feed found.' },
   { key: 'intermarche', displayName: 'Intermarché', retailerSlugs: ['intermarche'], note: 'No API or feed found.' },
-  { key: 'plus', displayName: 'PLUS', retailerSlugs: ['plus'], note: 'Awin affiliate programme exists; a product feed is not confirmed.' },
+  {
+    key: 'plus',
+    displayName: 'PLUS',
+    retailerSlugs: ['plus'],
+    note: 'Awin affiliate programme exists; a product feed is not confirmed.',
+  },
   { key: 'dirk', displayName: 'Dirk', retailerSlugs: ['dirk'], note: 'No API or feed found.' },
   { key: 'spar', displayName: 'SPAR', retailerSlugs: ['spar'], note: 'No API or feed found.' },
-  { key: 'picnic', displayName: 'Picnic', retailerSlugs: ['picnic'], note: 'Terms explicitly forbid scraping/spidering.' },
+  {
+    key: 'picnic',
+    displayName: 'Picnic',
+    retailerSlugs: ['picnic'],
+    note: 'Terms explicitly forbid scraping/spidering.',
+  },
   { key: 'dekamarkt', displayName: 'DekaMarkt', retailerSlugs: ['dekamarkt'], note: 'No API or feed found.' },
   { key: 'vomar', displayName: 'Vomar', retailerSlugs: ['vomar'], note: 'No API or feed found.' },
   { key: 'hoogvliet', displayName: 'Hoogvliet', retailerSlugs: ['hoogvliet'], note: 'No API or feed found.' },
-  { key: 'ekoplaza', displayName: 'Ekoplaza', retailerSlugs: ['ekoplaza'], note: 'No API or affiliate programme found.' },
-  { key: 'kruidvat', displayName: 'Kruidvat', retailerSlugs: ['kruidvat'], note: 'Belgian affiliate programme is closed; NL feed not verified.' },
+  {
+    key: 'ekoplaza',
+    displayName: 'Ekoplaza',
+    retailerSlugs: ['ekoplaza'],
+    note: 'No API or affiliate programme found.',
+  },
+  {
+    key: 'kruidvat',
+    displayName: 'Kruidvat',
+    retailerSlugs: ['kruidvat'],
+    note: 'Belgian affiliate programme is closed; NL feed not verified.',
+  },
   { key: 'etos', displayName: 'Etos', retailerSlugs: ['etos'], note: 'No independent affiliate programme verified.' },
 ];
 

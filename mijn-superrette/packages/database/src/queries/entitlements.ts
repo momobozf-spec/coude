@@ -15,7 +15,11 @@ const isKey = (k: string): k is EntitlementKey => (ENTITLEMENT_KEYS as readonly 
  * Resolve a user's entitlements from the default plan plus any active
  * subscription plans. All rules live in the database.
  */
-export async function resolveEntitlements(db: Database, userId: string, now = new Date()): Promise<{ plans: string[]; entitlements: EntitlementSet }> {
+export async function resolveEntitlements(
+  db: Database,
+  userId: string,
+  now = new Date(),
+): Promise<{ plans: string[]; entitlements: EntitlementSet }> {
   const active = await db
     .select({ planKey: subscriptions.planKey })
     .from(subscriptions)

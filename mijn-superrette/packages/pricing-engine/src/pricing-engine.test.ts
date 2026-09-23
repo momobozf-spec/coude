@@ -50,7 +50,10 @@ describe('UnitPriceCalculator', () => {
 
   it('prices per litre and per piece', () => {
     expect(UnitPriceCalculator.calculate(199, { amount: 1500, unit: 'ml' })).toMatchObject({ cents: 133, per: 'l' });
-    expect(UnitPriceCalculator.calculate(399, { amount: 12, unit: 'piece' })).toMatchObject({ cents: 33, per: 'piece' });
+    expect(UnitPriceCalculator.calculate(399, { amount: 12, unit: 'piece' })).toMatchObject({
+      cents: 33,
+      per: 'piece',
+    });
     expect(UnitPriceCalculator.calculate(249, { amount: 330, unit: 'ml' })).toMatchObject({ cents: 755, per: 'l' });
   });
 
@@ -111,7 +114,9 @@ describe('PromotionCalculator', () => {
   it('percent, amount off and price cut', () => {
     expect(PromotionCalculator.apply(promo({ mechanic: 'PERCENT_OFF', percent: 25 }), 399, 2).totalCents).toBe(598); // 299.25 -> 2.99 each
     expect(PromotionCalculator.apply(promo({ mechanic: 'AMOUNT_OFF', amountCents: 50 }), 30, 1).totalCents).toBe(0);
-    expect(PromotionCalculator.apply(promo({ mechanic: 'PRICE_CUT', promoPriceCents: 199 }), 289, 3).totalCents).toBe(597);
+    expect(PromotionCalculator.apply(promo({ mechanic: 'PRICE_CUT', promoPriceCents: 199 }), 289, 3).totalCents).toBe(
+      597,
+    );
   });
 
   it('honours maximum promotional units per customer', () => {
@@ -132,7 +137,11 @@ describe('PricingEngine.calculateEffectivePrice', () => {
   });
 
   it('treats a shelf promo price as a price cut', () => {
-    const r = PricingEngine.calculateEffectivePrice(offer({ regularPriceCents: 289, shelfPromoPriceCents: 199 }), 1, ctx);
+    const r = PricingEngine.calculateEffectivePrice(
+      offer({ regularPriceCents: 289, shelfPromoPriceCents: 199 }),
+      1,
+      ctx,
+    );
     expect(r.totalCents).toBe(199);
     expect(r.savingsCents).toBe(90);
     expect(r.discountPercent).toBe(31.1);

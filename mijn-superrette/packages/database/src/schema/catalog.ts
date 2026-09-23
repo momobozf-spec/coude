@@ -104,8 +104,14 @@ export const brands = catalog.table('brands', {
   id: uuid('id').primaryKey().defaultRandom(),
   slug: text('slug').notNull().unique(),
   name: text('name').notNull(),
-  aliases: text('aliases').array().notNull().default(sql`'{}'::text[]`),
-  impliesTokens: text('implies_tokens').array().notNull().default(sql`'{}'::text[]`),
+  aliases: text('aliases')
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
+  impliesTokens: text('implies_tokens')
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
   /** Set for private labels (huismerken) such as Boni (Colruyt) or AH. */
   privateLabelRetailerId: uuid('private_label_retailer_id').references(() => retailers.id, { onDelete: 'set null' }),
   ...timestamps,
@@ -147,9 +153,18 @@ export const products = catalog.table(
     brandId: uuid('brand_id').references(() => brands.id, { onDelete: 'set null' }),
     categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
     productType: text('product_type'),
-    variantTokens: text('variant_tokens').array().notNull().default(sql`'{}'::text[]`),
-    flavours: text('flavours').array().notNull().default(sql`'{}'::text[]`),
-    dietary: text('dietary').array().notNull().default(sql`'{}'::text[]`),
+    variantTokens: text('variant_tokens')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    flavours: text('flavours')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    dietary: text('dietary')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     description: text('description'),
     imageUrl: text('image_url'),
     dataOrigin: dataOrigin('data_origin').notNull(),
@@ -179,7 +194,10 @@ export const productVariants = catalog.table(
     soldByWeight: boolean('sold_by_weight').notNull().default(false),
     sizeLabel: text('size_label'),
     /** Canonical tokens (synonyms resolved) for search and equivalence. */
-    tokens: text('tokens').array().notNull().default(sql`'{}'::text[]`),
+    tokens: text('tokens')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     /** Normalised searchable text: brand + name + tokens. */
     searchText: text('search_text').notNull(),
     signature: text('signature').notNull(),
@@ -228,7 +246,10 @@ export const retailerProducts = catalog.table(
     brandText: text('brand_text'),
     quantityText: text('quantity_text'),
     categoryText: text('category_text'),
-    gtins: text('gtins').array().notNull().default(sql`'{}'::text[]`),
+    gtins: text('gtins')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     imageUrl: text('image_url'),
     productUrl: text('product_url'),
     isAvailable: boolean('is_available').notNull().default(true),
@@ -317,7 +338,10 @@ export const promotionConditions = catalog.table('promotion_conditions', {
   minQuantity: integer('min_quantity'),
   maxQuantityPerCustomer: integer('max_quantity_per_customer'),
   onlineOnly: boolean('online_only').notNull().default(false),
-  regionCodes: text('region_codes').array().notNull().default(sql`'{}'::text[]`),
+  regionCodes: text('region_codes')
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
 });
 
 export const promotionProducts = catalog.table(
@@ -330,7 +354,10 @@ export const promotionProducts = catalog.table(
       .notNull()
       .references(() => retailerProducts.id, { onDelete: 'cascade' }),
   },
-  (t) => [primaryKey({ columns: [t.promotionId, t.retailerProductId] }), index('promotion_products_rp_idx').on(t.retailerProductId)],
+  (t) => [
+    primaryKey({ columns: [t.promotionId, t.retailerProductId] }),
+    index('promotion_products_rp_idx').on(t.retailerProductId),
+  ],
 );
 
 // ─── Matching ────────────────────────────────────────────────────────────────
@@ -350,8 +377,14 @@ export const productMatches = catalog.table(
     method: matchMethod('method').notNull(),
     score: numeric('score', { mode: 'number', precision: 5, scale: 3 }).notNull(),
     status: matchStatus('status').notNull(),
-    reasons: text('reasons').array().notNull().default(sql`'{}'::text[]`),
-    alternatives: jsonb('alternatives').$type<{ variantId: string; score: number; confidence: string }[]>().notNull().default([]),
+    reasons: text('reasons')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    alternatives: jsonb('alternatives')
+      .$type<{ variantId: string; score: number; confidence: string }[]>()
+      .notNull()
+      .default([]),
     /** Admin user id (app.users) — stored without FK to keep catalog free of personal data. */
     reviewedBy: uuid('reviewed_by'),
     reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
@@ -375,7 +408,10 @@ export const productEquivalences = catalog.table(
       .references(() => productVariants.id, { onDelete: 'cascade' }),
     confidence: numeric('confidence', { mode: 'number', precision: 4, scale: 2 }).notNull(),
     status: equivalenceStatus('status').notNull().default('SUGGESTED'),
-    reasons: text('reasons').array().notNull().default(sql`'{}'::text[]`),
+    reasons: text('reasons')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     reviewedBy: uuid('reviewed_by'),
     reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
     ...timestamps,

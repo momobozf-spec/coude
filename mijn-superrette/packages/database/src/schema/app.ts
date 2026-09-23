@@ -293,8 +293,14 @@ export const plans = app.table('plans', {
   name: text('name').notNull(),
   isDefault: boolean('is_default').notNull().default(false),
   /** Store product identifiers that grant this plan. */
-  appleProductIds: text('apple_product_ids').array().notNull().default(sql`'{}'::text[]`),
-  googleProductIds: text('google_product_ids').array().notNull().default(sql`'{}'::text[]`),
+  appleProductIds: text('apple_product_ids')
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
+  googleProductIds: text('google_product_ids')
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
   sortOrder: integer('sort_order').notNull().default(0),
 });
 

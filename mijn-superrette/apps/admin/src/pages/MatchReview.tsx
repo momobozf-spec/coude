@@ -14,7 +14,9 @@ function MatchCard({ match, onDone }: { match: AdminMatchDto; onDone: () => void
   const [error, setError] = useState<string | null>(null);
   const [reassign, setReassign] = useState(false);
   const [query, setQuery] = useState('');
-  const results = useApi<Paginated<{ id: string; name: string; sizeLabel: string | null; listings: number }>>(reassign && query.length >= 2 ? `/v1/admin/products?q=${encodeURIComponent(query)}&limit=8` : null);
+  const results = useApi<Paginated<{ id: string; name: string; sizeLabel: string | null; listings: number }>>(
+    reassign && query.length >= 2 ? `/v1/admin/products?q=${encodeURIComponent(query)}&limit=8` : null,
+  );
 
   const decide = async (body: Record<string, unknown>): Promise<void> => {
     setBusy(true);
@@ -36,15 +38,32 @@ function MatchCard({ match, onDone }: { match: AdminMatchDto; onDone: () => void
           <span className="muted">RETAILER PRODUCT · {match.retailerProduct.retailerName}</span>
           <h3>{match.retailerProduct.title}</h3>
           <div className="muted">{match.retailerProduct.quantityText ?? ''}</div>
-          <div className="row">{match.retailerProduct.gtins.map((g) => <code key={g}>{g}</code>)}</div>
+          <div className="row">
+            {match.retailerProduct.gtins.map((g) => (
+              <code key={g}>{g}</code>
+            ))}
+          </div>
         </div>
         <div>
           <span className="muted">VOORGESTELDE CANONIEKE MATCH</span>
           <h3>{match.proposed.name}</h3>
-          <div className="row">{match.proposed.gtins.map((g) => <code key={g}>{g}</code>)}</div>
+          <div className="row">
+            {match.proposed.gtins.map((g) => (
+              <code key={g}>{g}</code>
+            ))}
+          </div>
           <div className="row" style={{ marginTop: 6 }}>
             {match.reasons.map((r) => (
-              <Badge key={r} tone={r.includes('different') || r.includes('conflict') ? 'danger' : r.includes('equal') ? 'success' : undefined}>
+              <Badge
+                key={r}
+                tone={
+                  r.includes('different') || r.includes('conflict')
+                    ? 'danger'
+                    : r.includes('equal')
+                      ? 'success'
+                      : undefined
+                }
+              >
                 {r}
               </Badge>
             ))}
@@ -54,7 +73,9 @@ function MatchCard({ match, onDone }: { match: AdminMatchDto; onDone: () => void
           <span className="muted">Zekerheid</span>
           <div style={{ fontSize: 26, fontWeight: 800 }}>{Math.round(match.score * 100)}%</div>
           <Meter value={match.score} />
-          <Badge tone={statusTone(match.confidence === 'HIGH' || match.confidence === 'EXACT' ? 'SUCCESS' : 'PARTIAL')}>{match.confidence}</Badge>{' '}
+          <Badge tone={statusTone(match.confidence === 'HIGH' || match.confidence === 'EXACT' ? 'SUCCESS' : 'PARTIAL')}>
+            {match.confidence}
+          </Badge>{' '}
           <Badge tone={statusTone(match.status)}>{match.status}</Badge>
         </div>
       </div>
@@ -76,7 +97,11 @@ function MatchCard({ match, onDone }: { match: AdminMatchDto; onDone: () => void
         <div className="row" style={{ marginTop: 10 }}>
           <span className="muted">Alternatieven:</span>
           {match.alternatives.map((a) => (
-            <button key={a.variantId} disabled={busy} onClick={() => void decide({ decision: 'reassign', variantId: a.variantId })}>
+            <button
+              key={a.variantId}
+              disabled={busy}
+              onClick={() => void decide({ decision: 'reassign', variantId: a.variantId })}
+            >
               {a.name} ({Math.round(a.score * 100)}%)
             </button>
           ))}
@@ -84,13 +109,22 @@ function MatchCard({ match, onDone }: { match: AdminMatchDto; onDone: () => void
       ) : null}
       {reassign ? (
         <div className="stack" style={{ marginTop: 12 }}>
-          <input placeholder="Zoek canoniek product…" value={query} onChange={(e) => setQuery(e.target.value)} autoFocus />
+          <input
+            placeholder="Zoek canoniek product…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            autoFocus
+          />
           {results.data?.items.map((v) => (
             <div key={v.id} className="row" style={{ justifyContent: 'space-between' }}>
               <span>
                 {v.name} <span className="muted">· {v.listings} listings</span>
               </span>
-              <button className="primary" disabled={busy} onClick={() => void decide({ decision: 'reassign', variantId: v.id })}>
+              <button
+                className="primary"
+                disabled={busy}
+                onClick={() => void decide({ decision: 'reassign', variantId: v.id })}
+              >
                 Koppel
               </button>
             </div>
@@ -104,9 +138,14 @@ function MatchCard({ match, onDone }: { match: AdminMatchDto; onDone: () => void
 export function MatchReview(): ReactNode {
   const [status, setStatus] = useState('PENDING_REVIEW');
   const [q, setQ] = useState('');
-  const { data, error, loading, reload } = useApi<Paginated<AdminMatchDto>>(`/v1/admin/matches?status=${status}&limit=50${q ? `&q=${encodeURIComponent(q)}` : ''}`);
+  const { data, error, loading, reload } = useApi<Paginated<AdminMatchDto>>(
+    `/v1/admin/matches?status=${status}&limit=50${q ? `&q=${encodeURIComponent(q)}` : ''}`,
+  );
   return (
-    <Page title="Product match review" subtitle="Menselijke correcties blijven bewaard en worden bij elke import gerespecteerd.">
+    <Page
+      title="Product match review"
+      subtitle="Menselijke correcties blijven bewaard en worden bij elke import gerespecteerd."
+    >
       <div className="toolbar">
         <select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Status">
           {['PENDING_REVIEW', 'AUTO_ACCEPTED', 'CONFIRMED', 'REJECTED'].map((s) => (

@@ -12,12 +12,19 @@ export default function Favorites(): ReactNode {
   const { t } = useI18n();
   const favorites = useQuery({ queryKey: ['favorites'], queryFn: api.favorites });
   return (
-    <Screen title={t('home.favorites')} back refreshing={favorites.isRefetching} onRefresh={() => void favorites.refetch()}>
+    <Screen
+      title={t('home.favorites')}
+      back
+      refreshing={favorites.isRefetching}
+      onRefresh={() => void favorites.refetch()}
+    >
       {favorites.isLoading ? <Loading /> : null}
       {favorites.error ? <ErrorState error={favorites.error} /> : null}
       {favorites.data ? <DataNotice origins={favorites.data.map((f) => f.product.dataOrigin)} /> : null}
       {favorites.data?.length === 0 ? <EmptyState icon="heart" title={t('home.noFavorites')} /> : null}
-      {favorites.data?.map((f) => <ProductCard key={f.product.variantId} product={f.product} />)}
+      {favorites.data?.map((f) => (
+        <ProductCard key={f.product.variantId} product={f.product} />
+      ))}
     </Screen>
   );
 }

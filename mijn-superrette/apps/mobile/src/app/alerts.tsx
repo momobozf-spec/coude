@@ -12,8 +12,14 @@ export default function Alerts(): ReactNode {
   const qc = useQueryClient();
   const { t, price } = useI18n();
   const alerts = useQuery({ queryKey: ['alerts'], queryFn: api.alerts });
-  const update = useMutation({ mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) => api.updateAlert(id, { enabled }), onSettled: () => void qc.invalidateQueries({ queryKey: ['alerts'] }) });
-  const remove = useMutation({ mutationFn: (id: string) => api.deleteAlert(id), onSettled: () => void qc.invalidateQueries({ queryKey: ['alerts'] }) });
+  const update = useMutation({
+    mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) => api.updateAlert(id, { enabled }),
+    onSettled: () => void qc.invalidateQueries({ queryKey: ['alerts'] }),
+  });
+  const remove = useMutation({
+    mutationFn: (id: string) => api.deleteAlert(id),
+    onSettled: () => void qc.invalidateQueries({ queryKey: ['alerts'] }),
+  });
   return (
     <Screen title={t('alerts.title')} back>
       {alerts.isLoading ? <Loading /> : null}
@@ -25,7 +31,11 @@ export default function Alerts(): ReactNode {
             <View style={{ flex: 1 }}>
               <Text variant="bodyStrong">{a.productName}</Text>
               <Text variant="caption" tone="muted">
-                {[a.targetPriceCents != null ? t('alerts.below', { price: price(a.targetPriceCents) }) : null, a.promotionOnly ? t('product.promo') : null, a.retailerName ?? t('alerts.anyRetailer')]
+                {[
+                  a.targetPriceCents != null ? t('alerts.below', { price: price(a.targetPriceCents) }) : null,
+                  a.promotionOnly ? t('product.promo') : null,
+                  a.retailerName ?? t('alerts.anyRetailer'),
+                ]
                   .filter(Boolean)
                   .join(' · ')}
               </Text>
@@ -35,7 +45,11 @@ export default function Alerts(): ReactNode {
             </View>
             <IconButton icon="trash" label={t('common.delete')} size={18} onPress={() => remove.mutate(a.id)} />
           </Row>
-          <ToggleRow label={t('product.priceAlert')} value={a.enabled} onValueChange={(enabled) => update.mutate({ id: a.id, enabled })} />
+          <ToggleRow
+            label={t('product.priceAlert')}
+            value={a.enabled}
+            onValueChange={(enabled) => update.mutate({ id: a.id, enabled })}
+          />
         </Card>
       ))}
     </Screen>

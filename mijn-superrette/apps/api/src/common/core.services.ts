@@ -20,7 +20,13 @@ import { resolveLocale } from '@superrette/i18n';
 import { createNormalizer } from '@superrette/ingestion';
 import type { ProductNormalizer } from '@superrette/product-matching';
 import { PricingEngine, type EffectivePrice, type PricingContext } from '@superrette/pricing-engine';
-import type { EntitlementsDto, OfferDto, ProductSummaryDto, PromotionSummaryDto, UnitPriceDto } from '@superrette/validation';
+import type {
+  EntitlementsDto,
+  OfferDto,
+  ProductSummaryDto,
+  PromotionSummaryDto,
+  UnitPriceDto,
+} from '@superrette/validation';
 import type { AppConfig } from '../config/config.js';
 import { entitlementRequired, limitReached } from './errors.js';
 import { CONFIG, DB } from './tokens.js';
@@ -93,18 +99,28 @@ export interface ShopperContext {
 export class ShopperContextService {
   constructor(@Inject(DB) private readonly db: Database) {}
 
-  async get(userId: string | null, overrides: { countryCode?: string | null; locale?: string | null } = {}): Promise<ShopperContext> {
+  async get(
+    userId: string | null,
+    overrides: { countryCode?: string | null; locale?: string | null } = {},
+  ): Promise<ShopperContext> {
     let locale: Locale = resolveLocale(overrides.locale);
     let countryCode = overrides.countryCode ?? null;
     let followed: { retailerId: string; hasLoyaltyCard: boolean; loyaltyProgram: string | null }[] = [];
     if (userId) {
-      const [user] = await this.db.select({ locale: users.locale, countryCode: users.countryCode }).from(users).where(eq(users.id, userId));
+      const [user] = await this.db
+        .select({ locale: users.locale, countryCode: users.countryCode })
+        .from(users)
+        .where(eq(users.id, userId));
       if (user) {
         locale = resolveLocale(user.locale);
         countryCode = user.countryCode ?? countryCode;
       }
       followed = await this.db
-        .select({ retailerId: userRetailerPreferences.retailerId, hasLoyaltyCard: userRetailerPreferences.hasLoyaltyCard, loyaltyProgram: retailers.loyaltyProgram })
+        .select({
+          retailerId: userRetailerPreferences.retailerId,
+          hasLoyaltyCard: userRetailerPreferences.hasLoyaltyCard,
+          loyaltyProgram: retailers.loyaltyProgram,
+        })
         .from(userRetailerPreferences)
         .innerJoin(retailers, eq(retailers.id, userRetailerPreferences.retailerId))
         .where(and(eq(userRetailerPreferences.userId, userId), eq(retailers.isActive, true)));
@@ -115,7 +131,11 @@ export class ShopperContextService {
         .selectDistinct({ id: retailers.id })
         .from(retailers)
         .innerJoin(retailerCountries, eq(retailerCountries.retailerId, retailers.id))
-        .where(countryCode ? and(eq(retailers.isActive, true), eq(retailerCountries.countryCode, countryCode)) : eq(retailers.isActive, true));
+        .where(
+          countryCode
+            ? and(eq(retailers.isActive, true), eq(retailerCountries.countryCode, countryCode))
+            : eq(retailers.isActive, true),
+        );
       retailerIds = rows.map((r) => r.id);
     }
     const loyaltyPrograms = followed.filter((f) => f.hasLoyaltyCard && f.loyaltyProgram).map((f) => f.loyaltyProgram!);
@@ -138,7 +158,8 @@ export interface PricedOfferRow {
   price: EffectivePrice;
 }
 
-export const unitPriceDto = (u: EffectivePrice['unitPrice']): UnitPriceDto | null => (u ? { cents: u.cents, per: u.per } : null);
+export const unitPriceDto = (u: EffectivePrice['unitPrice']): UnitPriceDto | null =>
+  u ? { cents: u.cents, per: u.per } : null;
 
 export function promotionSummary(p: OfferRow['promotions'][number]): PromotionSummaryDto {
   return {
@@ -155,7 +176,12 @@ export function promotionSummary(p: OfferRow['promotions'][number]): PromotionSu
 export function offerDto(p: PricedOfferRow, isCheapest: boolean): OfferDto {
   const { row, price } = p;
   return {
-    retailer: { id: row.retailer.id, slug: row.retailer.slug, name: row.retailer.name, brandColor: row.retailer.brandColor },
+    retailer: {
+      id: row.retailer.id,
+      slug: row.retailer.slug,
+      name: row.retailer.name,
+      brandColor: row.retailer.brandColor,
+    },
     retailerProductId: row.retailerProduct.id,
     title: row.retailerProduct.title,
     priceCents: Math.round(price.perItemCents),
@@ -255,12 +281,19 @@ export class CatalogService {
   }
 
   async gtins(variantId: string): Promise<string[]> {
-    const rows = await this.db.select({ gtin: productBarcodes.gtin }).from(productBarcodes).where(eq(productBarcodes.variantId, variantId));
+    const rows = await this.db
+      .select({ gtin: productBarcodes.gtin })
+      .from(productBarcodes)
+      .where(eq(productBarcodes.variantId, variantId));
     return rows.map((r) => r.gtin);
   }
 
   /** Current offers for variants, priced for one unit (or `quantity`) with the shopper's context. */
-  async pricedOffers(variantIds: readonly string[], shopper: ShopperContext, options: { retailerIds?: string[]; quantity?: number; at?: Date } = {}): Promise<Map<string, PricedOfferRow[]>> {
+  async pricedOffers(
+    variantIds: readonly string[],
+    shopper: ShopperContext,
+    options: { retailerIds?: string[]; quantity?: number; at?: Date } = {},
+  ): Promise<Map<string, PricedOfferRow[]>> {
     const at = options.at ?? new Date();
     const rows = await loadOffers(this.db, {
       variantIds,
@@ -276,7 +309,10 @@ export class CatalogService {
       if (list) list.push(item);
       else result.set(row.variantId, [item]);
     }
-    for (const list of result.values()) list.sort((a, b) => a.price.totalCents - b.price.totalCents || a.row.retailer.name.localeCompare(b.row.retailer.name));
+    for (const list of result.values())
+      list.sort(
+        (a, b) => a.price.totalCents - b.price.totalCents || a.row.retailer.name.localeCompare(b.row.retailer.name),
+      );
     return result;
   }
 

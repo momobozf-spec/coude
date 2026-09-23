@@ -34,17 +34,33 @@ afterAll(async () => {
 
 describe('auth', () => {
   it('rejects bad credentials and duplicate e-mails', async () => {
-    await new Client(app).post('/v1/auth/login', { email: 'demo@superrette.local', password: 'wrong-password' }).expect(401);
-    const res = await new Client(app).post('/v1/auth/register', { email: 'demo@superrette.local', password: 'correct-horse-battery', displayName: 'X' }).expect(409);
+    await new Client(app)
+      .post('/v1/auth/login', { email: 'demo@superrette.local', password: 'wrong-password' })
+      .expect(401);
+    const res = await new Client(app)
+      .post('/v1/auth/register', {
+        email: 'demo@superrette.local',
+        password: 'correct-horse-battery',
+        displayName: 'X',
+      })
+      .expect(409);
     expect(res.body.code).toBe('EMAIL_TAKEN');
-    await new Client(app).post('/v1/auth/register', { email: 'not-an-email', password: 'short', displayName: '' }).expect(400);
+    await new Client(app)
+      .post('/v1/auth/register', { email: 'not-an-email', password: 'short', displayName: '' })
+      .expect(400);
   });
 
   it('rotates refresh tokens and detects reuse', async () => {
-    const login1 = await new Client(app).post('/v1/auth/login', { email: 'demo@superrette.local', password: 'superrette-dev' }).expect(200);
-    const refreshed = await new Client(app).post('/v1/auth/refresh', { refreshToken: login1.body.refreshToken }).expect(200);
+    const login1 = await new Client(app)
+      .post('/v1/auth/login', { email: 'demo@superrette.local', password: 'superrette-dev' })
+      .expect(200);
+    const refreshed = await new Client(app)
+      .post('/v1/auth/refresh', { refreshToken: login1.body.refreshToken })
+      .expect(200);
     expect(refreshed.body.refreshToken).not.toBe(login1.body.refreshToken);
-    const reuse = await new Client(app).post('/v1/auth/refresh', { refreshToken: login1.body.refreshToken }).expect(401);
+    const reuse = await new Client(app)
+      .post('/v1/auth/refresh', { refreshToken: login1.body.refreshToken })
+      .expect(401);
     expect(reuse.body.code).toBe('REFRESH_TOKEN_REUSED');
     // Reuse revoked the whole family, including the newer token.
     await new Client(app).post('/v1/auth/refresh', { refreshToken: refreshed.body.refreshToken }).expect(401);
@@ -71,8 +87,11 @@ describe('entitlements (server-configured Free vs Plus)', () => {
     await sara.get('/v1/search?q=cola&maxPriceCents=200').expect(403);
 
     // Free plan: at most 3 active price alerts.
-    for (let i = 0; i < 3; i++) await sara.post('/v1/alerts', { variantId: search.items[0]!.variantId, targetPriceCents: 100 + i }).expect(201);
-    const limited = await sara.post('/v1/alerts', { variantId: search.items[0]!.variantId, targetPriceCents: 150 }).expect(403);
+    for (let i = 0; i < 3; i++)
+      await sara.post('/v1/alerts', { variantId: search.items[0]!.variantId, targetPriceCents: 100 + i }).expect(201);
+    const limited = await sara
+      .post('/v1/alerts', { variantId: search.items[0]!.variantId, targetPriceCents: 150 })
+      .expect(403);
     expect(limited.body.code).toBe('LIMIT_REACHED');
 
     const demo = await login(app, 'demo@superrette.local');
@@ -112,7 +131,11 @@ describe('shared household lists', () => {
     await stranger.post(`/v1/invites/${invite.token}/accept`).expect(404);
 
     // Realtime: the partner's socket receives Mohamed's changes.
-    const socket: Socket = io(`${baseUrl}/realtime`, { auth: { token: partner.token }, transports: ['websocket'], forceNew: true });
+    const socket: Socket = io(`${baseUrl}/realtime`, {
+      auth: { token: partner.token },
+      transports: ['websocket'],
+      forceNew: true,
+    });
     await new Promise<void>((resolve, reject) => {
       socket.on('connect', () => resolve());
       socket.on('connect_error', reject);
@@ -126,20 +149,33 @@ describe('shared household lists', () => {
     expect((await activity).userDisplayName).toBe('Mohamed');
 
     // Stranger cannot join the room.
-    const strangerSocket: Socket = io(`${baseUrl}/realtime`, { auth: { token: stranger.token }, transports: ['websocket'], forceNew: true });
+    const strangerSocket: Socket = io(`${baseUrl}/realtime`, {
+      auth: { token: stranger.token },
+      transports: ['websocket'],
+      forceNew: true,
+    });
     await new Promise<void>((resolve) => strangerSocket.on('connect', () => resolve()));
-    expect(await strangerSocket.emitWithAck('list.join', { listId: list.id })).toEqual({ ok: false, error: 'NOT_FOUND' });
+    expect(await strangerSocket.emitWithAck('list.join', { listId: list.id })).toEqual({
+      ok: false,
+      error: 'NOT_FOUND',
+    });
     strangerSocket.close();
 
     // Optimistic concurrency: partner checks the item, Mohamed's stale edit conflicts.
-    const checked = (await partner.patch(`/v1/lists/${list.id}/items/${item.id}`, { checked: true, version: item.version }).expect(200)).body;
+    const checked = (
+      await partner.patch(`/v1/lists/${list.id}/items/${item.id}`, { checked: true, version: item.version }).expect(200)
+    ).body;
     expect(checked).toMatchObject({ checked: true, version: item.version + 1 });
-    const conflict = await demo.patch(`/v1/lists/${list.id}/items/${item.id}`, { quantity: 3, version: item.version }).expect(409);
+    const conflict = await demo
+      .patch(`/v1/lists/${list.id}/items/${item.id}`, { quantity: 3, version: item.version })
+      .expect(409);
     expect(conflict.body.code).toBe('VERSION_CONFLICT');
     expect(conflict.body.details.current.checked).toBe(true);
 
     const feed = (await demo.get(`/v1/lists/${list.id}/activity`).expect(200)).body;
-    expect(feed.map((a: { type: string }) => a.type)).toEqual(expect.arrayContaining(['ITEM_ADDED', 'ITEM_CHECKED', 'MEMBER_JOINED']));
+    expect(feed.map((a: { type: string }) => a.type)).toEqual(
+      expect.arrayContaining(['ITEM_ADDED', 'ITEM_CHECKED', 'MEMBER_JOINED']),
+    );
     const detail = (await demo.get(`/v1/lists/${list.id}`).expect(200)).body as ShoppingListDetailDto;
     expect(detail.members.map((m) => m.displayName)).toEqual(['Mohamed', 'Partner']);
 
@@ -165,7 +201,8 @@ describe('barcodes, promotions and home', () => {
 
   it('lists promotions with honest mechanics', async () => {
     const demo = await login(app, 'demo@superrette.local');
-    const promos = (await demo.get('/v1/promotions?section=all&sort=largest_discount').expect(200)).body as PromotionDto[];
+    const promos = (await demo.get('/v1/promotions?section=all&sort=largest_discount').expect(200))
+      .body as PromotionDto[];
     const lotus = promos.find((p) => p.label === '1+1 gratis')!;
     expect(lotus).toMatchObject({ minimumQuantity: 2, discountPercent: 50, mechanic: 'BUY_X_GET_Y_FREE' });
     const pampers = promos.find((p) => p.label === '2e aan halve prijs')!;
@@ -173,7 +210,8 @@ describe('barcodes, promotions and home', () => {
     const bonus = promos.find((p) => p.label === 'Bonus -25%')!;
     expect(bonus.loyaltyProgram).toBe('bonuskaart');
     expect(promos.some((p) => p.label.includes('volgende week'))).toBe(false); // not active yet
-    const ending = (await demo.get('/v1/promotions?section=ending_soon&sort=ending_soon').expect(200)).body as PromotionDto[];
+    const ending = (await demo.get('/v1/promotions?section=ending_soon&sort=ending_soon').expect(200))
+      .body as PromotionDto[];
     expect(ending.length).toBeGreaterThan(0);
     expect(ending.every((p) => p.endsAt && new Date(p.endsAt).getTime() - Date.now() < 3 * 86_400_000)).toBe(true);
   });
@@ -200,38 +238,61 @@ describe('admin', () => {
     const pipeline = await jobs.pipeline();
     // No brand → the matcher cannot be sure: MEDIUM confidence, sent to review.
     const outcome = await pipeline.upsertRetailerProduct(
-      { externalId: 'lidl-review-melk', retailerSlug: 'lidl', title: 'Halfvolle melk 1 liter', gtins: [], isAvailable: true },
+      {
+        externalId: 'lidl-review-melk',
+        retailerSlug: 'lidl',
+        title: 'Halfvolle melk 1 liter',
+        gtins: [],
+        isAvailable: true,
+      },
       'development-seed',
       'DEVELOPMENT_SEED',
     );
     expect(outcome.variantId).toBeNull();
 
-    const pending = (await admin.get('/v1/admin/matches?status=PENDING_REVIEW&q=Halfvolle%20melk%201%20liter').expect(200)).body as Paginated<AdminMatchDto>;
+    const pending = (
+      await admin.get('/v1/admin/matches?status=PENDING_REVIEW&q=Halfvolle%20melk%201%20liter').expect(200)
+    ).body as Paginated<AdminMatchDto>;
     const match = pending.items.find((m) => m.retailerProduct.id === outcome.retailerProductId)!;
     expect(match).toBeDefined();
     expect(['MEDIUM', 'LOW']).toContain(match.confidence);
 
     await admin.post(`/v1/admin/matches/${match.id}/decision`, { decision: 'approve' }).expect(200);
     const again = await pipeline.upsertRetailerProduct(
-      { externalId: 'lidl-review-melk', retailerSlug: 'lidl', title: 'Halfvolle melk 1 liter', gtins: [], isAvailable: true },
+      {
+        externalId: 'lidl-review-melk',
+        retailerSlug: 'lidl',
+        title: 'Halfvolle melk 1 liter',
+        gtins: [],
+        isAvailable: true,
+      },
       'development-seed',
       'DEVELOPMENT_SEED',
     );
     expect(again.variantId).toBe(match.proposed.variantId);
-    const confirmed = (await admin.get('/v1/admin/matches?status=CONFIRMED').expect(200)).body as Paginated<AdminMatchDto>;
+    const confirmed = (await admin.get('/v1/admin/matches?status=CONFIRMED').expect(200))
+      .body as Paginated<AdminMatchDto>;
     expect(confirmed.items.some((m) => m.id === match.id)).toBe(true);
 
     // Reject flow: a second unbranded product; rejecting creates a new canonical product.
     const other = await pipeline.upsertRetailerProduct(
-      { externalId: 'lidl-review-melk-2', retailerSlug: 'lidl', title: 'Verse halfvolle melk 1L', gtins: [], isAvailable: true },
+      {
+        externalId: 'lidl-review-melk-2',
+        retailerSlug: 'lidl',
+        title: 'Verse halfvolle melk 1L',
+        gtins: [],
+        isAvailable: true,
+      },
       'development-seed',
       'DEVELOPMENT_SEED',
     );
-    const pending2 = (await admin.get('/v1/admin/matches?status=PENDING_REVIEW&q=Verse').expect(200)).body as Paginated<AdminMatchDto>;
+    const pending2 = (await admin.get('/v1/admin/matches?status=PENDING_REVIEW&q=Verse').expect(200))
+      .body as Paginated<AdminMatchDto>;
     const m2 = pending2.items.find((m) => m.retailerProduct.id === other.retailerProductId);
     if (m2) {
       await admin.post(`/v1/admin/matches/${m2.id}/decision`, { decision: 'reject' }).expect(200);
-      const rejected = (await admin.get('/v1/admin/matches?status=REJECTED&q=Verse').expect(200)).body as Paginated<AdminMatchDto>;
+      const rejected = (await admin.get('/v1/admin/matches?status=REJECTED&q=Verse').expect(200))
+        .body as Paginated<AdminMatchDto>;
       expect(rejected.items.some((m) => m.id === m2.id)).toBe(true);
     }
   });
@@ -248,7 +309,8 @@ describe('admin', () => {
     const unsupported = await admin.post('/v1/admin/providers/colruyt/sync', { kind: 'PRICES' }).expect(400);
     expect(unsupported.body.code).toBe('PROVIDER_UNSUPPORTED');
 
-    const sync = (await admin.post('/v1/admin/providers/development-seed/sync', { kind: 'PROMOTIONS' }).expect(202)).body as AdminSyncDto;
+    const sync = (await admin.post('/v1/admin/providers/development-seed/sync', { kind: 'PROMOTIONS' }).expect(202))
+      .body as AdminSyncDto;
     await app.get(JobsService).drain();
     const syncs = (await admin.get('/v1/admin/syncs').expect(200)).body as Paginated<AdminSyncDto>;
     expect(syncs.items.find((s) => s.id === sync.id)).toMatchObject({ status: 'SUCCESS', failedCount: 0 });

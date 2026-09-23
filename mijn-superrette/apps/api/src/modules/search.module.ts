@@ -11,7 +11,13 @@ import {
 } from '@superrette/validation';
 import { CurrentUser, OptionalUser, Public, type AuthUser } from '../common/auth.js';
 import { CacheService } from '../common/cache.service.js';
-import { CatalogService, EntitlementsService, NormalizerService, ShopperContextService, type ShopperContext } from '../common/core.services.js';
+import {
+  CatalogService,
+  EntitlementsService,
+  NormalizerService,
+  ShopperContextService,
+  type ShopperContext,
+} from '../common/core.services.js';
 import { entitlementRequired } from '../common/errors.js';
 import { CACHE, DB } from '../common/tokens.js';
 import { ZodPipe } from '../common/zod.pipe.js';
@@ -46,16 +52,36 @@ export class SearchService {
     const text = normalizeText(query);
     const gtin = /^\d{8,14}$/.test(text.replace(/\s/g, '')) ? normalizeGtin(text) : null;
     if (gtin) {
-      const rows = await this.db.execute<{ variant_id: string }>(sql`SELECT variant_id FROM catalog.product_barcodes WHERE gtin = ${gtin}`);
-      return { tokens: [gtin], ranked: rows.rows.map((r) => ({ variantId: r.variant_id, tokenRatio: 1, similarity: 1, score: 10 })) };
+      const rows = await this.db.execute<{ variant_id: string }>(
+        sql`SELECT variant_id FROM catalog.product_barcodes WHERE gtin = ${gtin}`,
+      );
+      return {
+        tokens: [gtin],
+        ranked: rows.rows.map((r) => ({ variantId: r.variant_id, tokenRatio: 1, similarity: 1, score: 10 })),
+      };
     }
     const normalizer = await this.normalizers.get();
     const tokens = normalizer.canonicalizeText(query);
     const origins = this.catalog.origins;
-    const tokenArray = tokens.length > 0 ? sql`ARRAY[${sql.join(tokens.map((t) => sql`${t}`), sql`, `)}]::text[]` : sql`ARRAY[]::text[]`;
-    const originArray = sql`ARRAY[${sql.join(origins.map((o) => sql`${o}`), sql`, `)}]::catalog.data_origin[]`;
+    const tokenArray =
+      tokens.length > 0
+        ? sql`ARRAY[${sql.join(
+            tokens.map((t) => sql`${t}`),
+            sql`, `,
+          )}]::text[]`
+        : sql`ARRAY[]::text[]`;
+    const originArray = sql`ARRAY[${sql.join(
+      origins.map((o) => sql`${o}`),
+      sql`, `,
+    )}]::catalog.data_origin[]`;
     const prefixes = text.split(' ').filter((w) => w.length >= 3);
-    const prefixClause = prefixes.length > 0 ? sql.join(prefixes.map((w) => sql`v.search_text ILIKE ${`%${w}%`}`), sql` AND `) : sql`false`;
+    const prefixClause =
+      prefixes.length > 0
+        ? sql.join(
+            prefixes.map((w) => sql`v.search_text ILIKE ${`%${w}%`}`),
+            sql` AND `,
+          )
+        : sql`false`;
 
     const rows = await this.db.execute<{ id: string; token_hits: number; sim: number; wsim: number }>(sql`
       SELECT v.id,
@@ -83,7 +109,9 @@ export class SearchService {
 
   /** "Bedoelde je …?" — closest known vocabulary word per query word. */
   async suggest(query: string): Promise<string | null> {
-    const words = normalizeText(query).split(' ').filter((w) => w.length >= 3);
+    const words = normalizeText(query)
+      .split(' ')
+      .filter((w) => w.length >= 3);
     if (words.length === 0) return null;
     const corrected: string[] = [];
     let changed = false;
@@ -110,7 +138,11 @@ export class SearchService {
       const retailerFilter = q.retailers && q.retailers.length > 0 ? q.retailers : undefined;
       const [basics, offers] = await Promise.all([
         this.catalog.basics(ranked.map((r) => r.variantId)),
-        this.catalog.pricedOffers(ranked.map((r) => r.variantId), shopper, retailerFilter ? { retailerIds: retailerFilter } : {}),
+        this.catalog.pricedOffers(
+          ranked.map((r) => r.variantId),
+          shopper,
+          retailerFilter ? { retailerIds: retailerFilter } : {},
+        ),
       ]);
       let items: (ProductSummaryDto & { _score: number; _discount: number })[] = [];
       for (const r of ranked) {
@@ -151,7 +183,12 @@ export class SearchService {
           break;
         default:
           // Relevance first; products we can price rank above those we cannot.
-          items.sort((a, b) => b._score - a._score || Number(b.cheapest != null) - Number(a.cheapest != null) || priceKey(a) - priceKey(b));
+          items.sort(
+            (a, b) =>
+              b._score - a._score ||
+              Number(b.cheapest != null) - Number(a.cheapest != null) ||
+              priceKey(a) - priceKey(b),
+          );
       }
       const total = items.length;
       const page = items.slice(q.offset, q.offset + q.limit).map(({ _score: _s, _discount: _d, ...rest }) => rest);
@@ -168,7 +205,10 @@ export class SearchService {
   async autocomplete(prefix: string): Promise<string[]> {
     const text = normalizeText(prefix);
     const origins = this.catalog.origins;
-    const originArray = sql`ARRAY[${sql.join(origins.map((o) => sql`${o}`), sql`, `)}]::catalog.data_origin[]`;
+    const originArray = sql`ARRAY[${sql.join(
+      origins.map((o) => sql`${o}`),
+      sql`, `,
+    )}]::catalog.data_origin[]`;
     return this.cache.wrap(`ac:${text}`, 300, async () => {
       const rows = await this.db.execute<{ name: string }>(sql`
         SELECT name FROM (
@@ -189,12 +229,20 @@ export class SearchService {
     await this.db
       .insert(searchStats)
       .values({ query: normalized, count: 1 })
-      .onConflictDoUpdate({ target: searchStats.query, set: { count: sql`${searchStats.count} + 1`, lastSearchedAt: new Date() } });
+      .onConflictDoUpdate({
+        target: searchStats.query,
+        set: { count: sql`${searchStats.count} + 1`, lastSearchedAt: new Date() },
+      });
     if (userId) await this.db.insert(searchHistory).values({ userId, query: query.trim().slice(0, 100) });
   }
 
   async recent(userId: string): Promise<string[]> {
-    const rows = await this.db.select({ query: searchHistory.query }).from(searchHistory).where(eq(searchHistory.userId, userId)).orderBy(desc(searchHistory.createdAt)).limit(30);
+    const rows = await this.db
+      .select({ query: searchHistory.query })
+      .from(searchHistory)
+      .where(eq(searchHistory.userId, userId))
+      .orderBy(desc(searchHistory.createdAt))
+      .limit(30);
     return [...new Set(rows.map((r) => r.query))].slice(0, 10);
   }
 
@@ -203,7 +251,11 @@ export class SearchService {
   }
 
   async popular(): Promise<string[]> {
-    const rows = await this.db.select({ query: searchStats.query }).from(searchStats).orderBy(desc(searchStats.count)).limit(10);
+    const rows = await this.db
+      .select({ query: searchStats.query })
+      .from(searchStats)
+      .orderBy(desc(searchStats.count))
+      .limit(10);
     return rows.map((r) => r.query);
   }
 }
@@ -218,8 +270,15 @@ export class SearchController {
 
   @Public()
   @Get()
-  async find(@Query(new ZodPipe(searchQuerySchema)) query: SearchQuery, @OptionalUser() user: AuthUser | null): Promise<SearchResponse> {
-    if (ADVANCED_FILTERS.some((f) => query[f] !== undefined && !(Array.isArray(query[f]) && (query[f] as unknown[]).length === 0))) {
+  async find(
+    @Query(new ZodPipe(searchQuerySchema)) query: SearchQuery,
+    @OptionalUser() user: AuthUser | null,
+  ): Promise<SearchResponse> {
+    if (
+      ADVANCED_FILTERS.some(
+        (f) => query[f] !== undefined && !(Array.isArray(query[f]) && (query[f] as unknown[]).length === 0),
+      )
+    ) {
       if (!user) throw entitlementRequired('advanced_filters');
       await this.entitlements.require(user.id, 'advanced_filters');
     }

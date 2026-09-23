@@ -44,7 +44,9 @@ export function formatUnitPrice(cents: number, per: ComparisonUnit, options: For
 }
 
 export function formatNumber(value: number, options: FormatOptions & { maximumFractionDigits?: number }): string {
-  return nf(toBcp47(options.locale, options.country), { maximumFractionDigits: options.maximumFractionDigits ?? 2 }).format(value);
+  return nf(toBcp47(options.locale, options.country), {
+    maximumFractionDigits: options.maximumFractionDigits ?? 2,
+  }).format(value);
 }
 
 /** "1,5 l", "500 g", "6 x 33 cl"-style pack labels, "12 stuks". */
@@ -56,16 +58,25 @@ export function formatQuantity(q: Quantity, options: FormatOptions & { packCount
   return options.packCount && options.packCount > 1 ? `${options.packCount} x ${single}` : single;
 }
 
-export function formatDate(date: Date | string, options: FormatOptions & { style?: 'short' | 'medium' | 'long' }): string {
+export function formatDate(
+  date: Date | string,
+  options: FormatOptions & { style?: 'short' | 'medium' | 'long' },
+): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   const style = options.style ?? 'medium';
   const opts: Intl.DateTimeFormatOptions =
-    style === 'short' ? { day: 'numeric', month: 'numeric' } : style === 'long' ? { dateStyle: 'long' } : { day: 'numeric', month: 'short' };
+    style === 'short'
+      ? { day: 'numeric', month: 'numeric' }
+      : style === 'long'
+        ? { dateStyle: 'long' }
+        : { day: 'numeric', month: 'short' };
   return new Intl.DateTimeFormat(toBcp47(options.locale, options.country), opts).format(d);
 }
 
 export function formatPercent(percent: number, options: FormatOptions): string {
-  return nf(toBcp47(options.locale, options.country), { style: 'percent', maximumFractionDigits: 0 }).format(percent / 100);
+  return nf(toBcp47(options.locale, options.country), { style: 'percent', maximumFractionDigits: 0 }).format(
+    percent / 100,
+  );
 }
 
 export type GreetingKey = 'greeting.morning' | 'greeting.afternoon' | 'greeting.evening';

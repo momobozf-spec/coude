@@ -47,7 +47,11 @@ export class ApiClient {
     const tokens = await this.store.get();
     await this.store.set(null);
     if (tokens) {
-      await this.fetchImpl(`${this.baseUrl}/v1/auth/logout`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: tokens.refreshToken }) }).catch(() => undefined);
+      await this.fetchImpl(`${this.baseUrl}/v1/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: tokens.refreshToken }),
+      }).catch(() => undefined);
     }
   }
 

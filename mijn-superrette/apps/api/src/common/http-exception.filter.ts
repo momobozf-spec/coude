@@ -16,7 +16,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const obj = typeof res === 'object' && res !== null ? (res as Record<string, unknown>) : {};
       body = {
         statusCode: status,
-        code: typeof obj.code === 'string' ? obj.code : HttpStatus[status] ?? 'ERROR',
+        code: typeof obj.code === 'string' ? obj.code : (HttpStatus[status] ?? 'ERROR'),
         message: typeof obj.message === 'string' ? obj.message : exception.message,
         ...(obj.details !== undefined ? { details: obj.details } : {}),
       };

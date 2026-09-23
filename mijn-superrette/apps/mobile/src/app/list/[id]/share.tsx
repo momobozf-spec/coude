@@ -23,22 +23,48 @@ export default function ShareList(): ReactNode {
       <Text tone="muted" style={{ marginBottom: 16 }}>
         {t('sharing.body')}
       </Text>
-      <Button title={`${t('sharing.createInvite')} · ${t('sharing.roleEditor')}`} icon="share" size="lg" loading={invite.isPending} onPress={() => invite.mutate('EDITOR')} />
-      <Button title={`${t('sharing.createInvite')} · ${t('sharing.roleViewer')}`} variant="secondary" style={{ marginTop: 10 }} onPress={() => invite.mutate('VIEWER')} />
+      <Button
+        title={`${t('sharing.createInvite')} · ${t('sharing.roleEditor')}`}
+        icon="share"
+        size="lg"
+        loading={invite.isPending}
+        onPress={() => invite.mutate('EDITOR')}
+      />
+      <Button
+        title={`${t('sharing.createInvite')} · ${t('sharing.roleViewer')}`}
+        variant="secondary"
+        style={{ marginTop: 10 }}
+        onPress={() => invite.mutate('VIEWER')}
+      />
       {invite.error ? <ErrorState error={invite.error} /> : null}
       <Card style={{ marginTop: 20 }}>
         <Text variant="micro" tone="muted">
           {t('lists.members').toUpperCase()}
         </Text>
         {list.data?.members.map((m, i) => (
-          <ListRowWithDivider key={m.userId} first={i === 0} title={m.displayName} subtitle={m.role === 'OWNER' ? 'Owner' : m.role === 'EDITOR' ? t('sharing.roleEditor') : t('sharing.roleViewer')} />
+          <ListRowWithDivider
+            key={m.userId}
+            first={i === 0}
+            title={m.displayName}
+            subtitle={
+              m.role === 'OWNER' ? 'Owner' : m.role === 'EDITOR' ? t('sharing.roleEditor') : t('sharing.roleViewer')
+            }
+          />
         ))}
       </Card>
     </Screen>
   );
 }
 
-function ListRowWithDivider({ first, title, subtitle }: { first: boolean; title: string; subtitle: string }): ReactNode {
+function ListRowWithDivider({
+  first,
+  title,
+  subtitle,
+}: {
+  first: boolean;
+  title: string;
+  subtitle: string;
+}): ReactNode {
   return (
     <>
       {first ? null : <Divider />}

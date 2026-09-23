@@ -38,7 +38,14 @@ export const promotionMechanic = catalog.enum('promotion_mechanic', PROMOTION_ME
 
 export const syncStatus = ingest.enum('sync_status', SYNC_STATUSES);
 export const syncKind = ingest.enum('sync_kind', SYNC_KINDS);
-export const ingestStage = ingest.enum('ingest_stage', ['FETCH', 'VALIDATION', 'NORMALIZATION', 'MATCHING', 'PERSIST', 'ALERTS']);
+export const ingestStage = ingest.enum('ingest_stage', [
+  'FETCH',
+  'VALIDATION',
+  'NORMALIZATION',
+  'MATCHING',
+  'PERSIST',
+  'ALERTS',
+]);
 
 export const userRole = app.enum('user_role', USER_ROLES);
 export const listMemberRole = app.enum('list_member_role', LIST_MEMBER_ROLES);

@@ -34,7 +34,9 @@ export class ListsGateway implements OnGatewayConnection, OnModuleInit, OnModule
   onModuleInit(): void {
     this.unsubscribe = this.events.subscribe((event) => {
       if (!this.server) return;
-      this.server.to(`list:${event.listId}`).emit(event.type, { listId: event.listId, actorId: event.actorId, ...event.payload });
+      this.server
+        .to(`list:${event.listId}`)
+        .emit(event.type, { listId: event.listId, actorId: event.actorId, ...event.payload });
       // Removed members stop receiving updates immediately.
       if (event.type === 'member.left' && typeof event.payload.userId === 'string') {
         this.server.in(`user:${event.payload.userId}`).socketsLeave(`list:${event.listId}`);
@@ -61,7 +63,10 @@ export class ListsGateway implements OnGatewayConnection, OnModuleInit, OnModule
   }
 
   @SubscribeMessage('list.join')
-  async join(@ConnectedSocket() client: Socket, @MessageBody() body: { listId?: string }): Promise<{ ok: boolean; error?: string }> {
+  async join(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { listId?: string },
+  ): Promise<{ ok: boolean; error?: string }> {
     const user = client.data.user as AuthUser | undefined;
     if (!user || typeof body?.listId !== 'string') return { ok: false, error: 'BAD_REQUEST' };
     try {

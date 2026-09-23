@@ -16,7 +16,12 @@ function FavoriteTile({ fav }: { fav: FavoriteDto }): ReactNode {
   const c = fav.product.cheapest;
   const insight = fav.insights[0];
   const insightLabel = insight
-    ? { DISCOUNTED: t('home.insightDiscounted'), PRICE_DROP: t('home.insightPriceDrop'), HISTORICAL_LOW: t('home.insightHistoricLow'), ALERT_TRIGGERED: t('home.insightAlert') }[insight.kind]
+    ? {
+        DISCOUNTED: t('home.insightDiscounted'),
+        PRICE_DROP: t('home.insightPriceDrop'),
+        HISTORICAL_LOW: t('home.insightHistoricLow'),
+        ALERT_TRIGGERED: t('home.insightAlert'),
+      }[insight.kind]
     : null;
   return (
     <Card onPress={() => router.push(`/product/${fav.product.variantId}`)} style={{ marginBottom: 10 }}>
@@ -25,7 +30,9 @@ function FavoriteTile({ fav }: { fav: FavoriteDto }): ReactNode {
           <Text variant="bodyStrong" numberOfLines={2}>
             {fav.product.name}
           </Text>
-          {insightLabel ? <Badge label={insightLabel} tone={insight?.kind === 'DISCOUNTED' ? 'promo' : 'success'} /> : null}
+          {insightLabel ? (
+            <Badge label={insightLabel} tone={insight?.kind === 'DISCOUNTED' ? 'promo' : 'success'} />
+          ) : null}
           {c ? (
             <Text variant="caption" tone="muted">
               {c.retailerName}
@@ -39,8 +46,14 @@ function FavoriteTile({ fav }: { fav: FavoriteDto }): ReactNode {
                 {price(insight.previousPriceCents)} → {price(c.priceCents)}
               </Text>
             ) : null}
-            <PriceTag price={t('common.from', { price: price(c.priceCents) })} unit={unitPrice(c.unitPrice)} promo={c.isPromotion} />
-            {insight?.discountPercent ? <Badge label={`-${Math.round(insight.discountPercent)}%`} tone="success" /> : null}
+            <PriceTag
+              price={t('common.from', { price: price(c.priceCents) })}
+              unit={unitPrice(c.unitPrice)}
+              promo={c.isPromotion}
+            />
+            {insight?.discountPercent ? (
+              <Badge label={`-${Math.round(insight.discountPercent)}%`} tone="success" />
+            ) : null}
           </View>
         ) : null}
       </Row>
@@ -62,7 +75,17 @@ export default function Home(): ReactNode {
         <View>
           <IconButton icon="bell" label={t('notifications.title')} onPress={() => router.push('/notifications')} />
           {data?.unreadNotifications ? (
-            <View style={{ position: 'absolute', right: 4, top: 4, width: 9, height: 9, borderRadius: 5, backgroundColor: colors.accent }} />
+            <View
+              style={{
+                position: 'absolute',
+                right: 4,
+                top: 4,
+                width: 9,
+                height: 9,
+                borderRadius: 5,
+                backgroundColor: colors.accent,
+              }}
+            />
           ) : null}
         </View>
       </Row>
@@ -72,13 +95,28 @@ export default function Home(): ReactNode {
       <Pressable
         accessibilityRole="search"
         onPress={() => router.push('/search')}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.surface, borderRadius: 999, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 16, paddingVertical: 14 }}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 10,
+          backgroundColor: colors.surface,
+          borderRadius: 999,
+          borderWidth: 1,
+          borderColor: colors.border,
+          paddingHorizontal: 16,
+          paddingVertical: 14,
+        }}
       >
         <Icon name="search" size={20} color={colors.textMuted} />
         <Text tone="muted" style={{ flex: 1 }}>
           {t('home.searchPlaceholder')}
         </Text>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('scanner.title')} onPress={() => router.push('/scan')} hitSlop={10}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('scanner.title')}
+          onPress={() => router.push('/scan')}
+          hitSlop={10}
+        >
           <Icon name="scan" size={22} />
         </Pressable>
       </Pressable>
@@ -90,7 +128,11 @@ export default function Home(): ReactNode {
           <View style={{ marginTop: 16 }}>
             <DataNotice origins={data.dataOrigins} />
           </View>
-          <SectionHeader title={t('home.favorites')} action={data.favorites.length ? t('common.seeAll') : undefined} onAction={() => router.push('/favorites')} />
+          <SectionHeader
+            title={t('home.favorites')}
+            action={data.favorites.length ? t('common.seeAll') : undefined}
+            onAction={() => router.push('/favorites')}
+          />
           {data.favorites.length === 0 ? (
             <Text tone="muted">{t('home.noFavorites')}</Text>
           ) : (
@@ -99,8 +141,17 @@ export default function Home(): ReactNode {
 
           {data.promotionsForYou.length > 0 ? (
             <>
-              <SectionHeader title={t('home.offersForYou')} action={t('common.seeAll')} onAction={() => router.push('/promotions')} />
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ paddingHorizontal: 16 }}>
+              <SectionHeader
+                title={t('home.offersForYou')}
+                action={t('common.seeAll')}
+                onAction={() => router.push('/promotions')}
+              />
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ marginHorizontal: -16 }}
+                contentContainerStyle={{ paddingHorizontal: 16 }}
+              >
                 {data.promotionsForYou.map((p) => (
                   <PromotionCard key={`${p.id}-${p.variantId}`} promo={p} compact />
                 ))}
@@ -111,14 +162,20 @@ export default function Home(): ReactNode {
           {data.primaryList ? (
             <>
               <SectionHeader title={t('home.shoppingList')} />
-              <Card onPress={() => router.push(`/list/${data.primaryList!.id}`)} style={{ backgroundColor: colors.primary, borderColor: colors.primary }}>
+              <Card
+                onPress={() => router.push(`/list/${data.primaryList!.id}`)}
+                style={{ backgroundColor: colors.primary, borderColor: colors.primary }}
+              >
                 <Text variant="heading" color={colors.onPrimary}>
                   {data.primaryList.name}
                 </Text>
                 <Text color={colors.onPrimary} style={{ opacity: 0.8 }}>
                   {t('home.listSummary', { count: data.primaryList.itemCount })}
                 </Text>
-                <Pressable onPress={() => router.push(`/list/${data.primaryList!.id}/compare`)} style={{ marginTop: 14 }}>
+                <Pressable
+                  onPress={() => router.push(`/list/${data.primaryList!.id}/compare`)}
+                  style={{ marginTop: 14 }}
+                >
                   <Row gap={6}>
                     <Text variant="bodyStrong" color={colors.accent}>
                       {t('home.compareCta')}

@@ -176,9 +176,7 @@ export const PricingEngine = {
       by === 'unitPrice' ? (p.unitPrice?.exactCents ?? Number.POSITIVE_INFINITY) : p.totalCents;
     const ranked = [...priced].sort((a, b) => key(a) - key(b) || a.retailerId.localeCompare(b.retailerId));
     const cheapest = ranked[0] ?? null;
-    const cheapestRetailerIds = cheapest
-      ? ranked.filter((p) => key(p) === key(cheapest)).map((p) => p.retailerId)
-      : [];
+    const cheapestRetailerIds = cheapest ? ranked.filter((p) => key(p) === key(cheapest)).map((p) => p.retailerId) : [];
     const last = ranked[ranked.length - 1];
     return {
       ranked,

@@ -39,7 +39,12 @@ export function cleanTitle(title: string, quantitySource: string | null): string
     const idx = stripDiacritics(title).toLowerCase().indexOf(quantitySource.toLowerCase());
     if (idx >= 0) result = `${title.slice(0, idx)} ${title.slice(idx + quantitySource.length)}`;
   }
-  return result.replace(/\s+/g, ' ').replace(/[\s,/-]+$/g, '').trim() || title;
+  return (
+    result
+      .replace(/\s+/g, ' ')
+      .replace(/[\s,/-]+$/g, '')
+      .trim() || title
+  );
 }
 
 export async function upsertBrand(tx: Tx, n: NormalizedProduct): Promise<string | null> {
@@ -64,7 +69,12 @@ async function categoryIdFor(tx: Tx, slug: string | null): Promise<string | null
 }
 
 /** Attach GTINs to a variant; a GTIN already owned by another variant is left untouched (conflict for review). */
-export async function attachBarcodes(tx: Tx, variantId: string, gtins: readonly string[], source: string): Promise<void> {
+export async function attachBarcodes(
+  tx: Tx,
+  variantId: string,
+  gtins: readonly string[],
+  source: string,
+): Promise<void> {
   if (gtins.length === 0) return;
   await tx
     .insert(productBarcodes)
@@ -131,7 +141,13 @@ export async function createCanonical(tx: Tx, source: CanonicalSource): Promise<
 /** Candidate canonical variants for matching: GTIN hits, same signature, or trigram-similar text. */
 export async function findCandidates(tx: Tx, n: NormalizedProduct, limit = 25): Promise<MatchCandidate[]> {
   const text = buildSearchText(n);
-  const gtinArray = n.gtins.length > 0 ? sql`ARRAY[${sql.join(n.gtins.map((g) => sql`${g}`), sql`, `)}]::text[]` : sql`ARRAY[]::text[]`;
+  const gtinArray =
+    n.gtins.length > 0
+      ? sql`ARRAY[${sql.join(
+          n.gtins.map((g) => sql`${g}`),
+          sql`, `,
+        )}]::text[]`
+      : sql`ARRAY[]::text[]`;
   const rows = await tx.execute<{ id: string; normalized: NormalizedProduct }>(sql`
     SELECT v.id, v.normalized
     FROM catalog.product_variants v
@@ -144,11 +160,19 @@ export async function findCandidates(tx: Tx, n: NormalizedProduct, limit = 25): 
   return rows.rows.map((r) => ({ productId: r.id, normalized: r.normalized }));
 }
 
-export async function mappingMemory(tx: Tx, retailerProductId: string): Promise<{ confirmedProductId: string | null; rejectedProductIds: string[] }> {
+export async function mappingMemory(
+  tx: Tx,
+  retailerProductId: string,
+): Promise<{ confirmedProductId: string | null; rejectedProductIds: string[] }> {
   const rows = await tx
     .select({ variantId: productMatches.variantId, status: productMatches.status })
     .from(productMatches)
-    .where(and(eq(productMatches.retailerProductId, retailerProductId), inArray(productMatches.status, ['CONFIRMED', 'REJECTED'])));
+    .where(
+      and(
+        eq(productMatches.retailerProductId, retailerProductId),
+        inArray(productMatches.status, ['CONFIRMED', 'REJECTED']),
+      ),
+    );
   return {
     confirmedProductId: rows.find((r) => r.status === 'CONFIRMED')?.variantId ?? null,
     rejectedProductIds: rows.filter((r) => r.status === 'REJECTED').map((r) => r.variantId),
@@ -186,5 +210,8 @@ export async function recordMatch(tx: Tx, m: MatchRecord): Promise<void> {
 
 /** Link a retailer product to a variant (used by pipeline and admin review). */
 export async function linkRetailerProduct(tx: Tx, retailerProductId: string, variantId: string | null): Promise<void> {
-  await tx.update(retailerProducts).set({ variantId, updatedAt: new Date() }).where(eq(retailerProducts.id, retailerProductId));
+  await tx
+    .update(retailerProducts)
+    .set({ variantId, updatedAt: new Date() })
+    .where(eq(retailerProducts.id, retailerProductId));
 }

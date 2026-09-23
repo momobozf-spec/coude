@@ -35,7 +35,10 @@ export const COUNTRIES = [
     currency: 'EUR',
     languages: ['nl', 'en'],
     defaultLocale: 'nl',
-    regions: ['DR', 'FL', 'FR', 'GE', 'GR', 'LI', 'NB', 'NH', 'OV', 'UT', 'ZE', 'ZH'].map((code) => ({ code, name: code })),
+    regions: ['DR', 'FL', 'FR', 'GE', 'GR', 'LI', 'NB', 'NH', 'OV', 'UT', 'ZE', 'ZH'].map((code) => ({
+      code,
+      name: code,
+    })),
   },
 ] as const;
 
@@ -51,25 +54,170 @@ export interface RetailerSeed {
 }
 
 export const RETAILERS: RetailerSeed[] = [
-  { slug: 'colruyt', name: 'Colruyt', type: 'SUPERMARKET', countries: ['BE'], brandColor: '#E4572E', loyaltyProgram: 'xtra', loyaltyProgramName: 'Xtra', websiteUrl: 'https://www.colruyt.be' },
-  { slug: 'delhaize', name: 'Delhaize', type: 'SUPERMARKET', countries: ['BE'], brandColor: '#B5121B', loyaltyProgram: 'superplus', loyaltyProgramName: 'SuperPlus', websiteUrl: 'https://www.delhaize.be' },
-  { slug: 'carrefour', name: 'Carrefour', type: 'SUPERMARKET', countries: ['BE'], brandColor: '#1E4FA1', loyaltyProgram: 'bonus-card', loyaltyProgramName: 'Bonus Card', websiteUrl: 'https://www.carrefour.be' },
-  { slug: 'albert-heijn', name: 'Albert Heijn', type: 'SUPERMARKET', countries: ['BE', 'NL'], brandColor: '#0A7EC2', loyaltyProgram: 'bonuskaart', loyaltyProgramName: 'Bonuskaart', websiteUrl: 'https://www.ah.nl' },
-  { slug: 'lidl', name: 'Lidl', type: 'DISCOUNTER', countries: ['BE', 'NL'], brandColor: '#1F4E9C', loyaltyProgram: 'lidl-plus', loyaltyProgramName: 'Lidl Plus', websiteUrl: 'https://www.lidl.be' },
-  { slug: 'aldi', name: 'ALDI', type: 'DISCOUNTER', countries: ['BE', 'NL'], brandColor: '#1B3F8B', websiteUrl: 'https://www.aldi.be' },
-  { slug: 'intermarche', name: 'Intermarché', type: 'SUPERMARKET', countries: ['BE'], brandColor: '#D52B1E', websiteUrl: 'https://www.intermarche.be' },
-  { slug: 'okay', name: 'Okay', type: 'CONVENIENCE', countries: ['BE'], brandColor: '#F28C28', websiteUrl: 'https://www.okay.be' },
-  { slug: 'jumbo', name: 'Jumbo', type: 'SUPERMARKET', countries: ['BE', 'NL'], brandColor: '#E0A800', loyaltyProgram: 'jumbo-extras', loyaltyProgramName: "Jumbo Extra's", websiteUrl: 'https://www.jumbo.com' },
-  { slug: 'plus', name: 'PLUS', type: 'SUPERMARKET', countries: ['NL'], brandColor: '#4E8B2F', websiteUrl: 'https://www.plus.nl' },
-  { slug: 'dirk', name: 'Dirk', type: 'DISCOUNTER', countries: ['NL'], brandColor: '#C8102E', websiteUrl: 'https://www.dirk.nl' },
-  { slug: 'spar', name: 'SPAR', type: 'CONVENIENCE', countries: ['NL'], brandColor: '#1C7C3A', websiteUrl: 'https://www.spar.nl' },
-  { slug: 'picnic', name: 'Picnic', type: 'ONLINE_GROCER', countries: ['NL'], brandColor: '#D6202A', websiteUrl: 'https://picnic.app' },
-  { slug: 'dekamarkt', name: 'DekaMarkt', type: 'SUPERMARKET', countries: ['NL'], brandColor: '#D4151C', websiteUrl: 'https://www.dekamarkt.nl' },
-  { slug: 'vomar', name: 'Vomar', type: 'SUPERMARKET', countries: ['NL'], brandColor: '#E30613', websiteUrl: 'https://www.vomar.nl' },
-  { slug: 'hoogvliet', name: 'Hoogvliet', type: 'SUPERMARKET', countries: ['NL'], brandColor: '#0055A5', websiteUrl: 'https://www.hoogvliet.com' },
-  { slug: 'ekoplaza', name: 'Ekoplaza', type: 'ORGANIC', countries: ['NL'], brandColor: '#6A9C2F', websiteUrl: 'https://www.ekoplaza.nl' },
-  { slug: 'kruidvat', name: 'Kruidvat', type: 'DRUGSTORE', countries: ['BE', 'NL'], brandColor: '#D40F7D', websiteUrl: 'https://www.kruidvat.nl' },
-  { slug: 'etos', name: 'Etos', type: 'DRUGSTORE', countries: ['NL'], brandColor: '#0090D0', websiteUrl: 'https://www.etos.nl' },
+  {
+    slug: 'colruyt',
+    name: 'Colruyt',
+    type: 'SUPERMARKET',
+    countries: ['BE'],
+    brandColor: '#E4572E',
+    loyaltyProgram: 'xtra',
+    loyaltyProgramName: 'Xtra',
+    websiteUrl: 'https://www.colruyt.be',
+  },
+  {
+    slug: 'delhaize',
+    name: 'Delhaize',
+    type: 'SUPERMARKET',
+    countries: ['BE'],
+    brandColor: '#B5121B',
+    loyaltyProgram: 'superplus',
+    loyaltyProgramName: 'SuperPlus',
+    websiteUrl: 'https://www.delhaize.be',
+  },
+  {
+    slug: 'carrefour',
+    name: 'Carrefour',
+    type: 'SUPERMARKET',
+    countries: ['BE'],
+    brandColor: '#1E4FA1',
+    loyaltyProgram: 'bonus-card',
+    loyaltyProgramName: 'Bonus Card',
+    websiteUrl: 'https://www.carrefour.be',
+  },
+  {
+    slug: 'albert-heijn',
+    name: 'Albert Heijn',
+    type: 'SUPERMARKET',
+    countries: ['BE', 'NL'],
+    brandColor: '#0A7EC2',
+    loyaltyProgram: 'bonuskaart',
+    loyaltyProgramName: 'Bonuskaart',
+    websiteUrl: 'https://www.ah.nl',
+  },
+  {
+    slug: 'lidl',
+    name: 'Lidl',
+    type: 'DISCOUNTER',
+    countries: ['BE', 'NL'],
+    brandColor: '#1F4E9C',
+    loyaltyProgram: 'lidl-plus',
+    loyaltyProgramName: 'Lidl Plus',
+    websiteUrl: 'https://www.lidl.be',
+  },
+  {
+    slug: 'aldi',
+    name: 'ALDI',
+    type: 'DISCOUNTER',
+    countries: ['BE', 'NL'],
+    brandColor: '#1B3F8B',
+    websiteUrl: 'https://www.aldi.be',
+  },
+  {
+    slug: 'intermarche',
+    name: 'Intermarché',
+    type: 'SUPERMARKET',
+    countries: ['BE'],
+    brandColor: '#D52B1E',
+    websiteUrl: 'https://www.intermarche.be',
+  },
+  {
+    slug: 'okay',
+    name: 'Okay',
+    type: 'CONVENIENCE',
+    countries: ['BE'],
+    brandColor: '#F28C28',
+    websiteUrl: 'https://www.okay.be',
+  },
+  {
+    slug: 'jumbo',
+    name: 'Jumbo',
+    type: 'SUPERMARKET',
+    countries: ['BE', 'NL'],
+    brandColor: '#E0A800',
+    loyaltyProgram: 'jumbo-extras',
+    loyaltyProgramName: "Jumbo Extra's",
+    websiteUrl: 'https://www.jumbo.com',
+  },
+  {
+    slug: 'plus',
+    name: 'PLUS',
+    type: 'SUPERMARKET',
+    countries: ['NL'],
+    brandColor: '#4E8B2F',
+    websiteUrl: 'https://www.plus.nl',
+  },
+  {
+    slug: 'dirk',
+    name: 'Dirk',
+    type: 'DISCOUNTER',
+    countries: ['NL'],
+    brandColor: '#C8102E',
+    websiteUrl: 'https://www.dirk.nl',
+  },
+  {
+    slug: 'spar',
+    name: 'SPAR',
+    type: 'CONVENIENCE',
+    countries: ['NL'],
+    brandColor: '#1C7C3A',
+    websiteUrl: 'https://www.spar.nl',
+  },
+  {
+    slug: 'picnic',
+    name: 'Picnic',
+    type: 'ONLINE_GROCER',
+    countries: ['NL'],
+    brandColor: '#D6202A',
+    websiteUrl: 'https://picnic.app',
+  },
+  {
+    slug: 'dekamarkt',
+    name: 'DekaMarkt',
+    type: 'SUPERMARKET',
+    countries: ['NL'],
+    brandColor: '#D4151C',
+    websiteUrl: 'https://www.dekamarkt.nl',
+  },
+  {
+    slug: 'vomar',
+    name: 'Vomar',
+    type: 'SUPERMARKET',
+    countries: ['NL'],
+    brandColor: '#E30613',
+    websiteUrl: 'https://www.vomar.nl',
+  },
+  {
+    slug: 'hoogvliet',
+    name: 'Hoogvliet',
+    type: 'SUPERMARKET',
+    countries: ['NL'],
+    brandColor: '#0055A5',
+    websiteUrl: 'https://www.hoogvliet.com',
+  },
+  {
+    slug: 'ekoplaza',
+    name: 'Ekoplaza',
+    type: 'ORGANIC',
+    countries: ['NL'],
+    brandColor: '#6A9C2F',
+    websiteUrl: 'https://www.ekoplaza.nl',
+  },
+  {
+    slug: 'kruidvat',
+    name: 'Kruidvat',
+    type: 'DRUGSTORE',
+    countries: ['BE', 'NL'],
+    brandColor: '#D40F7D',
+    websiteUrl: 'https://www.kruidvat.nl',
+  },
+  {
+    slug: 'etos',
+    name: 'Etos',
+    type: 'DRUGSTORE',
+    countries: ['NL'],
+    brandColor: '#0090D0',
+    websiteUrl: 'https://www.etos.nl',
+  },
 ];
 
 export const CATEGORIES: { slug: string; name: LocalizedText; icon: string }[] = [
@@ -86,7 +234,13 @@ export const CATEGORIES: { slug: string; name: LocalizedText; icon: string }[] =
 ];
 
 /** Default plan configuration. Editable in the database without a release. */
-export const PLAN_CONFIG: { key: string; name: string; isDefault: boolean; sortOrder: number; grants: [EntitlementKey, boolean, number | null][] }[] = [
+export const PLAN_CONFIG: {
+  key: string;
+  name: string;
+  isDefault: boolean;
+  sortOrder: number;
+  grants: [EntitlementKey, boolean, number | null][];
+}[] = [
   {
     key: 'free',
     name: 'Mijn Superrette Free',
@@ -154,12 +308,21 @@ export async function seedReferenceData(db: Database): Promise<void> {
   }
   let order = 0;
   for (const c of CATEGORIES) {
-    await db.insert(categories).values({ ...c, sortOrder: order++ }).onConflictDoNothing();
+    await db
+      .insert(categories)
+      .values({ ...c, sortOrder: order++ })
+      .onConflictDoNothing();
   }
   for (const p of PLAN_CONFIG) {
-    await db.insert(plans).values({ key: p.key, name: p.name, isDefault: p.isDefault, sortOrder: p.sortOrder }).onConflictDoNothing();
+    await db
+      .insert(plans)
+      .values({ key: p.key, name: p.name, isDefault: p.isDefault, sortOrder: p.sortOrder })
+      .onConflictDoNothing();
     for (const [key, enabled, limitValue] of p.grants) {
-      await db.insert(planEntitlements).values({ planKey: p.key, entitlementKey: key, enabled, limitValue }).onConflictDoNothing();
+      await db
+        .insert(planEntitlements)
+        .values({ planKey: p.key, entitlementKey: key, enabled, limitValue })
+        .onConflictDoNothing();
     }
   }
 }

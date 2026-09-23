@@ -1,10 +1,4 @@
-import {
-  type BaseQuantity,
-  type Quantity,
-  normalizeGtin,
-  normalizeText,
-  stripDiacritics,
-} from '@superrette/shared';
+import { type BaseQuantity, type Quantity, normalizeGtin, normalizeText, stripDiacritics } from '@superrette/shared';
 import type { DietaryAttribute } from '@superrette/domain';
 import { DEFAULT_DICTIONARY, type BrandEntry, type NormalizerDictionary } from './dictionary.js';
 import { parseQuantity } from './quantity-parser.js';
@@ -66,7 +60,10 @@ export class ProductNormalizer {
     this.synonyms = Object.entries(dictionary.synonyms)
       .map(([phrase, token]) => [normalizeText(phrase), token] as const)
       .sort((a, b) => b[0].length - a[0].length)
-      .map(([phrase, token]) => ({ pattern: new RegExp(`(?<![\\p{L}\\p{N}])${escapeRegExp(phrase)}(?![\\p{L}\\p{N}])`, 'gu'), token }));
+      .map(([phrase, token]) => ({
+        pattern: new RegExp(`(?<![\\p{L}\\p{N}])${escapeRegExp(phrase)}(?![\\p{L}\\p{N}])`, 'gu'),
+        token,
+      }));
     this.brandAliases = dictionary.brands
       .flatMap((brand) => brand.aliases.map((alias) => ({ alias: normalizeText(alias), brand })))
       .sort((a, b) => b.alias.length - a.alias.length)
@@ -149,11 +146,17 @@ export class ProductNormalizer {
     if (parsed) text = text.replace(parsed.source, ' ');
     const sizeMatch = /\b(?:maat|taille|size)\s*(\d+\+?)/i.exec(text);
     // Remove remaining quantity expressions (e.g. duplicated "1,5L" or "1500 ml").
-    text = text.replace(/\d+\s*[x×]\s*\d+(?:[.,]\d+)?\s*[a-z]+/g, ' ').replace(/\d+(?:[.,]\d+)?\s*(?:ml|cl|dl|l|ltr|liter|litre|g|gr|kg|gram|stuks?)\b/g, ' ');
+    text = text
+      .replace(/\d+\s*[x×]\s*\d+(?:[.,]\d+)?\s*[a-z]+/g, ' ')
+      .replace(/\d+(?:[.,]\d+)?\s*(?:ml|cl|dl|l|ltr|liter|litre|g|gr|kg|gram|stuks?)\b/g, ' ');
     let nameText = normalizeText(text);
     if (brand) {
       for (const { alias, brand: b } of this.brandAliases) {
-        if (b.slug === brand.slug) nameText = nameText.replace(new RegExp(`(?<![\\p{L}\\p{N}])${escapeRegExp(alias)}(?![\\p{L}\\p{N}])`, 'u'), ' ');
+        if (b.slug === brand.slug)
+          nameText = nameText.replace(
+            new RegExp(`(?<![\\p{L}\\p{N}])${escapeRegExp(alias)}(?![\\p{L}\\p{N}])`, 'u'),
+            ' ',
+          );
       }
     }
     // Brand names such as "Coca-Cola" also carry product meaning ("cola").
@@ -214,7 +217,8 @@ export class ProductNormalizer {
     for (const type of this.dictionary.productTypes) {
       if (!type.requires.every((t) => tokens.has(t))) continue;
       if (type.excludes?.some((t) => tokens.has(t))) continue;
-      if (!best || type.requires.length > best.specificity) best = { slug: type.slug, specificity: type.requires.length };
+      if (!best || type.requires.length > best.specificity)
+        best = { slug: type.slug, specificity: type.requires.length };
     }
     return best?.slug ?? null;
   }

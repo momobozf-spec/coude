@@ -31,7 +31,12 @@ export class HealthController {
       checks.developmentData = (await countDevelopmentRows(this.db)) === 0 ? 'none' : 'PRESENT';
     }
     const healthy = Object.values(checks).every((v) => v === 'ok' || v === 'none');
-    const body = { status: healthy ? 'ok' : 'degraded', env: this.config.env, sampleDataVisible: this.config.allowDevelopmentData, checks };
+    const body = {
+      status: healthy ? 'ok' : 'degraded',
+      env: this.config.env,
+      sampleDataVisible: this.config.allowDevelopmentData,
+      checks,
+    };
     if (!healthy) throw new ServiceUnavailableException(body);
     return body;
   }

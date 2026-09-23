@@ -113,11 +113,7 @@ export const PromotionCalculator = {
   },
 
   /** Why a promotion does not apply to this purchase, or null if it is eligible. */
-  ineligibility(
-    promotion: PricingPromotion,
-    quantity: number,
-    context: PricingContext,
-  ): PromotionIneligibility | null {
+  ineligibility(promotion: PricingPromotion, quantity: number, context: PricingContext): PromotionIneligibility | null {
     const c = promotion.conditions;
     if (!isWithin(context.at, promotion.startsAt, promotion.endsAt)) return 'NOT_ACTIVE';
     if (c.onlineOnly && !context.online) return 'ONLINE_ONLY';
@@ -136,11 +132,7 @@ export const PromotionCalculator = {
    * Apply a promotion to a purchase, honouring conditions such as a
    * maximum number of promotional units per customer.
    */
-  apply(
-    promotion: PricingPromotion,
-    regularUnitCents: Cents,
-    quantity: number,
-  ): PromotionApplication {
+  apply(promotion: PricingPromotion, regularUnitCents: Cents, quantity: number): PromotionApplication {
     assertQuantity(quantity);
     const max = promotion.conditions.maxQuantityPerCustomer;
     const promoUnits = max != null ? Math.min(quantity, max) : quantity;

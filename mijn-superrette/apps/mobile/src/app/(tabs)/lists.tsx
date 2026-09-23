@@ -17,7 +17,8 @@ export default function Lists(): ReactNode {
   const [name, setName] = useState('');
   const [kind, setKind] = useState<(typeof PRESETS)[number] | 'custom'>('custom');
   const create = useMutation({
-    mutationFn: () => api.createList({ name: name.trim() || t(`lists.presets.${kind === 'custom' ? 'weekly' : kind}`), kind }),
+    mutationFn: () =>
+      api.createList({ name: name.trim() || t(`lists.presets.${kind === 'custom' ? 'weekly' : kind}`), kind }),
     onSuccess: (list) => {
       setName('');
       void qc.invalidateQueries({ queryKey: ['lists'] });
@@ -60,8 +61,21 @@ export default function Lists(): ReactNode {
             />
           ))}
         </Row>
-        <TextField placeholder={t('lists.listName')} value={name} onChangeText={(v) => { setName(v); setKind('custom'); }} />
-        <Button title={t('lists.newList')} icon="plus" onPress={() => create.mutate()} loading={create.isPending} style={{ marginTop: 12 }} />
+        <TextField
+          placeholder={t('lists.listName')}
+          value={name}
+          onChangeText={(v) => {
+            setName(v);
+            setKind('custom');
+          }}
+        />
+        <Button
+          title={t('lists.newList')}
+          icon="plus"
+          onPress={() => create.mutate()}
+          loading={create.isPending}
+          style={{ marginTop: 12 }}
+        />
         {create.error ? <ErrorState error={create.error} /> : null}
       </Card>
       {lists.error ? <ErrorState error={lists.error} onRetry={() => void lists.refetch()} /> : null}

@@ -40,8 +40,11 @@ export function mergeEntitlements(...sets: EntitlementGrant[][]): EntitlementSet
     for (const grant of grants) {
       const current = result[grant.key];
       if (!grant.enabled) continue;
-      const limit =
-        !current.enabled ? grant.limit : current.limit === null || grant.limit === null ? null : Math.max(current.limit, grant.limit);
+      const limit = !current.enabled
+        ? grant.limit
+        : current.limit === null || grant.limit === null
+          ? null
+          : Math.max(current.limit, grant.limit);
       result[grant.key] = { key: grant.key, enabled: true, limit };
     }
   }

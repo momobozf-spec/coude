@@ -180,7 +180,9 @@ export class ProductMatchingEngine {
           method: 'GTIN',
           score: 1,
           reasons,
-          alternatives: ranked.slice(1).map((r) => ({ productId: r.c.productId, score: r.s.score, confidence: 'EXACT' })),
+          alternatives: ranked
+            .slice(1)
+            .map((r) => ({ productId: r.c.productId, score: r.s.score, confidence: 'EXACT' })),
           // Two canonical products sharing a GTIN is a data problem a human must resolve.
           status: byGtin.length > 1 ? 'PENDING_REVIEW' : this.statusFor('EXACT', 'GTIN'),
         };
@@ -194,7 +196,15 @@ export class ProductMatchingEngine {
 
     const best = scored[0];
     if (!best) {
-      return { productId: null, confidence: 'UNMATCHED', method: null, score: 0, reasons: ['no-candidates'], alternatives: [], status: 'CREATE_CANONICAL' };
+      return {
+        productId: null,
+        confidence: 'UNMATCHED',
+        method: null,
+        score: 0,
+        reasons: ['no-candidates'],
+        alternatives: [],
+        status: 'CREATE_CANONICAL',
+      };
     }
     let confidence = this.confidenceFor(best.score, best.strongIdentity);
     const second = scored[1];

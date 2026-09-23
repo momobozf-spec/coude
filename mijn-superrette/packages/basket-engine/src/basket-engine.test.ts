@@ -66,7 +66,12 @@ describe('BasketComparisonEngine', () => {
 
   it('prices every retailer and never hides missing products', () => {
     const byId = Object.fromEntries(result.retailers.map((r) => [r.retailerId, r]));
-    expect(byId.colruyt).toMatchObject({ totalCents: 2 * 99 + 249 + 329, foundCount: 3, itemCount: 3, isComplete: true });
+    expect(byId.colruyt).toMatchObject({
+      totalCents: 2 * 99 + 249 + 329,
+      foundCount: 3,
+      itemCount: 3,
+      isComplete: true,
+    });
     expect(byId.delhaize!.totalCents).toBe(2 * 119 + 269 + 349);
     expect(byId.ah!.totalCents).toBe(2 * 109 + 199 + 369);
     expect(byId.lidl).toMatchObject({ foundCount: 2, isComplete: false, missingItemIds: ['eieren'] });
@@ -81,7 +86,11 @@ describe('BasketComparisonEngine', () => {
   });
 
   it('recalculates immediately when the user changes a product', () => {
-    const premiumMilk = cand('melk', 'colruyt', 159, { matchType: 'EQUIVALENT', confidence: 0.92, productName: 'Campina Halfvolle melk' });
+    const premiumMilk = cand('melk', 'colruyt', 159, {
+      matchType: 'EQUIVALENT',
+      confidence: 0.92,
+      productName: 'Campina Halfvolle melk',
+    });
     const withChoice = BasketComparisonEngine.compare({
       items,
       retailers,
@@ -137,7 +146,12 @@ describe('BasketComparisonEngine', () => {
       },
       retailerProductId: 'ah-promo-milk',
     });
-    const r = BasketComparisonEngine.compare({ items, retailers, candidates: [...candidates, promoMilk], context: ctx });
+    const r = BasketComparisonEngine.compare({
+      items,
+      retailers,
+      candidates: [...candidates, promoMilk],
+      context: ctx,
+    });
     const line = r.retailers.find((x) => x.retailerId === 'ah')!.lines.find((l) => l.itemId === 'melk')!;
     expect(line.selected?.retailerProductId).toBe('ah-promo-milk');
     expect(line.selected?.price.totalCents).toBe(129);
@@ -179,7 +193,9 @@ describe('SmartBasketOptimizer', () => {
     const onlyLidlAndOther = BasketComparisonEngine.compare({
       items,
       retailers: [retailers[3]!, retailers[1]!],
-      candidates: candidates.filter((c) => c.retailerId === 'lidl' || (c.retailerId === 'delhaize' && c.itemId === 'eieren')),
+      candidates: candidates.filter(
+        (c) => c.retailerId === 'lidl' || (c.retailerId === 'delhaize' && c.itemId === 'eieren'),
+      ),
       context: ctx,
     });
     const r = SmartBasketOptimizer.optimize(onlyLidlAndOther, { maxStores: 2 });

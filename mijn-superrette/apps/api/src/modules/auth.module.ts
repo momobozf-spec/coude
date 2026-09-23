@@ -1,4 +1,14 @@
-import { Body, ConflictException, Controller, HttpCode, Inject, Injectable, Module, Post, UnauthorizedException } from '@nestjs/common';
+import {
+  Body,
+  ConflictException,
+  Controller,
+  HttpCode,
+  Inject,
+  Injectable,
+  Module,
+  Post,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { createHash, randomBytes } from 'node:crypto';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { hashPassword, sessions, users, verifyPassword, type Database } from '@superrette/database';
@@ -60,8 +70,12 @@ export class AuthService {
   }
 
   async register(input: RegisterInput): Promise<AuthResponse> {
-    const [existing] = await this.db.select({ id: users.id }).from(users).where(eq(sql`lower(${users.email})`, input.email));
-    if (existing) throw new ConflictException({ code: 'EMAIL_TAKEN', message: 'An account with this e-mail already exists' });
+    const [existing] = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(sql`lower(${users.email})`, input.email));
+    if (existing)
+      throw new ConflictException({ code: 'EMAIL_TAKEN', message: 'An account with this e-mail already exists' });
     const [user] = await this.db
       .insert(users)
       .values({
@@ -76,21 +90,35 @@ export class AuthService {
   }
 
   async login(input: LoginInput): Promise<AuthResponse> {
-    const [user] = await this.db.select().from(users).where(eq(sql`lower(${users.email})`, input.email));
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(eq(sql`lower(${users.email})`, input.email));
     const valid = await verifyPassword(input.password, user?.passwordHash ?? DUMMY_HASH);
-    if (!user || !valid) throw new UnauthorizedException({ code: 'INVALID_CREDENTIALS', message: 'Invalid e-mail or password' });
+    if (!user || !valid)
+      throw new UnauthorizedException({ code: 'INVALID_CREDENTIALS', message: 'Invalid e-mail or password' });
     return this.issue(user);
   }
 
   /** Rotate the refresh token. Presenting an already-rotated token revokes every session (theft detection). */
   async refresh(refreshToken: string): Promise<AuthResponse> {
-    const [session] = await this.db.select().from(sessions).where(eq(sessions.refreshTokenHash, sha256(refreshToken)));
+    const [session] = await this.db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.refreshTokenHash, sha256(refreshToken)));
     if (!session) throw new UnauthorizedException({ code: 'INVALID_REFRESH_TOKEN', message: 'Invalid refresh token' });
     if (session.revokedAt) {
-      await this.db.update(sessions).set({ revokedAt: new Date() }).where(and(eq(sessions.userId, session.userId), isNull(sessions.revokedAt)));
-      throw new UnauthorizedException({ code: 'REFRESH_TOKEN_REUSED', message: 'Refresh token reuse detected; all sessions were signed out' });
+      await this.db
+        .update(sessions)
+        .set({ revokedAt: new Date() })
+        .where(and(eq(sessions.userId, session.userId), isNull(sessions.revokedAt)));
+      throw new UnauthorizedException({
+        code: 'REFRESH_TOKEN_REUSED',
+        message: 'Refresh token reuse detected; all sessions were signed out',
+      });
     }
-    if (session.expiresAt < new Date()) throw new UnauthorizedException({ code: 'REFRESH_TOKEN_EXPIRED', message: 'Session expired' });
+    if (session.expiresAt < new Date())
+      throw new UnauthorizedException({ code: 'REFRESH_TOKEN_EXPIRED', message: 'Session expired' });
     await this.db.update(sessions).set({ revokedAt: new Date() }).where(eq(sessions.id, session.id));
     const [user] = await this.db.select().from(users).where(eq(users.id, session.userId));
     if (!user) throw new UnauthorizedException();
@@ -98,7 +126,10 @@ export class AuthService {
   }
 
   async logout(refreshToken: string): Promise<void> {
-    await this.db.update(sessions).set({ revokedAt: new Date() }).where(eq(sessions.refreshTokenHash, sha256(refreshToken)));
+    await this.db
+      .update(sessions)
+      .set({ revokedAt: new Date() })
+      .where(eq(sessions.refreshTokenHash, sha256(refreshToken)));
   }
 }
 

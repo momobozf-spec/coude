@@ -39,16 +39,41 @@ const UNIT_ALIASES: Record<string, { unit: Unit; factor: number }> = {
 };
 
 const COUNT_WORDS = [
-  'stuks', 'stuk', 'st', 'pieces', 'piece', 'pcs', 'pc', 'stk', 'x',
-  'luiers', 'couches', 'tabletten', 'tablettes', 'capsules', 'caps', 'rollen', 'rouleaux', 'zakjes', 'sachets',
-  'eieren', 'oeufs', 'eggs', 'pads',
+  'stuks',
+  'stuk',
+  'st',
+  'pieces',
+  'piece',
+  'pcs',
+  'pc',
+  'stk',
+  'x',
+  'luiers',
+  'couches',
+  'tabletten',
+  'tablettes',
+  'capsules',
+  'caps',
+  'rollen',
+  'rouleaux',
+  'zakjes',
+  'sachets',
+  'eieren',
+  'oeufs',
+  'eggs',
+  'pads',
 ];
 
-const MEASURE_UNITS = Object.keys(UNIT_ALIASES).sort((a, b) => b.length - a.length).join('|');
+const MEASURE_UNITS = Object.keys(UNIT_ALIASES)
+  .sort((a, b) => b.length - a.length)
+  .join('|');
 const NUMBER = String.raw`(\d+(?:[.,]\d+)?)`;
 const MULTIPACK_RE = new RegExp(String.raw`(\d+)\s*[x×*]\s*${NUMBER}\s*(${MEASURE_UNITS})\b`, 'i');
 const MULTIPACK_REVERSED_RE = new RegExp(String.raw`${NUMBER}\s*(${MEASURE_UNITS})\s*[x×*]\s*(\d+)\b`, 'i');
-const MEASURE_RE = new RegExp(String.raw`(ca\.?\s*|±\s*|\+/-\s*|circa\s*|env\.?\s*)?${NUMBER}\s*(${MEASURE_UNITS})\b`, 'gi');
+const MEASURE_RE = new RegExp(
+  String.raw`(ca\.?\s*|±\s*|\+/-\s*|circa\s*|env\.?\s*)?${NUMBER}\s*(${MEASURE_UNITS})\b`,
+  'gi',
+);
 const COUNT_RE = new RegExp(String.raw`(\d+)\s*(${COUNT_WORDS.join('|')})\b`, 'i');
 const PER_WEIGHT_RE = /\b(per|par|le|au)\s*(kilo|kg|kilogram)\b|\bper\s*500\s*g\b/i;
 const PER_PIECE_RE = /\b(per stuk|par piece|la piece|per piece|each)\b/i;

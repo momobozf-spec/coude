@@ -26,7 +26,15 @@ const toneColor = (tone: TextTone, c: ColorScheme): string =>
     inverse: c.onPrimary,
   })[tone];
 
-export function Text({ variant = 'body', tone = 'default', color, align, strike, style, ...rest }: TextProps): ReactNode {
+export function Text({
+  variant = 'body',
+  tone = 'default',
+  color,
+  align,
+  strike,
+  style,
+  ...rest
+}: TextProps): ReactNode {
   const theme = useTheme();
   return (
     <RNText

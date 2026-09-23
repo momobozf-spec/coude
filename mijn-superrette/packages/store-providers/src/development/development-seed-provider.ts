@@ -44,7 +44,15 @@ export class DevelopmentSeedProvider extends BaseStoreProvider {
     supportStatus: 'SUPPORTED',
     reason: 'Development only: fictitious sample data, never shown as live prices.',
     dataOrigin: 'DEVELOPMENT_SEED',
-    capabilities: ['searchProducts', 'getProduct', 'getPrices', 'getPromotions', 'getCategories', 'getAvailability', 'listCatalog'],
+    capabilities: [
+      'searchProducts',
+      'getProduct',
+      'getPrices',
+      'getPromotions',
+      'getCategories',
+      'getAvailability',
+      'listCatalog',
+    ],
     documentation: 'docs/DATA_INGESTION.md#development-seed',
   };
 
@@ -82,7 +90,8 @@ export class DevelopmentSeedProvider extends BaseStoreProvider {
   }
 
   override async *listCatalog(): AsyncIterable<ProviderProduct> {
-    for (const { retailer, listing, category, gtin } of this.listings()) yield this.toProduct(retailer, listing, category, gtin);
+    for (const { retailer, listing, category, gtin } of this.listings())
+      yield this.toProduct(retailer, listing, category, gtin);
   }
 
   override async searchProducts(query: string): Promise<ProviderProduct[]> {

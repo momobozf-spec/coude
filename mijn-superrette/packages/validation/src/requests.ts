@@ -7,7 +7,10 @@ const uuid = z.uuid();
 const cents = z.number().int().min(0).max(1_000_000);
 
 export const registerSchema = z.object({
-  email: z.email().max(254).transform((e) => e.toLowerCase().trim()),
+  email: z
+    .email()
+    .max(254)
+    .transform((e) => e.toLowerCase().trim()),
   password: z.string().min(10).max(200),
   displayName: z.string().trim().min(1).max(60),
   locale: z.enum(LOCALES).default('nl'),
@@ -86,9 +89,11 @@ export const createListItemSchema = z.object({
 export type CreateListItemInput = z.infer<typeof createListItemSchema>;
 
 /** Updates carry the version the client last saw (optimistic concurrency). */
-export const updateListItemSchema = createListItemSchema
-  .partial()
-  .extend({ checked: z.boolean().optional(), position: z.number().int().min(0).optional(), version: z.number().int().min(1) });
+export const updateListItemSchema = createListItemSchema.partial().extend({
+  checked: z.boolean().optional(),
+  position: z.number().int().min(0).optional(),
+  version: z.number().int().min(1),
+});
 export type UpdateListItemInput = z.infer<typeof updateListItemSchema>;
 
 export const itemSelectionSchema = z.object({ retailerId: uuid, retailerProductId: uuid.nullable() });
@@ -157,7 +162,9 @@ export type MatchDecision = z.infer<typeof matchDecisionSchema>;
 
 export const equivalenceDecisionSchema = z.object({ decision: z.enum(['confirm', 'reject']) });
 
-export const triggerSyncSchema = z.object({ kind: z.enum(['CATALOG', 'PRICES', 'PROMOTIONS', 'FULL']).default('FULL') });
+export const triggerSyncSchema = z.object({
+  kind: z.enum(['CATALOG', 'PRICES', 'PROMOTIONS', 'FULL']).default('FULL'),
+});
 
 export const adminListQuerySchema = z.object({
   q: z.string().max(100).optional(),

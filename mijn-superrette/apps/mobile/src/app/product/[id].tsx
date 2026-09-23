@@ -28,7 +28,9 @@ import { useApi } from '../../state/session';
 function OfferLine({ offer }: { offer: OfferDto }): ReactNode {
   const { t, price, unitPrice } = useI18n();
   const { colors } = useTheme();
-  const loyalty = offer.missedPromotions.find((m) => m.reason === 'LOYALTY_CARD_REQUIRED' && m.potentialPriceCents != null);
+  const loyalty = offer.missedPromotions.find(
+    (m) => m.reason === 'LOYALTY_CARD_REQUIRED' && m.potentialPriceCents != null,
+  );
   const quantityDeal = offer.missedPromotions.find((m) => m.reason === 'NO_BENEFIT_AT_QUANTITY');
   return (
     <View style={{ paddingVertical: 10 }}>
@@ -61,7 +63,10 @@ function OfferLine({ offer }: { offer: OfferDto }): ReactNode {
           ) : null}
         </View>
         <View style={{ alignItems: 'flex-end' }}>
-          <Text variant="priceSmall" color={offer.isCheapest ? colors.success : offer.isPromotion ? colors.accent : colors.text}>
+          <Text
+            variant="priceSmall"
+            color={offer.isCheapest ? colors.success : offer.isPromotion ? colors.accent : colors.text}
+          >
             {price(offer.priceCents)}
           </Text>
           {offer.isPromotion ? (
@@ -97,12 +102,16 @@ function History({ variantId }: { variantId: string }): ReactNode {
   const h = history.data;
   if (!h || h.observationCount === 0) return <Text tone="muted">{t('product.historyNone')}</Text>;
   // At most three lines stay readable: keep the retailers that are cheapest now.
-  const lastCents = (points: { cents: number }[]): number => points[points.length - 1]?.cents ?? Number.POSITIVE_INFINITY;
-  const series = [...h.series].sort((a, b) => lastCents(a.points) - lastCents(b.points)).slice(0, 3).map((s, i) => ({
-    label: s.retailerName,
-    color: [colors.success, colors.primary, colors.accent][i % 3]!,
-    points: s.points.map((p) => ({ x: new Date(p.date).getTime(), y: p.cents, highlight: p.isPromo })),
-  }));
+  const lastCents = (points: { cents: number }[]): number =>
+    points[points.length - 1]?.cents ?? Number.POSITIVE_INFINITY;
+  const series = [...h.series]
+    .sort((a, b) => lastCents(a.points) - lastCents(b.points))
+    .slice(0, 3)
+    .map((s, i) => ({
+      label: s.retailerName,
+      color: [colors.success, colors.primary, colors.accent][i % 3]!,
+      points: s.points.map((p) => ({ x: new Date(p.date).getTime(), y: p.cents, highlight: p.isPromo })),
+    }));
   return (
     <Card>
       <Row style={{ justifyContent: 'space-between', marginBottom: 12 }}>
@@ -157,7 +166,8 @@ export default function ProductScreen(): ReactNode {
 
   const favorite = useMutation({
     mutationFn: (on: boolean) => (on ? api.addFavorite(id) : api.removeFavorite(id)),
-    onMutate: (on) => qc.setQueryData<ProductDetailDto>(['product', id, scope], (p) => (p ? { ...p, isFavorite: on } : p)),
+    onMutate: (on) =>
+      qc.setQueryData<ProductDetailDto>(['product', id, scope], (p) => (p ? { ...p, isFavorite: on } : p)),
     onSettled: () => {
       void qc.invalidateQueries({ queryKey: ['home'] });
       void qc.invalidateQueries({ queryKey: ['favorites'] });
@@ -193,8 +203,20 @@ export default function ProductScreen(): ReactNode {
               size="sm"
               onPress={() => favorite.mutate(!p.isFavorite)}
             />
-            <Button title={t('product.addToList')} icon="plus" variant="secondary" size="sm" onPress={() => router.push(`/add-to-list/${p.variantId}?name=${encodeURIComponent(p.name)}`)} />
-            <Button title={t('product.priceAlert')} icon="bell" variant="secondary" size="sm" onPress={() => router.push(`/alert/${p.variantId}`)} />
+            <Button
+              title={t('product.addToList')}
+              icon="plus"
+              variant="secondary"
+              size="sm"
+              onPress={() => router.push(`/add-to-list/${p.variantId}?name=${encodeURIComponent(p.name)}`)}
+            />
+            <Button
+              title={t('product.priceAlert')}
+              icon="bell"
+              variant="secondary"
+              size="sm"
+              onPress={() => router.push(`/alert/${p.variantId}`)}
+            />
           </Row>
 
           <DataNotice origins={p.dataOrigins} />
@@ -213,7 +235,12 @@ export default function ProductScreen(): ReactNode {
               {p.cheapest.unitPrice ? (
                 <Row style={{ justifyContent: 'space-between', marginTop: 4 }}>
                   <Text variant="caption" tone="muted">
-                    {t('product.unitPrice', { unit: p.cheapest.unitPrice.per === 'piece' ? t('units.piece', { count: 1 }) : t(`units.${p.cheapest.unitPrice.per}`) })}
+                    {t('product.unitPrice', {
+                      unit:
+                        p.cheapest.unitPrice.per === 'piece'
+                          ? t('units.piece', { count: 1 })
+                          : t(`units.${p.cheapest.unitPrice.per}`),
+                    })}
                   </Text>
                   <Text variant="bodyStrong">{unitPrice(p.cheapest.unitPrice)}</Text>
                 </Row>
@@ -223,7 +250,11 @@ export default function ProductScreen(): ReactNode {
             <Text tone="muted">{t('product.noPrices')}</Text>
           )}
 
-          <SectionHeader title={t('product.prices')} action={scope === 'mine' ? t('common.seeAll') : undefined} onAction={() => setScope('all')} />
+          <SectionHeader
+            title={t('product.prices')}
+            action={scope === 'mine' ? t('common.seeAll') : undefined}
+            onAction={() => setScope('all')}
+          />
           {p.offers.length > 0 ? (
             <ReceiptCard>
               {p.offers.map((o, i) => (
@@ -245,7 +276,11 @@ export default function ProductScreen(): ReactNode {
               <SectionHeader title={t('product.otherSizes')} />
               <Row gap={8} style={{ flexWrap: 'wrap' }}>
                 {p.otherSizes.map((s) => (
-                  <Chip key={s.variantId} label={s.sizeLabel ?? s.name} onPress={() => router.push(`/product/${s.variantId}`)} />
+                  <Chip
+                    key={s.variantId}
+                    label={s.sizeLabel ?? s.name}
+                    onPress={() => router.push(`/product/${s.variantId}`)}
+                  />
                 ))}
               </Row>
             </>
@@ -263,9 +298,14 @@ export default function ProductScreen(): ReactNode {
                         <Text variant="bodyStrong" numberOfLines={2}>
                           {e.name}
                         </Text>
-                        <ConfidenceMeter value={e.confidence} label={t('basket.confidence', { percent: Math.round(e.confidence * 100) })} />
+                        <ConfidenceMeter
+                          value={e.confidence}
+                          label={t('basket.confidence', { percent: Math.round(e.confidence * 100) })}
+                        />
                       </View>
-                      <Text variant="priceSmall">{e.cheapestPriceCents != null ? price(e.cheapestPriceCents) : '—'}</Text>
+                      <Text variant="priceSmall">
+                        {e.cheapestPriceCents != null ? price(e.cheapestPriceCents) : '—'}
+                      </Text>
                     </Row>
                   </Pressable>
                 ))}

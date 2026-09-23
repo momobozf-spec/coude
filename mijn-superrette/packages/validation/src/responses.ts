@@ -181,7 +181,13 @@ export interface BarcodeLookupDto {
   status: 'FOUND' | 'UNKNOWN' | 'INVALID';
   product: ProductDetailDto | null;
   /** Non-authoritative metadata from Open Food Facts, only for UNKNOWN codes. */
-  external: { source: 'open-food-facts'; name: string | null; brand: string | null; quantity: string | null; imageUrl: string | null } | null;
+  external: {
+    source: 'open-food-facts';
+    name: string | null;
+    brand: string | null;
+    quantity: string | null;
+    imageUrl: string | null;
+  } | null;
 }
 
 export interface ShoppingListItemDto {

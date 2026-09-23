@@ -55,5 +55,8 @@ export const providerErrors = ingest.table(
     resolvedAt: timestamp('resolved_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('provider_errors_sync_idx').on(t.syncId), index('provider_errors_open_idx').on(t.providerKey, t.resolvedAt)],
+  (t) => [
+    index('provider_errors_sync_idx').on(t.syncId),
+    index('provider_errors_open_idx').on(t.providerKey, t.resolvedAt),
+  ],
 );

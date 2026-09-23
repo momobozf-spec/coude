@@ -56,7 +56,9 @@ export class RedisCacheStore implements CacheStore {
     return this.redis.incr(key);
   }
   async incrWindow(key: string, ttlSeconds: number): Promise<number> {
-    const [[, count]] = (await this.redis.multi().incr(key).expire(key, ttlSeconds, 'NX').exec()) as [[Error | null, number]];
+    const [[, count]] = (await this.redis.multi().incr(key).expire(key, ttlSeconds, 'NX').exec()) as [
+      [Error | null, number],
+    ];
     return count;
   }
 }

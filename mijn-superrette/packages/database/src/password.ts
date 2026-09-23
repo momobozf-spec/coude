@@ -14,7 +14,12 @@ function scrypt(password: string, salt: Buffer, keylen: number, options: ScryptO
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16);
-  const key = await scrypt(password, salt, PARAMS.keylen, { N: PARAMS.N, r: PARAMS.r, p: PARAMS.p, maxmem: 128 * PARAMS.N * PARAMS.r * 2 });
+  const key = await scrypt(password, salt, PARAMS.keylen, {
+    N: PARAMS.N,
+    r: PARAMS.r,
+    p: PARAMS.p,
+    maxmem: 128 * PARAMS.N * PARAMS.r * 2,
+  });
   return ['scrypt', PARAMS.N, PARAMS.r, PARAMS.p, salt.toString('base64url'), key.toString('base64url')].join('$');
 }
 
@@ -23,6 +28,11 @@ export async function verifyPassword(password: string, stored: string): Promise<
   if (alg !== 'scrypt' || !n || !r || !p || !saltText || !hashText) return false;
   const expected = Buffer.from(hashText, 'base64url');
   const N = Number(n);
-  const key = await scrypt(password, Buffer.from(saltText, 'base64url'), expected.length, { N, r: Number(r), p: Number(p), maxmem: 128 * N * Number(r) * 2 });
+  const key = await scrypt(password, Buffer.from(saltText, 'base64url'), expected.length, {
+    N,
+    r: Number(r),
+    p: Number(p),
+    maxmem: 128 * N * Number(r) * 2,
+  });
   return key.length === expected.length && timingSafeEqual(key, expected);
 }

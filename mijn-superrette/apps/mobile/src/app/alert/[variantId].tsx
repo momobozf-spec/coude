@@ -39,16 +39,35 @@ export default function CreateAlert(): ReactNode {
         </Text>
       ) : null}
       <View style={{ gap: 12 }}>
-        <TextField label={t('alerts.targetPrice')} placeholder="2,00" keyboardType="decimal-pad" value={target} onChangeText={setTarget} />
+        <TextField
+          label={t('alerts.targetPrice')}
+          placeholder="2,00"
+          keyboardType="decimal-pad"
+          value={target}
+          onChangeText={setTarget}
+        />
         {targetCents != null ? <Text tone="info">{t('alerts.below', { price: price(targetCents) })}</Text> : null}
         <ToggleRow label={t('alerts.promotionOnly')} value={promotionOnly} onValueChange={setPromotionOnly} />
         <Row gap={8} style={{ flexWrap: 'wrap' }}>
           <Chip label={t('alerts.anyRetailer')} selected={retailerId === null} onPress={() => setRetailerId(null)} />
           {product.data?.offers.map((o) => (
-            <Chip key={o.retailer.id} label={o.retailer.name} color={o.retailer.brandColor} selected={retailerId === o.retailer.id} onPress={() => setRetailerId(o.retailer.id)} />
+            <Chip
+              key={o.retailer.id}
+              label={o.retailer.name}
+              color={o.retailer.brandColor}
+              selected={retailerId === o.retailer.id}
+              onPress={() => setRetailerId(o.retailer.id)}
+            />
           ))}
         </Row>
-        <Button title={t('alerts.create')} icon="bell" size="lg" disabled={targetCents == null && !promotionOnly} loading={create.isPending} onPress={() => create.mutate()} />
+        <Button
+          title={t('alerts.create')}
+          icon="bell"
+          size="lg"
+          disabled={targetCents == null && !promotionOnly}
+          loading={create.isPending}
+          onPress={() => create.mutate()}
+        />
         {create.error ? <ErrorState error={create.error} lockedMessage={t('alerts.limitReached')} /> : null}
       </View>
     </Screen>

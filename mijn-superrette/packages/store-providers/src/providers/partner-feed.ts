@@ -35,16 +35,15 @@ export interface PartnerFeedConfig {
   fetch?: typeof fetch;
 }
 
-const isoDate = z.iso.datetime({ offset: true }).or(z.iso.date()).transform((s) => new Date(s));
+const isoDate = z.iso
+  .datetime({ offset: true })
+  .or(z.iso.date())
+  .transform((s) => new Date(s));
 
 const feedSchema = z.object({
   products: z.array(providerProductSchema).default([]),
-  prices: z
-    .array(z.looseObject({ observedAt: isoDate }))
-    .default([]),
-  promotions: z
-    .array(z.looseObject({ startsAt: isoDate.nullish(), endsAt: isoDate.nullish() }))
-    .default([]),
+  prices: z.array(z.looseObject({ observedAt: isoDate })).default([]),
+  promotions: z.array(z.looseObject({ startsAt: isoDate.nullish(), endsAt: isoDate.nullish() })).default([]),
 });
 
 export class PartnerFeedProvider extends BaseStoreProvider {
@@ -54,7 +53,9 @@ export class PartnerFeedProvider extends BaseStoreProvider {
   constructor(private readonly config: PartnerFeedConfig) {
     super();
     if (!config.licenseReference?.trim()) {
-      throw new Error(`PartnerFeedProvider "${config.key}" requires a licenseReference documenting permission to use the feed`);
+      throw new Error(
+        `PartnerFeedProvider "${config.key}" requires a licenseReference documenting permission to use the feed`,
+      );
     }
     this.info = {
       key: config.key,
@@ -70,7 +71,9 @@ export class PartnerFeedProvider extends BaseStoreProvider {
 
   private async load(): Promise<z.output<typeof feedSchema>> {
     if (this.cache) return this.cache;
-    const res = await (this.config.fetch ?? fetch)(this.config.url, { headers: { Accept: 'application/json', ...this.config.headers } });
+    const res = await (this.config.fetch ?? fetch)(this.config.url, {
+      headers: { Accept: 'application/json', ...this.config.headers },
+    });
     if (!res.ok) throw new ProviderHttpError(this.info.key, res.status, this.config.url);
     this.cache = feedSchema.parse(await res.json());
     return this.cache;

@@ -1,4 +1,18 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, Inject, Injectable, Module, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Inject,
+  Injectable,
+  Module,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { and, count, desc, eq, gte, ilike, inArray, isNull, lte, ne, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
@@ -85,13 +99,36 @@ export class AdminService {
       one(this.db.select({ value: count() }).from(productVariants)),
       one(this.db.select({ value: count() }).from(retailerProducts)),
       one(this.db.select({ value: count() }).from(priceObservations)),
-      one(this.db.select({ value: count() }).from(promotions).where(and(or(isNull(promotions.startsAt), lte(promotions.startsAt, now)), or(isNull(promotions.endsAt), gte(promotions.endsAt, now))))),
+      one(
+        this.db
+          .select({ value: count() })
+          .from(promotions)
+          .where(
+            and(
+              or(isNull(promotions.startsAt), lte(promotions.startsAt, now)),
+              or(isNull(promotions.endsAt), gte(promotions.endsAt, now)),
+            ),
+          ),
+      ),
       one(this.db.select({ value: count() }).from(productMatches).where(eq(productMatches.status, 'PENDING_REVIEW'))),
-      one(this.db.select({ value: count() }).from(productEquivalences).where(eq(productEquivalences.status, 'SUGGESTED'))),
+      one(
+        this.db.select({ value: count() }).from(productEquivalences).where(eq(productEquivalences.status, 'SUGGESTED')),
+      ),
       one(this.db.select({ value: count() }).from(providerErrors).where(isNull(providerErrors.resolvedAt))),
       one(this.db.select({ value: count() }).from(users)),
     ]);
-    return { retailers: r, products: p, variants: v, retailerProducts: rp, priceObservations: obs, activePromotions: promo, pendingMatches: pending, suggestedEquivalences: eqs, openErrors: errs, users: u };
+    return {
+      retailers: r,
+      products: p,
+      variants: v,
+      retailerProducts: rp,
+      priceObservations: obs,
+      activePromotions: promo,
+      pendingMatches: pending,
+      suggestedEquivalences: eqs,
+      openErrors: errs,
+      users: u,
+    };
   }
 
   // ── Product match review ───────────────────────────────────────────────
@@ -100,7 +137,12 @@ export class AdminService {
     const status = (q.status ?? 'PENDING_REVIEW') as 'PENDING_REVIEW' | 'AUTO_ACCEPTED' | 'CONFIRMED' | 'REJECTED';
     const where = and(eq(productMatches.status, status), q.q ? ilike(retailerProducts.title, `%${q.q}%`) : undefined);
     const rows = await this.db
-      .select({ m: productMatches, rp: retailerProducts, retailerName: retailers.name, variantName: productVariants.displayName })
+      .select({
+        m: productMatches,
+        rp: retailerProducts,
+        retailerName: retailers.name,
+        variantName: productVariants.displayName,
+      })
       .from(productMatches)
       .innerJoin(retailerProducts, eq(retailerProducts.id, productMatches.retailerProductId))
       .innerJoin(retailers, eq(retailers.id, retailerProducts.retailerId))
@@ -115,15 +157,26 @@ export class AdminService {
       .innerJoin(retailerProducts, eq(retailerProducts.id, productMatches.retailerProductId))
       .where(where);
     const variantIds = [...new Set(rows.flatMap((r) => [r.m.variantId, ...r.m.alternatives.map((a) => a.variantId)]))];
-    const names = variantIds.length ? await this.db.select({ id: productVariants.id, name: productVariants.displayName }).from(productVariants).where(inArray(productVariants.id, variantIds)) : [];
-    const gtins = variantIds.length ? await this.db.select().from(productBarcodes).where(inArray(productBarcodes.variantId, variantIds)) : [];
+    const names = variantIds.length
+      ? await this.db
+          .select({ id: productVariants.id, name: productVariants.displayName })
+          .from(productVariants)
+          .where(inArray(productVariants.id, variantIds))
+      : [];
+    const gtins = variantIds.length
+      ? await this.db.select().from(productBarcodes).where(inArray(productBarcodes.variantId, variantIds))
+      : [];
     const nameOf = new Map(names.map((n) => [n.id, n.name]));
     return {
       total,
       items: rows.map(({ m, rp, retailerName, variantName }) => ({
         id: m.id,
         retailerProduct: { id: rp.id, title: rp.title, retailerName, gtins: rp.gtins, quantityText: rp.quantityText },
-        proposed: { variantId: m.variantId, name: variantName, gtins: gtins.filter((g) => g.variantId === m.variantId).map((g) => g.gtin) },
+        proposed: {
+          variantId: m.variantId,
+          name: variantName,
+          gtins: gtins.filter((g) => g.variantId === m.variantId).map((g) => g.gtin),
+        },
         confidence: m.confidence,
         score: m.score,
         status: m.status,
@@ -145,20 +198,38 @@ export class AdminService {
     const pipeline = await this.jobs.pipeline();
     await this.db.transaction(async (tx) => {
       if (decision.decision === 'approve') {
-        await tx.update(productMatches).set({ status: 'CONFIRMED', reviewedBy: admin.id, reviewedAt: now, updatedAt: now }).where(eq(productMatches.id, matchId));
+        await tx
+          .update(productMatches)
+          .set({ status: 'CONFIRMED', reviewedBy: admin.id, reviewedAt: now, updatedAt: now })
+          .where(eq(productMatches.id, matchId));
         // Other open proposals for the same retailer product are superseded.
         await tx
           .update(productMatches)
           .set({ status: 'REJECTED', reviewedBy: admin.id, reviewedAt: now })
-          .where(and(eq(productMatches.retailerProductId, match.retailerProductId), ne(productMatches.id, matchId), eq(productMatches.status, 'PENDING_REVIEW')));
+          .where(
+            and(
+              eq(productMatches.retailerProductId, match.retailerProductId),
+              ne(productMatches.id, matchId),
+              eq(productMatches.status, 'PENDING_REVIEW'),
+            ),
+          );
         await linkRetailerProduct(tx, match.retailerProductId, match.variantId);
-        const [rp] = await tx.select({ gtins: retailerProducts.gtins }).from(retailerProducts).where(eq(retailerProducts.id, match.retailerProductId));
+        const [rp] = await tx
+          .select({ gtins: retailerProducts.gtins })
+          .from(retailerProducts)
+          .where(eq(retailerProducts.id, match.retailerProductId));
         await attachBarcodes(tx, match.variantId, rp?.gtins ?? [], 'admin-review');
       } else if (decision.decision === 'reassign') {
-        const [target] = await tx.select({ id: productVariants.id }).from(productVariants).where(eq(productVariants.id, decision.variantId));
+        const [target] = await tx
+          .select({ id: productVariants.id })
+          .from(productVariants)
+          .where(eq(productVariants.id, decision.variantId));
         if (!target) throw notFound('Product');
         if (decision.variantId !== match.variantId) {
-          await tx.update(productMatches).set({ status: 'REJECTED', reviewedBy: admin.id, reviewedAt: now }).where(eq(productMatches.id, matchId));
+          await tx
+            .update(productMatches)
+            .set({ status: 'REJECTED', reviewedBy: admin.id, reviewedAt: now })
+            .where(eq(productMatches.id, matchId));
         }
         await recordMatch(tx, {
           retailerProductId: match.retailerProductId,
@@ -173,11 +244,22 @@ export class AdminService {
         await tx
           .update(productMatches)
           .set({ status: 'CONFIRMED', reviewedBy: admin.id, reviewedAt: now })
-          .where(and(eq(productMatches.retailerProductId, match.retailerProductId), eq(productMatches.variantId, decision.variantId)));
+          .where(
+            and(
+              eq(productMatches.retailerProductId, match.retailerProductId),
+              eq(productMatches.variantId, decision.variantId),
+            ),
+          );
         await linkRetailerProduct(tx, match.retailerProductId, decision.variantId);
       } else {
-        await tx.update(productMatches).set({ status: 'REJECTED', reviewedBy: admin.id, reviewedAt: now, updatedAt: now }).where(eq(productMatches.id, matchId));
-        const [rp] = await tx.select({ variantId: retailerProducts.variantId }).from(retailerProducts).where(eq(retailerProducts.id, match.retailerProductId));
+        await tx
+          .update(productMatches)
+          .set({ status: 'REJECTED', reviewedBy: admin.id, reviewedAt: now, updatedAt: now })
+          .where(eq(productMatches.id, matchId));
+        const [rp] = await tx
+          .select({ variantId: retailerProducts.variantId })
+          .from(retailerProducts)
+          .where(eq(retailerProducts.id, match.retailerProductId));
         if (rp?.variantId === match.variantId) await linkRetailerProduct(tx, match.retailerProductId, null);
       }
     });
@@ -185,7 +267,9 @@ export class AdminService {
     if (decision.decision === 'reject') await pipeline.rematch(match.retailerProductId);
     await this.cache.invalidateCatalog();
     this.normalizers.invalidate();
-    const [updated] = (await this.matches({ status: undefined, limit: 200, offset: 0 })).items.filter((m) => m.id === matchId);
+    const [updated] = (await this.matches({ status: undefined, limit: 200, offset: 0 })).items.filter(
+      (m) => m.id === matchId,
+    );
     return updated ?? null;
   }
 
@@ -193,7 +277,16 @@ export class AdminService {
 
   async equivalences(q: AdminListQuery): Promise<Paginated<AdminEquivalenceDto>> {
     const status = (q.status ?? 'SUGGESTED') as 'SUGGESTED' | 'CONFIRMED' | 'REJECTED';
-    const rows = await this.db.execute<{ id: string; source_id: string; source_name: string; target_id: string; target_name: string; confidence: string; status: 'SUGGESTED' | 'CONFIRMED' | 'REJECTED'; reasons: string[] }>(sql`
+    const rows = await this.db.execute<{
+      id: string;
+      source_id: string;
+      source_name: string;
+      target_id: string;
+      target_name: string;
+      confidence: string;
+      status: 'SUGGESTED' | 'CONFIRMED' | 'REJECTED';
+      reasons: string[];
+    }>(sql`
       SELECT e.id, s.id AS source_id, s.display_name AS source_name, t.id AS target_id, t.display_name AS target_name, e.confidence, e.status, e.reasons
       FROM catalog.product_equivalences e
       JOIN catalog.product_variants s ON s.id = e.source_variant_id
@@ -202,7 +295,10 @@ export class AdminService {
       ORDER BY e.confidence DESC, s.display_name
       LIMIT ${q.limit} OFFSET ${q.offset}
     `);
-    const [{ value: total } = { value: 0 }] = await this.db.select({ value: count() }).from(productEquivalences).where(eq(productEquivalences.status, status));
+    const [{ value: total } = { value: 0 }] = await this.db
+      .select({ value: count() })
+      .from(productEquivalences)
+      .where(eq(productEquivalences.status, status));
     return {
       total,
       items: rows.rows.map((r) => ({
@@ -218,13 +314,22 @@ export class AdminService {
 
   async decideEquivalence(id: string, decision: 'confirm' | 'reject', admin: AuthUser): Promise<void> {
     const status = decision === 'confirm' ? 'CONFIRMED' : 'REJECTED';
-    const [row] = await this.db.update(productEquivalences).set({ status, reviewedBy: admin.id, reviewedAt: new Date(), updatedAt: new Date() }).where(eq(productEquivalences.id, id)).returning();
+    const [row] = await this.db
+      .update(productEquivalences)
+      .set({ status, reviewedBy: admin.id, reviewedAt: new Date(), updatedAt: new Date() })
+      .where(eq(productEquivalences.id, id))
+      .returning();
     if (!row) throw notFound('Equivalence');
     // Apply the same decision to the reverse pair so both directions agree.
     await this.db
       .update(productEquivalences)
       .set({ status, reviewedBy: admin.id, reviewedAt: new Date() })
-      .where(and(eq(productEquivalences.sourceVariantId, row.targetVariantId), eq(productEquivalences.targetVariantId, row.sourceVariantId)));
+      .where(
+        and(
+          eq(productEquivalences.sourceVariantId, row.targetVariantId),
+          eq(productEquivalences.targetVariantId, row.sourceVariantId),
+        ),
+      );
     await this.cache.invalidateCatalog();
   }
 
@@ -266,7 +371,10 @@ export class AdminService {
     const provider = this.registry.get(providerKey);
     if (!provider) throw notFound('Provider');
     if (provider.info.supportStatus === 'UNSUPPORTED') {
-      throw new BadRequestException({ code: 'PROVIDER_UNSUPPORTED', message: provider.info.reason ?? 'Provider is unsupported' });
+      throw new BadRequestException({
+        code: 'PROVIDER_UNSUPPORTED',
+        message: provider.info.reason ?? 'Provider is unsupported',
+      });
     }
     const syncId = await this.jobs.enqueueSync(providerKey, kind, `admin:${admin.id}`);
     const [row] = await this.db.select().from(providerSyncs).where(eq(providerSyncs.id, syncId));
@@ -275,18 +383,43 @@ export class AdminService {
 
   async syncs(q: AdminListQuery): Promise<Paginated<AdminSyncDto>> {
     const where = q.status ? eq(providerSyncs.status, q.status as SyncRow['status']) : undefined;
-    const rows = await this.db.select().from(providerSyncs).where(where).orderBy(desc(providerSyncs.createdAt)).limit(q.limit).offset(q.offset);
+    const rows = await this.db
+      .select()
+      .from(providerSyncs)
+      .where(where)
+      .orderBy(desc(providerSyncs.createdAt))
+      .limit(q.limit)
+      .offset(q.offset);
     const [{ value: total } = { value: 0 }] = await this.db.select({ value: count() }).from(providerSyncs).where(where);
     return { total, items: rows.map(syncDto) };
   }
 
   async errors(q: AdminListQuery): Promise<Paginated<AdminProviderErrorDto>> {
-    const where = q.status === 'resolved' ? sql`${providerErrors.resolvedAt} IS NOT NULL` : isNull(providerErrors.resolvedAt);
-    const rows = await this.db.select().from(providerErrors).where(where).orderBy(desc(providerErrors.createdAt)).limit(q.limit).offset(q.offset);
-    const [{ value: total } = { value: 0 }] = await this.db.select({ value: count() }).from(providerErrors).where(where);
+    const where =
+      q.status === 'resolved' ? sql`${providerErrors.resolvedAt} IS NOT NULL` : isNull(providerErrors.resolvedAt);
+    const rows = await this.db
+      .select()
+      .from(providerErrors)
+      .where(where)
+      .orderBy(desc(providerErrors.createdAt))
+      .limit(q.limit)
+      .offset(q.offset);
+    const [{ value: total } = { value: 0 }] = await this.db
+      .select({ value: count() })
+      .from(providerErrors)
+      .where(where);
     return {
       total,
-      items: rows.map((e) => ({ id: e.id, syncId: e.syncId, providerKey: e.providerKey, stage: e.stage, externalId: e.externalId, message: e.message, createdAt: e.createdAt.toISOString(), resolvedAt: e.resolvedAt?.toISOString() ?? null })),
+      items: rows.map((e) => ({
+        id: e.id,
+        syncId: e.syncId,
+        providerKey: e.providerKey,
+        stage: e.stage,
+        externalId: e.externalId,
+        message: e.message,
+        createdAt: e.createdAt.toISOString(),
+        resolvedAt: e.resolvedAt?.toISOString() ?? null,
+      })),
     };
   }
 
@@ -297,7 +430,10 @@ export class AdminService {
   // ── Catalogue browsing ─────────────────────────────────────────────────
 
   async variants(q: AdminListQuery): Promise<Paginated<Record<string, unknown>>> {
-    const where = and(q.q ? ilike(productVariants.searchText, `%${q.q.toLowerCase()}%`) : undefined, q.status === 'needs_review' ? eq(productVariants.needsReview, true) : undefined);
+    const where = and(
+      q.q ? ilike(productVariants.searchText, `%${q.q.toLowerCase()}%`) : undefined,
+      q.status === 'needs_review' ? eq(productVariants.needsReview, true) : undefined,
+    );
     const rows = await this.db
       .select({
         id: productVariants.id,
@@ -306,14 +442,19 @@ export class AdminService {
         needsReview: productVariants.needsReview,
         dataOrigin: productVariants.dataOrigin,
         listings: sql<number>`(SELECT count(*)::int FROM catalog.retailer_products rp WHERE rp.variant_id = ${productVariants.id})`,
-        gtins: sql<string[]>`(SELECT coalesce(array_agg(b.gtin), '{}') FROM catalog.product_barcodes b WHERE b.variant_id = ${productVariants.id})`,
+        gtins: sql<
+          string[]
+        >`(SELECT coalesce(array_agg(b.gtin), '{}') FROM catalog.product_barcodes b WHERE b.variant_id = ${productVariants.id})`,
       })
       .from(productVariants)
       .where(where)
       .orderBy(productVariants.displayName)
       .limit(q.limit)
       .offset(q.offset);
-    const [{ value: total } = { value: 0 }] = await this.db.select({ value: count() }).from(productVariants).where(where);
+    const [{ value: total } = { value: 0 }] = await this.db
+      .select({ value: count() })
+      .from(productVariants)
+      .where(where);
     return { total, items: rows };
   }
 
@@ -331,15 +472,32 @@ export class AdminService {
   }
 
   async updateVariant(id: string, input: { displayName?: string; needsReview?: boolean }): Promise<void> {
-    const [row] = await this.db.update(productVariants).set({ ...input, updatedAt: new Date() }).where(eq(productVariants.id, id)).returning({ id: productVariants.id });
+    const [row] = await this.db
+      .update(productVariants)
+      .set({ ...input, updatedAt: new Date() })
+      .where(eq(productVariants.id, id))
+      .returning({ id: productVariants.id });
     if (!row) throw notFound('Product');
     await this.cache.invalidateCatalog();
   }
 
   async retailerProductsList(q: AdminListQuery): Promise<Paginated<Record<string, unknown>>> {
-    const where = and(q.q ? ilike(retailerProducts.title, `%${q.q}%`) : undefined, q.status === 'unlinked' ? isNull(retailerProducts.variantId) : undefined);
+    const where = and(
+      q.q ? ilike(retailerProducts.title, `%${q.q}%`) : undefined,
+      q.status === 'unlinked' ? isNull(retailerProducts.variantId) : undefined,
+    );
     const rows = await this.db
-      .select({ id: retailerProducts.id, title: retailerProducts.title, sku: retailerProducts.retailerSku, retailerName: retailers.name, variantId: retailerProducts.variantId, dataOrigin: retailerProducts.dataOrigin, lastSeenAt: retailerProducts.lastSeenAt, price: currentPrices.regularPriceCents, promo: currentPrices.promoPriceCents })
+      .select({
+        id: retailerProducts.id,
+        title: retailerProducts.title,
+        sku: retailerProducts.retailerSku,
+        retailerName: retailers.name,
+        variantId: retailerProducts.variantId,
+        dataOrigin: retailerProducts.dataOrigin,
+        lastSeenAt: retailerProducts.lastSeenAt,
+        price: currentPrices.regularPriceCents,
+        promo: currentPrices.promoPriceCents,
+      })
       .from(retailerProducts)
       .innerJoin(retailers, eq(retailers.id, retailerProducts.retailerId))
       .leftJoin(currentPrices, eq(currentPrices.retailerProductId, retailerProducts.id))
@@ -347,17 +505,34 @@ export class AdminService {
       .orderBy(retailerProducts.title)
       .limit(q.limit)
       .offset(q.offset);
-    const [{ value: total } = { value: 0 }] = await this.db.select({ value: count() }).from(retailerProducts).where(where);
+    const [{ value: total } = { value: 0 }] = await this.db
+      .select({ value: count() })
+      .from(retailerProducts)
+      .where(where);
     return { total, items: rows };
   }
 
   async prices(retailerProductId: string): Promise<Record<string, unknown>[]> {
-    return this.db.select().from(priceObservations).where(eq(priceObservations.retailerProductId, retailerProductId)).orderBy(desc(priceObservations.observedAt)).limit(200);
+    return this.db
+      .select()
+      .from(priceObservations)
+      .where(eq(priceObservations.retailerProductId, retailerProductId))
+      .orderBy(desc(priceObservations.observedAt))
+      .limit(200);
   }
 
   async promotionsList(q: AdminListQuery): Promise<Paginated<Record<string, unknown>>> {
     const rows = await this.db
-      .select({ id: promotions.id, label: promotions.label, mechanic: promotions.mechanic, params: promotions.params, retailerName: retailers.name, startsAt: promotions.startsAt, endsAt: promotions.endsAt, dataOrigin: promotions.dataOrigin })
+      .select({
+        id: promotions.id,
+        label: promotions.label,
+        mechanic: promotions.mechanic,
+        params: promotions.params,
+        retailerName: retailers.name,
+        startsAt: promotions.startsAt,
+        endsAt: promotions.endsAt,
+        dataOrigin: promotions.dataOrigin,
+      })
       .from(promotions)
       .innerJoin(retailers, eq(retailers.id, promotions.retailerId))
       .orderBy(desc(promotions.startsAt))
@@ -399,7 +574,11 @@ export class AdminController {
 
   @Post('matches/:id/decision')
   @HttpCode(200)
-  decide(@Param('id', ParseUUIDPipe) id: string, @Body(new ZodPipe(matchDecisionSchema)) body: MatchDecision, @CurrentUser() user: AuthUser): Promise<AdminMatchDto | null> {
+  decide(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodPipe(matchDecisionSchema)) body: MatchDecision,
+    @CurrentUser() user: AuthUser,
+  ): Promise<AdminMatchDto | null> {
     return this.admin.decideMatch(id, body, user);
   }
 
@@ -410,7 +589,11 @@ export class AdminController {
 
   @Post('equivalences/:id/decision')
   @HttpCode(204)
-  async decideEquivalence(@Param('id', ParseUUIDPipe) id: string, @Body(new ZodPipe(equivalenceDecisionSchema)) body: { decision: 'confirm' | 'reject' }, @CurrentUser() user: AuthUser): Promise<void> {
+  async decideEquivalence(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodPipe(equivalenceDecisionSchema)) body: { decision: 'confirm' | 'reject' },
+    @CurrentUser() user: AuthUser,
+  ): Promise<void> {
     await this.admin.decideEquivalence(id, body.decision, user);
   }
 
@@ -421,7 +604,11 @@ export class AdminController {
 
   @Post('providers/:key/sync')
   @HttpCode(202)
-  sync(@Param('key') key: string, @Body(new ZodPipe(triggerSyncSchema)) body: { kind: SyncKind }, @CurrentUser() user: AuthUser): Promise<AdminSyncDto> {
+  sync(
+    @Param('key') key: string,
+    @Body(new ZodPipe(triggerSyncSchema)) body: { kind: SyncKind },
+    @CurrentUser() user: AuthUser,
+  ): Promise<AdminSyncDto> {
     return this.admin.triggerSync(key, body.kind, user);
   }
 
@@ -448,7 +635,10 @@ export class AdminController {
 
   @Patch('retailers/:id')
   @HttpCode(204)
-  async retailer(@Param('id', ParseUUIDPipe) id: string, @Body(new ZodPipe(z.object({ isActive: z.boolean() }))) body: { isActive: boolean }): Promise<void> {
+  async retailer(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodPipe(z.object({ isActive: z.boolean() }))) body: { isActive: boolean },
+  ): Promise<void> {
     await this.admin.setRetailerActive(id, body.isActive);
   }
 
@@ -466,13 +656,20 @@ export class AdminController {
   @HttpCode(204)
   async updateVariant(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body(new ZodPipe(z.object({ displayName: z.string().min(1).max(200).optional(), needsReview: z.boolean().optional() }))) body: { displayName?: string; needsReview?: boolean },
+    @Body(
+      new ZodPipe(
+        z.object({ displayName: z.string().min(1).max(200).optional(), needsReview: z.boolean().optional() }),
+      ),
+    )
+    body: { displayName?: string; needsReview?: boolean },
   ): Promise<void> {
     await this.admin.updateVariant(id, body);
   }
 
   @Get('retailer-products')
-  retailerProducts(@Query(new ZodPipe(adminListQuerySchema)) q: AdminListQuery): Promise<Paginated<Record<string, unknown>>> {
+  retailerProducts(
+    @Query(new ZodPipe(adminListQuerySchema)) q: AdminListQuery,
+  ): Promise<Paginated<Record<string, unknown>>> {
     return this.admin.retailerProductsList(q);
   }
 
@@ -489,9 +686,14 @@ export class AdminController {
   /** Development only: import a price observation through the pipeline (vertical slice 3). */
   @Post('dev/price-observations')
   @HttpCode(201)
-  async devObservation(@Body(new ZodPipe(devObservationSchema)) body: z.infer<typeof devObservationSchema>): Promise<Record<string, unknown>> {
+  async devObservation(
+    @Body(new ZodPipe(devObservationSchema)) body: z.infer<typeof devObservationSchema>,
+  ): Promise<Record<string, unknown>> {
     if (this.config.isProduction || !this.config.allowDevelopmentData) {
-      throw new BadRequestException({ code: 'DISABLED', message: 'Development tooling is disabled in this environment' });
+      throw new BadRequestException({
+        code: 'DISABLED',
+        message: 'Development tooling is disabled in this environment',
+      });
     }
     return this.jobs.importDevelopmentObservation(body);
   }

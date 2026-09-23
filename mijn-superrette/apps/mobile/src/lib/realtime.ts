@@ -40,12 +40,16 @@ export function useListRealtime(listId: string | undefined): { connected: boolea
           if (!prev) return prev;
           const exists = prev.items.some((i) => i.id === e.item.id);
           // Never overwrite a newer local version with an older event.
-          const items = exists ? prev.items.map((i) => (i.id === e.item.id && i.version <= e.item.version ? e.item : i)) : [...prev.items, e.item];
+          const items = exists
+            ? prev.items.map((i) => (i.id === e.item.id && i.version <= e.item.version ? e.item : i))
+            : [...prev.items, e.item];
           return { ...prev, items };
         });
       });
       socket.on('item.deleted', (e: { itemId: string }) => {
-        qc.setQueryData<ShoppingListDetailDto>(key, (prev) => (prev ? { ...prev, items: prev.items.filter((i) => i.id !== e.itemId) } : prev));
+        qc.setQueryData<ShoppingListDetailDto>(key, (prev) =>
+          prev ? { ...prev, items: prev.items.filter((i) => i.id !== e.itemId) } : prev,
+        );
       });
       socket.on('list.updated', () => void qc.invalidateQueries({ queryKey: ['compare', listId] }));
       socket.on('member.joined', () => void qc.invalidateQueries({ queryKey: key }));

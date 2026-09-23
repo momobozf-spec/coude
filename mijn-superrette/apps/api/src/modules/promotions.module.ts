@@ -68,14 +68,23 @@ export class PromotionsService {
       );
 
     const favoriteIds = shopper.userId
-      ? new Set((await this.db.select({ v: favorites.variantId }).from(favorites).where(eq(favorites.userId, shopper.userId))).map((f) => f.v))
+      ? new Set(
+          (
+            await this.db.select({ v: favorites.variantId }).from(favorites).where(eq(favorites.userId, shopper.userId))
+          ).map((f) => f.v),
+        )
       : new Set<string>();
 
     let items: PromotionDto[] = rows.map((r) => {
-      const conditions = r.c
-        ? { ...r.c, regionCodes: r.c.regionCodes }
-        : DEFAULT_CONDITIONS;
-      const promo = { id: r.p.id, label: r.p.label, params: r.p.params, startsAt: r.p.startsAt, endsAt: r.p.endsAt, conditions };
+      const conditions = r.c ? { ...r.c, regionCodes: r.c.regionCodes } : DEFAULT_CONDITIONS;
+      const promo = {
+        id: r.p.id,
+        label: r.p.label,
+        params: r.p.params,
+        startsAt: r.p.startsAt,
+        endsAt: r.p.endsAt,
+        conditions,
+      };
       const qty = Math.max(PromotionCalculator.groupSize(r.p.params), conditions.minQuantity ?? 1);
       const total = PromotionCalculator.apply(promo, r.regular, qty).totalCents;
       const perItem = Math.round(total / qty);
@@ -105,7 +114,8 @@ export class PromotionsService {
 
     if (q.section === 'favorites') items = items.filter((i) => i.isFavorite);
     if (q.section === 'category' && q.category) items = items.filter((i) => i.categorySlug === q.category);
-    if (q.section === 'ending_soon') items = items.filter((i) => i.endsAt && new Date(i.endsAt).getTime() - now.getTime() < 3 * 86_400_000);
+    if (q.section === 'ending_soon')
+      items = items.filter((i) => i.endsAt && new Date(i.endsAt).getTime() - now.getTime() < 3 * 86_400_000);
 
     const endsAt = (i: PromotionDto): number => (i.endsAt ? new Date(i.endsAt).getTime() : Number.POSITIVE_INFINITY);
     switch (q.sort) {
@@ -135,7 +145,10 @@ export class PromotionsController {
 
   @Public()
   @Get()
-  async list(@Query(new ZodPipe(promotionsQuerySchema)) q: PromotionsQuery, @OptionalUser() user: AuthUser | null): Promise<PromotionDto[]> {
+  async list(
+    @Query(new ZodPipe(promotionsQuerySchema)) q: PromotionsQuery,
+    @OptionalUser() user: AuthUser | null,
+  ): Promise<PromotionDto[]> {
     return this.promotions.list(q, await this.shoppers.get(user?.id ?? null));
   }
 }

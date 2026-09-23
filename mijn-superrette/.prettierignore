@@ -5,3 +5,6 @@ build
 coverage
 pnpm-lock.yaml
 packages/database/drizzle
+apps/mobile/dist-web
+apps/admin/dist
+docs/research

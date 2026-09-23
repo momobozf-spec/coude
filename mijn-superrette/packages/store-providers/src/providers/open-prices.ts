@@ -36,7 +36,13 @@ interface OpenPricesItem {
   date: string;
   location_osm_id?: number | null;
   location_osm_type?: string | null;
-  product?: { code?: string; product_name?: string | null; brands?: string | null; quantity?: string | null; image_url?: string | null } | null;
+  product?: {
+    code?: string;
+    product_name?: string | null;
+    brands?: string | null;
+    quantity?: string | null;
+    image_url?: string | null;
+  } | null;
   location?: { osm_brand?: string | null; osm_name?: string | null; osm_address_country_code?: string | null } | null;
 }
 
@@ -82,7 +88,11 @@ const BRAND_TO_RETAILER: Record<string, string> = {
 
 export function retailerSlugForOsmBrand(brand: string | null | undefined): string | null {
   if (!brand) return null;
-  const key = stripDiacritics(brand).toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const key = stripDiacritics(brand)
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
   return BRAND_TO_RETAILER[key] ?? null;
 }
 
@@ -92,7 +102,8 @@ export class OpenPricesProvider extends BaseStoreProvider {
     displayName: 'Open Prices (Open Food Facts)',
     retailerSlugs: [...new Set(Object.values(BRAND_TO_RETAILER))],
     supportStatus: 'SUPPORTED',
-    reason: 'Crowdsourced prices (ODbL). Coverage in Belgium and the Netherlands is partial; prices are user-reported with a date.',
+    reason:
+      'Crowdsourced prices (ODbL). Coverage in Belgium and the Netherlands is partial; prices are user-reported with a date.',
     dataOrigin: 'CROWDSOURCED',
     capabilities: ['getPrices'],
     documentation: 'docs/STORE_PROVIDERS.md#open-prices',
@@ -124,7 +135,9 @@ export class OpenPricesProvider extends BaseStoreProvider {
   private async fetchPage(params: URLSearchParams): Promise<OpenPricesPage> {
     await this.throttle();
     const url = `${this.baseUrl}/prices?${params.toString()}`;
-    const response = await this.fetchImpl(url, { headers: { 'User-Agent': this.options.userAgent, Accept: 'application/json' } });
+    const response = await this.fetchImpl(url, {
+      headers: { 'User-Agent': this.options.userAgent, Accept: 'application/json' },
+    });
     if (!response.ok) throw new ProviderHttpError(this.info.key, response.status, url);
     return (await response.json()) as OpenPricesPage;
   }
@@ -165,9 +178,10 @@ export class OpenPricesProvider extends BaseStoreProvider {
   }
 
   override async *getPrices(request: PriceRequest): AsyncIterable<ProviderPrice> {
-    const gtins = [...new Set((request.gtins ?? []).map((g) => normalizeGtin(g)).filter((g): g is string => g !== null))];
-    const since =
-      request.since ?? new Date(Date.now() - (this.options.maxAgeDays ?? 90) * 24 * 3600 * 1000);
+    const gtins = [
+      ...new Set((request.gtins ?? []).map((g) => normalizeGtin(g)).filter((g): g is string => g !== null)),
+    ];
+    const since = request.since ?? new Date(Date.now() - (this.options.maxAgeDays ?? 90) * 24 * 3600 * 1000);
     for (const gtin of gtins) {
       let page = 1;
       let pages: number;

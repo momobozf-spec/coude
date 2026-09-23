@@ -46,8 +46,16 @@ const promotionParamsSchema = z.discriminatedUnion('mechanic', [
   z.object({ mechanic: z.literal('PERCENT_OFF'), percent: z.number().gt(0).lte(100) }),
   z.object({ mechanic: z.literal('AMOUNT_OFF'), amountCents: z.number().int().positive() }),
   z.object({ mechanic: z.literal('BUY_X_GET_Y_FREE'), buy: z.number().int().min(1), free: z.number().int().min(1) }),
-  z.object({ mechanic: z.literal('MULTI_BUY_FIXED_PRICE'), quantity: z.number().int().min(2), totalCents: z.number().int().positive() }),
-  z.object({ mechanic: z.literal('NTH_ITEM_PERCENT_OFF'), nth: z.number().int().min(2), percent: z.number().gt(0).lte(100) }),
+  z.object({
+    mechanic: z.literal('MULTI_BUY_FIXED_PRICE'),
+    quantity: z.number().int().min(2),
+    totalCents: z.number().int().positive(),
+  }),
+  z.object({
+    mechanic: z.literal('NTH_ITEM_PERCENT_OFF'),
+    nth: z.number().int().min(2),
+    percent: z.number().gt(0).lte(100),
+  }),
 ]);
 
 export const providerPromotionSchema = z.object({

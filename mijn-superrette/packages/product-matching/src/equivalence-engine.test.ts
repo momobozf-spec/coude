@@ -59,7 +59,9 @@ describe('ProductEquivalenceEngine', () => {
   });
 
   it('honours a same-brand preference', () => {
-    const results = engine.findEquivalents(subject('campina-src', 'Campina Halfvolle Melk 1L'), pool, { brandPreference: 'same' });
+    const results = engine.findEquivalents(subject('campina-src', 'Campina Halfvolle Melk 1L'), pool, {
+      brandPreference: 'same',
+    });
     expect(results[0]!.targetProduct).toBe('campina-milk');
   });
 });

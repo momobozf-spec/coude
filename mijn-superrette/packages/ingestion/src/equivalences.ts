@@ -34,15 +34,24 @@ export class EquivalenceIndexer {
     }
     const sources = variantIds ? new Set(variantIds) : null;
     let evaluated = 0;
-    const suggestions: { sourceVariantId: string; targetVariantId: string; confidence: number; reasons: string[] }[] = [];
+    const suggestions: { sourceVariantId: string; targetVariantId: string; confidence: number; reasons: string[] }[] =
+      [];
     for (const members of groups.values()) {
       for (const source of members) {
         if (sources && !sources.has(source.id)) continue;
         const candidates = members.filter((m) => m.id !== source.id && m.productId !== source.productId);
         evaluated += candidates.length;
-        for (const r of this.engine.findEquivalents({ productId: source.id, normalized: source.normalized }, candidates.map((c) => ({ productId: c.id, normalized: c.normalized })))) {
+        for (const r of this.engine.findEquivalents(
+          { productId: source.id, normalized: source.normalized },
+          candidates.map((c) => ({ productId: c.id, normalized: c.normalized })),
+        )) {
           if (r.matchType !== 'EQUIVALENT') continue;
-          suggestions.push({ sourceVariantId: r.sourceProduct, targetVariantId: r.targetProduct, confidence: r.confidence, reasons: r.reasons });
+          suggestions.push({
+            sourceVariantId: r.sourceProduct,
+            targetVariantId: r.targetProduct,
+            confidence: r.confidence,
+            reasons: r.reasons,
+          });
         }
       }
     }
@@ -50,7 +59,10 @@ export class EquivalenceIndexer {
       // Drop stale suggestions for refreshed sources; keep human decisions.
       await this.db.execute(sql`
         DELETE FROM catalog.product_equivalences
-        WHERE status = 'SUGGESTED' AND source_variant_id IN (${sql.join(variantIds.map((id) => sql`${id}::uuid`), sql`, `)})
+        WHERE status = 'SUGGESTED' AND source_variant_id IN (${sql.join(
+          variantIds.map((id) => sql`${id}::uuid`),
+          sql`, `,
+        )})
       `);
     }
     for (let i = 0; i < suggestions.length; i += 500) {
@@ -72,7 +84,11 @@ export class EquivalenceIndexer {
   /** Equivalents for one variant, excluding rejected pairs, best first. */
   async forVariant(variantId: string): Promise<{ targetVariantId: string; confidence: number; status: string }[]> {
     const rows = await this.db
-      .select({ targetVariantId: productEquivalences.targetVariantId, confidence: productEquivalences.confidence, status: productEquivalences.status })
+      .select({
+        targetVariantId: productEquivalences.targetVariantId,
+        confidence: productEquivalences.confidence,
+        status: productEquivalences.status,
+      })
       .from(productEquivalences)
       .where(inArray(productEquivalences.sourceVariantId, [variantId]));
     return rows.filter((r) => r.status !== 'REJECTED').sort((a, b) => b.confidence - a.confidence);

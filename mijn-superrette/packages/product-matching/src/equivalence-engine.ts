@@ -53,7 +53,13 @@ export class ProductEquivalenceEngine {
     const reasons: string[] = [];
 
     if (source.productId === target.productId || s.gtins.some((g) => t.gtins.includes(g))) {
-      return { sourceProduct: source.productId, targetProduct: target.productId, matchType: 'EXACT', confidence: 1, reasons: ['identity'] };
+      return {
+        sourceProduct: source.productId,
+        targetProduct: target.productId,
+        matchType: 'EXACT',
+        confidence: 1,
+        reasons: ['identity'],
+      };
     }
 
     // Product type: must agree when both known.
@@ -114,10 +120,21 @@ export class ProductEquivalenceEngine {
     reasons.push(`semantic:${round2(semantic)}`);
 
     const confidence = round2(
-      0.35 * typeScore + 0.2 * sizeScore + 0.2 * semantic + 0.1 * brandScore + 0.1 * dietaryScore + 0.05 * (s.categorySlug === t.categorySlug ? 1 : 0),
+      0.35 * typeScore +
+        0.2 * sizeScore +
+        0.2 * semantic +
+        0.1 * brandScore +
+        0.1 * dietaryScore +
+        0.05 * (s.categorySlug === t.categorySlug ? 1 : 0),
     );
     if (confidence < (prefs.minConfidence ?? 0.6)) return null;
-    return { sourceProduct: source.productId, targetProduct: target.productId, matchType: 'EQUIVALENT', confidence, reasons };
+    return {
+      sourceProduct: source.productId,
+      targetProduct: target.productId,
+      matchType: 'EQUIVALENT',
+      confidence,
+      reasons,
+    };
   }
 
   findEquivalents(

@@ -35,14 +35,20 @@ const CATALOG_VERSION_KEY = 'superrette:catalog-version';
  * ingest.provider_syncs / provider_errors and retried with backoff.
  */
 export async function startWorker(config: WorkerConfig, log: WorkerLogger): Promise<RunningWorker> {
-  const handle: DatabaseHandle = createDatabase(config.databaseUrl, { max: config.concurrency + 2, applicationName: 'superrette-worker' });
+  const handle: DatabaseHandle = createDatabase(config.databaseUrl, {
+    max: config.concurrency + 2,
+    applicationName: 'superrette-worker',
+  });
   const connection = { url: config.redisUrl };
   const registry = createDefaultRegistry({
     environment: config.env,
     openPrices: config.openPricesEnabled ? { enabled: true, userAgent: config.userAgent } : null,
     developmentSeed: config.allowDevelopmentData ? {} : null,
   });
-  const push: PushSender = config.pushMode === 'expo' ? new ExpoPushSender({ accessToken: config.expoAccessToken }) : new LogPushSender((m) => log.info(m));
+  const push: PushSender =
+    config.pushMode === 'expo'
+      ? new ExpoPushSender({ accessToken: config.expoAccessToken })
+      : new LogPushSender((m) => log.info(m));
   const syncQueue = new Queue<ProviderSyncJob>(QUEUES.providerSync, { connection });
   const alertsQueue = new Queue<PriceAlertsJob>(QUEUES.priceAlerts, { connection });
   const redis = new Redis(config.redisUrl, { maxRetriesPerRequest: null });
@@ -58,18 +64,33 @@ export async function startWorker(config: WorkerConfig, log: WorkerLogger): Prom
         hooks: {
           onVariantsChanged: async (variantIds) => {
             await redis.incr(CATALOG_VERSION_KEY);
-            await alertsQueue.add('evaluate', { variantIds, reason: `sync:${job.data.providerKey}` }, { attempts: 3, backoff: { type: 'exponential', delay: 5000 }, removeOnComplete: 1000, removeOnFail: 5000 });
+            await alertsQueue.add(
+              'evaluate',
+              { variantIds, reason: `sync:${job.data.providerKey}` },
+              {
+                attempts: 3,
+                backoff: { type: 'exponential', delay: 5000 },
+                removeOnComplete: 1000,
+                removeOnFail: 5000,
+              },
+            );
           },
         },
       });
       // Scheduled jobs have no pre-created sync record; queued API jobs do.
       const syncId = job.data.syncId || undefined;
-      const report = await pipeline.runSync(job.data.providerKey, job.data.kind, { triggeredBy: job.data.triggeredBy, ...(syncId ? { syncId } : {}), ...(job.id ? { jobId: job.id } : {}) });
+      const report = await pipeline.runSync(job.data.providerKey, job.data.kind, {
+        triggeredBy: job.data.triggeredBy,
+        ...(syncId ? { syncId } : {}),
+        ...(job.id ? { jobId: job.id } : {}),
+      });
       if (job.data.kind === 'CATALOG' || job.data.kind === 'FULL') {
         await new EquivalenceIndexer(handle.db).refresh();
         await redis.incr(CATALOG_VERSION_KEY);
       }
-      log.info(`sync ${report.providerKey}/${report.kind}: ${report.status} (read ${report.read}, failed ${report.failed})`);
+      log.info(
+        `sync ${report.providerKey}/${report.kind}: ${report.status} (read ${report.read}, failed ${report.failed})`,
+      );
       return report;
     },
     { connection, concurrency: config.concurrency },
@@ -96,11 +117,20 @@ export async function startWorker(config: WorkerConfig, log: WorkerLogger): Prom
       log.error(`schedule ignored: provider "${s.providerKey}" is unknown or UNSUPPORTED`);
       continue;
     }
-    await syncQueue.upsertJobScheduler(`${s.providerKey}:${s.kind}`, { pattern: s.pattern, tz: 'UTC' }, {
-      name: `${s.providerKey}:${s.kind}`,
-      data: { syncId: '', providerKey: s.providerKey, kind: s.kind, triggeredBy: 'schedule' },
-      opts: { attempts: 2, backoff: { type: 'exponential', delay: 60_000 }, removeOnComplete: 200, removeOnFail: 500 },
-    });
+    await syncQueue.upsertJobScheduler(
+      `${s.providerKey}:${s.kind}`,
+      { pattern: s.pattern, tz: 'UTC' },
+      {
+        name: `${s.providerKey}:${s.kind}`,
+        data: { syncId: '', providerKey: s.providerKey, kind: s.kind, triggeredBy: 'schedule' },
+        opts: {
+          attempts: 2,
+          backoff: { type: 'exponential', delay: 60_000 },
+          removeOnComplete: 200,
+          removeOnFail: 500,
+        },
+      },
+    );
     log.info(`scheduled ${s.providerKey}:${s.kind} at "${s.pattern}"`);
   }
 

@@ -3,7 +3,8 @@ import { EventEmitter } from 'node:events';
 
 export interface ListEvent {
   listId: string;
-  type: 'item.upserted' | 'item.deleted' | 'list.updated' | 'list.deleted' | 'activity' | 'member.joined' | 'member.left';
+  type:
+    'item.upserted' | 'item.deleted' | 'list.updated' | 'list.deleted' | 'activity' | 'member.joined' | 'member.left';
   payload: Record<string, unknown>;
   actorId: string | null;
 }

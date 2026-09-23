@@ -106,13 +106,35 @@ export const typography = {
   caption: { fontSize: 13, lineHeight: 18, fontWeight: '500' as const },
   micro: { fontSize: 11, lineHeight: 14, fontWeight: '700' as const, letterSpacing: 0.6 },
   /** Prices use tabular figures so columns align like a receipt. */
-  price: { fontSize: 20, lineHeight: 24, fontWeight: '800' as const, fontVariant: ['tabular-nums'] as ['tabular-nums'] },
-  priceSmall: { fontSize: 15, lineHeight: 20, fontWeight: '700' as const, fontVariant: ['tabular-nums'] as ['tabular-nums'] },
+  price: {
+    fontSize: 20,
+    lineHeight: 24,
+    fontWeight: '800' as const,
+    fontVariant: ['tabular-nums'] as ['tabular-nums'],
+  },
+  priceSmall: {
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '700' as const,
+    fontVariant: ['tabular-nums'] as ['tabular-nums'],
+  },
 };
 
 export const elevation = {
-  card: { shadowColor: '#0F1E23', shadowOpacity: 0.06, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, elevation: 2 },
-  raised: { shadowColor: '#0F1E23', shadowOpacity: 0.12, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 6 },
+  card: {
+    shadowColor: '#0F1E23',
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
+  },
+  raised: {
+    shadowColor: '#0F1E23',
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
+  },
 } as const;
 
 export const brand = {

@@ -23,7 +23,13 @@ export default function Register(): ReactNode {
       await signUp({ email, password, displayName, locale });
       router.replace('/onboarding');
     } catch (e) {
-      setError(e instanceof ApiError && e.code === 'EMAIL_TAKEN' ? t('auth.emailTaken') : e instanceof ApiError && e.status === 400 ? t('auth.passwordHint') : t('common.error'));
+      setError(
+        e instanceof ApiError && e.code === 'EMAIL_TAKEN'
+          ? t('auth.emailTaken')
+          : e instanceof ApiError && e.status === 400
+            ? t('auth.passwordHint')
+            : t('common.error'),
+      );
     } finally {
       setBusy(false);
     }
@@ -32,10 +38,35 @@ export default function Register(): ReactNode {
   return (
     <Screen title={t('auth.createAccount')} back>
       <View style={{ gap: 16 }}>
-        <TextField label={t('auth.displayName')} value={displayName} onChangeText={setDisplayName} autoComplete="given-name" />
-        <TextField label={t('auth.email')} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
-        <TextField label={`${t('auth.password')} · ${t('auth.passwordHint')}`} value={password} onChangeText={setPassword} secureTextEntry autoComplete="new-password" error={error} />
-        <Button title={t('auth.createAccount')} onPress={submit} loading={busy} disabled={!email || password.length < 10 || !displayName} size="lg" />
+        <TextField
+          label={t('auth.displayName')}
+          value={displayName}
+          onChangeText={setDisplayName}
+          autoComplete="given-name"
+        />
+        <TextField
+          label={t('auth.email')}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          autoComplete="email"
+        />
+        <TextField
+          label={`${t('auth.password')} · ${t('auth.passwordHint')}`}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoComplete="new-password"
+          error={error}
+        />
+        <Button
+          title={t('auth.createAccount')}
+          onPress={submit}
+          loading={busy}
+          disabled={!email || password.length < 10 || !displayName}
+          size="lg"
+        />
       </View>
     </Screen>
   );

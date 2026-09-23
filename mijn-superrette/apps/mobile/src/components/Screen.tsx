@@ -31,7 +31,13 @@ export function Screen({
     title || back ? (
       <Row style={{ paddingHorizontal: 12, paddingVertical: 8, justifyContent: 'space-between' }}>
         <Row gap={4} style={{ flex: 1 }}>
-          {back ? <IconButton icon="chevron-left" label={t('common.back')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} /> : null}
+          {back ? (
+            <IconButton
+              icon="chevron-left"
+              label={t('common.back')}
+              onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+            />
+          ) : null}
           {title ? (
             <Text variant="title" numberOfLines={1} style={{ flex: 1, paddingLeft: back ? 0 : 8 }}>
               {title}
@@ -48,7 +54,9 @@ export function Screen({
         <ScrollView
           contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
           keyboardShouldPersistTaps="handled"
-          refreshControl={onRefresh ? <RefreshControl refreshing={Boolean(refreshing)} onRefresh={onRefresh} /> : undefined}
+          refreshControl={
+            onRefresh ? <RefreshControl refreshing={Boolean(refreshing)} onRefresh={onRefresh} /> : undefined
+          }
         >
           {children}
         </ScrollView>
@@ -69,7 +77,15 @@ export function Loading(): ReactNode {
 }
 
 /** Error state; entitlement errors show an upgrade hint instead of a generic failure. */
-export function ErrorState({ error, onRetry, lockedMessage }: { error: unknown; onRetry?: () => void; lockedMessage?: string }): ReactNode {
+export function ErrorState({
+  error,
+  onRetry,
+  lockedMessage,
+}: {
+  error: unknown;
+  onRetry?: () => void;
+  lockedMessage?: string;
+}): ReactNode {
   const { t } = useI18n();
   if (error instanceof ApiError && (error.code === 'ENTITLEMENT_REQUIRED' || error.code === 'LIMIT_REACHED')) {
     return (
@@ -81,5 +97,12 @@ export function ErrorState({ error, onRetry, lockedMessage }: { error: unknown; 
       />
     );
   }
-  return <EmptyState icon="info" title={t('common.error')} body={error instanceof Error ? error.message : undefined} action={onRetry ? <Button title={t('common.retry')} variant="secondary" onPress={onRetry} /> : undefined} />;
+  return (
+    <EmptyState
+      icon="info"
+      title={t('common.error')}
+      body={error instanceof Error ? error.message : undefined}
+      action={onRetry ? <Button title={t('common.retry')} variant="secondary" onPress={onRetry} /> : undefined}
+    />
+  );
 }

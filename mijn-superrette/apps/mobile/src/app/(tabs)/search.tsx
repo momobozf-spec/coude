@@ -30,7 +30,11 @@ export default function Search(): ReactNode {
   const [promotionOnly, setPromotionOnly] = useState(false);
   const debounced = useDebounced(text.trim());
 
-  const suggestions = useQuery({ queryKey: ['autocomplete', debounced], queryFn: () => api.autocomplete(debounced), enabled: debounced.length >= 2 && debounced !== submitted });
+  const suggestions = useQuery({
+    queryKey: ['autocomplete', debounced],
+    queryFn: () => api.autocomplete(debounced),
+    enabled: debounced.length >= 2 && debounced !== submitted,
+  });
   const recent = useQuery({ queryKey: ['recent-searches'], queryFn: api.recentSearches });
   const popular = useQuery({ queryKey: ['popular-searches'], queryFn: api.popularSearches });
   const results = useQuery({
@@ -54,7 +58,14 @@ export default function Search(): ReactNode {
 
   return (
     <Screen title={t('search.title')}>
-      <SearchField value={text} onChangeText={setText} placeholder={t('search.placeholder')} onSubmit={() => run(text)} onScan={() => router.push('/scan')} autoFocus={!params.q} />
+      <SearchField
+        value={text}
+        onChangeText={setText}
+        placeholder={t('search.placeholder')}
+        onSubmit={() => run(text)}
+        onScan={() => router.push('/scan')}
+        autoFocus={!params.q}
+      />
 
       {suggestions.data?.length && text.trim() !== submitted ? (
         <View style={{ marginTop: 8 }}>
@@ -79,7 +90,9 @@ export default function Search(): ReactNode {
                 }}
               />
               <Row gap={8} style={{ flexWrap: 'wrap' }}>
-                {recent.data.map((q) => <Chip key={q} label={q} onPress={() => run(q)} />)}
+                {recent.data.map((q) => (
+                  <Chip key={q} label={q} onPress={() => run(q)} />
+                ))}
               </Row>
             </>
           ) : null}
@@ -87,15 +100,26 @@ export default function Search(): ReactNode {
             <>
               <SectionHeader title={t('search.popular')} />
               <Row gap={8} style={{ flexWrap: 'wrap' }}>
-                {popular.data.map((q) => <Chip key={q} label={q} onPress={() => run(q)} />)}
+                {popular.data.map((q) => (
+                  <Chip key={q} label={q} onPress={() => run(q)} />
+                ))}
               </Row>
             </>
           ) : null}
         </>
       ) : (
         <>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 12, marginHorizontal: -16 }} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
-            <Chip label={t('search.filterPromotion')} selected={promotionOnly} onPress={() => setPromotionOnly((v) => !v)} />
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ marginVertical: 12, marginHorizontal: -16 }}
+            contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+          >
+            <Chip
+              label={t('search.filterPromotion')}
+              selected={promotionOnly}
+              onPress={() => setPromotionOnly((v) => !v)}
+            />
             {sorts.map(([key, label]) => (
               <Chip key={key} label={label} selected={sort === key} onPress={() => setSort(key)} />
             ))}

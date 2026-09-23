@@ -69,7 +69,11 @@ export class JobsService implements OnModuleDestroy {
   async variantsChanged(variantIds: string[], reason: string): Promise<AlertEvaluationReport | null> {
     await this.cache.invalidateCatalog();
     if (this.alertsQueue) {
-      await this.alertsQueue.add('evaluate', { variantIds, reason }, { removeOnComplete: 1000, removeOnFail: 5000, attempts: 3, backoff: { type: 'exponential', delay: 5000 } });
+      await this.alertsQueue.add(
+        'evaluate',
+        { variantIds, reason },
+        { removeOnComplete: 1000, removeOnFail: 5000, attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
+      );
       return null;
     }
     return evaluatePriceAlerts(this.db, variantIds, { origins: this.config.dataOrigins, push: this.push });
@@ -80,9 +84,21 @@ export class JobsService implements OnModuleDestroy {
     const pipeline = await this.pipeline();
     const syncId = await pipeline.createSync(providerKey, kind, triggeredBy);
     if (this.syncQueue) {
-      await this.syncQueue.add(`${providerKey}:${kind}`, { syncId, providerKey, kind, triggeredBy }, { jobId: syncId, attempts: 2, backoff: { type: 'exponential', delay: 30_000 }, removeOnComplete: 500, removeOnFail: 1000 });
+      await this.syncQueue.add(
+        `${providerKey}:${kind}`,
+        { syncId, providerKey, kind, triggeredBy },
+        {
+          jobId: syncId,
+          attempts: 2,
+          backoff: { type: 'exponential', delay: 30_000 },
+          removeOnComplete: 500,
+          removeOnFail: 1000,
+        },
+      );
     } else {
-      const task = this.runSync(providerKey, kind, triggeredBy, syncId).catch((error: unknown) => this.logger.error(String(error)));
+      const task = this.runSync(providerKey, kind, triggeredBy, syncId).catch((error: unknown) =>
+        this.logger.error(String(error)),
+      );
       this.running.add(task);
       void task.finally(() => this.running.delete(task));
     }
@@ -109,8 +125,14 @@ export class JobsService implements OnModuleDestroy {
    * existing retailer product through the real pipeline, tagged
    * DEVELOPMENT_SEED. Disabled in production.
    */
-  async importDevelopmentObservation(input: { retailerProductId: string; regularPriceCents: number; promoPriceCents: number | null; observedAt?: Date }): Promise<{ stored: boolean; changedVariantIds: string[]; alerts: AlertEvaluationReport | null }> {
-    if (this.config.isProduction || !this.config.allowDevelopmentData) throw new Error('Development observations are disabled in this environment');
+  async importDevelopmentObservation(input: {
+    retailerProductId: string;
+    regularPriceCents: number;
+    promoPriceCents: number | null;
+    observedAt?: Date;
+  }): Promise<{ stored: boolean; changedVariantIds: string[]; alerts: AlertEvaluationReport | null }> {
+    if (this.config.isProduction || !this.config.allowDevelopmentData)
+      throw new Error('Development observations are disabled in this environment');
     const [rp] = await this.db
       .select({ sku: retailerProducts.retailerSku, slug: retailers.slug })
       .from(retailerProducts)
@@ -134,7 +156,8 @@ export class JobsService implements OnModuleDestroy {
       changed,
     );
     const changedVariantIds = [...changed];
-    const alerts = changedVariantIds.length > 0 ? await this.variantsChanged(changedVariantIds, 'dev-observation') : null;
+    const alerts =
+      changedVariantIds.length > 0 ? await this.variantsChanged(changedVariantIds, 'dev-observation') : null;
     return { stored, changedVariantIds, alerts };
   }
 

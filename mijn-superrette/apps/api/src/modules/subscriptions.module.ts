@@ -23,27 +23,42 @@ export class SubscriptionsController {
 
   @Public()
   @Get('plans')
-  async plans(): Promise<{ key: string; name: string; isDefault: boolean; entitlements: { key: string; enabled: boolean; limit: number | null }[] }[]> {
+  async plans(): Promise<
+    {
+      key: string;
+      name: string;
+      isDefault: boolean;
+      entitlements: { key: string; enabled: boolean; limit: number | null }[];
+    }[]
+  > {
     const rows = await this.db.select().from(plans).orderBy(asc(plans.sortOrder));
     const grants = await this.db.select().from(planEntitlements);
     return rows.map((p) => ({
       key: p.key,
       name: p.name,
       isDefault: p.isDefault,
-      entitlements: grants.filter((g) => g.planKey === p.key).map((g) => ({ key: g.entitlementKey, enabled: g.enabled, limit: g.limitValue })),
+      entitlements: grants
+        .filter((g) => g.planKey === p.key)
+        .map((g) => ({ key: g.entitlementKey, enabled: g.enabled, limit: g.limitValue })),
     }));
   }
 
   @Post('subscriptions/apple/verify')
   @HttpCode(501)
   apple(): never {
-    throw new NotImplementedException({ code: 'NOT_IMPLEMENTED', message: 'App Store subscription verification is not implemented yet' });
+    throw new NotImplementedException({
+      code: 'NOT_IMPLEMENTED',
+      message: 'App Store subscription verification is not implemented yet',
+    });
   }
 
   @Post('subscriptions/google/verify')
   @HttpCode(501)
   google(): never {
-    throw new NotImplementedException({ code: 'NOT_IMPLEMENTED', message: 'Google Play subscription verification is not implemented yet' });
+    throw new NotImplementedException({
+      code: 'NOT_IMPLEMENTED',
+      message: 'Google Play subscription verification is not implemented yet',
+    });
   }
 }
 

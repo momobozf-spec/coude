@@ -25,13 +25,25 @@ const info = (key: string): ProviderInfo => ({
 class FlakyProvider extends BaseStoreProvider {
   readonly info = info('test-flaky');
   override async *listCatalog(): AsyncIterable<ProviderProduct> {
-    yield { externalId: 'flaky-good', retailerSlug: 'colruyt', title: 'Testmerk Appelsap 1L', brand: 'Testmerk', gtins: [] };
+    yield {
+      externalId: 'flaky-good',
+      retailerSlug: 'colruyt',
+      title: 'Testmerk Appelsap 1L',
+      brand: 'Testmerk',
+      gtins: [],
+    };
     yield { externalId: '', retailerSlug: 'colruyt', title: '' } as ProviderProduct; // invalid
     yield { externalId: 'flaky-unknown-retailer', retailerSlug: 'nope', title: 'X 1L' };
   }
   override async *getPrices(): AsyncIterable<ProviderPrice> {
     yield { externalId: 'flaky-good', retailerSlug: 'colruyt', observedAt: new Date(), regularPriceCents: 199 };
-    yield { externalId: 'flaky-good', retailerSlug: 'colruyt', observedAt: new Date(), regularPriceCents: 100, promoPriceCents: 150 }; // promo > regular
+    yield {
+      externalId: 'flaky-good',
+      retailerSlug: 'colruyt',
+      observedAt: new Date(),
+      regularPriceCents: 100,
+      promoPriceCents: 150,
+    }; // promo > regular
   }
 }
 

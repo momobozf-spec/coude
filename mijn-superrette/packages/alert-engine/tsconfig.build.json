@@ -7,8 +7,5 @@
     "customConditions": [],
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
-  "exclude": [
-    "src/**/*.test.ts",
-    "src/**/__tests__/**"
-  ]
+  "exclude": ["src/**/*.test.ts", "src/**/__tests__/**"]
 }

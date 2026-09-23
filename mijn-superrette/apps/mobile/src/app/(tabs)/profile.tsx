@@ -36,7 +36,15 @@ export default function Profile(): ReactNode {
         <Divider />
         <ListRow title={t('profile.dataSources')} onPress={() => router.push('/settings/sources')} />
       </Card>
-      <Button title={t('auth.logout')} variant="ghost" style={{ marginTop: 24 }} onPress={async () => { await signOut(); router.replace('/welcome'); }} />
+      <Button
+        title={t('auth.logout')}
+        variant="ghost"
+        style={{ marginTop: 24 }}
+        onPress={async () => {
+          await signOut();
+          router.replace('/welcome');
+        }}
+      />
       <Logo size={28} />
     </Screen>
   );

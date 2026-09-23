@@ -7,11 +7,24 @@ const ctx: PricingContext = { at: now, loyaltyPrograms: [] };
 
 const offer = (retailerId: string, regular: number, promo: number | null = null): AlertOffer => {
   const price = PricingEngine.calculateEffectivePrice(
-    { retailerId, retailerProductId: `rp-${retailerId}`, regularPriceCents: regular, shelfPromoPriceCents: promo, promotions: [], netContent: null },
+    {
+      retailerId,
+      retailerProductId: `rp-${retailerId}`,
+      regularPriceCents: regular,
+      shelfPromoPriceCents: promo,
+      promotions: [],
+      netContent: null,
+    },
     1,
     ctx,
   );
-  return { retailerId, retailerName: retailerId, retailerProductId: `rp-${retailerId}`, price, isPromotion: price.appliedPromotion !== null };
+  return {
+    retailerId,
+    retailerName: retailerId,
+    retailerProductId: `rp-${retailerId}`,
+    price,
+    isPromotion: price.appliedPromotion !== null,
+  };
 };
 
 const alert = (overrides: Partial<PriceAlertState> = {}): PriceAlertState => ({
@@ -35,7 +48,10 @@ describe('PriceAlertEngine', () => {
   });
 
   it('does not trigger above the target', () => {
-    expect(PriceAlertEngine.evaluate(alert(), [offer('colruyt', 249)], { now })).toEqual({ action: 'NONE', reason: 'NOT_SATISFIED' });
+    expect(PriceAlertEngine.evaluate(alert(), [offer('colruyt', 249)], { now })).toEqual({
+      action: 'NONE',
+      reason: 'NOT_SATISFIED',
+    });
   });
 
   it('never sends duplicates for the same price', () => {
@@ -43,11 +59,18 @@ describe('PriceAlertEngine', () => {
     const after = PriceAlertEngine.nextState(alert(), first, now);
     expect(after.armed).toBe(false);
     const later = new Date(now.getTime() + 3 * 24 * 3600 * 1000);
-    expect(PriceAlertEngine.evaluate(after, [offer('dirk', 229, 189)], { now: later })).toEqual({ action: 'NONE', reason: 'ALREADY_NOTIFIED' });
+    expect(PriceAlertEngine.evaluate(after, [offer('dirk', 229, 189)], { now: later })).toEqual({
+      action: 'NONE',
+      reason: 'ALREADY_NOTIFIED',
+    });
   });
 
   it('re-arms after the price goes back up, then fires again', () => {
-    const fired = PriceAlertEngine.nextState(alert(), PriceAlertEngine.evaluate(alert(), [offer('dirk', 229, 189)], { now }), now);
+    const fired = PriceAlertEngine.nextState(
+      alert(),
+      PriceAlertEngine.evaluate(alert(), [offer('dirk', 229, 189)], { now }),
+      now,
+    );
     const t1 = new Date(now.getTime() + 2 * 24 * 3600 * 1000);
     const rearm = PriceAlertEngine.evaluate(fired, [offer('dirk', 229)], { now: t1 });
     expect(rearm).toEqual({ action: 'REARM' });
@@ -57,23 +80,43 @@ describe('PriceAlertEngine', () => {
   });
 
   it('fires again for a meaningful further drop, but respects the cooldown', () => {
-    const fired = PriceAlertEngine.nextState(alert(), PriceAlertEngine.evaluate(alert(), [offer('dirk', 229, 189)], { now }), now);
+    const fired = PriceAlertEngine.nextState(
+      alert(),
+      PriceAlertEngine.evaluate(alert(), [offer('dirk', 229, 189)], { now }),
+      now,
+    );
     const soon = new Date(now.getTime() + 3600 * 1000);
-    expect(PriceAlertEngine.evaluate(fired, [offer('dirk', 229, 149)], { now: soon })).toEqual({ action: 'NONE', reason: 'COOLDOWN' });
+    expect(PriceAlertEngine.evaluate(fired, [offer('dirk', 229, 149)], { now: soon })).toEqual({
+      action: 'NONE',
+      reason: 'COOLDOWN',
+    });
     const later = new Date(now.getTime() + 2 * 24 * 3600 * 1000);
-    expect(PriceAlertEngine.evaluate(fired, [offer('dirk', 229, 149)], { now: later })).toMatchObject({ action: 'TRIGGER', reason: 'FURTHER_DROP', priceCents: 149 });
+    expect(PriceAlertEngine.evaluate(fired, [offer('dirk', 229, 149)], { now: later })).toMatchObject({
+      action: 'TRIGGER',
+      reason: 'FURTHER_DROP',
+      priceCents: 149,
+    });
   });
 
   it('supports promotion-only alerts ("laat mij weten wanneer dit in promotie staat")', () => {
     const promoAlert = alert({ targetPriceCents: null, promotionOnly: true });
     expect(PriceAlertEngine.evaluate(promoAlert, [offer('colruyt', 199)], { now }).action).toBe('NONE');
-    expect(PriceAlertEngine.evaluate(promoAlert, [offer('colruyt', 249, 219)], { now })).toMatchObject({ action: 'TRIGGER', reason: 'PROMOTION' });
+    expect(PriceAlertEngine.evaluate(promoAlert, [offer('colruyt', 249, 219)], { now })).toMatchObject({
+      action: 'TRIGGER',
+      reason: 'PROMOTION',
+    });
   });
 
   it('filters on retailer and ignores disabled alerts', () => {
     const colruytOnly = alert({ retailerId: 'colruyt' });
-    expect(PriceAlertEngine.evaluate(colruytOnly, [offer('dirk', 229, 189)], { now })).toEqual({ action: 'NONE', reason: 'NO_OFFERS' });
-    expect(PriceAlertEngine.evaluate(alert({ enabled: false }), [offer('dirk', 189)], { now })).toEqual({ action: 'NONE', reason: 'DISABLED' });
+    expect(PriceAlertEngine.evaluate(colruytOnly, [offer('dirk', 229, 189)], { now })).toEqual({
+      action: 'NONE',
+      reason: 'NO_OFFERS',
+    });
+    expect(PriceAlertEngine.evaluate(alert({ enabled: false }), [offer('dirk', 189)], { now })).toEqual({
+      action: 'NONE',
+      reason: 'DISABLED',
+    });
   });
 
   it('produces stable dedupe keys', () => {

@@ -74,5 +74,7 @@ export function tokenJaccard(a: Iterable<string>, b: Iterable<string>): number {
 }
 
 export function slugify(input: string): string {
-  return normalizeText(input).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return normalizeText(input)
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 }

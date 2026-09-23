@@ -53,9 +53,13 @@ export class ListsService {
 
   /** Membership check. Non-members get 404 so list ids do not leak. */
   async requireRole(listId: string, userId: string, minimum: ListMemberRole): Promise<ListMemberRole> {
-    const [m] = await this.db.select({ role: listMembers.role }).from(listMembers).where(and(eq(listMembers.listId, listId), eq(listMembers.userId, userId)));
+    const [m] = await this.db
+      .select({ role: listMembers.role })
+      .from(listMembers)
+      .where(and(eq(listMembers.listId, listId), eq(listMembers.userId, userId)));
     if (!m) throw notFound('List');
-    if (ROLE_RANK[m.role] < ROLE_RANK[minimum]) throw new ForbiddenException({ code: 'FORBIDDEN', message: `Requires ${minimum} role` });
+    if (ROLE_RANK[m.role] < ROLE_RANK[minimum])
+      throw new ForbiddenException({ code: 'FORBIDDEN', message: `Requires ${minimum} role` });
     return m.role;
   }
 
@@ -67,7 +71,10 @@ export class ListsService {
   private async itemDto(row: ItemRow): Promise<ShoppingListItemDto> {
     let preferredVariantName: string | null = null;
     if (row.preferredVariantId) {
-      const [v] = await this.db.select({ name: productVariants.displayName }).from(productVariants).where(eq(productVariants.id, row.preferredVariantId));
+      const [v] = await this.db
+        .select({ name: productVariants.displayName })
+        .from(productVariants)
+        .where(eq(productVariants.id, row.preferredVariantId));
       preferredVariantName = v?.name ?? null;
     }
     return {
@@ -88,17 +95,34 @@ export class ListsService {
   }
 
   private async touch(listId: string): Promise<void> {
-    await this.db.update(shoppingLists).set({ updatedAt: new Date(), version: sql`${shoppingLists.version} + 1` }).where(eq(shoppingLists.id, listId));
+    await this.db
+      .update(shoppingLists)
+      .set({ updatedAt: new Date(), version: sql`${shoppingLists.version} + 1` })
+      .where(eq(shoppingLists.id, listId));
   }
 
-  private async activity(listId: string, userId: string, type: string, payload: Record<string, unknown>): Promise<void> {
+  private async activity(
+    listId: string,
+    userId: string,
+    type: string,
+    payload: Record<string, unknown>,
+  ): Promise<void> {
     const actorName = await this.displayName(userId);
-    const [row] = await this.db.insert(listActivity).values({ listId, userId, type, payload: { ...payload, actorName } }).returning();
+    const [row] = await this.db
+      .insert(listActivity)
+      .values({ listId, userId, type, payload: { ...payload, actorName } })
+      .returning();
     this.events.emit({
       listId,
       type: 'activity',
       actorId: userId,
-      payload: { id: row!.id, type, userDisplayName: actorName, payload: row!.payload, createdAt: row!.createdAt.toISOString() },
+      payload: {
+        id: row!.id,
+        type,
+        userDisplayName: actorName,
+        payload: row!.payload,
+        createdAt: row!.createdAt.toISOString(),
+      },
     });
   }
 
@@ -114,11 +138,19 @@ export class ListsService {
     if (rows.length === 0) return [];
     const ids = rows.map((r) => r.l.id);
     const itemCounts = await this.db
-      .select({ listId: shoppingListItems.listId, total: count(), checked: sql<number>`count(*) filter (where ${shoppingListItems.checked})::int` })
+      .select({
+        listId: shoppingListItems.listId,
+        total: count(),
+        checked: sql<number>`count(*) filter (where ${shoppingListItems.checked})::int`,
+      })
       .from(shoppingListItems)
       .where(inArray(shoppingListItems.listId, ids))
       .groupBy(shoppingListItems.listId);
-    const memberCounts = await this.db.select({ listId: listMembers.listId, n: count() }).from(listMembers).where(inArray(listMembers.listId, ids)).groupBy(listMembers.listId);
+    const memberCounts = await this.db
+      .select({ listId: listMembers.listId, n: count() })
+      .from(listMembers)
+      .where(inArray(listMembers.listId, ids))
+      .groupBy(listMembers.listId);
     return rows.map(({ l, role }) => {
       const c = itemCounts.find((x) => x.listId === l.id);
       return {
@@ -136,10 +168,16 @@ export class ListsService {
   }
 
   async create(userId: string, input: CreateListInput): Promise<ShoppingListDto> {
-    const [{ value: owned } = { value: 0 }] = await this.db.select({ value: count() }).from(shoppingLists).where(eq(shoppingLists.ownerId, userId));
+    const [{ value: owned } = { value: 0 }] = await this.db
+      .select({ value: count() })
+      .from(shoppingLists)
+      .where(eq(shoppingLists.ownerId, userId));
     await this.entitlements.requireWithinLimit(userId, 'shopping_lists', owned);
     const list = await this.db.transaction(async (tx) => {
-      const [l] = await tx.insert(shoppingLists).values({ ownerId: userId, name: input.name, kind: input.kind, icon: input.icon ?? null }).returning();
+      const [l] = await tx
+        .insert(shoppingLists)
+        .values({ ownerId: userId, name: input.name, kind: input.kind, icon: input.icon ?? null })
+        .returning();
       await tx.insert(listMembers).values({ listId: l!.id, userId, role: 'OWNER' });
       return l!;
     });
@@ -150,7 +188,11 @@ export class ListsService {
     await this.requireRole(listId, userId, 'VIEWER');
     const summary = (await this.lists(userId)).find((l) => l.id === listId);
     if (!summary) throw notFound('List');
-    const items = await this.db.select().from(shoppingListItems).where(eq(shoppingListItems.listId, listId)).orderBy(asc(shoppingListItems.checked), asc(shoppingListItems.position), asc(shoppingListItems.createdAt));
+    const items = await this.db
+      .select()
+      .from(shoppingListItems)
+      .where(eq(shoppingListItems.listId, listId))
+      .orderBy(asc(shoppingListItems.checked), asc(shoppingListItems.position), asc(shoppingListItems.createdAt));
     const members = await this.db
       .select({ userId: listMembers.userId, displayName: users.displayName, role: listMembers.role })
       .from(listMembers)
@@ -164,7 +206,12 @@ export class ListsService {
     await this.requireRole(listId, userId, 'EDITOR');
     await this.db
       .update(shoppingLists)
-      .set({ ...(input.name ? { name: input.name } : {}), ...(input.kind ? { kind: input.kind } : {}), ...(input.icon !== undefined ? { icon: input.icon } : {}), updatedAt: new Date() })
+      .set({
+        ...(input.name ? { name: input.name } : {}),
+        ...(input.kind ? { kind: input.kind } : {}),
+        ...(input.icon !== undefined ? { icon: input.icon } : {}),
+        updatedAt: new Date(),
+      })
       .where(eq(shoppingLists.id, listId));
     const dto = (await this.lists(userId)).find((l) => l.id === listId)!;
     this.events.emit({ listId, type: 'list.updated', actorId: userId, payload: { list: dto } });
@@ -181,7 +228,10 @@ export class ListsService {
 
   async addItem(listId: string, userId: string, input: CreateListItemInput): Promise<ShoppingListItemDto> {
     await this.requireRole(listId, userId, 'EDITOR');
-    const [{ max } = { max: 0 }] = await this.db.select({ max: sql<number>`coalesce(max(${shoppingListItems.position}), -1)::int + 1` }).from(shoppingListItems).where(eq(shoppingListItems.listId, listId));
+    const [{ max } = { max: 0 }] = await this.db
+      .select({ max: sql<number>`coalesce(max(${shoppingListItems.position}), -1)::int + 1` })
+      .from(shoppingListItems)
+      .where(eq(shoppingListItems.listId, listId));
     const [row] = await this.db
       .insert(shoppingListItems)
       .values({
@@ -208,7 +258,12 @@ export class ListsService {
    * Optimistic concurrency: the client sends the version it last saw. A stale
    * version returns 409 with the current item so the client can reconcile.
    */
-  async updateItem(listId: string, itemId: string, userId: string, input: UpdateListItemInput): Promise<ShoppingListItemDto> {
+  async updateItem(
+    listId: string,
+    itemId: string,
+    userId: string,
+    input: UpdateListItemInput,
+  ): Promise<ShoppingListItemDto> {
     await this.requireRole(listId, userId, 'EDITOR');
     const now = new Date();
     const [row] = await this.db
@@ -221,30 +276,46 @@ export class ListsService {
         ...(input.notes !== undefined ? { notes: input.notes } : {}),
         ...(input.categorySlug !== undefined ? { categorySlug: input.categorySlug } : {}),
         ...(input.position !== undefined ? { position: input.position } : {}),
-        ...(input.checked !== undefined ? { checked: input.checked, checkedBy: input.checked ? userId : null, checkedAt: input.checked ? now : null } : {}),
+        ...(input.checked !== undefined
+          ? { checked: input.checked, checkedBy: input.checked ? userId : null, checkedAt: input.checked ? now : null }
+          : {}),
         version: sql`${shoppingListItems.version} + 1`,
         updatedBy: userId,
         updatedAt: now,
       })
-      .where(and(eq(shoppingListItems.id, itemId), eq(shoppingListItems.listId, listId), eq(shoppingListItems.version, input.version)))
+      .where(
+        and(
+          eq(shoppingListItems.id, itemId),
+          eq(shoppingListItems.listId, listId),
+          eq(shoppingListItems.version, input.version),
+        ),
+      )
       .returning();
     if (!row) {
-      const [current] = await this.db.select().from(shoppingListItems).where(and(eq(shoppingListItems.id, itemId), eq(shoppingListItems.listId, listId)));
+      const [current] = await this.db
+        .select()
+        .from(shoppingListItems)
+        .where(and(eq(shoppingListItems.id, itemId), eq(shoppingListItems.listId, listId)));
       if (!current) throw notFound('Item');
       throw versionConflict(await this.itemDto(current));
     }
     // A different preferred product invalidates per-retailer product choices.
-    if (input.preferredVariantId !== undefined) await this.db.delete(listItemSelections).where(eq(listItemSelections.itemId, itemId));
+    if (input.preferredVariantId !== undefined)
+      await this.db.delete(listItemSelections).where(eq(listItemSelections.itemId, itemId));
     const dto = await this.itemDto(row);
     await this.touch(listId);
     this.events.emit({ listId, type: 'item.upserted', actorId: userId, payload: { item: dto } });
-    if (input.checked !== undefined) await this.activity(listId, userId, input.checked ? 'ITEM_CHECKED' : 'ITEM_UNCHECKED', { item: dto.title });
+    if (input.checked !== undefined)
+      await this.activity(listId, userId, input.checked ? 'ITEM_CHECKED' : 'ITEM_UNCHECKED', { item: dto.title });
     return dto;
   }
 
   async deleteItem(listId: string, itemId: string, userId: string): Promise<void> {
     await this.requireRole(listId, userId, 'EDITOR');
-    const [row] = await this.db.delete(shoppingListItems).where(and(eq(shoppingListItems.id, itemId), eq(shoppingListItems.listId, listId))).returning();
+    const [row] = await this.db
+      .delete(shoppingListItems)
+      .where(and(eq(shoppingListItems.id, itemId), eq(shoppingListItems.listId, listId)))
+      .returning();
     if (!row) throw notFound('Item');
     await this.touch(listId);
     this.events.emit({ listId, type: 'item.deleted', actorId: userId, payload: { itemId } });
@@ -254,17 +325,34 @@ export class ListsService {
   /** "Wijzig product": choose the retailer product for an item at one retailer (null resets). */
   async setSelection(listId: string, itemId: string, userId: string, input: ItemSelectionInput): Promise<void> {
     await this.requireRole(listId, userId, 'EDITOR');
-    const [item] = await this.db.select({ id: shoppingListItems.id }).from(shoppingListItems).where(and(eq(shoppingListItems.id, itemId), eq(shoppingListItems.listId, listId)));
+    const [item] = await this.db
+      .select({ id: shoppingListItems.id })
+      .from(shoppingListItems)
+      .where(and(eq(shoppingListItems.id, itemId), eq(shoppingListItems.listId, listId)));
     if (!item) throw notFound('Item');
     if (input.retailerProductId === null) {
-      await this.db.delete(listItemSelections).where(and(eq(listItemSelections.itemId, itemId), eq(listItemSelections.retailerId, input.retailerId)));
+      await this.db
+        .delete(listItemSelections)
+        .where(and(eq(listItemSelections.itemId, itemId), eq(listItemSelections.retailerId, input.retailerId)));
     } else {
-      const [rp] = await this.db.select({ retailerId: retailerProducts.retailerId }).from(retailerProducts).where(eq(retailerProducts.id, input.retailerProductId));
-      if (!rp || rp.retailerId !== input.retailerId) throw new NotFoundException({ code: 'NOT_FOUND', message: 'Retailer product not found for this retailer' });
+      const [rp] = await this.db
+        .select({ retailerId: retailerProducts.retailerId })
+        .from(retailerProducts)
+        .where(eq(retailerProducts.id, input.retailerProductId));
+      if (!rp || rp.retailerId !== input.retailerId)
+        throw new NotFoundException({ code: 'NOT_FOUND', message: 'Retailer product not found for this retailer' });
       await this.db
         .insert(listItemSelections)
-        .values({ itemId, retailerId: input.retailerId, retailerProductId: input.retailerProductId, selectedBy: userId })
-        .onConflictDoUpdate({ target: [listItemSelections.itemId, listItemSelections.retailerId], set: { retailerProductId: input.retailerProductId, selectedBy: userId, createdAt: new Date() } });
+        .values({
+          itemId,
+          retailerId: input.retailerId,
+          retailerProductId: input.retailerProductId,
+          selectedBy: userId,
+        })
+        .onConflictDoUpdate({
+          target: [listItemSelections.itemId, listItemSelections.retailerId],
+          set: { retailerProductId: input.retailerProductId, selectedBy: userId, createdAt: new Date() },
+        });
     }
     await this.touch(listId);
     this.events.emit({ listId, type: 'list.updated', actorId: userId, payload: { reason: 'selection' } });
@@ -272,7 +360,11 @@ export class ListsService {
 
   async selections(listId: string): Promise<Map<string, string>> {
     const rows = await this.db
-      .select({ itemId: listItemSelections.itemId, retailerId: listItemSelections.retailerId, rp: listItemSelections.retailerProductId })
+      .select({
+        itemId: listItemSelections.itemId,
+        retailerId: listItemSelections.retailerId,
+        rp: listItemSelections.retailerProductId,
+      })
       .from(listItemSelections)
       .innerJoin(shoppingListItems, eq(shoppingListItems.id, listItemSelections.itemId))
       .where(eq(shoppingListItems.listId, listId));
@@ -281,7 +373,12 @@ export class ListsService {
 
   async activityFeed(listId: string, userId: string): Promise<ListActivityDto[]> {
     await this.requireRole(listId, userId, 'VIEWER');
-    const rows = await this.db.select().from(listActivity).where(eq(listActivity.listId, listId)).orderBy(desc(listActivity.createdAt)).limit(50);
+    const rows = await this.db
+      .select()
+      .from(listActivity)
+      .where(eq(listActivity.listId, listId))
+      .orderBy(desc(listActivity.createdAt))
+      .limit(50);
     return rows.map((r) => ({
       id: r.id,
       type: r.type,
@@ -316,7 +413,13 @@ export class ListsService {
     const invite = await this.findInvite(token);
     if (!invite) throw notFound('Invite');
     const valid = !invite.i.acceptedAt && !invite.i.revokedAt && invite.i.expiresAt > new Date();
-    return { listId: invite.i.listId, listName: invite.listName, invitedBy: invite.invitedBy, role: invite.i.role, valid };
+    return {
+      listId: invite.i.listId,
+      listName: invite.listName,
+      invitedBy: invite.invitedBy,
+      role: invite.i.role,
+      valid,
+    };
   }
 
   /** Single-use invitation: accepting it atomically consumes it. */
@@ -325,10 +428,20 @@ export class ListsService {
       const [consumed] = await tx
         .update(listInvites)
         .set({ acceptedBy: userId, acceptedAt: new Date() })
-        .where(and(eq(listInvites.tokenHash, sha256(token)), isNull(listInvites.acceptedAt), isNull(listInvites.revokedAt), gt(listInvites.expiresAt, new Date())))
+        .where(
+          and(
+            eq(listInvites.tokenHash, sha256(token)),
+            isNull(listInvites.acceptedAt),
+            isNull(listInvites.revokedAt),
+            gt(listInvites.expiresAt, new Date()),
+          ),
+        )
         .returning();
       if (!consumed) throw new NotFoundException({ code: 'INVITE_INVALID', message: 'Invite expired or already used' });
-      await tx.insert(listMembers).values({ listId: consumed.listId, userId, role: consumed.role }).onConflictDoNothing();
+      await tx
+        .insert(listMembers)
+        .values({ listId: consumed.listId, userId, role: consumed.role })
+        .onConflictDoNothing();
       return consumed.listId;
     });
     await this.activity(listId, userId, 'MEMBER_JOINED', {});
@@ -339,10 +452,15 @@ export class ListsService {
   /** Owner removes a member, or a member leaves. The owner cannot leave (delete or transfer instead). */
   async removeMember(listId: string, memberId: string, userId: string): Promise<void> {
     const role = await this.requireRole(listId, userId, 'VIEWER');
-    if (memberId !== userId && role !== 'OWNER') throw new ForbiddenException({ code: 'FORBIDDEN', message: 'Only the owner can remove members' });
-    const [target] = await this.db.select({ role: listMembers.role }).from(listMembers).where(and(eq(listMembers.listId, listId), eq(listMembers.userId, memberId)));
+    if (memberId !== userId && role !== 'OWNER')
+      throw new ForbiddenException({ code: 'FORBIDDEN', message: 'Only the owner can remove members' });
+    const [target] = await this.db
+      .select({ role: listMembers.role })
+      .from(listMembers)
+      .where(and(eq(listMembers.listId, listId), eq(listMembers.userId, memberId)));
     if (!target) throw notFound('Member');
-    if (target.role === 'OWNER') throw new ForbiddenException({ code: 'OWNER_CANNOT_LEAVE', message: 'The owner cannot leave the list' });
+    if (target.role === 'OWNER')
+      throw new ForbiddenException({ code: 'OWNER_CANNOT_LEAVE', message: 'The owner cannot leave the list' });
     await this.db.delete(listMembers).where(and(eq(listMembers.listId, listId), eq(listMembers.userId, memberId)));
     this.events.emit({ listId, type: 'member.left', actorId: userId, payload: { userId: memberId } });
   }

@@ -1,8 +1,26 @@
-import { Body, Controller, Delete, Get, HttpCode, Inject, Injectable, Module, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Inject,
+  Injectable,
+  Module,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { and, count, desc, eq } from 'drizzle-orm';
 import { priceAlerts, productVariants, retailers, type Database } from '@superrette/database';
 import { PriceAlertEngine } from '@superrette/alert-engine';
-import { createAlertSchema, updateAlertSchema, type CreateAlertInput, type PriceAlertDto } from '@superrette/validation';
+import {
+  createAlertSchema,
+  updateAlertSchema,
+  type CreateAlertInput,
+  type PriceAlertDto,
+} from '@superrette/validation';
 import { z } from 'zod';
 import { CurrentUser, type AuthUser } from '../common/auth.js';
 import { CatalogService, EntitlementsService, ShopperContextService } from '../common/core.services.js';
@@ -32,7 +50,9 @@ export class AlertsService {
     const shopper = await this.shoppers.get(userId);
     const offers = await this.catalog.pricedOffers([...new Set(rows.map((r) => r.a.variantId))], shopper);
     return rows.map(({ a, productName, retailerName }) => {
-      const relevant = (offers.get(a.variantId) ?? []).filter((o) => !a.retailerId || o.row.retailer.id === a.retailerId);
+      const relevant = (offers.get(a.variantId) ?? []).filter(
+        (o) => !a.retailerId || o.row.retailer.id === a.retailerId,
+      );
       return {
         id: a.id,
         variantId: a.variantId,
@@ -55,9 +75,15 @@ export class AlertsService {
    * notifies on a further drop or after the price has gone back up.
    */
   async create(userId: string, input: CreateAlertInput): Promise<PriceAlertDto> {
-    const [{ value: active } = { value: 0 }] = await this.db.select({ value: count() }).from(priceAlerts).where(and(eq(priceAlerts.userId, userId), eq(priceAlerts.enabled, true)));
+    const [{ value: active } = { value: 0 }] = await this.db
+      .select({ value: count() })
+      .from(priceAlerts)
+      .where(and(eq(priceAlerts.userId, userId), eq(priceAlerts.enabled, true)));
     await this.entitlements.requireWithinLimit(userId, 'price_alerts', active);
-    const [variant] = await this.db.select({ id: productVariants.id }).from(productVariants).where(eq(productVariants.id, input.variantId));
+    const [variant] = await this.db
+      .select({ id: productVariants.id })
+      .from(productVariants)
+      .where(eq(productVariants.id, input.variantId));
     if (!variant) throw notFound('Product');
 
     const shopper = await this.shoppers.get(userId);
@@ -75,7 +101,13 @@ export class AlertsService {
     };
     const satisfiedNow = offers
       .filter((o) => !state.retailerId || o.row.retailer.id === state.retailerId)
-      .map((o) => ({ retailerId: o.row.retailer.id, retailerName: o.row.retailer.name, retailerProductId: o.row.retailerProduct.id, price: o.price, isPromotion: o.price.appliedPromotion !== null }))
+      .map((o) => ({
+        retailerId: o.row.retailer.id,
+        retailerName: o.row.retailer.name,
+        retailerProductId: o.row.retailerProduct.id,
+        price: o.price,
+        isPromotion: o.price.appliedPromotion !== null,
+      }))
       .filter((o) => PriceAlertEngine.isSatisfied(state, o))
       .sort((a, b) => a.price.perItemCents - b.price.perItemCents)[0];
 
@@ -125,12 +157,19 @@ export class AlertsController {
   }
 
   @Post()
-  create(@CurrentUser() user: AuthUser, @Body(new ZodPipe(createAlertSchema)) body: CreateAlertInput): Promise<PriceAlertDto> {
+  create(
+    @CurrentUser() user: AuthUser,
+    @Body(new ZodPipe(createAlertSchema)) body: CreateAlertInput,
+  ): Promise<PriceAlertDto> {
     return this.alerts.create(user.id, body);
   }
 
   @Patch(':id')
-  update(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string, @Body(new ZodPipe(updateAlertSchema)) body: UpdateAlertInput): Promise<PriceAlertDto> {
+  update(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodPipe(updateAlertSchema)) body: UpdateAlertInput,
+  ): Promise<PriceAlertDto> {
     return this.alerts.update(user.id, id, body);
   }
 

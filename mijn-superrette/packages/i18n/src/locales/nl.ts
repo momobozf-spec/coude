@@ -275,7 +275,8 @@ export const nl = {
     exportData: 'Download mijn gegevens',
     deleteHistory: 'Wis zoekgeschiedenis',
     deleteAccount: 'Account verwijderen',
-    deleteAccountConfirm: 'Je account, lijstjes, favorieten en alarmen worden definitief verwijderd. Gedeelde lijstjes van anderen blijven bestaan.',
+    deleteAccountConfirm:
+      'Je account, lijstjes, favorieten en alarmen worden definitief verwijderd. Gedeelde lijstjes van anderen blijven bestaan.',
     historyDeleted: 'Je zoekgeschiedenis is gewist.',
     about: 'Over Mijn Superrette',
     dataSources: 'Gegevensbronnen',

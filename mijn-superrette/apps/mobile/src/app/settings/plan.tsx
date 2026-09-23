@@ -36,7 +36,11 @@ export default function Plan(): ReactNode {
           </Row>
           {p.entitlements.map((e) => (
             <Row key={e.key} gap={8} style={{ marginTop: 6 }}>
-              <Icon name={e.enabled ? 'check' : 'close'} size={16} color={e.enabled ? colors.success : colors.textMuted} />
+              <Icon
+                name={e.enabled ? 'check' : 'close'}
+                size={16}
+                color={e.enabled ? colors.success : colors.textMuted}
+              />
               <Text tone={e.enabled ? 'default' : 'muted'}>
                 {t((FEATURE_LABELS[e.key] ?? 'app.name') as Parameters<typeof t>[0])}
                 {e.enabled && e.limit !== null ? ` (max ${e.limit})` : ''}

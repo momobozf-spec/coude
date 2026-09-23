@@ -51,7 +51,15 @@ export class ExpoPushSender implements PushSender {
     const result: PushResult = { ticketIds: [], invalidTokens: [], errors: [] };
     const doFetch = this.options.fetch ?? fetch;
     for (let i = 0; i < messages.length; i += 100) {
-      const batch = messages.slice(i, i + 100).map((m) => ({ to: m.to, title: m.title, body: m.body, data: m.data ?? {}, sound: 'default', priority: 'high', channelId: 'price-alerts' }));
+      const batch = messages.slice(i, i + 100).map((m) => ({
+        to: m.to,
+        title: m.title,
+        body: m.body,
+        data: m.data ?? {},
+        sound: 'default',
+        priority: 'high',
+        channelId: 'price-alerts',
+      }));
       const headers: Record<string, string> = { 'Content-Type': 'application/json', Accept: 'application/json' };
       if (this.options.accessToken) headers.Authorization = `Bearer ${this.options.accessToken}`;
       try {

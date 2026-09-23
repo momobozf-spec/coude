@@ -1,0 +1,53 @@
+name: Mijn Superrette CI
+
+on:
+  push:
+    paths: ["mijn-superrette/**", ".github/workflows/mijn-superrette.yml"]
+  pull_request:
+    paths: ["mijn-superrette/**", ".github/workflows/mijn-superrette.yml"]
+
+defaults:
+  run:
+    working-directory: mijn-superrette
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: superrette
+          POSTGRES_PASSWORD: superrette
+          POSTGRES_DB: superrette_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U superrette" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+    env:
+      TEST_DATABASE_URL: postgres://superrette:superrette@localhost:5432/superrette_test
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: mijn-superrette/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm build:packages
+      - run: pnpm typecheck
+      - run: pnpm test
+        env:
+          INTEGRATION: "1"
+      - run: pnpm test:integration
+      - run: pnpm --filter @superrette/api build && pnpm --filter @superrette/worker build && pnpm --filter @superrette/admin build
+      - name: Mobile production bundles (Android + iOS, Hermes)
+        run: pnpm --filter @superrette/mobile build

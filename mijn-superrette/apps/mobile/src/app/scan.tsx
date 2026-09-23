@@ -38,7 +38,11 @@ export default function Scan(): ReactNode {
   if (!permission.granted) {
     return (
       <Screen title={t('scanner.title')} back>
-        <EmptyState icon="scan" title={t('scanner.permission')} action={<Button title={t('scanner.grant')} onPress={() => void requestPermission()} />} />
+        <EmptyState
+          icon="scan"
+          title={t('scanner.permission')}
+          action={<Button title={t('scanner.grant')} onPress={() => void requestPermission()} />}
+        />
       </Screen>
     );
   }
@@ -65,7 +69,9 @@ export default function Scan(): ReactNode {
             ) : null}
             {result.external?.name ? (
               <Text variant="caption" tone="muted" style={{ marginTop: 6 }}>
-                {t('scanner.externalInfo', { name: [result.external.brand, result.external.name].filter(Boolean).join(' – ') })}
+                {t('scanner.externalInfo', {
+                  name: [result.external.brand, result.external.name].filter(Boolean).join(' – '),
+                })}
               </Text>
             ) : null}
             <Button title={t('common.retry')} style={{ marginTop: 12 }} onPress={() => setResult(null)} />

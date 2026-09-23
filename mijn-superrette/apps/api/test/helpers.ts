@@ -31,13 +31,25 @@ export class Client {
     return this.auth(this.http().get(path));
   }
   post(path: string, body: unknown = {}): request.Test {
-    return this.auth(this.http().post(path).send(body as object));
+    return this.auth(
+      this.http()
+        .post(path)
+        .send(body as object),
+    );
   }
   put(path: string, body: unknown = {}): request.Test {
-    return this.auth(this.http().put(path).send(body as object));
+    return this.auth(
+      this.http()
+        .put(path)
+        .send(body as object),
+    );
   }
   patch(path: string, body: unknown = {}): request.Test {
-    return this.auth(this.http().patch(path).send(body as object));
+    return this.auth(
+      this.http()
+        .patch(path)
+        .send(body as object),
+    );
   }
   delete(path: string): request.Test {
     return this.auth(this.http().delete(path));
@@ -51,9 +63,18 @@ export async function login(app: INestApplication, email: string, password = 'su
 }
 
 let counter = 0;
-export async function registerUser(app: INestApplication, name = 'Tester'): Promise<{ client: Client; email: string; userId: string }> {
+export async function registerUser(
+  app: INestApplication,
+  name = 'Tester',
+): Promise<{ client: Client; email: string; userId: string }> {
   const email = `user${Date.now()}${counter++}@test.local`;
-  const res = await new Client(app).post('/v1/auth/register', { email, password: 'correct-horse-battery', displayName: name, locale: 'nl', countryCode: 'BE' });
+  const res = await new Client(app).post('/v1/auth/register', {
+    email,
+    password: 'correct-horse-battery',
+    displayName: name,
+    locale: 'nl',
+    countryCode: 'BE',
+  });
   if (res.status !== 201) throw new Error(`register failed: ${res.status} ${JSON.stringify(res.body)}`);
   return { client: new Client(app, res.body.accessToken as string), email, userId: res.body.user.id as string };
 }

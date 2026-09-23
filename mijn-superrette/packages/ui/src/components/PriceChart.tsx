@@ -15,7 +15,15 @@ export interface ChartSeries {
  * so steps (not interpolated lines) tell the truth. Values are plain numbers;
  * the app formats axis labels.
  */
-export function PriceChart({ series, height = 160, formatY }: { series: ChartSeries[]; height?: number; formatY: (y: number) => string }): ReactNode {
+export function PriceChart({
+  series,
+  height = 160,
+  formatY,
+}: {
+  series: ChartSeries[];
+  height?: number;
+  formatY: (y: number) => string;
+}): ReactNode {
   const { colors } = useTheme();
   const [width, setWidth] = useState(300);
   const all = series.flatMap((s) => s.points);
@@ -33,7 +41,15 @@ export function PriceChart({ series, height = 160, formatY }: { series: ChartSer
     <View onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}>
       <Svg width={width} height={height}>
         {[0.25, 0.5, 0.75].map((f) => (
-          <Line key={f} x1={0} x2={width} y1={height * f} y2={height * f} stroke={colors.border} strokeDasharray="3 4" />
+          <Line
+            key={f}
+            x1={0}
+            x2={width}
+            y1={height * f}
+            y2={height * f}
+            stroke={colors.border}
+            strokeDasharray="3 4"
+          />
         ))}
         {series.map((s) => {
           const pts = [...s.points].sort((a, b) => a.x - b.x);
@@ -46,9 +62,11 @@ export function PriceChart({ series, height = 160, formatY }: { series: ChartSer
           return (
             <G key={s.label}>
               <Path d={d} stroke={s.color} strokeWidth={2.5} fill="none" strokeLinejoin="round" />
-              {pts.filter((p) => p.highlight).map((p) => (
-                <Circle key={`${s.label}-${p.x}`} cx={sx(p.x)} cy={sy(p.y)} r={3.5} fill={colors.accent} />
-              ))}
+              {pts
+                .filter((p) => p.highlight)
+                .map((p) => (
+                  <Circle key={`${s.label}-${p.x}`} cx={sx(p.x)} cy={sy(p.y)} r={3.5} fill={colors.accent} />
+                ))}
             </G>
           );
         })}

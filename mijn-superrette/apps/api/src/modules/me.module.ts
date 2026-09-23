@@ -62,7 +62,10 @@ export class MeService {
 
   async retailers(userId: string): Promise<RetailerPreferenceDto[]> {
     return this.db
-      .select({ retailerId: userRetailerPreferences.retailerId, hasLoyaltyCard: userRetailerPreferences.hasLoyaltyCard })
+      .select({
+        retailerId: userRetailerPreferences.retailerId,
+        hasLoyaltyCard: userRetailerPreferences.hasLoyaltyCard,
+      })
       .from(userRetailerPreferences)
       .where(eq(userRetailerPreferences.userId, userId));
   }
@@ -70,7 +73,9 @@ export class MeService {
   async setRetailers(userId: string, input: RetailerPreferencesInput): Promise<RetailerPreferenceDto[]> {
     await this.db.transaction(async (tx) => {
       await tx.delete(userRetailerPreferences).where(eq(userRetailerPreferences.userId, userId));
-      await tx.insert(userRetailerPreferences).values(input.retailers.map((r) => ({ userId, retailerId: r.retailerId, hasLoyaltyCard: r.hasLoyaltyCard })));
+      await tx
+        .insert(userRetailerPreferences)
+        .values(input.retailers.map((r) => ({ userId, retailerId: r.retailerId, hasLoyaltyCard: r.hasLoyaltyCard })));
     });
     return this.retailers(userId);
   }
@@ -86,18 +91,41 @@ export class MeService {
     return {
       exportedAt: new Date().toISOString(),
       profile,
-      retailerPreferences: await this.db.select().from(userRetailerPreferences).where(eq(userRetailerPreferences.userId, userId)),
+      retailerPreferences: await this.db
+        .select()
+        .from(userRetailerPreferences)
+        .where(eq(userRetailerPreferences.userId, userId)),
       favorites: await this.db.select().from(favorites).where(eq(favorites.userId, userId)),
-      shoppingLists: listIds.length ? await this.db.select().from(shoppingLists).where(inArray(shoppingLists.id, listIds)) : [],
-      shoppingListItems: listIds.length ? await this.db.select().from(shoppingListItems).where(inArray(shoppingListItems.listId, listIds)) : [],
+      shoppingLists: listIds.length
+        ? await this.db.select().from(shoppingLists).where(inArray(shoppingLists.id, listIds))
+        : [],
+      shoppingListItems: listIds.length
+        ? await this.db.select().from(shoppingListItems).where(inArray(shoppingListItems.listId, listIds))
+        : [],
       listMemberships: memberships,
       priceAlerts: alerts,
-      priceAlertTriggers: alerts.length ? await this.db.select().from(priceAlertTriggers).where(inArray(priceAlertTriggers.alertId, alerts.map((a) => a.id))) : [],
+      priceAlertTriggers: alerts.length
+        ? await this.db
+            .select()
+            .from(priceAlertTriggers)
+            .where(
+              inArray(
+                priceAlertTriggers.alertId,
+                alerts.map((a) => a.id),
+              ),
+            )
+        : [],
       notifications: await this.db.select().from(notifications).where(eq(notifications.userId, userId)),
       searchHistory: await this.db.select().from(searchHistory).where(eq(searchHistory.userId, userId)),
       subscriptions: await this.db.select().from(subscriptions).where(eq(subscriptions.userId, userId)),
-      pushDevices: (await this.db.select({ platform: pushTokens.platform, createdAt: pushTokens.createdAt }).from(pushTokens).where(eq(pushTokens.userId, userId))),
-      sessions: await this.db.select({ createdAt: sessions.createdAt, expiresAt: sessions.expiresAt, revokedAt: sessions.revokedAt }).from(sessions).where(eq(sessions.userId, userId)),
+      pushDevices: await this.db
+        .select({ platform: pushTokens.platform, createdAt: pushTokens.createdAt })
+        .from(pushTokens)
+        .where(eq(pushTokens.userId, userId)),
+      sessions: await this.db
+        .select({ createdAt: sessions.createdAt, expiresAt: sessions.expiresAt, revokedAt: sessions.revokedAt })
+        .from(sessions)
+        .where(eq(sessions.userId, userId)),
     };
   }
 
@@ -112,7 +140,10 @@ export class MeService {
    */
   async deleteAccount(userId: string): Promise<void> {
     await this.db.transaction(async (tx) => {
-      const owned = await tx.select({ id: shoppingLists.id }).from(shoppingLists).where(eq(shoppingLists.ownerId, userId));
+      const owned = await tx
+        .select({ id: shoppingLists.id })
+        .from(shoppingLists)
+        .where(eq(shoppingLists.ownerId, userId));
       for (const list of owned) {
         const [heir] = await tx
           .select({ userId: listMembers.userId })
@@ -122,7 +153,10 @@ export class MeService {
           .limit(1);
         if (heir) {
           await tx.update(shoppingLists).set({ ownerId: heir.userId }).where(eq(shoppingLists.id, list.id));
-          await tx.update(listMembers).set({ role: 'OWNER' }).where(and(eq(listMembers.listId, list.id), eq(listMembers.userId, heir.userId)));
+          await tx
+            .update(listMembers)
+            .set({ role: 'OWNER' })
+            .where(and(eq(listMembers.listId, list.id), eq(listMembers.userId, heir.userId)));
         }
       }
       // Activity mentioning the user keeps the event but loses the identity (FK set null).
@@ -145,7 +179,10 @@ export class MeController {
   }
 
   @Patch()
-  update(@CurrentUser() user: AuthUser, @Body(new ZodPipe(updateProfileSchema)) body: UpdateProfileInput): Promise<UserDto> {
+  update(
+    @CurrentUser() user: AuthUser,
+    @Body(new ZodPipe(updateProfileSchema)) body: UpdateProfileInput,
+  ): Promise<UserDto> {
     return this.me.update(user.id, body);
   }
 
@@ -155,7 +192,10 @@ export class MeController {
   }
 
   @Put('retailers')
-  setRetailers(@CurrentUser() user: AuthUser, @Body(new ZodPipe(retailerPreferencesSchema)) body: RetailerPreferencesInput): Promise<RetailerPreferenceDto[]> {
+  setRetailers(
+    @CurrentUser() user: AuthUser,
+    @Body(new ZodPipe(retailerPreferencesSchema)) body: RetailerPreferencesInput,
+  ): Promise<RetailerPreferenceDto[]> {
     return this.me.setRetailers(user.id, body);
   }
 

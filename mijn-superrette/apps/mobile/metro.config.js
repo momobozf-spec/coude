@@ -5,7 +5,10 @@
 const { getDefaultConfig } = require('expo/metro-config');
 
 const config = getDefaultConfig(__dirname);
-config.resolver.unstable_conditionNames = [...(config.resolver.unstable_conditionNames ?? ['require', 'import']), '@superrette/source'];
+config.resolver.unstable_conditionNames = [
+  ...(config.resolver.unstable_conditionNames ?? ['require', 'import']),
+  '@superrette/source',
+];
 
 const upstream = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {

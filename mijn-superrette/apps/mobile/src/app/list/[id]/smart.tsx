@@ -14,7 +14,11 @@ export default function Smart(): ReactNode {
   const { t, price } = useI18n();
   const { colors } = useTheme();
   const [maxStores, setMaxStores] = useState(2);
-  const smart = useQuery({ queryKey: ['smart', id, maxStores], queryFn: () => api.smartBasket(id, { maxStores }), retry: false });
+  const smart = useQuery({
+    queryKey: ['smart', id, maxStores],
+    queryFn: () => api.smartBasket(id, { maxStores }),
+    retry: false,
+  });
   const s = smart.data;
   return (
     <Screen title={t('smart.title')} back>

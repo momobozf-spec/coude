@@ -44,13 +44,18 @@ export function Dashboard(): ReactNode {
 export function Equivalences(): ReactNode {
   const [status, setStatus] = useState('SUGGESTED');
   const [q, setQ] = useState('');
-  const { data, error, loading, reload } = useApi<Paginated<AdminEquivalenceDto>>(`/v1/admin/equivalences?status=${status}&limit=100${q ? `&q=${encodeURIComponent(q)}` : ''}`);
+  const { data, error, loading, reload } = useApi<Paginated<AdminEquivalenceDto>>(
+    `/v1/admin/equivalences?status=${status}&limit=100${q ? `&q=${encodeURIComponent(q)}` : ''}`,
+  );
   const decide = async (id: string, decision: 'confirm' | 'reject'): Promise<void> => {
     await api(`/v1/admin/equivalences/${id}/decision`, { method: 'POST', body: { decision } });
     reload();
   };
   return (
-    <Page title="Equivalente producten" subtitle="Bv. Boni Halfvolle Melk 1L ≈ AH Halfvolle Melk 1L. Bevestigde paren krijgen voorrang in de mandvergelijking.">
+    <Page
+      title="Equivalente producten"
+      subtitle="Bv. Boni Halfvolle Melk 1L ≈ AH Halfvolle Melk 1L. Bevestigde paren krijgen voorrang in de mandvergelijking."
+    >
       <div className="toolbar">
         <select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Status">
           {['SUGGESTED', 'CONFIRMED', 'REJECTED'].map((s) => (
@@ -80,7 +85,11 @@ export function Equivalences(): ReactNode {
                 {Math.round(e.confidence * 100)}%<Meter value={e.confidence} />
               </td>
               <td>
-                <div className="row">{e.reasons.map((r) => <Badge key={r}>{r}</Badge>)}</div>
+                <div className="row">
+                  {e.reasons.map((r) => (
+                    <Badge key={r}>{r}</Badge>
+                  ))}
+                </div>
               </td>
               <td>
                 {e.status === 'SUGGESTED' ? (
@@ -121,7 +130,10 @@ export function Providers(): ReactNode {
     }
   };
   return (
-    <Page title="Providers & synchronisatie" subtitle="Eén kapotte provider breekt nooit de rest. UNSUPPORTED providers hebben (nog) geen legale, betrouwbare integratie.">
+    <Page
+      title="Providers & synchronisatie"
+      subtitle="Eén kapotte provider breekt nooit de rest. UNSUPPORTED providers hebben (nog) geen legale, betrouwbare integratie."
+    >
       {message ? <p className="banner">{message}</p> : null}
       <State loading={providers.loading} error={providers.error} />
       <table>
@@ -148,9 +160,21 @@ export function Providers(): ReactNode {
                 <Badge tone={statusTone(p.supportStatus)}>{p.supportStatus}</Badge>
               </td>
               <td>
-                {p.supportStatus === 'UNSUPPORTED' ? <span className="muted">—</span> : <Badge tone={p.dataOrigin === 'DEVELOPMENT_SEED' ? 'warning' : 'info'}>{p.dataOrigin}</Badge>}
+                {p.supportStatus === 'UNSUPPORTED' ? (
+                  <span className="muted">—</span>
+                ) : (
+                  <Badge tone={p.dataOrigin === 'DEVELOPMENT_SEED' ? 'warning' : 'info'}>{p.dataOrigin}</Badge>
+                )}
               </td>
-              <td>{p.lastSync ? <Badge tone={statusTone(p.lastSync.status)}>{`${p.lastSync.status} · ${dateTime(p.lastSync.finishedAt ?? p.lastSync.startedAt)}`}</Badge> : <span className="muted">—</span>}</td>
+              <td>
+                {p.lastSync ? (
+                  <Badge
+                    tone={statusTone(p.lastSync.status)}
+                  >{`${p.lastSync.status} · ${dateTime(p.lastSync.finishedAt ?? p.lastSync.startedAt)}`}</Badge>
+                ) : (
+                  <span className="muted">—</span>
+                )}
+              </td>
               <td className="muted" style={{ maxWidth: 420 }}>
                 {p.reason}
               </td>
@@ -210,7 +234,10 @@ export function Providers(): ReactNode {
 export function Errors(): ReactNode {
   const { data, error, loading, reload } = useApi<Paginated<AdminProviderErrorDto>>('/v1/admin/errors?limit=100');
   return (
-    <Page title="Mislukte imports" subtitle="Records die een pipelinestap niet haalden. De rest van de import ging gewoon door.">
+    <Page
+      title="Mislukte imports"
+      subtitle="Records die een pipelinestap niet haalden. De rest van de import ging gewoon door."
+    >
       <State loading={loading} error={error} />
       <table>
         <thead>
@@ -236,7 +263,9 @@ export function Errors(): ReactNode {
               </td>
               <td style={{ maxWidth: 520, wordBreak: 'break-word' }}>{e.message}</td>
               <td>
-                <button onClick={() => void api(`/v1/admin/errors/${e.id}/resolve`, { method: 'POST' }).then(reload)}>Opgelost</button>
+                <button onClick={() => void api(`/v1/admin/errors/${e.id}/resolve`, { method: 'POST' }).then(reload)}>
+                  Opgelost
+                </button>
               </td>
             </tr>
           ))}
@@ -261,10 +290,23 @@ export function Products(): ReactNode {
   const [q, setQ] = useState('');
   const [review, setReview] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
-  const list = useApi<Paginated<VariantRow>>(`/v1/admin/products?limit=100${q ? `&q=${encodeURIComponent(q)}` : ''}${review ? '&status=needs_review' : ''}`);
-  const detail = useApi<{ variant: Record<string, unknown>; listings: { rp: { id: string; title: string; retailerSku: string }; retailerName: string; price: { regularPriceCents: number; promoPriceCents: number | null; observedAt: string } | null }[]; gtins: { gtin: string }[] }>(selected ? `/v1/admin/products/${selected}` : null);
+  const list = useApi<Paginated<VariantRow>>(
+    `/v1/admin/products?limit=100${q ? `&q=${encodeURIComponent(q)}` : ''}${review ? '&status=needs_review' : ''}`,
+  );
+  const detail = useApi<{
+    variant: Record<string, unknown>;
+    listings: {
+      rp: { id: string; title: string; retailerSku: string };
+      retailerName: string;
+      price: { regularPriceCents: number; promoPriceCents: number | null; observedAt: string } | null;
+    }[];
+    gtins: { gtin: string }[];
+  }>(selected ? `/v1/admin/products/${selected}` : null);
   return (
-    <Page title="Canonieke producten" subtitle="Product = genormaliseerd canoniek product; retailerproducten zijn de versies per supermarkt.">
+    <Page
+      title="Canonieke producten"
+      subtitle="Product = genormaliseerd canoniek product; retailerproducten zijn de versies per supermarkt."
+    >
       <div className="toolbar">
         <input placeholder="Zoek" value={q} onChange={(e) => setQ(e.target.value)} />
         <label className="row">
@@ -284,11 +326,19 @@ export function Products(): ReactNode {
           </thead>
           <tbody>
             {list.data?.items.map((v) => (
-              <tr key={v.id} onClick={() => setSelected(v.id)} style={{ cursor: 'pointer', background: selected === v.id ? 'var(--surface-alt)' : undefined }}>
+              <tr
+                key={v.id}
+                onClick={() => setSelected(v.id)}
+                style={{ cursor: 'pointer', background: selected === v.id ? 'var(--surface-alt)' : undefined }}
+              >
                 <td>
                   {v.name} {v.needsReview ? <Badge tone="warning">controleren</Badge> : null}
                 </td>
-                <td>{v.gtins.map((g) => <code key={g}>{g}</code>)}</td>
+                <td>
+                  {v.gtins.map((g) => (
+                    <code key={g}>{g}</code>
+                  ))}
+                </td>
                 <td className="num">{v.listings}</td>
                 <td>
                   <Badge tone={v.dataOrigin === 'DEVELOPMENT_SEED' ? 'warning' : 'info'}>{v.dataOrigin}</Badge>
@@ -300,9 +350,23 @@ export function Products(): ReactNode {
         {selected && detail.data ? (
           <div className="card">
             <h2 style={{ marginTop: 0 }}>{String(detail.data.variant.displayName)}</h2>
-            <div className="row">{detail.data.gtins.map((g) => <code key={g.gtin}>{g.gtin}</code>)}</div>
+            <div className="row">
+              {detail.data.gtins.map((g) => (
+                <code key={g.gtin}>{g.gtin}</code>
+              ))}
+            </div>
             {detail.data.variant.needsReview ? (
-              <button style={{ marginTop: 10 }} onClick={() => void api(`/v1/admin/products/${selected}`, { method: 'PATCH', body: { needsReview: false } }).then(() => { detail.reload(); list.reload(); })}>
+              <button
+                style={{ marginTop: 10 }}
+                onClick={() =>
+                  void api(`/v1/admin/products/${selected}`, { method: 'PATCH', body: { needsReview: false } }).then(
+                    () => {
+                      detail.reload();
+                      list.reload();
+                    },
+                  )
+                }
+              >
                 Markeer als gecontroleerd
               </button>
             ) : null}
@@ -317,7 +381,11 @@ export function Products(): ReactNode {
                     </td>
                     <td className="num">
                       {euro(l.price?.promoPriceCents ?? l.price?.regularPriceCents)}
-                      {l.price?.promoPriceCents ? <div className="muted" style={{ textDecoration: 'line-through' }}>{euro(l.price.regularPriceCents)}</div> : null}
+                      {l.price?.promoPriceCents ? (
+                        <div className="muted" style={{ textDecoration: 'line-through' }}>
+                          {euro(l.price.regularPriceCents)}
+                        </div>
+                      ) : null}
                     </td>
                   </tr>
                 ))}
@@ -345,8 +413,18 @@ export function RetailerProducts(): ReactNode {
   const [q, setQ] = useState('');
   const [unlinked, setUnlinked] = useState(false);
   const [prices, setPrices] = useState<string | null>(null);
-  const list = useApi<Paginated<RetailerProductRow>>(`/v1/admin/retailer-products?limit=100${q ? `&q=${encodeURIComponent(q)}` : ''}${unlinked ? '&status=unlinked' : ''}`);
-  const history = useApi<{ id: number; observedAt: string; regularPriceCents: number; promoPriceCents: number | null; sourceProvider: string }[]>(prices ? `/v1/admin/retailer-products/${prices}/prices` : null);
+  const list = useApi<Paginated<RetailerProductRow>>(
+    `/v1/admin/retailer-products?limit=100${q ? `&q=${encodeURIComponent(q)}` : ''}${unlinked ? '&status=unlinked' : ''}`,
+  );
+  const history = useApi<
+    {
+      id: number;
+      observedAt: string;
+      regularPriceCents: number;
+      promoPriceCents: number | null;
+      sourceProvider: string;
+    }[]
+  >(prices ? `/v1/admin/retailer-products/${prices}/prices` : null);
   return (
     <Page title="Retailerproducten & prijzen">
       <div className="toolbar">
@@ -411,7 +489,17 @@ export function RetailerProducts(): ReactNode {
 }
 
 export function Promotions(): ReactNode {
-  const { data, error, loading } = useApi<Paginated<{ id: string; label: string; mechanic: string; retailerName: string; startsAt: string | null; endsAt: string | null; dataOrigin: string }>>('/v1/admin/promotions?limit=200');
+  const { data, error, loading } = useApi<
+    Paginated<{
+      id: string;
+      label: string;
+      mechanic: string;
+      retailerName: string;
+      startsAt: string | null;
+      endsAt: string | null;
+      dataOrigin: string;
+    }>
+  >('/v1/admin/promotions?limit=200');
   const now = Date.now();
   return (
     <Page title="Promoties">
@@ -428,7 +516,9 @@ export function Promotions(): ReactNode {
         </thead>
         <tbody>
           {data?.items.map((p) => {
-            const active = (!p.startsAt || new Date(p.startsAt).getTime() <= now) && (!p.endsAt || new Date(p.endsAt).getTime() >= now);
+            const active =
+              (!p.startsAt || new Date(p.startsAt).getTime() <= now) &&
+              (!p.endsAt || new Date(p.endsAt).getTime() >= now);
             return (
               <tr key={p.id}>
                 <td>{p.retailerName}</td>
@@ -450,7 +540,17 @@ export function Promotions(): ReactNode {
 }
 
 export function Retailers(): ReactNode {
-  const { data, error, loading, reload } = useApi<{ id: string; name: string; slug: string; type: string; isActive: boolean; dataSupport: string; brandColor: string }[]>('/v1/admin/retailers');
+  const { data, error, loading, reload } = useApi<
+    {
+      id: string;
+      name: string;
+      slug: string;
+      type: string;
+      isActive: boolean;
+      dataSupport: string;
+      brandColor: string;
+    }[]
+  >('/v1/admin/retailers');
   return (
     <Page title="Supermarkten" subtitle="Supermarkten zijn data: toevoegen of uitschakelen vereist geen app-release.">
       <State loading={loading} error={error} />
@@ -467,7 +567,16 @@ export function Retailers(): ReactNode {
           {data?.map((r) => (
             <tr key={r.id}>
               <td>
-                <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 5, background: r.brandColor, marginRight: 8 }} />
+                <span
+                  style={{
+                    display: 'inline-block',
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    background: r.brandColor,
+                    marginRight: 8,
+                  }}
+                />
                 {r.name} <code>{r.slug}</code>
               </td>
               <td>{r.type}</td>
@@ -475,7 +584,17 @@ export function Retailers(): ReactNode {
                 <Badge tone={statusTone(r.dataSupport)}>{r.dataSupport}</Badge>
               </td>
               <td>
-                <input type="checkbox" checked={r.isActive} onChange={(e) => void api(`/v1/admin/retailers/${r.id}`, { method: 'PATCH', body: { isActive: e.target.checked } }).then(reload)} aria-label={`${r.name} actief`} />
+                <input
+                  type="checkbox"
+                  checked={r.isActive}
+                  onChange={(e) =>
+                    void api(`/v1/admin/retailers/${r.id}`, {
+                      method: 'PATCH',
+                      body: { isActive: e.target.checked },
+                    }).then(reload)
+                  }
+                  aria-label={`${r.name} actief`}
+                />
               </td>
             </tr>
           ))}

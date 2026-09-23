@@ -4,12 +4,22 @@ import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
 
 const packages = fileURLToPath(new URL('../../packages', import.meta.url));
-const alias = Object.fromEntries(readdirSync(packages).map((name) => [`@superrette/${name}`, `${packages}/${name}/src/index.ts`]));
+const alias = Object.fromEntries(
+  readdirSync(packages).map((name) => [`@superrette/${name}`, `${packages}/${name}/src/index.ts`]),
+);
 
 // NestJS dependency injection needs emitted decorator metadata, which esbuild
 // does not produce; SWC does.
 export default defineConfig({
-  plugins: [swc.vite({ module: { type: 'es6' }, jsc: { transform: { decoratorMetadata: true, legacyDecorator: true }, parser: { syntax: 'typescript', decorators: true } } })],
+  plugins: [
+    swc.vite({
+      module: { type: 'es6' },
+      jsc: {
+        transform: { decoratorMetadata: true, legacyDecorator: true },
+        parser: { syntax: 'typescript', decorators: true },
+      },
+    }),
+  ],
   resolve: { alias },
   test: {
     include: ['test/**/*.test.ts'],

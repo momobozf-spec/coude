@@ -2,11 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "customConditions": [
-      "@superrette/source"
-    ]
+    "customConditions": ["@superrette/source"]
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

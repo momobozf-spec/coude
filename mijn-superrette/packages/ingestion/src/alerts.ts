@@ -36,7 +36,11 @@ export interface AlertEvaluationReport {
  * guarantees an alert never notifies twice for the same offer and price, even
  * if two workers process the same import concurrently.
  */
-export async function evaluatePriceAlerts(db: Database, variantIds: readonly string[], options: AlertEvaluationOptions): Promise<AlertEvaluationReport> {
+export async function evaluatePriceAlerts(
+  db: Database,
+  variantIds: readonly string[],
+  options: AlertEvaluationOptions,
+): Promise<AlertEvaluationReport> {
   const report: AlertEvaluationReport = { evaluated: 0, triggered: 0, rearmed: 0, notificationIds: [] };
   if (variantIds.length === 0) return report;
   const now = options.now ?? new Date();
@@ -54,7 +58,11 @@ export async function evaluatePriceAlerts(db: Database, variantIds: readonly str
     .where(and(inArray(priceAlerts.variantId, [...variantIds]), eq(priceAlerts.enabled, true)));
   if (alerts.length === 0) return report;
 
-  const offers = await loadOffers(db, { variantIds: [...new Set(alerts.map((a) => a.alert.variantId))], at: now, origins: options.origins });
+  const offers = await loadOffers(db, {
+    variantIds: [...new Set(alerts.map((a) => a.alert.variantId))],
+    at: now,
+    origins: options.origins,
+  });
   const userIds = [...new Set(alerts.map((a) => a.alert.userId))];
   const prefs = await db.select().from(userRetailerPreferences).where(inArray(userRetailerPreferences.userId, userIds));
 
@@ -63,7 +71,9 @@ export async function evaluatePriceAlerts(db: Database, variantIds: readonly str
     const myPrefs = prefs.filter((p) => p.userId === alert.userId);
     const followed = new Set(myPrefs.map((p) => p.retailerId));
     const loyaltyPrograms = offers
-      .filter((o) => myPrefs.some((p) => p.retailerId === o.retailer.id && p.hasLoyaltyCard) && o.retailer.loyaltyProgram)
+      .filter(
+        (o) => myPrefs.some((p) => p.retailerId === o.retailer.id && p.hasLoyaltyCard) && o.retailer.loyaltyProgram,
+      )
       .map((o) => o.retailer.loyaltyProgram!);
 
     const alertOffers: AlertOffer[] = offers
@@ -91,7 +101,10 @@ export async function evaluatePriceAlerts(db: Database, variantIds: readonly str
       lastTriggeredAt: alert.lastTriggeredAt,
       lastTriggeredPriceCents: alert.lastTriggeredPriceCents,
     };
-    const decision = PriceAlertEngine.evaluate(state, alertOffers, { now, ...(options.cooldownMs != null ? { cooldownMs: options.cooldownMs } : {}) });
+    const decision = PriceAlertEngine.evaluate(state, alertOffers, {
+      now,
+      ...(options.cooldownMs != null ? { cooldownMs: options.cooldownMs } : {}),
+    });
 
     if (decision.action === 'REARM') {
       await db.update(priceAlerts).set({ armed: true, updatedAt: now }).where(eq(priceAlerts.id, alert.id));
@@ -112,7 +125,13 @@ export async function evaluatePriceAlerts(db: Database, variantIds: readonly str
     const notificationId = await db.transaction(async (tx) => {
       const inserted = await tx
         .insert(priceAlertTriggers)
-        .values({ alertId: alert.id, dedupeKey: decision.dedupeKey, retailerProductId: decision.offer.retailerProductId, priceCents: decision.priceCents, reason: decision.reason })
+        .values({
+          alertId: alert.id,
+          dedupeKey: decision.dedupeKey,
+          retailerProductId: decision.offer.retailerProductId,
+          priceCents: decision.priceCents,
+          reason: decision.reason,
+        })
         .onConflictDoNothing()
         .returning({ id: priceAlertTriggers.id });
       if (inserted.length === 0) return null; // already delivered by another run
@@ -123,14 +142,27 @@ export async function evaluatePriceAlerts(db: Database, variantIds: readonly str
           type: 'PRICE_ALERT',
           title,
           body,
-          data: { alertId: alert.id, variantId: alert.variantId, retailerId: decision.offer.retailerId, priceCents: decision.priceCents },
+          data: {
+            alertId: alert.id,
+            variantId: alert.variantId,
+            retailerId: decision.offer.retailerId,
+            priceCents: decision.priceCents,
+          },
         })
         .returning({ id: notifications.id });
-      await tx.update(priceAlertTriggers).set({ notificationId: n!.id }).where(eq(priceAlertTriggers.id, inserted[0]!.id));
+      await tx
+        .update(priceAlertTriggers)
+        .set({ notificationId: n!.id })
+        .where(eq(priceAlertTriggers.id, inserted[0]!.id));
       const next = PriceAlertEngine.nextState(state, decision, now);
       await tx
         .update(priceAlerts)
-        .set({ armed: next.armed, lastTriggeredAt: next.lastTriggeredAt, lastTriggeredPriceCents: next.lastTriggeredPriceCents, updatedAt: now })
+        .set({
+          armed: next.armed,
+          lastTriggeredAt: next.lastTriggeredAt,
+          lastTriggeredPriceCents: next.lastTriggeredPriceCents,
+          updatedAt: now,
+        })
         .where(eq(priceAlerts.id, alert.id));
       return n!.id;
     });
@@ -145,7 +177,12 @@ export async function evaluatePriceAlerts(db: Database, variantIds: readonly str
         .where(and(eq(pushTokens.userId, alert.userId), isNull(pushTokens.disabledAt)));
       if (tokens.length > 0) {
         const result = await options.push.send(
-          tokens.map((tk) => ({ to: tk.token, title, body, data: { type: 'PRICE_ALERT', notificationId, variantId: alert.variantId } })),
+          tokens.map((tk) => ({
+            to: tk.token,
+            title,
+            body,
+            data: { type: 'PRICE_ALERT', notificationId, variantId: alert.variantId },
+          })),
         );
         if (result.invalidTokens.length > 0) {
           await db.update(pushTokens).set({ disabledAt: now }).where(inArray(pushTokens.token, result.invalidTokens));

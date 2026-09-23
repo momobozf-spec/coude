@@ -7,7 +7,13 @@ import { createDefaultRegistry, OpenFoodFactsClient } from '@superrette/store-pr
 import { loadConfig, type AppConfig } from '../config/config.js';
 import { AuthGuard, TokenService } from './auth.js';
 import { CacheService, MemoryCacheStore, RedisCacheStore } from './cache.service.js';
-import { CatalogService, EntitlementsService, NormalizerService, ShopperContextService, ShutdownService } from './core.services.js';
+import {
+  CatalogService,
+  EntitlementsService,
+  NormalizerService,
+  ShopperContextService,
+  ShutdownService,
+} from './core.services.js';
 import { HttpExceptionFilter } from './http-exception.filter.js';
 import { JobsService } from './jobs.service.js';
 import { ListEventsService } from './list-events.service.js';
@@ -42,13 +48,16 @@ export const OFF_CLIENT = Symbol('OFF_CLIENT');
     {
       provide: CACHE,
       inject: [REDIS],
-      useFactory: (redis: Redis | null) => new CacheService(redis ? new RedisCacheStore(redis) : new MemoryCacheStore()),
+      useFactory: (redis: Redis | null) =>
+        new CacheService(redis ? new RedisCacheStore(redis) : new MemoryCacheStore()),
     },
     {
       provide: PUSH,
       inject: [CONFIG],
       useFactory: (config: AppConfig): PushSender =>
-        config.pushMode === 'expo' ? new ExpoPushSender({ accessToken: config.expoAccessToken }) : new LogPushSender((m) => console.info(m)),
+        config.pushMode === 'expo'
+          ? new ExpoPushSender({ accessToken: config.expoAccessToken })
+          : new LogPushSender((m) => console.info(m)),
     },
     {
       provide: PROVIDERS,
@@ -63,7 +72,8 @@ export const OFF_CLIENT = Symbol('OFF_CLIENT');
     {
       provide: OFF_CLIENT,
       inject: [CONFIG],
-      useFactory: (config: AppConfig) => (config.openFoodFactsEnabled ? new OpenFoodFactsClient({ userAgent: config.userAgent }) : null),
+      useFactory: (config: AppConfig) =>
+        config.openFoodFactsEnabled ? new OpenFoodFactsClient({ userAgent: config.userAgent }) : null,
     },
     ShutdownService,
     TokenService,

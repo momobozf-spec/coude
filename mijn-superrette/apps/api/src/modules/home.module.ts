@@ -29,7 +29,10 @@ export class HomeController {
       this.favorites.list(shopper, 10),
       this.promotions.list({ section: 'for_you', sort: 'largest_discount', limit: 10 }, shopper),
       this.lists.lists(user.id),
-      this.db.select({ value: count() }).from(notifications).where(and(eq(notifications.userId, user.id), isNull(notifications.readAt))),
+      this.db
+        .select({ value: count() })
+        .from(notifications)
+        .where(and(eq(notifications.userId, user.id), isNull(notifications.readAt))),
     ]);
     return {
       displayName: profile?.displayName ?? '',
@@ -37,7 +40,13 @@ export class HomeController {
       promotionsForYou,
       primaryList: lists[0] ?? null,
       unreadNotifications: unread?.value ?? 0,
-      dataOrigins: [...new Set([...favorites.map((f) => f.product.dataOrigin), ...promotionsForYou.map((p) => p.dataOrigin)].filter((o): o is NonNullable<typeof o> => o != null))],
+      dataOrigins: [
+        ...new Set(
+          [...favorites.map((f) => f.product.dataOrigin), ...promotionsForYou.map((p) => p.dataOrigin)].filter(
+            (o): o is NonNullable<typeof o> => o != null,
+          ),
+        ),
+      ],
     };
   }
 }

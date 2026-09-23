@@ -50,14 +50,30 @@ export default function ChooseProduct(): ReactNode {
             {line.alternatives.map((a, i) => {
               const selected = a.retailerProductId === line.selected?.retailerProductId;
               return (
-                <Pressable key={a.retailerProductId} onPress={() => select.mutate(a.retailerProductId)} disabled={selected}>
+                <Pressable
+                  key={a.retailerProductId}
+                  onPress={() => select.mutate(a.retailerProductId)}
+                  disabled={selected}
+                >
                   {i > 0 ? <Divider /> : null}
                   <Row style={{ justifyContent: 'space-between', paddingVertical: 8, opacity: selected ? 0.5 : 1 }}>
                     <View style={{ flex: 1, gap: 4 }}>
                       <Text variant="bodyStrong">{a.name}</Text>
                       <Row gap={8}>
-                        <Badge label={a.matchType === 'EXACT' ? t('basket.exact') : a.matchType === 'EQUIVALENT' ? t('basket.equivalent') : t('basket.generic')} tone={a.matchType === 'EXACT' ? 'success' : 'info'} />
-                        <ConfidenceMeter value={a.confidence} label={t('basket.confidence', { percent: Math.round(a.confidence * 100) })} />
+                        <Badge
+                          label={
+                            a.matchType === 'EXACT'
+                              ? t('basket.exact')
+                              : a.matchType === 'EQUIVALENT'
+                                ? t('basket.equivalent')
+                                : t('basket.generic')
+                          }
+                          tone={a.matchType === 'EXACT' ? 'success' : 'info'}
+                        />
+                        <ConfidenceMeter
+                          value={a.confidence}
+                          label={t('basket.confidence', { percent: Math.round(a.confidence * 100) })}
+                        />
                       </Row>
                       {a.promotionLabel ? (
                         <Text variant="caption" tone="accent">
@@ -76,7 +92,14 @@ export default function ChooseProduct(): ReactNode {
               );
             })}
           </Card>
-          {line.status === 'USER_SELECTED' ? <Button title={t('common.cancel')} variant="ghost" style={{ marginTop: 12 }} onPress={() => select.mutate(null)} /> : null}
+          {line.status === 'USER_SELECTED' ? (
+            <Button
+              title={t('common.cancel')}
+              variant="ghost"
+              style={{ marginTop: 12 }}
+              onPress={() => select.mutate(null)}
+            />
+          ) : null}
           {select.error ? <ErrorState error={select.error} /> : null}
         </>
       ) : null}

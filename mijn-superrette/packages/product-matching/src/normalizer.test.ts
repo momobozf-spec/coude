@@ -25,7 +25,10 @@ describe('parseQuantity', () => {
   });
 
   it('recognises sold-by-weight and approximate weights', () => {
-    expect(parseQuantity('Bananen per kilo')).toMatchObject({ soldByWeight: true, netContent: { amount: 1000, unit: 'g' } });
+    expect(parseQuantity('Bananen per kilo')).toMatchObject({
+      soldByWeight: true,
+      netContent: { amount: 1000, unit: 'g' },
+    });
     expect(parseQuantity('ca. 1 kg')).toMatchObject({ approximate: true, netContent: { amount: 1000, unit: 'g' } });
   });
 

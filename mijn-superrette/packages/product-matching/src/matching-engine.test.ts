@@ -6,7 +6,10 @@ const n = new ProductNormalizer();
 const engine = new ProductMatchingEngine();
 
 const candidates: MatchCandidate[] = [
-  { productId: 'cola-zero-15', normalized: n.normalize({ title: 'Coca-Cola Zero Sugar 1,5L', gtins: ['5449000131805'] }) },
+  {
+    productId: 'cola-zero-15',
+    normalized: n.normalize({ title: 'Coca-Cola Zero Sugar 1,5L', gtins: ['5449000131805'] }),
+  },
   { productId: 'cola-regular-15', normalized: n.normalize({ title: 'Coca-Cola Original 1,5L' }) },
   { productId: 'cola-zero-33', normalized: n.normalize({ title: 'Coca-Cola Zero Sugar blik 33cl' }) },
   { productId: 'ah-milk-1l', normalized: n.normalize({ title: 'AH Halfvolle melk 1L' }) },
@@ -16,12 +19,22 @@ const candidates: MatchCandidate[] = [
 describe('ProductMatchingEngine', () => {
   it('matches on GTIN first (EXACT, auto-accepted)', () => {
     const r = engine.match(n.normalize({ title: 'Cola Zero PET', gtins: ['5449000131805'] }), candidates);
-    expect(r).toMatchObject({ productId: 'cola-zero-15', confidence: 'EXACT', method: 'GTIN', status: 'AUTO_ACCEPTED' });
+    expect(r).toMatchObject({
+      productId: 'cola-zero-15',
+      confidence: 'EXACT',
+      method: 'GTIN',
+      status: 'AUTO_ACCEPTED',
+    });
   });
 
   it('confirmed human mappings win over everything and persist', () => {
     const r = engine.match(n.normalize({ title: 'Something else' }), candidates, { confirmedProductId: 'ah-milk-1l' });
-    expect(r).toMatchObject({ productId: 'ah-milk-1l', confidence: 'EXACT', method: 'CONFIRMED_MAPPING', status: 'CONFIRMED' });
+    expect(r).toMatchObject({
+      productId: 'ah-milk-1l',
+      confidence: 'EXACT',
+      method: 'CONFIRMED_MAPPING',
+      status: 'CONFIRMED',
+    });
   });
 
   it('matches same brand + name + size with HIGH confidence', () => {
@@ -52,7 +65,9 @@ describe('ProductMatchingEngine', () => {
   });
 
   it('respects rejected mappings', () => {
-    const r = engine.match(n.normalize({ title: 'AH Halfvolle melk 1 L' }), candidates, { rejectedProductIds: ['ah-milk-1l'] });
+    const r = engine.match(n.normalize({ title: 'AH Halfvolle melk 1 L' }), candidates, {
+      rejectedProductIds: ['ah-milk-1l'],
+    });
     expect(r.productId).not.toBe('ah-milk-1l');
   });
 
@@ -64,7 +79,10 @@ describe('ProductMatchingEngine', () => {
   });
 
   it('flags GTIN conflicts for review', () => {
-    const dup: MatchCandidate = { productId: 'dup', normalized: n.normalize({ title: 'Coke Zero', gtins: ['5449000131805'] }) };
+    const dup: MatchCandidate = {
+      productId: 'dup',
+      normalized: n.normalize({ title: 'Coke Zero', gtins: ['5449000131805'] }),
+    };
     const r = engine.match(n.normalize({ title: 'Coca-Cola Zero', gtins: ['5449000131805'] }), [...candidates, dup]);
     expect(r.confidence).toBe('EXACT');
     expect(r.status).toBe('PENDING_REVIEW');

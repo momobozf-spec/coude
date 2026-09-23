@@ -5,7 +5,12 @@ import type { Endpoints } from '../api/endpoints';
 import { EAS_PROJECT_ID } from './config';
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({ shouldPlaySound: true, shouldSetBadge: true, shouldShowBanner: true, shouldShowList: true }),
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
 });
 
 /**
@@ -16,7 +21,10 @@ Notifications.setNotificationHandler({
 export async function registerForPush(api: Endpoints): Promise<'registered' | 'denied' | 'unavailable'> {
   if (Platform.OS === 'web' || !Device.isDevice || !EAS_PROJECT_ID) return 'unavailable';
   if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('price-alerts', { name: 'Prijsalarmen', importance: Notifications.AndroidImportance.HIGH });
+    await Notifications.setNotificationChannelAsync('price-alerts', {
+      name: 'Prijsalarmen',
+      importance: Notifications.AndroidImportance.HIGH,
+    });
   }
   const current = await Notifications.getPermissionsAsync();
   const status = current.status === 'granted' ? current.status : (await Notifications.requestPermissionsAsync()).status;

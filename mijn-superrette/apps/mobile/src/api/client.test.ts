@@ -11,7 +11,8 @@ class MemoryStore implements TokenStore {
   }
 }
 
-const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+const json = (status: number, body: unknown) =>
+  new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
 describe('ApiClient', () => {
   it('refreshes once for concurrent 401s and retries', async () => {
@@ -37,7 +38,9 @@ describe('ApiClient', () => {
     const store = new MemoryStore({ accessToken: 'old', refreshToken: 'r1' });
     const lost = vi.fn();
     const fetchMock = vi.fn(async (url: string | URL | Request) =>
-      String(url).endsWith('/refresh') ? json(401, { code: 'REFRESH_TOKEN_REUSED', message: 'x' }) : json(401, { code: 'INVALID_TOKEN', message: 'x' }),
+      String(url).endsWith('/refresh')
+        ? json(401, { code: 'REFRESH_TOKEN_REUSED', message: 'x' })
+        : json(401, { code: 'INVALID_TOKEN', message: 'x' }),
     );
     const client = new ApiClient('http://api', store, fetchMock as unknown as typeof fetch, lost);
     await expect(client.get('/v1/me')).rejects.toBeInstanceOf(ApiError);
@@ -46,7 +49,17 @@ describe('ApiClient', () => {
   });
 
   it('maps API errors', async () => {
-    const client = new ApiClient('http://api', new MemoryStore(null), (async () => json(409, { statusCode: 409, code: 'VERSION_CONFLICT', message: 'changed', details: { current: 1 } })) as unknown as typeof fetch);
-    await expect(client.patch('/v1/lists/1/items/2', {})).rejects.toMatchObject({ status: 409, code: 'VERSION_CONFLICT', details: { current: 1 } });
+    const client = new ApiClient('http://api', new MemoryStore(null), (async () =>
+      json(409, {
+        statusCode: 409,
+        code: 'VERSION_CONFLICT',
+        message: 'changed',
+        details: { current: 1 },
+      })) as unknown as typeof fetch);
+    await expect(client.patch('/v1/lists/1/items/2', {})).rejects.toMatchObject({
+      status: 409,
+      code: 'VERSION_CONFLICT',
+      details: { current: 1 },
+    });
   });
 });

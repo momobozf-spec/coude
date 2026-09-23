@@ -73,10 +73,20 @@ export function createDefaultRegistry(options: RegistryOptions): ProviderRegistr
   for (const p of retailerProviders) if (!feedKeys.has(p.info.key)) registry.register(p);
   for (const feed of options.partnerFeeds ?? []) registry.register(new PartnerFeedProvider(feed));
   if (options.openPrices?.enabled) {
-    registry.register(new OpenPricesProvider({ userAgent: options.openPrices.userAgent, ...(options.openPrices.countries ? { countries: options.openPrices.countries } : {}) }));
+    registry.register(
+      new OpenPricesProvider({
+        userAgent: options.openPrices.userAgent,
+        ...(options.openPrices.countries ? { countries: options.openPrices.countries } : {}),
+      }),
+    );
   }
   if (options.developmentSeed && options.environment !== 'production') {
-    registry.register(new DevelopmentSeedProvider({ environment: options.environment, ...(options.developmentSeed.now ? { now: options.developmentSeed.now } : {}) }));
+    registry.register(
+      new DevelopmentSeedProvider({
+        environment: options.environment,
+        ...(options.developmentSeed.now ? { now: options.developmentSeed.now } : {}),
+      }),
+    );
   }
   return registry;
 }

@@ -22,7 +22,12 @@ export function parseSchedules(value: string | undefined): Schedule[] {
     .map((entry) => {
       const [providerKey, kind, ...cron] = entry.split(':');
       const pattern = cron.join(':').trim();
-      if (!providerKey || !kind || !(SYNC_KINDS as readonly string[]).includes(kind) || pattern.split(/\s+/).length < 5) {
+      if (
+        !providerKey ||
+        !kind ||
+        !(SYNC_KINDS as readonly string[]).includes(kind) ||
+        pattern.split(/\s+/).length < 5
+      ) {
         throw new Error(`Invalid SYNC_SCHEDULES entry "${entry}" (expected provider:KIND:cron)`);
       }
       return { providerKey, kind: kind as SyncKind, pattern };

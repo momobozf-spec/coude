@@ -17,8 +17,18 @@ export class ReferenceController {
   @Public()
   @Get('countries')
   async countries(): Promise<CountryDto[]> {
-    const rows = await this.db.select().from(countries).where(eq(countries.isActive, true)).orderBy(asc(countries.code));
-    return rows.map((c) => ({ code: c.code, name: c.name, currency: c.currency, languages: c.languages as Locale[], defaultLocale: c.defaultLocale as Locale }));
+    const rows = await this.db
+      .select()
+      .from(countries)
+      .where(eq(countries.isActive, true))
+      .orderBy(asc(countries.code));
+    return rows.map((c) => ({
+      code: c.code,
+      name: c.name,
+      currency: c.currency,
+      languages: c.languages as Locale[],
+      defaultLocale: c.defaultLocale as Locale,
+    }));
   }
 
   /** Retailers are data-driven: the apps never hard-code supermarkets. */

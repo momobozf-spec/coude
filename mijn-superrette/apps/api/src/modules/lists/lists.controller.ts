@@ -41,7 +41,10 @@ export class ListsController {
   }
 
   @Post('lists')
-  create(@CurrentUser() user: AuthUser, @Body(new ZodPipe(createListSchema)) body: CreateListInput): Promise<ShoppingListDto> {
+  create(
+    @CurrentUser() user: AuthUser,
+    @Body(new ZodPipe(createListSchema)) body: CreateListInput,
+  ): Promise<ShoppingListDto> {
     return this.lists.create(user.id, body);
   }
 
@@ -51,7 +54,11 @@ export class ListsController {
   }
 
   @Patch('lists/:id')
-  rename(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string, @Body(new ZodPipe(updateListSchema)) body: Partial<CreateListInput>): Promise<ShoppingListDto> {
+  rename(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodPipe(updateListSchema)) body: Partial<CreateListInput>,
+  ): Promise<ShoppingListDto> {
     return this.lists.rename(id, user.id, body);
   }
 
@@ -62,7 +69,11 @@ export class ListsController {
   }
 
   @Post('lists/:id/items')
-  addItem(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string, @Body(new ZodPipe(createListItemSchema)) body: CreateListItemInput): Promise<ShoppingListItemDto> {
+  addItem(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodPipe(createListItemSchema)) body: CreateListItemInput,
+  ): Promise<ShoppingListItemDto> {
     return this.lists.addItem(id, user.id, body);
   }
 
@@ -78,7 +89,11 @@ export class ListsController {
 
   @Delete('lists/:id/items/:itemId')
   @HttpCode(204)
-  async deleteItem(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string, @Param('itemId', ParseUUIDPipe) itemId: string): Promise<void> {
+  async deleteItem(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('itemId', ParseUUIDPipe) itemId: string,
+  ): Promise<void> {
     await this.lists.deleteItem(id, itemId, user.id);
   }
 
@@ -95,13 +110,21 @@ export class ListsController {
 
   @Post('lists/:id/compare')
   @HttpCode(200)
-  compare(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string, @Body(new ZodPipe(compareListSchema)) body: { retailerIds?: string[] }): Promise<BasketComparisonDto> {
+  compare(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodPipe(compareListSchema)) body: { retailerIds?: string[] },
+  ): Promise<BasketComparisonDto> {
     return this.basket.compare(id, user.id, body.retailerIds);
   }
 
   @Post('lists/:id/smart-basket')
   @HttpCode(200)
-  smart(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string, @Body(new ZodPipe(smartBasketSchema)) body: SmartBasketInput): Promise<SmartBasketDto> {
+  smart(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodPipe(smartBasketSchema)) body: SmartBasketInput,
+  ): Promise<SmartBasketDto> {
     return this.basket.smart(id, user.id, body);
   }
 
@@ -111,13 +134,21 @@ export class ListsController {
   }
 
   @Post('lists/:id/invites')
-  invite(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string, @Body(new ZodPipe(createInviteSchema)) body: z.infer<typeof createInviteSchema>): Promise<InviteDto> {
+  invite(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodPipe(createInviteSchema)) body: z.infer<typeof createInviteSchema>,
+  ): Promise<InviteDto> {
     return this.lists.createInvite(id, user.id, body.role as 'EDITOR' | 'VIEWER');
   }
 
   @Delete('lists/:id/members/:userId')
   @HttpCode(204)
-  async removeMember(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string, @Param('userId', ParseUUIDPipe) memberId: string): Promise<void> {
+  async removeMember(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('userId', ParseUUIDPipe) memberId: string,
+  ): Promise<void> {
     await this.lists.removeMember(id, memberId, user.id);
   }
 

@@ -37,7 +37,14 @@ export default function OnboardingCountry(): ReactNode {
         <Text tone="muted">{t('onboarding.countryBody')}</Text>
         {countries.isLoading ? <Loading /> : null}
         <Row gap={8} style={{ flexWrap: 'wrap' }}>
-          {countries.data?.map((c) => <Chip key={c.code} label={c.name[locale]} selected={c.code === country} onPress={() => setCountry(c.code)} />)}
+          {countries.data?.map((c) => (
+            <Chip
+              key={c.code}
+              label={c.name[locale]}
+              selected={c.code === country}
+              onPress={() => setCountry(c.code)}
+            />
+          ))}
         </Row>
         <Text variant="heading" style={{ marginTop: 24 }}>
           {t('onboarding.languageTitle')}

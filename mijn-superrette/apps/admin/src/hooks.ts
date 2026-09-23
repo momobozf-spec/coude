@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from './api';
 
-export function useApi<T>(path: string | null): { data: T | null; error: string | null; loading: boolean; reload: () => void } {
+export function useApi<T>(path: string | null): {
+  data: T | null;
+  error: string | null;
+  loading: boolean;
+  reload: () => void;
+} {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
