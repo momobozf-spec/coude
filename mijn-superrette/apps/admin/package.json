@@ -1,0 +1,26 @@
+{
+  "name": "@superrette/admin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mijn Superrette admin: product match review, equivalences, provider syncs, catalogue",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@superrette/domain": "workspace:*",
+    "@superrette/ui": "workspace:*",
+    "@superrette/validation": "workspace:*",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "@types/react-dom": "~19.2.2",
+    "@vitejs/plugin-react": "^6.1.1",
+    "vite": "^8.3.0"
+  }
+}

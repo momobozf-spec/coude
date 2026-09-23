@@ -15,6 +15,7 @@ export default tseslint.config(
       'apps/mobile/babel.config.js',
       'apps/mobile/metro.config.js',
       'apps/mobile/dist/**',
+      'apps/admin/dist/**',
       'apps/mobile/dist-web/**',
       'apps/mobile/.expo/**',
       '**/*.d.ts',
