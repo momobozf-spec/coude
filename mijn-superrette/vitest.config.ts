@@ -12,7 +12,7 @@ const alias = Object.fromEntries(
 export default defineConfig({
   resolve: { alias },
   test: {
-    include: ['packages/*/src/**/*.test.ts', 'apps/worker/src/**/*.test.ts'],
+    include: ['packages/*/src/**/*.test.ts', 'apps/worker/src/**/*.test.ts', 'apps/mobile/src/**/*.test.ts'],
     environment: 'node',
     reporters: ['default'],
   },

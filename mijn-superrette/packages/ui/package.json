@@ -1,0 +1,40 @@
+{
+  "name": "@superrette/ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mijn Superrette design system: tokens (platform independent) and React Native components",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@superrette/source": "./src/index.ts",
+      "react-native": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./tokens": {
+      "@superrette/source": "./src/tokens.ts",
+      "react-native": "./src/tokens.ts",
+      "types": "./dist/tokens.d.ts",
+      "default": "./dist/tokens.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "react-native": ">=0.80",
+    "react-native-svg": ">=15"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-svg": "15.15.4"
+  }
+}
