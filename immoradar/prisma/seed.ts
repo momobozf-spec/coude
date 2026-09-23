@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import "dotenv/config";
 import { createPrismaClient } from "../src/lib/db";
 import { hashPassword } from "../src/lib/auth/password";
@@ -138,10 +137,13 @@ async function main() {
   const antProps = properties.filter((p) => p.city.city === "Antwerpen");
   plans.push(makePlan(antProps[0]!, { sellerType: "PRIVATE", firstSeenDaysAgo: 50, steps: [{ daysAgo: 50, price: 389000, status: "ACTIVE", sellerType: "PROFESSIONAL" }, { daysAgo: 4, price: 375000, status: "ACTIVE", sellerType: "PRIVATE" }], sellerName: "Ilse Cools", sellerPhone: "0477 90 90 90", description: "Eigenaar verkoopt zelf, zonder makelaar. Bezichtiging na afspraak." }));
 
-  // Random listings until 250, some properties get 2 listings (2 sources)
-  let pi = 4;
+  // Random listings until 250, some properties get 2 listings (2 sources).
+  // Scenario properties are excluded so their stories stay clean.
+  const reserved = new Set([scenarioC.id, scenarioE.id, antProps[0]!.id]);
+  const pool = properties.filter((p) => !reserved.has(p.id));
+  let pi = 0;
   while (plans.length < 250) {
-    const property = properties[pi % properties.length]!;
+    const property = pool[pi % pool.length]!;
     pi++;
     plans.push(makePlan(property));
     if (rnd() < 0.25 && plans.length < 250) plans.push(makePlan(property, { sourceId: feed.id, sellerType: plans[plans.length - 1]!.sellerType, sellerName: plans[plans.length - 1]!.sellerName, sellerPhone: plans[plans.length - 1]!.sellerPhone, firstSeenDaysAgo: plans[plans.length - 1]!.firstSeenDaysAgo - between(0, 3) }));
