@@ -52,8 +52,9 @@ export function mapContactType(value: string | undefined): CrmContactType {
   if (/former|oud|ancien|ex-?client|voormalig/.test(s)) return "FORMER_CLIENT";
   if (/landlord|verhuurder|bailleur|eigenaar-verhuurder/.test(s)) return "LANDLORD";
   if (/tenant|huurder|locataire/.test(s)) return "TENANT";
-  if (/buyer|koper|acheteur|kandidaat-koper/.test(s)) return "BUYER";
+  // "verkoper" (seller) contains "koper" (buyer): test seller patterns first.
   if (/seller|verkoper|vendeur|eigenaar|owner/.test(s)) return "SELLER";
+  if (/buyer|koper|acheteur/.test(s)) return "BUYER";
   if (/prospect|lead|suspect/.test(s)) return "PROSPECT";
   return "UNKNOWN";
 }
@@ -72,8 +73,8 @@ export function mapStatus(value: string | undefined): CrmContactStatus {
 function mapRelationshipType(value: string | undefined): NonNullable<CrmContactInput["propertyRelationship"]>["type"] | null {
   const s = foldText(value) ?? "";
   if (!s) return null;
-  if (/bought|gekocht|achete|buyer|koper/.test(s)) return "BOUGHT";
   if (/sold|verkocht|vendu|seller|verkoper/.test(s)) return "SOLD";
+  if (/bought|gekocht|achete|buyer|koper/.test(s)) return "BOUGHT";
   if (/valuation|schatting|estimation|waardebepaling/.test(s)) return "VALUATION_REQUESTED";
   if (/owner|eigenaar|proprietaire/.test(s)) return "OWNER";
   if (/tenant|huurder|locataire/.test(s)) return "TENANT";

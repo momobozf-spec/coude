@@ -44,6 +44,8 @@ describe("CsvCrmAdapter", () => {
   it("maps contact types and statuses in NL/FR/EN", () => {
     expect(mapContactType("Schatting")).toBe("VALUATION_LEAD");
     expect(mapContactType("vendeur")).toBe("SELLER");
+    expect(mapContactType("Verkoper")).toBe("SELLER");
+    expect(mapContactType("Kandidaat-koper")).toBe("BUYER");
     expect(mapContactType("Oud-klant")).toBe("FORMER_CLIENT");
     expect(mapContactType("")).toBe("UNKNOWN");
     expect(mapStatus("Verloren")).toBe("LOST");

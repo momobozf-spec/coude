@@ -76,7 +76,7 @@ export function hasPermission(role: Role, permission: Permission): boolean {
   return ROLE_PERMISSIONS[role].has(permission);
 }
 
-export function assertPermission(actor: ActorLike | null, permission: Permission): asserts actor is ActorLike {
+export function assertPermission(actor: { role: Role } | null, permission: Permission): asserts actor is { role: Role } {
   if (!actor) throw new UnauthorizedError();
   if (!hasPermission(actor.role, permission)) {
     throw new ForbiddenError(`Missing permission: ${permission}`);
