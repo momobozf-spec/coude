@@ -14,6 +14,9 @@ export interface AlertOptions {
   transport?: AlertTransport;
 }
 
+/** Instant alerts are only sent for fresh signals; backfilled history never spams agents. */
+export const ALERT_MAX_SIGNAL_AGE_HOURS = 72;
+
 export async function opportunityMessageInput(db: Db, opportunityId: string, now: Date): Promise<OpportunityMessageInput | null> {
   const o = await db.opportunity.findUnique({
     where: { id: opportunityId },
@@ -78,6 +81,7 @@ export async function evaluateOpportunityAlerts(db: Db, opportunityId: string, o
   const opp = await db.opportunity.findUnique({ where: { id: opportunityId }, include: { agency: { include: { alertRules: true } }, assignedUser: { select: { id: true, telegramChatId: true } } } });
   if (!opp || opp.engine !== "IMMORADAR") return 0;
   if (["DISMISSED", "LOST", "MANDATE_WON"].includes(opp.status)) return 0;
+  if (now.getTime() - opp.lastSignalAt.getTime() > ALERT_MAX_SIGNAL_AGE_HOURS * 3600000) return 0;
   const agency = opp.agency;
   const rules = agency.alertRules;
   const hotRule = rules.find((r) => r.type === "HOT_OPPORTUNITY");

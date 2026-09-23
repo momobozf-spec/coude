@@ -48,7 +48,13 @@ export async function runCollectJob(db: Db, opts: PipelineOptions = {}): Promise
     }
   }
   await linkRelationshipsToProperties(db);
-  const events = await processMarketEvents(db, { now, transport: opts.transport });
+  // Drain the event queue in batches so a large backfill is fully processed.
+  const events: ProcessEventsResult = { eventsProcessed: 0, opportunitiesCreated: 0, opportunitiesUpdated: 0, crmMatches: 0, alertsSent: 0 };
+  for (let i = 0; i < 50; i++) {
+    const batch = await processMarketEvents(db, { now, transport: opts.transport });
+    for (const k of Object.keys(events) as Array<keyof ProcessEventsResult>) events[k] += batch[k];
+    if (batch.eventsProcessed === 0) break;
+  }
   return { runs, events };
 }
 
