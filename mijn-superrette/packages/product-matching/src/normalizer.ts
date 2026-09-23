@@ -35,6 +35,8 @@ export interface NormalizedProduct {
   packCount: number;
   netContent: BaseQuantity | null;
   soldByWeight: boolean;
+  /** The quantity text that was recognised, e.g. "1,5l" (lower-cased, without accents). */
+  quantitySource: string | null;
   /** Clothing/diaper style size such as "maat 4". */
   size: string | null;
   /** Deterministic key for blocking candidates: brand|type|variants|content. */
@@ -187,6 +189,7 @@ export class ProductNormalizer {
       packCount: parsed?.packCount ?? 1,
       netContent,
       soldByWeight: parsed?.soldByWeight ?? false,
+      quantitySource: parsed && parsed.source !== 'per kg' && parsed.source !== 'per stuk' ? parsed.source : null,
       size: sizeMatch?.[1] ?? null,
       signature,
     };

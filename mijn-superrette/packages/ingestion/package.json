@@ -1,0 +1,36 @@
+{
+  "name": "@superrette/ingestion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ingestion pipeline (provider \u2192 validation \u2192 normalisation \u2192 matching \u2192 observations), equivalence indexing and price alert evaluation",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@superrette/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "seed:dev": "node --env-file-if-exists=../../.env dist/bin/seed-dev.js"
+  },
+  "dependencies": {
+    "@superrette/alert-engine": "workspace:*",
+    "@superrette/database": "workspace:*",
+    "@superrette/domain": "workspace:*",
+    "@superrette/i18n": "workspace:*",
+    "@superrette/pricing-engine": "workspace:*",
+    "@superrette/product-matching": "workspace:*",
+    "@superrette/shared": "workspace:*",
+    "@superrette/store-providers": "workspace:*",
+    "drizzle-orm": "^0.45.3"
+  }
+}

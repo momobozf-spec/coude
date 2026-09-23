@@ -1,13 +1,12 @@
 {
-  "name": "@superrette/i18n",
+  "name": "@superrette/database",
   "version": "0.1.0",
   "private": true,
-  "description": "Internationalisation: NL/FR/EN catalogs and locale-aware formatters",
+  "description": "PostgreSQL schema (Drizzle), migrations, shared queries and development seed",
   "type": "module",
   "exports": {
     ".": {
       "@superrette/source": "./src/index.ts",
-      "react-native": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
@@ -15,15 +14,25 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "drizzle"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json",
+    "generate": "drizzle-kit generate",
+    "migrate": "node --env-file-if-exists=../../.env dist/migrate.js",
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@superrette/domain": "workspace:*",
     "@superrette/shared": "workspace:*",
-    "@superrette/domain": "workspace:*"
+    "drizzle-orm": "^0.45.3",
+    "pg": "^8.23.0",
+    "@superrette/pricing-engine": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.0",
+    "drizzle-kit": "^0.31.11"
   }
 }

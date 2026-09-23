@@ -2,7 +2,7 @@
   "name": "mijn-superrette",
   "private": true,
   "version": "0.1.0",
-  "description": "Mijn Superrette — smart grocery price comparison and shopping assistant for Belgium and the Netherlands",
+  "description": "Mijn Superrette \u2014 smart grocery price comparison and shopping assistant for Belgium and the Netherlands",
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "engines": {
@@ -21,7 +21,7 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "db:migrate": "pnpm --filter @superrette/database migrate",
     "db:generate": "pnpm --filter @superrette/database generate",
-    "db:seed:dev": "pnpm --filter @superrette/database seed:dev",
+    "db:seed:dev": "pnpm --filter @superrette/ingestion seed:dev",
     "dev:api": "pnpm --filter @superrette/api dev",
     "dev:worker": "pnpm --filter @superrette/worker dev",
     "dev:admin": "pnpm --filter @superrette/admin dev",
