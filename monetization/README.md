@@ -1,12 +1,18 @@
 # monetization/
 
-Commercieel onderzoek van alle apps (oktober 2026). **Gekozen: ImmoRadar, verkocht als LeadRevive-pilot in twee fasen.**
+Commercieel onderzoek van alle apps (oktober 2026).
+
+**Huidig besluit (tweede ronde): LeadRevive commercieel parkeren en een nieuw product valideren.** Begin bij [opleverstatus.md](opleverstatus.md) en [investeringsbeslissing.md](investeringsbeslissing.md).
 
 De code voor de pilot staat in de repo `immoradar`, branch `ccr-02331f64-4fd2md`
 (intake-scan, demo, export, fixes in de motor, `docs/pilot/`).
 
 | Document | Inhoud |
 |---|---|
+| [opleverstatus.md](opleverstatus.md) | Per repo: branch, commits, tests, wat live is, en de accountacties bovenaan |
+| [investeringsbeslissing.md](investeringsbeslissing.md) | Opties A/B/C, drie productideeën, validatie van 14 dagen |
+| [juridisch-kader.md](juridisch-kader.md) | Wet, richtsnoeren, wetsvoorstel opt-in en interpretatie, met officiële links |
+| [leadrevive-productcheck.md](leadrevive-productcheck.md) | Self-service, terugkerende waarde, geselecteerd vs. toegestaan, steekproef, economie |
 | [portfolio-assessment.md](portfolio-assessment.md) | Alle apps, vergelijkingstabel, keuze |
 | [bronnen-en-aannames.md](bronnen-en-aannames.md) | Wat bewezen is en wat niet: ereloon, concurrentieprijzen, marges, juridisch kader, met links |
 | [commercial-offer.md](commercial-offer.md) | Doelgroep, definitie van een "bruikbare kans", pilot in twee fasen, meetbare resultaten |

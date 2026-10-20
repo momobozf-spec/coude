@@ -1,5 +1,7 @@
 # Bronnen en aannames — wat is bewezen, wat niet
 
+> **Het juridische deel (§4) is vervangen door [juridisch-kader.md](juridisch-kader.md).** Daar staan de officiële bronnen, de actuele status van de GBA-aanbeveling (definitieve Franse versie, niet langer alleen het ontwerp), het Belgische wetsvoorstel over opt-in voor telemarketing, en de correctie dat een juristenreview niet wettelijk verplicht is.
+
 *Bijgewerkt 20 oktober 2026.* Elke uitspraak in de andere documenten valt in één
 van vier soorten:
 

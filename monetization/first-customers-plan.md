@@ -1,11 +1,14 @@
-# Eerste betalende klant — plan, demo, voorstel en berichten
+# Eerste betalende klant — plan, demo, voorstel en berichten (geparkeerd)
+
+> **Correctie (20-10-2026, tweede ronde):** zie [juridisch-kader.md](juridisch-kader.md) en [leadrevive-productcheck.md](leadrevive-productcheck.md). Wettelijk verplicht vóór het ontvangen van een klantbestand is een **verwerkersovereenkomst** (art. 28.3 AVG), niet een juristenreview; die review is een advies. Een steekproef kan "0 foute samenvoegingen" niet bewijzen. En een geselecteerd contact is nog geen contact dat benaderd mag worden. LeadRevive wordt commercieel geparkeerd: zie [investeringsbeslissing.md](investeringsbeslissing.md).
+
 
 **Doel:** één vastgoedkantoor tekent fase 1 (intake-scan, €350), en daarna fase 2.
 Alle berichten zijn **concepten**: er is niets verstuurd of gepubliceerd.
 
-## 0. Vóór je iemand benadert (blokkerend)
+## 0. Vóór je iemand benadert
 
-1. Juristenreview van de verwerkersovereenkomst en de vraag per categorie (zie
+1. Getekende verwerkersovereenkomst vóór je een bestand ontvangt (wettelijk, art. 28.3 AVG). Juristenreview van die overeenkomst en van de vraag per categorie is aanbevolen (zie
    `commercial-offer.md` §8). Zonder die review mag je geen echt bestand ontvangen.
 2. Merge de branches en zet de beveiligingsacties uit [beveiliging-acties.md](beveiliging-acties.md) in gang.
 3. Demo klaar: `npm run demo:leadrevive` in immoradar → `demo/leadrevive/output/intake.html`.
@@ -62,7 +65,7 @@ eerlijk (het is een stopsignaal, zie §5).
 > **Wat ik garandeer**
 > - Rapport binnen 5 werkdagen; tweede import binnen 2 werkdagen.
 > - Elke kans heeft een reden en een openingszin.
-> - Geen twee personen onterecht samengevoegd. We controleren samen een steekproef van 50, en elke fout herstel ik binnen 2 werkdagen.
+> - Jullie krijgen de volledige lijst van samengevoegde contacten om na te kijken; elke gemelde foute samenvoeging maak ik binnen 2 werkdagen ongedaan.
 > - Antwoord op vragen binnen 1 werkdag.
 >
 > **Wat we samen meten** (niet gegarandeerd: het hangt af van het bellen)

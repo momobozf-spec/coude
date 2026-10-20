@@ -24,7 +24,7 @@ Labels: ✅ klaar en getest · 🔧 jouw actie (account, dashboard, contract) ·
 | A9 | Marktradar en panden verborgen zonder marktbron | ✅ |
 | A10 | CI draait (bestand naar `.github/workflows/`) | ✅ (draait bij de eerste push naar `main` of een PR) |
 | A11 | Concepten: verwerkersovereenkomst, register, DPIA-screening | ✅ concept · 🔧 **jurist** |
-| A12 | Juridische vraag per categorie (GBA 01/2025, Bel-me-niet-meer) | 🔧 **jurist** — blokkerend |
+| A12 | Juridische vraag per categorie (GBA 01/2025, Bel-me-niet-meer, wetsvoorstel opt-in) | 🔧 jurist aanbevolen (niet wettelijk verplicht); zie juridisch-kader.md |
 | A13 | Hosting Render Frankfurt (betaald plan), domein, `LEGAL_*`, monitoring | 🔧 pas voor fase 2 |
 | A14 | Back-up: PITR aan + één hersteltest | 🔧 pas voor fase 2 |
 | A15 | Beveiligingsacties uit [beveiliging-acties.md](beveiliging-acties.md) | 🔧 |

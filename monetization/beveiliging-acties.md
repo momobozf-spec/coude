@@ -39,6 +39,13 @@ Op branch `ccr-02331f64-4fd2md`, nog **niet** gemerged:
 **Wat een codefix niet oplost:** de oude waarden staan nog in de git-geschiedenis
 (publiek bij `coude`). Intrekken of roteren is de echte oplossing.
 
+> **Aanvulling (tweede ronde):** de publieke repo `clodeproject1` is een oudere
+> kopie van `coude`. Ze bevat dezelfde ANWB-sleutel en Firebase-config
+> (`brandstofprijzen.html`, `sites/brandstofprijzen/index.html`) en dezelfde
+> kwetsbare admin-routes van printable-generator. Ik heb die repo **niet**
+> aangepast. Maak haar privé of archiveer ze, en voer de acties hieronder ook
+> voor eventuele deploys vanuit die repo uit.
+
 ## 3. Wat jij zelf moet doen
 
 In volgorde van urgentie.

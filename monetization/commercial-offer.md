@@ -1,4 +1,7 @@
-# Commercieel aanbod — LeadRevive-pilot (definitief concept)
+# Commercieel aanbod — LeadRevive-pilot (concept, geparkeerd)
+
+> **Correctie (20-10-2026, tweede ronde):** zie [juridisch-kader.md](juridisch-kader.md) en [leadrevive-productcheck.md](leadrevive-productcheck.md). Wettelijk verplicht vóór het ontvangen van een klantbestand is een **verwerkersovereenkomst** (art. 28.3 AVG), niet een juristenreview; die review is een advies. Een steekproef kan "0 foute samenvoegingen" niet bewijzen. En een geselecteerd contact is nog geen contact dat benaderd mag worden. LeadRevive wordt commercieel geparkeerd: zie [investeringsbeslissing.md](investeringsbeslissing.md).
+
 
 Labels: zie [bronnen-en-aannames.md](bronnen-en-aannames.md).
 
@@ -84,7 +87,7 @@ te gaan. Het kantoor betaalt alleen fase 1 en houdt het opgeschoonde bestand.
 |---|---|
 | Intake-rapport opgeleverd | binnen 5 werkdagen |
 | Elke bruikbare kans heeft een categorie, reden en openingszin | 100 % |
-| Ontdubbeling: steekproef van 50 samengevoegde of naast elkaar gelaten contacten, samen nagekeken | 0 onterecht samengevoegde personen; elke fout wordt binnen 2 werkdagen hersteld |
+| Ontdubbeling: **alle** samenvoegingen staan in een lijst die het kantoor kan nakijken; samenvoegingen op een gedeeld vast nummer worden apart gemarkeerd | Elke gemelde foute samenvoeging wordt binnen 2 werkdagen ongedaan gemaakt. Geen garantie op nul fouten: een steekproef van 50 kan dat niet bewijzen (zie productcheck) |
 | Tweede import verwerkt | binnen 2 werkdagen na ontvangst |
 | Supportvraag beantwoord | binnen 1 werkdag |
 | Export en verwijdering bij stopzetting | export binnen 10 werkdagen, wissen binnen 30 dagen, schriftelijk bevestigd |
@@ -131,5 +134,5 @@ schattingsafspraken uit 30 gesprekken [AANNAME — er is geen marktcijfer voor].
 ## 8. Juridisch kader voor het aanbod
 
 - Het kantoor is verwerkingsverantwoordelijke, jij bent verwerker → **verwerkersovereenkomst vóór de data**: concept in immoradar `docs/pilot/verwerkersovereenkomst-concept.md`.
-- De GBA (ontwerp-aanbeveling 01/2025) laat ruimte voor contact met oud-klanten en met mensen die zelf een aanvraag deden, maar **minder naarmate de relatie ouder en zwakker is**. Laat een jurist per categorie bevestigen welke termijnen verdedigbaar zijn **voordat** je de pilot verkoopt.
+- De GBA (ontwerp-aanbeveling 01/2025) laat ruimte voor contact met oud-klanten en met mensen die zelf een aanvraag deden, maar **minder naarmate de relatie ouder en zwakker is**. Een juristenadvies per categorie is **aanbevolen** (de belangenafweging is aan het kantoor en moet aantoonbaar zijn), maar niet wettelijk verplicht.
 - De kick-off behandelt verplicht de transparantie aan het begin van elk telefoongesprek (identiteit, doel, bron van de gegevens, recht op bezwaar) en de Bel-me-niet-meer-lijst.

@@ -13,7 +13,7 @@ bronnen, berekeningen en aannames staat in [bronnen-en-aannames.md](bronnen-en-a
 > (2) Bij het testen bleek dat LeadRevive uit een CSV-export maar drie van de zes
 > beloofde categorieën kon opleveren, door vier bugs in import en motor. Die
 > zijn hersteld en getest. (3) De GBA beperkt het gebruik van oude relaties voor
-> marketing: dat is nu een blokkerende juridische vraag. (4) Het
+> marketing, en telemarketing schuift richting opt-in: zie juridisch-kader.md. (4) Het
 > maandabonnement van €249 is herzien naar een kwartaalmodel (zie
 > `pricing-and-costs.md`).
 
