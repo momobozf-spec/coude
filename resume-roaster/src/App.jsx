@@ -199,7 +199,7 @@ export default function App() {
             <span>🔥</span>
             <span>Resume Roaster</span>
             <span className="text-zinc-700">·</span>
-            <span>Your data is never stored</span>
+            <span>Not stored by us · analysed by Claude (Anthropic)</span>
           </div>
           <div className="text-sm text-zinc-600">
             Built with Claude AI by passionate developers

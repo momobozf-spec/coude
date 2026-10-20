@@ -35,8 +35,15 @@ export default function AdminPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/stats");
+      let password = sessionStorage.getItem("noor-admin-password") || "";
+      if (!password) {
+        password = window.prompt("Admin password") || "";
+        if (!password) { setError("Admin password required"); return; }
+      }
+      const res = await fetch("/api/admin/stats", { headers: { "x-admin-password": password } });
+      if (res.status === 401) { sessionStorage.removeItem("noor-admin-password"); setError("Wrong admin password"); return; }
       if (!res.ok) { setError("Failed to load stats"); return; }
+      sessionStorage.setItem("noor-admin-password", password);
       const data = await res.json();
       setStats(data);
     } catch {
@@ -58,7 +65,7 @@ export default function AdminPage() {
     );
   }
 
-  if (!stats) return <div style={{ padding: 40, textAlign: "center", fontFamily: "Inter, sans-serif" }}>Loading...</div>;
+  if (!stats) return <div style={{ padding: 40, textAlign: "center", fontFamily: "Inter, sans-serif" }}>{error || "Loading..."}</div>;
 
   const S: React.CSSProperties = { fontFamily: "Inter, sans-serif", background: "#f8f9fa", minHeight: "100vh", padding: "24px 16px" };
   const Card: React.CSSProperties = { background: "#fff", borderRadius: 12, padding: 20, border: "1px solid #e8e4dc" };

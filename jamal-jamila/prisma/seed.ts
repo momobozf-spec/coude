@@ -44,13 +44,26 @@ type SeedProduct = {
   category: string; // category slug
 };
 
+// Seed passwords: the defaults below are public (this repo is public), so they are
+// only allowed against a local database. Seeding Turso or production requires
+// SEED_ADMIN_PASSWORD, and the demo customer is not created there at all.
+const isRemoteDb =
+  (process.env.DATABASE_URL ?? "").startsWith("libsql://") || process.env.NODE_ENV === "production";
+
+function seedPassword(envName: string, localDefault: string): string {
+  const fromEnv = process.env[envName];
+  if (fromEnv && fromEnv.length >= 12) return fromEnv;
+  if (isRemoteDb) throw new Error(`${envName} (12+ characters) is required when seeding a non-local database.`);
+  return localDefault;
+}
+
 async function main() {
   console.log("Seeding Layali (Oriental Lifestyle) database...");
 
   // ---------------------------------------------------------------------------
   // Admin user
   // ---------------------------------------------------------------------------
-  const adminPassword = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD || "admin123456", 12);
+  const adminPassword = await bcrypt.hash(seedPassword("SEED_ADMIN_PASSWORD", "admin123456"), 12);
   const admin = await prisma.user.upsert({
     where: { email: process.env.ADMIN_EMAIL || "admin@layali.shop" },
     update: { role: "ADMIN" },
@@ -63,13 +76,15 @@ async function main() {
   });
   console.log("Admin user:", admin.email);
 
-  // A demo customer so order/account flows can be tested immediately.
-  const customerPassword = await bcrypt.hash("klant123456", 12);
-  await prisma.user.upsert({
-    where: { email: "klant@layali.shop" },
-    update: {},
-    create: { email: "klant@layali.shop", name: "Demo Klant", password: customerPassword, role: "USER" },
-  });
+  // A demo customer so order/account flows can be tested immediately (local only).
+  if (!isRemoteDb) {
+    const customerPassword = await bcrypt.hash("klant123456", 12);
+    await prisma.user.upsert({
+      where: { email: "klant@layali.shop" },
+      update: {},
+      create: { email: "klant@layali.shop", name: "Demo Klant", password: customerPassword, role: "USER" },
+    });
+  }
 
   // ---------------------------------------------------------------------------
   // Categories

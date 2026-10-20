@@ -32,3 +32,7 @@ Thumbs.db
 
 # Generated Prisma client
 **/src/generated/prisma/
+
+# Curl cookie jars / local session dumps
+cookies.txt
+*.cookies

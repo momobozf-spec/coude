@@ -1319,10 +1319,7 @@ const ANWB_MAP = { 'Euro95':'E10','E10':'E10','euro95':'E10','SuperPlus':'E5','E
 const FR_MAP   = { E10:['SP95-E10','SP95','Gazole_B10'], E5:['SP98'], diesel:['Gazole','Gazole_B7'], lpg:['GPLc'], cng:['GNV'] };
 const CARBU_FUEL = { E10:6, E5:10, diesel:2, lpg:3 };
 // Luxembourg base prices (government regulated max prices, updated periodically)
-const LU_BASE  = { E10:1.399, E5:1.499, diesel:1.319, lpg:0.649, cng:1.099 };
-const BASE_PRICES = { E10:1.849, E5:1.949, diesel:1.739, lpg:0.919, cng:1.359 };
 
-const ANWB_KEY = 'GNYXLHxCa14zfA1nVJkVV8ldQZHbPTcu';
 
 let selectedFuel = 'E10', selectedCountry = 'NL', allStations = [], alertStations = [], isLoading = false;
 
@@ -1435,10 +1432,9 @@ async function fetchPrices(lat, lon) {
     }
   } catch(e) { console.warn('Primary API fout:', e.message); }
 
-  // Universal fallback: Overpass + demo prices
+  // Geen verzonnen prijzen meer als terugval: zonder echte bron tonen we niets.
   if (!stations.length) {
-    try { stations = await fetchOverpass(lat,lon,radius); isLive=false; apiName='Overpass (indicatief)'; }
-    catch { toast('Geen stations gevonden. Controleer uw verbinding.','red'); resetBtn(); return; }
+    toast('Geen betrouwbare prijsdata voor deze locatie of dit land.','amber'); resetBtn(); return;
   }
   if (!stations.length) { toast('Geen stations gevonden. Vergroot de zoekstraal.','amber'); resetBtn(); return; }
 
@@ -1448,18 +1444,11 @@ async function fetchPrices(lat, lon) {
   resetBtn();
 }
 
-/* ─── NL: ANWB API ─── */
-async function fetchNL(lat, lon, radius) {
-  const delta = radius/111000;
-  const url = `https://api.anwb.nl/v1/fuel/stations?sw=${lat-delta},${lon-delta}&ne=${lat+delta},${lon+delta}&apiKey=${ANWB_KEY}`;
-  let resp;
-  try { resp = await fetch(url, { signal:AbortSignal.timeout(6000) }); }
-  catch { resp = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`, { signal:AbortSignal.timeout(8000) }); }
-  if (!resp.ok) return [[],false,''];
-  const data = await resp.json();
-  const items = data.items||data.Items||data||[];
-  if (!Array.isArray(items)||!items.length) return [[],false,''];
-  return [parseANWB(items,lat,lon,radius), true, 'ANWB'];
+/* ─── NL: geen bron ───
+   De vroegere ANWB-koppeling gebruikte een sleutel die niet van ons was en in de
+   pagina stond. Zonder officiële, toegestane bron tonen we voor NL geen prijzen. */
+async function fetchNL() {
+  return [[],false,''];
 }
 
 /* ─── BE: Carbu.com ─── */
@@ -1489,16 +1478,10 @@ async function fetchBE(lat, lon, radius) {
   return [[],false,''];
 }
 
-/* ─── LU: Overpass + luxemburgse gemiddelde prijzen ─── */
-async function fetchLU(lat, lon, radius) {
-  const stations = await fetchOverpass(lat, lon, radius);
-  // Apply Luxembourg government max prices with small variation
-  stations.forEach(s => {
-    const base = LU_BASE[selectedFuel]||1.399;
-    s.price = Math.round((base + (Math.random()*.06-.02))*1000)/1000;
-    s.isLive = false;
-  });
-  return [stations, false, 'Schatting (LU)'];
+/* ─── LU: geen bron ───
+   Hier stonden vroeger willekeurig gevarieerde prijzen. Die tonen we niet meer. */
+async function fetchLU() {
+  return [[],false,''];
 }
 
 /* ─── FR: Overheid API ─── */
@@ -1546,51 +1529,6 @@ async function fetchFR(lat, lon, radius) {
     }
     return [stations, true, 'Gouv.fr'];
   } catch(e) { console.warn('FR API fout:', e.message); return [[],false,'']; }
-}
-
-function parseANWB(items, uLat, uLon, radius) {
-  return items.map(item => {
-    const loc  = item.Location||item.location||item.coordinates||{};
-    const slat = parseFloat(loc.Lat||loc.lat||loc.latitude||item.lat||0);
-    const slon = parseFloat(loc.Lng||loc.lng||loc.longitude||item.lon||0);
-    if (!slat||!slon) return null;
-    const dist = haversine(uLat,uLon,slat,slon);
-    if (dist > radius*1.2) return null;
-    const addr  = item.Address||item.address||{};
-    const address = [
-      addr.Street&&(addr.Street+' '+(addr.HouseNumber||'')).trim(),
-      addr.City||addr.city||''
-    ].filter(Boolean).join(', ')||'Adres onbekend';
-    const fuels = item.FuelTypes||item.fuelTypes||item.fuels||[];
-    let price=null;
-    for (const f of fuels) {
-      const code = f.Code||f.code||f.Type||f.type||'';
-      if ((ANWB_MAP[code]||ANWB_MAP[code.toLowerCase()])=== selectedFuel) {
-        const p=parseFloat(f.Price||f.price||0);
-        if (p>0) { price=p; break; }
-      }
-    }
-    if (price===null) return null;
-    return { id:item.Id||item.id||Math.random(), name:item.Name||item.name||'Tankstation',
-      brand:(item.Brand||item.brand||item.Name||'').split(' ')[0],
-      address, lat:slat, lon:slon, distance:dist, price, isLive:true, uLat, uLon };
-  }).filter(Boolean);
-}
-
-async function fetchOverpass(lat, lon, radius) {
-  const q = `[out:json][timeout:25];(node["amenity"="fuel"](around:${radius},${lat},${lon});way["amenity"="fuel"](around:${radius},${lat},${lon}););out center tags;`;
-  const resp = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', body:'data='+encodeURIComponent(q) });
-  if (!resp.ok) throw new Error('Overpass '+resp.status);
-  const data = await resp.json();
-  return data.elements.map(el => {
-    const slat=el.lat??el.center?.lat, slon=el.lon??el.center?.lon;
-    if (!slat||!slon) return null;
-    const t=el.tags||{}, addr=[t['addr:street']&&(t['addr:street']+' '+(t['addr:housenumber']||'')).trim(), t['addr:city']||''].filter(Boolean).join(', ')||'Adres onbekend';
-    const base=BASE_PRICES[selectedFuel]||1.849;
-    return { id:el.id, name:t.name||t.brand||'Tankstation', brand:t.brand||'',
-      address:addr, lat:slat, lon:slon, distance:haversine(lat,lon,slat,slon),
-      price:Math.round((base+(Math.random()*.18-.06))*1000)/1000, isLive:false, uLat:lat, uLon:lon };
-  }).filter(Boolean);
 }
 
 /* ──────────────────────────────────────

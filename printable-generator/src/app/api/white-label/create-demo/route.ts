@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAdminRequest, adminUnauthorized } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { generateDemoToken } from "@/lib/white-label";
 
 export async function POST(req: NextRequest) {
   // Admin only
-  const adminPwd = req.headers.get("x-admin-password");
-  if (adminPwd !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!isAdminRequest(req)) return adminUnauthorized();
 
   try {
     const { schoolName, contactEmail } = await req.json();

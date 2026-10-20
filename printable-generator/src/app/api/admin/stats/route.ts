@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isAdminRequest, adminUnauthorized } from "@/lib/admin-auth";
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
+  if (!isAdminRequest(req)) return adminUnauthorized();
 
   try {
     const now = new Date();

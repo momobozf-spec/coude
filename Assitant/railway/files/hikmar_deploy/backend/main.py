@@ -2,12 +2,18 @@
 Hikmar AI — Backend Server
 FastAPI backend with multi-model AI routing and smart home controls.
 Run with: uvicorn main:app --reload --port 8000
+
+Required: HIKMAR_ACCESS_TOKEN (24+ random characters; the PWA asks for it once).
+Optional: ALLOWED_ORIGINS for a frontend on another domain, HIKMAR_RATE_LIMIT_PER_MINUTE.
 """
 
 import os
 import re
+import hmac
+import time
+from collections import defaultdict, deque
 from typing import Optional, Union
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -23,13 +29,42 @@ load_dotenv()
 
 app = FastAPI(title="Hikmar AI Backend", version="1.0.0")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Only origins listed in ALLOWED_ORIGINS (comma-separated) may call the API from a
+# browser. The PWA is served by this same backend, so it needs no CORS at all.
+ALLOWED_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+if ALLOWED_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=ALLOWED_ORIGINS,
+        allow_credentials=False,
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type", "X-Hikmar-Token"],
+    )
+
+# ─── ACCESS CONTROL ───────────────────────────────────────────────────────────
+# Every call to /chat and /smart-home spends API credit or changes state, so it
+# needs the shared token from HIKMAR_ACCESS_TOKEN. Without that variable (or with
+# a short one) the API refuses all calls instead of running open.
+
+ACCESS_TOKEN = os.getenv("HIKMAR_ACCESS_TOKEN", "")
+RATE_LIMIT_PER_MINUTE = int(os.getenv("HIKMAR_RATE_LIMIT_PER_MINUTE", "20"))
+MAX_MESSAGE_CHARS = 4000
+_hits: dict = defaultdict(deque)
+
+
+def require_access(request: Request, x_hikmar_token: str = Header(default="")):
+    if len(ACCESS_TOKEN) < 24:
+        raise HTTPException(status_code=503, detail="Server not configured: set HIKMAR_ACCESS_TOKEN")
+    if not hmac.compare_digest(x_hikmar_token.encode(), ACCESS_TOKEN.encode()):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    client = request.client.host if request.client else "unknown"
+    now = time.monotonic()
+    window = _hits[client]
+    while window and now - window[0] > 60:
+        window.popleft()
+    if len(window) >= RATE_LIMIT_PER_MINUTE:
+        raise HTTPException(status_code=429, detail="Too many requests")
+    window.append(now)
 
 # Serve the frontend — works both locally and on Railway
 import pathlib
@@ -87,6 +122,15 @@ smart_home_state = {
 class ChatRequest(BaseModel):
     message: str
     conversation_history: list = []
+
+    def trimmed_history(self) -> list:
+        # Last 10 turns, each capped, so a client cannot inflate the prompt (and the bill).
+        out = []
+        for h in self.conversation_history[-10:]:
+            if isinstance(h, dict) and isinstance(h.get("content"), str):
+                out.append({"role": "user" if h.get("role") == "user" else "assistant",
+                            "content": h["content"][:MAX_MESSAGE_CHARS]})
+        return out
 
 class SmartHomeCommand(BaseModel):
     device: str
@@ -297,7 +341,8 @@ async def call_claude(message: str, history: list) -> str:
         )
         return response.content[0].text
     except Exception as e:
-        return f"[Claude Error] {str(e)}"
+        print(f"[Claude error] {type(e).__name__}")
+        return "Sorry, Claude is not available right now."
 
 
 async def call_openai(message: str, history: list) -> str:
@@ -319,7 +364,8 @@ async def call_openai(message: str, history: list) -> str:
             data = response.json()
             return data["choices"][0]["message"]["content"]
     except Exception as e:
-        return f"[GPT-4o Error] {str(e)}"
+        print(f"[GPT-4o error] {type(e).__name__}")
+        return "Sorry, GPT-4o is not available right now."
 
 
 async def call_gemini(message: str, history: list) -> str:
@@ -344,7 +390,8 @@ async def call_gemini(message: str, history: list) -> str:
             data = response.json()
             return data["candidates"][0]["content"]["parts"][0]["text"]
     except Exception as e:
-        return f"[Gemini Error] {str(e)}"
+        print(f"[Gemini error] {type(e).__name__}")
+        return "Sorry, Gemini is not available right now."
 
 
 # ─── ROUTES ───────────────────────────────────────────────────────────────────
@@ -354,8 +401,14 @@ def root():
     return {"message": "Hikmar AI Backend is running", "version": "1.0.0"}
 
 
-@app.get("/status", response_model=StatusResponse)
+@app.get("/status")
 def get_status():
+    # Public: only liveness. Which keys are configured is not shown to anonymous callers.
+    return {"status": "online"}
+
+
+@app.get("/status/keys", response_model=StatusResponse, dependencies=[Depends(require_access)])
+def get_key_status():
     return {
         "status": "online",
         "api_keys": {
@@ -366,13 +419,15 @@ def get_status():
     }
 
 
-@app.post("/chat")
+@app.post("/chat", dependencies=[Depends(require_access)])
 async def chat(request: ChatRequest):
     message  = request.message.strip()
-    history  = request.conversation_history
+    history  = request.trimmed_history()
 
     if not message:
         raise HTTPException(status_code=400, detail="Message cannot be empty")
+    if len(message) > MAX_MESSAGE_CHARS:
+        raise HTTPException(status_code=413, detail="Message too long")
 
     # Determine routing
     model_key = classify_query(message)
@@ -409,19 +464,19 @@ async def chat(request: ChatRequest):
     }
 
 
-@app.get("/smart-home")
+@app.get("/smart-home", dependencies=[Depends(require_access)])
 def get_smart_home_state():
     return smart_home_state
 
 
-@app.post("/smart-home/command")
+@app.post("/smart-home/command", dependencies=[Depends(require_access)])
 def smart_home_command(cmd: SmartHomeCommand):
     parsed   = {"device": cmd.device, "action": cmd.action, "value": cmd.value, "response": ""}
     response = apply_smart_home_command(parsed)
     return {"response": response, "state": smart_home_state}
 
 
-@app.post("/smart-home/reset")
+@app.post("/smart-home/reset", dependencies=[Depends(require_access)])
 def reset_smart_home():
     """Reset smart home to default state."""
     smart_home_state["lights"] = {

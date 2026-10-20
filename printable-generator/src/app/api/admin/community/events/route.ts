@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAdminRequest, adminUnauthorized } from "@/lib/admin-auth";
 import { getCommunityStats, createWeeklyQA } from "@/lib/circle";
 
 export async function GET(req: NextRequest) {
-  const adminPwd = req.headers.get("x-admin-password");
-  if (adminPwd !== process.env.ADMIN_PASSWORD) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isAdminRequest(req)) return adminUnauthorized();
 
   try {
     const stats = await getCommunityStats();
@@ -14,8 +14,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const adminPwd = req.headers.get("x-admin-password");
-  if (adminPwd !== process.env.ADMIN_PASSWORD) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isAdminRequest(req)) return adminUnauthorized();
 
   try {
     const { title, description, startsAt, durationMinutes, zoomUrl } = await req.json();

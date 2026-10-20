@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAdminRequest, adminUnauthorized } from "@/lib/admin-auth";
 import { listVideos, getVideoStats, deleteVideo, isBunnyConfigured } from "@/lib/bunny";
 
 export async function GET(req: NextRequest) {
-  const adminPwd = req.headers.get("x-admin-password");
-  if (adminPwd !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!isAdminRequest(req)) return adminUnauthorized();
 
   if (!isBunnyConfigured()) {
     return NextResponse.json({ error: "Bunny.net not configured" }, { status: 503 });
@@ -20,10 +18,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const adminPwd = req.headers.get("x-admin-password");
-  if (adminPwd !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!isAdminRequest(req)) return adminUnauthorized();
 
   try {
     const { videoId } = await req.json();

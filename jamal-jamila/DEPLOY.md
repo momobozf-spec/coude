@@ -53,7 +53,7 @@ bash/zsh equivalent:
 
 ```bash
 DATABASE_URL="libsql://layali-<org>.turso.io" DATABASE_AUTH_TOKEN="<token>" npm run db:deploy
-DATABASE_URL="libsql://layali-<org>.turso.io" DATABASE_AUTH_TOKEN="<token>" npm run db:seed
+SEED_ADMIN_PASSWORD="<your own 12+ char password>" DATABASE_URL="libsql://layali-<org>.turso.io" DATABASE_AUTH_TOKEN="<token>" npm run db:seed
 ```
 
 > `db:deploy` generates the SQL from `prisma/schema.prisma` and applies it over
@@ -134,18 +134,19 @@ NEXT_PUBLIC_GA_ID / NEXT_PUBLIC_META_PIXEL_ID / NEXT_PUBLIC_TIKTOK_PIXEL_ID
 - [ ] Order appears in `/admin/orders` and seller `/account/dashboard`
 - [ ] Order confirmation + admin e-mails arrive (Resend)
 - [ ] `/sitemap.xml` and `/robots.txt` resolve
-- [ ] Admin login: `admin@layali.shop` / `admin123456` → **change this password**
+- [ ] Admin login: `admin@layali.shop` / the `SEED_ADMIN_PASSWORD` you chose
 
 ---
 
 ## Admin & demo accounts (from seed)
 
+Seeding a Turso/production database **requires** `SEED_ADMIN_PASSWORD` (12+ characters);
+the seed refuses to run without it, and the demo customer is only created locally.
+
 | Role | Email | Password |
 |---|---|---|
-| Admin | `admin@layali.shop` | `admin123456` |
-| Customer/seller demo | `klant@layali.shop` | `klant123456` |
-
-**Change the admin password immediately after the first deploy.**
+| Admin | `admin@layali.shop` | `SEED_ADMIN_PASSWORD` (local default: see `prisma/seed.ts`) |
+| Customer/seller demo (local only) | `klant@layali.shop` | `klant123456` |
 
 ---
 

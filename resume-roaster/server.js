@@ -1,6 +1,5 @@
 import 'dotenv/config'
 import express from 'express'
-import cors from 'cors'
 import multer from 'multer'
 import pdf from 'pdf-parse/lib/pdf-parse.js'
 import Anthropic from '@anthropic-ai/sdk'
@@ -9,10 +8,32 @@ import { dirname, join } from 'path'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express()
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } })
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 * 1024 * 1024, files: 1 } })
 
-app.use(cors())
-app.use(express.json({ limit: '1mb' }))
+// Every roast costs API credit, so the endpoint is same-origin only (no CORS),
+// capped per IP and per day, and the resume text is truncated.
+const MAX_RESUME_CHARS = 15000
+const PER_IP_LIMIT = Number(process.env.ROAST_PER_IP_PER_HOUR || 5)
+const DAILY_LIMIT = Number(process.env.ROAST_DAILY_LIMIT || 200)
+const hits = new Map()
+let day = new Date().toISOString().slice(0, 10)
+let dailyCount = 0
+
+function allowRoast(ip) {
+  const today = new Date().toISOString().slice(0, 10)
+  if (today !== day) { day = today; dailyCount = 0; hits.clear() }
+  if (dailyCount >= DAILY_LIMIT) return false
+  const hourAgo = Date.now() - 60 * 60 * 1000
+  const recent = (hits.get(ip) || []).filter((t) => t > hourAgo)
+  if (recent.length >= PER_IP_LIMIT) return false
+  recent.push(Date.now())
+  hits.set(ip, recent)
+  dailyCount++
+  return true
+}
+
+app.set('trust proxy', Number(process.env.TRUSTED_PROXY_HOPS || 1))
+app.use(express.json({ limit: '64kb' }))
 app.use(express.static(join(__dirname, 'dist')))
 
 const anthropic = new Anthropic()
@@ -47,14 +68,20 @@ Return this exact JSON structure:
 
 app.post('/api/roast', upload.single('file'), async (req, res) => {
   try {
-    let resumeText = req.body.text
+    if (!allowRoast(req.ip)) {
+      return res.status(429).json({ error: 'Too many roasts right now. Try again later.' })
+    }
+
+    let resumeText = typeof req.body.text === 'string' ? req.body.text : ''
 
     if (req.file) {
       if (req.file.mimetype === 'application/pdf') {
         const data = await pdf(req.file.buffer)
         resumeText = data.text
-      } else {
+      } else if (req.file.mimetype.startsWith('text/')) {
         resumeText = req.file.buffer.toString('utf-8')
+      } else {
+        return res.status(400).json({ error: 'Upload a PDF or a plain-text file.' })
       }
     }
 
@@ -65,16 +92,22 @@ app.post('/api/roast', upload.single('file'), async (req, res) => {
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
-      messages: [{ role: 'user', content: buildPrompt(resumeText) }]
+      messages: [{ role: 'user', content: buildPrompt(resumeText.slice(0, MAX_RESUME_CHARS)) }]
     })
 
     const raw = message.content[0].text
-    const result = JSON.parse(raw)
+    let result
+    try {
+      result = JSON.parse(raw)
+    } catch {
+      return res.status(502).json({ error: 'The roast came back garbled. Try again.' })
+    }
     res.json(result)
   } catch (err) {
-    console.error('Roast error:', err)
+    // Log the error type only, never the resume.
+    console.error('Roast error:', err?.status || '', err?.name || 'Error')
     if (err.status === 401) {
-      return res.status(401).json({ error: 'Invalid API key. Check your .env file.' })
+      return res.status(503).json({ error: 'Roasting is unavailable right now.' })
     }
     res.status(500).json({ error: 'Failed to roast resume. Try again.' })
   }

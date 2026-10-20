@@ -1117,9 +1117,24 @@ window.addEventListener('load', async () => {
   updateKeyStatus();
 });
 
+// Shared access token for the backend (HIKMAR_ACCESS_TOKEN). Kept on this device only.
+function authHeaders() {
+  let token = localStorage.getItem('hikmar_token') || '';
+  if (!token) {
+    token = (window.prompt('Hikmar toegangscode') || '').trim();
+    if (token) localStorage.setItem('hikmar_token', token);
+  }
+  return { 'Content-Type': 'application/json', 'X-Hikmar-Token': token };
+}
+
+function handleAuthFailure(res) {
+  if (res.status === 401) localStorage.removeItem('hikmar_token');
+}
+
 async function checkBackend() {
   try {
-    const res = await fetch(`${BACKEND}/status`, { signal: AbortSignal.timeout(3000) });
+    const res = await fetch(`${BACKEND}/status/keys`, { headers: authHeaders(), signal: AbortSignal.timeout(3000) });
+    handleAuthFailure(res);
     if (res.ok) {
       const data = await res.json();
       setStatus(true, 'ONLINE');
@@ -1171,9 +1186,10 @@ async function processMessage(message) {
   try {
     const res = await fetch(`${BACKEND}/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify({ message, conversation_history: conversationHistory })
     });
+    handleAuthFailure(res);
 
     if (!res.ok) throw new Error(`Server error ${res.status}`);
 
@@ -1376,9 +1392,10 @@ async function sendSmartHomeCommand(device, action, value = null) {
   try {
     const res = await fetch(`${BACKEND}/smart-home/command`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify({ device, action, value })
     });
+    handleAuthFailure(res);
     const data = await res.json();
     homeState = data.state;
     renderHomeState();

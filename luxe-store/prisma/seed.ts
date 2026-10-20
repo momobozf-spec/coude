@@ -28,11 +28,24 @@ const prisma = raw.$extends({
   },
 });
 
+// Seed passwords: the defaults below are public (this repo is public), so they are
+// only allowed against a local database. Seeding Turso or production requires
+// SEED_ADMIN_PASSWORD, and the demo customer is not created there at all.
+const isRemoteDb =
+  (process.env.DATABASE_URL ?? "").startsWith("libsql://") || process.env.NODE_ENV === "production";
+
+function seedPassword(envName: string, localDefault: string): string {
+  const fromEnv = process.env[envName];
+  if (fromEnv && fromEnv.length >= 12) return fromEnv;
+  if (isRemoteDb) throw new Error(`${envName} (12+ characters) is required when seeding a non-local database.`);
+  return localDefault;
+}
+
 async function main() {
   console.log("Seeding database...");
 
   // Create admin user
-  const adminPassword = await bcrypt.hash("admin123456", 12);
+  const adminPassword = await bcrypt.hash(seedPassword("SEED_ADMIN_PASSWORD", "admin123456"), 12);
   const admin = await prisma.user.upsert({
     where: { email: "admin@luxestore.com" },
     update: {},
