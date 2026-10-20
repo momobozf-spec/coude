@@ -1,12 +1,16 @@
 # monetization/
 
-Commercieel onderzoek van alle apps (oktober 2026). **Gekozen: ImmoRadar, verkocht als LeadRevive-pilot.**
+Commercieel onderzoek van alle apps (oktober 2026). **Gekozen: ImmoRadar, verkocht als LeadRevive-pilot in twee fasen.**
 
-Deze map staat in `coude` omdat deze sessie alleen naar deze repo kan pushen. De documenten gaan
-over de repo `immoradar`; kopieer de map daarheen als je ze bij de code wil bewaren.
+De code voor de pilot staat in de repo `immoradar`, branch `ccr-02331f64-4fd2md`
+(intake-scan, demo, export, fixes in de motor, `docs/pilot/`).
 
-1. [portfolio-assessment.md](portfolio-assessment.md): alle apps, vergelijkingstabel, keuze
-2. [commercial-offer.md](commercial-offer.md): doelgroep, propositie, pilotaanbod, prijshypothese
-3. [pricing-and-costs.md](pricing-and-costs.md): scenario's met 5, 10 en 25 klanten
-4. [first-customers-plan.md](first-customers-plan.md): 30-dagenplan, vragen, outreach, demo, voorstel
-5. [technical-backlog.md](technical-backlog.md): A (vóór de pilot), B (meerdere klanten), C (later)
+| Document | Inhoud |
+|---|---|
+| [portfolio-assessment.md](portfolio-assessment.md) | Alle apps, vergelijkingstabel, keuze |
+| [bronnen-en-aannames.md](bronnen-en-aannames.md) | Wat bewezen is en wat niet: ereloon, concurrentieprijzen, marges, juridisch kader, met links |
+| [commercial-offer.md](commercial-offer.md) | Doelgroep, definitie van een "bruikbare kans", pilot in twee fasen, meetbare resultaten |
+| [pricing-and-costs.md](pricing-and-costs.md) | Eenmalig vs. kwartaal vs. maand, jouw uren, scenario's met 5, 10 en 25 klanten |
+| [first-customers-plan.md](first-customers-plan.md) | Demo-opbouw, definitief pilotvoorstel, bericht voor een warme introductie, 30-dagenplan, stopcriteria |
+| [technical-backlog.md](technical-backlog.md) | A (vóór de pilot), B (meerdere klanten), C (later), met status |
+| [beveiliging-acties.md](beveiliging-acties.md) | Gescande lekken, wat hersteld is, en wat jij in je accounts moet doen |

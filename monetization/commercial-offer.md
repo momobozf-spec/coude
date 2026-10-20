@@ -1,126 +1,135 @@
-# Commercieel aanbod — LeadRevive (draait op ImmoRadar)
+# Commercieel aanbod — LeadRevive-pilot (definitief concept)
 
-## 1. Eerste doelgroep: één segment, scherp afgebakend
+Labels: zie [bronnen-en-aannames.md](bronnen-en-aannames.md).
 
-**Onafhankelijke vastgoedkantoren in Vlaanderen** met:
-- 2 tot 15 medewerkers, met verkoop als hoofdactiviteit;
-- minstens 8 jaar actief (dan is er een groot, oud bestand: daar zit de waarde);
-- een CRM waaruit ze een CSV of Excel kunnen exporteren (Whise, SweepBright, Omnicasa, Zabun,
-  Skarabee of zelfs Excel);
-- de zaakvoerder beslist zelf over de aankoop.
+## 1. Doelgroep
 
-**Niet** in de eerste ronde:
-- franchises en ketens (Era, Century 21, Dewaele…): centrale tools en een lange beslissingsweg;
-- verhuur- en syndickantoren;
-- Brussel en Wallonië (Franstalige verkoop, later) [aanname: jouw verkoop verloopt in het Nederlands].
+**Onafhankelijke vastgoedkantoren in Vlaanderen**, met:
+- 2–15 medewerkers, verkoop als hoofdactiviteit;
+- minstens 8 jaar actief (een groot, oud bestand);
+- een CRM waaruit ze een CSV of Excel kunnen exporteren;
+- een zaakvoerder die zelf beslist;
+- iemand die effectief belt (zaakvoerder, makelaar of een vaste binnendienst).
 
-## 2. Waarvoor ze willen betalen
+Niet: franchises en ketens, verhuur- en syndickantoren, Brussel/Wallonië (eerst Nederlandstalig).
 
-> "Ik heb te weinig verkoopopdrachten, en ik weet dat er in mijn eigen bestand mensen zitten
-> die ooit een schatting vroegen of via ons kochten — maar niemand heeft tijd om dat uit te
-> spitten."
+## 2. Het probleem waarvoor ze betalen [AANNAME, te toetsen]
 
-De pijn is **mandaten winnen**, niet "data". Het bestand is het middel.
+> "We hebben te weinig verkoopopdrachten, en in ons bestand zitten mensen die ooit
+> een schatting vroegen of via ons kochten. Niemand heeft tijd om dat uit te
+> zoeken, en ons bestand zit vol dubbels."
 
-*Te valideren:* hoeveel nieuwe mandaten per maand ze hebben, wat ze daar nu aan uitgeven
-(leadbureaus, folders, advertenties, schattingstools) en of ze hun oude contacten vandaag
-opvolgen.
+## 3. Waardepropositie
 
-## 3. Waardepropositie in één zin
+**"Uit je eigen klantenbestand: een opgeschoonde lijst van wie je eerst belt,
+met per persoon de reden en een eerlijke openingszin."**
 
-**"Binnen een week krijg je uit je eigen klantenbestand een lijst van de 50 mensen die je deze
-maand moet bellen om een verkoopopdracht te winnen, met per persoon de reden waarom."**
+Wat we er bewust **niet** bij zeggen: "wie gaat verkopen". Niemand weet dat vóór het gesprek.
 
-## 4. Wat de klant precies koopt
+## 4. Wat een "bruikbare kans" is
 
-Geen software-licentie, maar **een resultaat met software erachter**:
+Een contact telt als bruikbare kans als het aan alle vier voldoet [CODE,
+`src/leadrevive/intake.ts` in immoradar]:
 
-1. **Bestandsscan**: jij importeert en schoont hun CRM-export(s), ontdubbelt die en categoriseert
-   de contacten in 6 soorten slapende relaties [code: `src/crm/dormant.ts`,
-   `src/leadrevive/relationshipEngine.ts`].
-2. **Bellijst + platformtoegang**: de geprioriteerde kansen staan in ImmoRadar (dashboard,
-   toewijzen aan makelaars, pipelinestatus), met per contact de reden en wat we wél en níet
-   weten.
-3. **Belaanpak**: per categorie een korte openingszin (een schattingsaanvraag bel je anders dan
-   een oud-koper).
-4. **Opvolging**: jij ververst de import en bespreekt de resultaten met hen.
+1. **Reden om te bellen**: het valt in een van zes categorieën (slapende
+   schattingsaanvraag, verloren mandaat, verloren verkoopprospect, eerdere koper
+   ≥ 5 jaar, oud-klant, nooit opgevolgd) en haalt de volgorde-drempel van het product;
+2. **bereikbaar**: geldig Belgisch telefoonnummer of e-mailadres;
+3. **in het werkgebied** dat het kantoor opgeeft;
+4. "nooit opgevolgd" telt alleen als de export een kolom *laatste contact* heeft.
 
-## 5. Betaald pilotaanbod (afgebakend)
+Plus één voorwaarde die het kantoor zelf controleert: **niet op de
+Bel-me-niet-meer-lijst** (als het om telefonische prospectie gaat).
 
-**LeadRevive Pilot — 60 dagen — €750 excl. btw**
+## 5. Wat het kantoor moet aanleveren
 
-Inbegrepen:
-- verwerkersovereenkomst (art. 28 AVG) vóór er data wordt aangeleverd;
-- import en opschoning van **één** CRM-export tot 15.000 contacten, plus **één** verversing op
-  dag 30;
-- instellen van werkgebied, maximaal 5 gebruikers en een eigen kantooromgeving;
-- **een bellijst van de top 50** met een reden per contact, plus de volledige lijst in het platform;
-- 1 kick-off van 45 minuten (op locatie of online) en één belaanpak per categorie;
-- 2 check-ins van 20 minuten (dag 14 en dag 30) en een evaluatie op dag 60;
-- e-mailsupport met antwoord binnen 1 werkdag.
+| Minimum om fase 1 te starten | Aanbevolen |
+|---|---|
+| Export als CSV/Excel met naam en telefoon of e-mail | + type contact, aanmaakdatum, laatste contact, adres + postcode, status, klantnummer |
+| Getekende verwerkersovereenkomst | Notities weglaten of opschonen (gevoelige info) |
 
-**Scangarantie:** levert de scan op dag 5 **minder dan 30 bruikbare kansen** op, dan betaalt de
-klant niets en verwijder ik de data. Dit kan, omdat de scan meetbaar is vóór er gebeld wordt.
+**Er wordt geen aantal kansen beloofd vóór de intake-scan.** Pas na fase 1 weet
+je wat het bestand oplevert.
 
-**Succescriteria (samen vastgelegd op dag 0):** het aantal gevoerde gesprekken, het aantal
-schattingsafspraken en het aantal gewonnen mandaten uit de lijst. Richtwaarde: ≥ 3
-schattingsafspraken in 60 dagen [aanname, toetsen in de pilot].
+## 6. Het aanbod: pilot in twee fasen, €950 excl. btw
 
-**Na de pilot:** €249 excl. btw per maand per kantoor, maandelijks opzegbaar. Het pilotbedrag
-wordt verrekend als de klant binnen 14 dagen na de evaluatie start (3 maanden à €249 = €747).
+### Fase 1 — Intake-scan (5 werkdagen, €350)
 
-**Buiten scope:**
-- de marktradar of particuliere verkopers (er is geen legale databron; niet beloven);
-- API-koppelingen met CRM's (alleen CSV of Excel);
-- het bellen zelf, belscripts op maat per contact, marketingcampagnes;
-- terugschrijven naar het CRM van de klant;
-- data van meer dan één kantoor of vestiging (aparte prijs).
+Jij levert, binnen **5 werkdagen** na ontvangst van export en getekende overeenkomst:
+- een **datakwaliteitsrapport**: aantal rijen, dubbels, onbruikbare rijen, welke velden ontbreken;
+- het **aantal bruikbare kansen per categorie**, berekend met de regels van het product;
+- een **opgeschoonde, ontdubbelde export** die het kantoor zelf mag houden;
+- een gesprek van 30 minuten om het rapport te overlopen.
 
-## 6. Prijshypothese en onderbouwing
+**Beslismoment.** Het kantoor beslist na fase 1 of het verdergaat. Vooraf
+spreek je samen een drempel af (voorstel: ≥ 40 bruikbare kansen in het
+werkgebied). Ligt het resultaat onder die drempel, dan raad jij zelf af om door
+te gaan. Het kantoor betaalt alleen fase 1 en houdt het opgeschoonde bestand.
 
-| Anker | Bedrag | Wat het zegt |
-|---|---|---|
-| Immo Estate (prospectie-abonnement) | €45–95 | Ondergrens voor "software zonder dienst" |
-| ProspectScope / Ledoux | €99–149/maand | Gangbaar voor een niche-tool per kantoor |
-| Converted (leadgeneratie) | vanaf €499/maand | Wat een kantoor betaalt voor *nieuwe* leads |
-| Waarde van één mandaat | ~€10.000 excl. btw | Rendement: 1 mandaat per jaar = ×3 op €249/maand |
+### Fase 2 — Pilot (60 dagen, €600)
 
-**Hypothese:** €249/maand plaatst LeadRevive tussen tool en leadbureau. Dat klopt omdat je de
-import en de opvolging zelf doet. De pilot van €750 dekt jouw opstartwerk (~6–8 uur).
+- Afgeschermde omgeving voor het kantoor, maximaal 5 gebruikers, werkgebied ingesteld;
+- de volledige lijst bruikbare kansen in volgorde, met reden en openingszin, toewijsbaar aan makelaars;
+- kick-off van 45 minuten: hoe bel je per categorie, en welke transparantie is verplicht in het gesprek;
+- tweede import op dag 30 (nieuwe of gewijzigde contacten);
+- check-ins op dag 14 en dag 30 (20 min), evaluatie op dag 60;
+- support per e-mail, antwoord binnen 1 werkdag;
+- einde: export en wissen binnen 30 dagen, of overgang naar het vervolg.
 
-**Hoe je dit test (in de eerste 10 gesprekken):**
-1. Vraag eerst wat ze vandaag betalen voor leads of marketing (anker van de klant).
-2. Toon het aanbod met **drie opties** en kijk welke ze kiezen of waar ze afhaken:
-   - *Scan*: eenmalige bestandsscan + bellijst, €490;
-   - *Pilot*: zie hierboven, €750 → daarna €249/maand;
-   - *Volledig*: maandelijkse verversing + belcoaching, €399/maand.
-3. Vraag: "Bij welke prijs vind je dit te duur om zelfs te proberen?" en "Bij welke prijs
-   twijfel je aan de kwaliteit?" (een lichte versie van de Van Westendorp-methode).
-4. **Beslisregel:** als ≥ 2 van de eerste 5 de pilot van €750 zonder onderhandeling accepteren,
-   verhoog je het pilotbedrag naar €950. Wijst ≥ 4 van de 5 af op prijs (niet op nut), test
-   dan de scan van €490 als instap.
+### Meetbare resultaten
 
-## 7. Supportniveau
+**Wat wij garanderen** (onder onze controle):
 
-- Kantooruren, op werkdagen. Antwoord per e-mail binnen 1 werkdag, kritieke problemen (geen
-  toegang) dezelfde dag.
-- Imports doe ik tijdens de pilot zelf. Daarna kan de klant ze zelf doen via `/imports`, of ik
-  doe ze tegen een vergoeding (inbegrepen in €249: één verversing per maand).
-- Geen telefonische support buiten de geplande check-ins.
+| Resultaat | Norm |
+|---|---|
+| Intake-rapport opgeleverd | binnen 5 werkdagen |
+| Elke bruikbare kans heeft een categorie, reden en openingszin | 100 % |
+| Ontdubbeling: steekproef van 50 samengevoegde of naast elkaar gelaten contacten, samen nagekeken | 0 onterecht samengevoegde personen; elke fout wordt binnen 2 werkdagen hersteld |
+| Tweede import verwerkt | binnen 2 werkdagen na ontvangst |
+| Supportvraag beantwoord | binnen 1 werkdag |
+| Export en verwijdering bij stopzetting | export binnen 10 werkdagen, wissen binnen 30 dagen, schriftelijk bevestigd |
 
-## 8. Andere verdienmodellen afgewogen
+**Wat we samen meten maar niet garanderen** (dat hangt af van het bellen):
 
-| Model | Oordeel | Waarom |
-|---|---|---|
-| **Betaalde pilot + abonnement (done-for-you)** | ✅ Kies dit | Snelste omzet, de klant hoeft niets te leren, en je leert per kantoor wat werkt |
-| Self-service SaaS-abonnement | Later (fase B) | Vereist onboarding, betalingen en zelfstandig importeren. Te vroeg zonder bewijs |
-| Eenmalige licentie | ❌ | Weinig waarde zonder verversingen. Een kantoor wil geen software beheren |
-| Betalen per gebruik (per kans of contact) | ❌ voorlopig | Onvoorspelbaar voor de klant, en het zet je in een discussie over de "kwaliteit van de lead" |
-| Betaalde installatie + onderhoud on-premise | ❌ | Kleine kantoren hebben geen IT. Hosting en back-ups zijn juist wat jij ontzorgt |
-| Dienst waarbij ik de app inzet voor de klant | ✅ = het pilotmodel | De app is jouw tool. De klant koopt het resultaat |
-| White-label onder het merk van de klant (bv. een CRM-leverancier of netwerk) | Later, mogelijk interessant | Als 3+ kantoren resultaat zien, pitch dan aan een CRM-leverancier of een netwerk van onafhankelijke kantoren. Niet nu: lange salescyclus |
+| Indicator | Hoe |
+|---|---|
+| Gevoerde gesprekken | status in de pipeline |
+| Schattingsafspraken uit de lijst | status in de pipeline |
+| Verkoopopdrachten uit de lijst | melding door het kantoor |
+| "Foute" kansen (overleden, verhuisd, al klant) | feedbackknop of notitie |
 
-**Gaat een betaalde dienst sneller dan eerst een volledig SaaS-platform bouwen?** Ja,
-duidelijk. Het platform bestaat al. Wat ontbreekt is bewijs dat kantoren betalen. De pilot
-levert dat bewijs met **nul** nieuwe functies. Alles wat in `technical-backlog.md` onder A staat,
-is configuratie en papierwerk.
+**Inspanning van het kantoor:** minstens **30 contacten van de lijst bellen** in
+de eerste 30 dagen en de status bijhouden. Zonder die inspanning valt er niets te evalueren.
+
+**Richtwaarde voor "geslaagd"** (vooraf samen vastleggen): bijvoorbeeld ≥ 3
+schattingsafspraken uit 30 gesprekken [AANNAME — er is geen marktcijfer voor].
+
+### Vervolg na de pilot
+- **Standaard:** opvolging per kwartaal, €450 per kwartaal (nieuwe import, nieuwe lijst, gesprek van 30 min).
+- **Optie:** maandabonnement €249/maand, als het kantoor de pipeline dagelijks gebruikt.
+- Wie binnen 14 dagen verdergaat, krijgt fase 2 (€600) verrekend met de eerste factuur(en).
+
+### Buiten scope
+- marktradar en particuliere verkopers uit advertenties (geen legale databron);
+- koppelingen met het CRM (alleen CSV/Excel);
+- zelf bellen, campagnes, sms of e-mailings;
+- de controle op de Bel-me-niet-meer-lijst (verantwoordelijkheid van het kantoor; jij herinnert eraan);
+- juridisch advies aan het kantoor.
+
+## 7. Andere modellen afgewogen
+
+| Model | Oordeel |
+|---|---|
+| Pilot in twee fasen + kwartaalservice | ✅ Gekozen: geen belofte vóór de data er is; past bij hoe traag nieuwe waarde aangroeit |
+| Alleen een eenmalige scan (fase 1 los, €350–590) | ✅ Uitweg voor twijfelaars; tegelijk het product voor wie het vervolg niet ziet zitten |
+| Maandabonnement self-service SaaS | Later: vraagt onboarding, betalingen en self-service import, en er is nog geen bewijs van vraag |
+| Betalen per kans of per afspraak | ❌ Discussie over "kwaliteit van de lead"; je beheerst het bellen niet |
+| On-premise licentie | ❌ Kleine kantoren hebben geen IT |
+| White-label (CRM-leverancier, netwerk van onafhankelijke kantoren) | Later, na ≥ 3 succesvolle pilots |
+| **Instap voor datawerk** (CRM-opschoning, Power BI-dashboard voor het kantoor) | 🔍 Te toetsen: misschien de echte waarde van de pilot voor jou |
+
+## 8. Juridisch kader voor het aanbod
+
+- Het kantoor is verwerkingsverantwoordelijke, jij bent verwerker → **verwerkersovereenkomst vóór de data**: concept in immoradar `docs/pilot/verwerkersovereenkomst-concept.md`.
+- De GBA (ontwerp-aanbeveling 01/2025) laat ruimte voor contact met oud-klanten en met mensen die zelf een aanvraag deden, maar **minder naarmate de relatie ouder en zwakker is**. Laat een jurist per categorie bevestigen welke termijnen verdedigbaar zijn **voordat** je de pilot verkoopt.
+- De kick-off behandelt verplicht de transparantie aan het begin van elk telefoongesprek (identiteit, doel, bron van de gegevens, recht op bezwaar) en de Bel-me-niet-meer-lijst.
