@@ -43,7 +43,7 @@ Render uit `main` van `coude` of uit `clodeproject1` (beide met `render.yaml`).
 | `1dba402` | Eerste commercieel onderzoek (`monetization/`) |
 | `d9b17ba` | Beveiligingsfixes in 6 apps |
 | `9fe537e` | Bronnen, verdienmodellen, pilotaanbod, beveiligingsacties |
-| *(deze ronde)* | Correcties, juridisch kader, productcheck, investeringsbeslissing, opleverstatus |
+| `c4e3e3e` | Correcties, juridisch kader, productcheck, investeringsbeslissing, opleverstatus |
 
 **Uitgevoerde tests:**
 
