@@ -16,9 +16,16 @@ code zijn en die niemand anders voor je kan afvinken.
 ## Juridisch
 
 - [ ] `/privacy` en `/voorwaarden` door een jurist laten nalezen. Het gaat om
-  financiële gegevens; de teksten zijn een degelijke basis, geen juridisch advies.
-- [ ] `LEGAL_ENTITY_*` en `LEGAL_CONTACT_EMAIL` ingevuld (anders staan er
-  invulvelden op de juridische pagina's).
+  financiële gegevens en (art. 9) religieuze overtuiging; de teksten zijn een
+  degelijke basis, geen juridisch advies. Daarna `LEGAL_TEXTS_REVIEWED=1`.
+- [ ] Uitbater: Marhaba Data & AI Agent BV, BE 1003.552.102, Zaventem,
+  momobozf@gmail.com (standaard in `src/modules/legal/identity.tsx`). Nog
+  invullen: `LEGAL_ENTITY_ADDRESS` (straat, nr, postcode van de zetel).
+- [ ] Registratie vraagt nu uitdrukkelijke toestemming (art. 9.2.a) en bewaart
+  het tijdstip (`users.specialDataConsentAt`). Google-login vraagt dat nog niet:
+  laat `AUTH_GOOGLE_ID/SECRET` leeg tot dat ook daar gebeurt.
+- [ ] Betaalde plannen staan als "nog niet beschikbaar" (`PAID_PLANS_AVAILABLE`
+  in `src/config/plans.ts`). Pas op `true` met een betaalprovider en prijzen.
 - [ ] Verwerkersovereenkomsten (DPA) met je hosting-/databaseprovider en met
   Resend. Kies EU-regio's.
 - [ ] Register van verwerkingsactiviteiten bijhouden (AVG art. 30).

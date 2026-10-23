@@ -43,7 +43,9 @@ services:
       - key: LEGAL_ENTITY_NAME
         value: Marhaba Data & AI Agent BV
       - key: LEGAL_ENTITY_VAT
-        value: BE1003552102
+        value: BE 1003.552.102
+      - key: LEGAL_CONTACT_EMAIL
+        value: momobozf@gmail.com
       - key: AUTH_SECRET
         generateValue: true
       - key: CRON_SECRET
@@ -59,8 +61,6 @@ services:
       - key: EMAIL_FROM
         sync: false
       - key: LEGAL_ENTITY_ADDRESS
-        sync: false
-      - key: LEGAL_CONTACT_EMAIL
         sync: false
       - key: ADMIN_EMAIL
         sync: false

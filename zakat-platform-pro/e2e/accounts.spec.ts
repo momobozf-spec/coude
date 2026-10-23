@@ -61,6 +61,7 @@ async function register(page: Page, email: string, secret: string): Promise<void
   await page.getByLabel('Naam').fill('E2E Gebruiker')
   await page.getByLabel('E-mailadres').fill(email)
   await page.getByLabel('Wachtwoord').fill(secret)
+  await page.getByLabel(/uitdrukkelijk toestemming/i).check()
   await page.getByRole('button', { name: /aanmelden|account aanmaken/i }).click()
   await page.waitForURL(/\/(dashboard|onboarding)/)
   await settled(page)

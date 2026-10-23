@@ -3,11 +3,13 @@ import Link from 'next/link'
 import { ButtonLink } from '@/components/ui'
 import { siteConfig } from '@/config/site'
 import { getActor } from '@/server/auth/actor'
+import { legalIdentity } from '@/modules/legal/identity'
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   // The charity directory is public but reachable from the dashboard nav, so a
   // signed-in visitor gets a way back instead of a sign-up prompt.
   const actor = await getActor()
+  const who = legalIdentity()
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -52,7 +54,10 @@ export default async function PublicLayout({ children }: { children: React.React
           <p className="font-medium text-foreground">{siteConfig.name}</p>
           <p className="max-w-2xl">{siteConfig.description}</p>
           <p className="mt-2 flex flex-wrap gap-4 text-xs">
-            <span>© {new Date().getFullYear()} {siteConfig.name}</span>
+            <span>
+              © {new Date().getFullYear()} {siteConfig.name} — {who.name} · {who.vat} · {who.address}
+            </span>
+            <a href={`mailto:${who.email}`} className="hover:underline">Contact</a>
             <Link href="/privacy" className="hover:underline">Privacy</Link>
             <Link href="/voorwaarden" className="hover:underline">Voorwaarden</Link>
           </p>

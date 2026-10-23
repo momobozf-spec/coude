@@ -145,6 +145,17 @@ export const PLANS: Record<Plan, PlanDefinition> = {
 export const PLAN_ORDER: readonly Plan[] = ['FREE', 'PLUS', 'FAMILY', 'ORGANIZATION']
 
 /**
+ * Kunnen betaalde plannen gekocht worden?
+ *
+ * v1 lanceert gratis: er is geen betaalprovider geïmplementeerd en er zijn geen
+ * prijzen. Zolang dit `false` is, toont de app Plus/Familie/Organisatie nooit
+ * als iets wat je kunt kopen (geen prijs, geen knop, "nog niet beschikbaar").
+ * Pas op `true` zetten in dezelfde wijziging die een betaalprovider (checkout +
+ * webhook) en prijzen toevoegt.
+ */
+export const PAID_PLANS_AVAILABLE = false as boolean
+
+/**
  * The cheapest plan that includes a feature — used to tell the user *which*
  * upgrade unlocks what they just tried to do, rather than a bare "upgrade".
  */

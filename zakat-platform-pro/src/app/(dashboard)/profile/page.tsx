@@ -22,7 +22,7 @@ import { accountSecurityInfo } from '@/server/modules/account/service'
 import { emailConfigured } from '@/server/integrations/email'
 import { requireActorOrRedirect } from '@/server/auth/guards'
 import { entitlementSnapshot } from '@/server/services/entitlements'
-import { PLANS, PLAN_ORDER } from '@/config/plans'
+import { PAID_PLANS_AVAILABLE, PLANS, PLAN_ORDER } from '@/config/plans'
 import { getCurrency } from '@/config/currencies'
 
 export const metadata: Metadata = { title: 'Profiel' }
@@ -104,11 +104,23 @@ export default async function ProfilePage() {
           </ul>
 
           <div className="border-t border-border pt-3">
-            <p className="text-sm font-medium">Beschikbare abonnementen</p>
+            {PAID_PLANS_AVAILABLE ? (
+              <p className="text-sm font-medium">Beschikbare abonnementen</p>
+            ) : (
+              <>
+                <p className="text-sm font-medium">Abonnementen</p>
+                {/* v1 is gratis: geen betaalprovider, dus niets mag als koopbaar ogen. */}
+                <p className="mt-1 text-sm text-muted">
+                  Barakah is in deze versie gratis. Betaalde abonnementen zijn nog niet te koop; de
+                  plannen hieronder zijn in voorbereiding en kunnen nog wijzigen.
+                </p>
+              </>
+            )}
             <ul className="mt-2 flex flex-col gap-1.5 text-sm text-muted">
               {PLAN_ORDER.map((plan) => (
                 <li key={plan}>
-                  <span className="font-medium text-foreground">{PLANS[plan].name}</span> —{' '}
+                  <span className="font-medium text-foreground">{PLANS[plan].name}</span>
+                  {!PAID_PLANS_AVAILABLE && plan !== 'FREE' ? ' (nog niet beschikbaar)' : ''} —{' '}
                   {PLANS[plan].description}
                 </li>
               ))}

@@ -21,6 +21,7 @@ export function RegisterForm() {
       name: form.get('name'),
       email: form.get('email'),
       password: form.get('password'),
+      specialDataConsent: form.get('specialDataConsent') === 'on',
     })
 
     if (!parsed.success) {
@@ -77,6 +78,21 @@ export function RegisterForm() {
         />
         <p className="text-xs text-muted">Minstens 10 tekens.</p>
       </div>
+
+      <label htmlFor="specialDataConsent" className="flex cursor-pointer items-start gap-2 text-xs text-muted">
+        <input
+          id="specialDataConsent"
+          name="specialDataConsent"
+          type="checkbox"
+          required
+          className="mt-0.5 size-4 shrink-0 cursor-pointer"
+        />
+        <span>
+          Ik geef uitdrukkelijk toestemming dat Barakah mijn Zakat-, Sadaqah- en donatiegegevens bewaart. Die
+          kunnen mijn religieuze overtuiging tonen. Ik kan deze toestemming altijd intrekken door mijn
+          account te verwijderen.
+        </span>
+      </label>
 
       <FieldError>{error}</FieldError>
 

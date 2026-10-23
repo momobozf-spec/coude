@@ -46,6 +46,9 @@ model User {
   locale      String    @default("nl")
   timezone    String    @default("Europe/Brussels")
   onboardedAt DateTime?
+  /// Moment van de uitdrukkelijke toestemming (AVG art. 9(2)(a)) bij registratie.
+  /// Null voor accounts van vóór deze vraag of via Google-login.
+  specialDataConsentAt DateTime?
 
   // NextAuth
   accounts Account[]

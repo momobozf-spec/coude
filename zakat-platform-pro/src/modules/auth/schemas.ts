@@ -12,6 +12,14 @@ export const registerSchema = z.object({
     .string()
     .min(10, 'Gebruik minstens 10 tekens.')
     .max(200, 'Dat wachtwoord is te lang.'),
+  /**
+   * Uitdrukkelijke toestemming (AVG art. 9(2)(a)): Zakat- en Sadaqah-gegevens
+   * kunnen je religieuze overtuiging onthullen, een bijzondere categorie van
+   * persoonsgegevens. Zonder deze toestemming geen account.
+   */
+  specialDataConsent: z.literal(true, {
+    message: 'Geef je uitdrukkelijke toestemming om je account aan te maken.',
+  }),
 })
 
 export type RegisterInput = z.infer<typeof registerSchema>

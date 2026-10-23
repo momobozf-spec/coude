@@ -13,8 +13,8 @@ export default function TermsPage() {
     <LegalPage title="Gebruiksvoorwaarden" updated="4 oktober 2026">
       <h2>1. Wie we zijn</h2>
       <p>
-        Barakah wordt uitgebaat door {who.name}
-        {who.vat ? ` (ondernemingsnummer ${who.vat})` : ''}, {who.address}. Contact:{' '}
+        Barakah wordt uitgebaat door {who.name} (ondernemingsnummer {who.vat}), maatschappelijke zetel:{' '}
+        {who.address}. Contact:{' '}
         <a className="text-primary hover:underline" href={`mailto:${who.email}`}>{who.email}</a>.
       </p>
 
@@ -61,8 +61,9 @@ export default function TermsPage() {
 
       <h2>6. Prijs van de dienst</h2>
       <p>
-        Het gratis plan is gratis. Betaalde plannen worden pas aangeboden met een eigen
-        prijsvermelding en bestelproces; tot dan betaal je niets.
+        Barakah is in deze versie gratis. Betaalde abonnementen zijn nog niet te koop; worden ze
+        later aangeboden, dan gebeurt dat met een eigen prijsvermelding, bestelproces en
+        herroepingsrecht. Tot dan betaal je niets.
       </p>
 
       <h2>7. Beschikbaarheid en aansprakelijkheid</h2>
@@ -78,10 +79,19 @@ export default function TermsPage() {
         <Link className="text-primary hover:underline" href="/privacy">privacyverklaring</Link>.
       </p>
 
-      <h2>9. Wijzigingen en toepasselijk recht</h2>
+      <h2>9. Klachten</h2>
+      <p>
+        Klachten kun je melden via{' '}
+        <a className="text-primary hover:underline" href={`mailto:${who.email}`}>{who.email}</a>. Lukt het
+        niet om er samen uit te komen, dan kun je terecht bij de Consumentenombudsdienst
+        (consumentenombudsdienst.be).
+      </p>
+
+      <h2>10. Wijzigingen en toepasselijk recht</h2>
       <p>
         Wijzigen we deze voorwaarden wezenlijk, dan melden we dat vooraf in de app. Het Belgische
-        recht is van toepassing.
+        recht is van toepassing, onverminderd de dwingende bescherming die je als consument geniet in
+        het land waar je woont.
       </p>
     </LegalPage>
   )

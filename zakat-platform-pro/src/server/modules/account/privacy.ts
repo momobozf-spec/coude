@@ -30,6 +30,7 @@ export async function exportPersonalData(actor: Actor): Promise<Record<string, u
       locale: true,
       timezone: true,
       onboardedAt: true,
+      specialDataConsentAt: true,
       passwordChangedAt: true,
       createdAt: true,
       updatedAt: true,

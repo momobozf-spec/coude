@@ -18,8 +18,7 @@ export default function PrivacyPage() {
 
       <h2>Wie is verantwoordelijk</h2>
       <p>
-        {who.name}
-        {who.vat ? `, ondernemingsnummer ${who.vat}` : ''}, {who.address}. Vragen en verzoeken over
+        {who.name}, ondernemingsnummer {who.vat}, maatschappelijke zetel: {who.address}. Vragen en verzoeken over
         je gegevens: <a className="text-primary hover:underline" href={`mailto:${who.email}`}>{who.email}</a>.
       </p>
 
@@ -44,6 +43,12 @@ export default function PrivacyPage() {
           overeenkomst, art. 6.1.b AVG).
         </li>
         <li>Om de dienst te beveiligen, bv. inlogpogingen beperken en het auditlog (gerechtvaardigd belang, art. 6.1.f).</li>
+        <li>
+          Zakat-, Sadaqah- en donatiegegevens kunnen je religieuze overtuiging onthullen: een bijzondere
+          categorie van persoonsgegevens. Die verwerken we alleen met je uitdrukkelijke toestemming (art.
+          9.2.a AVG), die je geeft bij het aanmaken van je account. Je trekt ze in door je gegevens of je
+          account te verwijderen; dat raakt de verwerking van daarvoor niet.
+        </li>
       </ul>
       <p>
         We verkopen je gegevens niet, gebruiken ze niet voor reclame en delen ze niet met goede

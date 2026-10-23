@@ -36,7 +36,7 @@ Sterk aanbevolen:
 | Variabele | Waarom |
 | --- | --- |
 | `FX_SYNC=frankfurter` | De worker vult elk uur de ECB-koersen (USD, GBP, TRY) aan. |
-| `LEGAL_ENTITY_NAME`, `LEGAL_ENTITY_VAT`, `LEGAL_ENTITY_ADDRESS`, `LEGAL_CONTACT_EMAIL` | Verschijnen op `/privacy` en `/voorwaarden`. Zonder staan daar invulvelden. |
+| `LEGAL_ENTITY_ADDRESS` | Straat, nr en postcode van de zetel; verschijnt op `/privacy`, `/voorwaarden` en in de footer. Naam, ondernemingsnummer en e-mail staan standaard op Marhaba Data & AI Agent BV (`LEGAL_ENTITY_NAME`, `LEGAL_ENTITY_VAT`, `LEGAL_CONTACT_EMAIL` overschrijven). |
 | `TRUSTED_PROXY_HOPS` | Aantal proxies vóór de app (Render/Fly/Railway/Caddy: 1). Verplicht ≥ 1 in productie. Fout = de IP-limiet telt het verkeerde adres. De app-poort mag alleen voor de proxy bereikbaar zijn. |
 | `DATABASE_POOL_MAX` | Web + worker samen onder de verbindingslimiet van je database. |
 | `STORAGE_LOCAL_DIR` | In de image al `/data/storage`. |

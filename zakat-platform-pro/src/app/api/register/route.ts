@@ -31,6 +31,8 @@ export const POST = handler(async (request: NextRequest) => {
       email: input.email,
       name: input.name,
       passwordHash: await hashPassword(input.password),
+      // De schema-validatie garandeert dat de toestemming gegeven is.
+      specialDataConsentAt: new Date(),
     },
     select: { id: true, email: true, name: true },
   })

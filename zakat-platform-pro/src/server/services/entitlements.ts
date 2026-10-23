@@ -4,6 +4,7 @@ import {
   FEATURES,
   PLANS,
   lowestPlanWithFeature,
+  PAID_PLANS_AVAILABLE,
   type Feature,
   type LimitKey,
   type LimitValue,
@@ -40,7 +41,9 @@ export function assertFeature(subject: PlanSubject, feature: Feature): void {
   const requiredPlan = lowestPlanWithFeature(feature)
   throw new EntitlementError(
     requiredPlan
-      ? `Deze functie zit in ${PLANS[requiredPlan].name}.`
+      ? PAID_PLANS_AVAILABLE
+        ? `Deze functie zit in ${PLANS[requiredPlan].name}.`
+        : `Deze functie zit in ${PLANS[requiredPlan].name}. Betaalde abonnementen zijn nog niet beschikbaar.`
       : 'Deze functie is niet beschikbaar in jouw abonnement.',
     { feature, requiredPlan },
   )

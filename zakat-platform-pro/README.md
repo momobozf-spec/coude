@@ -160,6 +160,37 @@ De opgegeven database wordt tussen tests volledig geleegd — gebruik een wegwer
 - **Jaarrapporten** — live preview plus bevroren snapshots met echte PDF-uitvoer uit
   een eigen minimale writer. Privéopslag, ondertekende downloadlink.
 
+## Live zetten
+
+Uitbater: **Marhaba Data & AI Agent BV** (BE 1003.552.102, Zaventem) — zie
+`src/modules/legal/identity.tsx`. Volledig draaiboek: [docs/DEPLOY.md](docs/DEPLOY.md);
+gratis testopstelling: [docs/DEPLOY-RENDER-FREE.md](docs/DEPLOY-RENDER-FREE.md).
+Barakah heeft PostgreSQL, een worker en een persistente schijf nodig, dus **Render**
+(regio Frankfurt) en geen Vercel:
+
+1. **Database**: Neon of Render Postgres in Frankfurt, PostgreSQL 17, point-in-time recovery aan.
+2. **Resend**: domein verifiëren (SPF/DKIM); e-mail is verplicht in productie.
+3. **Render Web Service** (Docker, betaald plan): health check `/api/ready`, start
+   `npm run start:render`, **persistent disk** op `/data`.
+4. **Render Background Worker**: zelfde image, start `npm run worker`, één instantie.
+5. Gedeelde environment group met minstens: `DATABASE_URL`, `AUTH_SECRET`
+   (`npx auth secret`), `NEXT_PUBLIC_APP_URL` = `AUTH_URL` (https), `TRUSTED_PROXY_HOPS=1`,
+   `METAL_PRICE_PROVIDER=published`, `FX_PROVIDER=published`, `FX_SYNC=frankfurter`,
+   `EMAIL_PROVIDER=resend`, `RESEND_API_KEY`, `EMAIL_FROM`, `CRON_SECRET`,
+   **`LEGAL_ENTITY_ADDRESS`** (straat, nr, postcode van de zetel — TODO). Naam,
+   ondernemingsnummer en contactmail staan standaard op de BV.
+6. Eigen account registreren, `ADMIN_EMAIL` zetten voor de beheerdersrol, daarna weer weg.
+7. Elke werkdag goud/zilver publiceren op `/admin/prijzen` (anders weigert de app te rekenen).
+8. Uptime-monitor op `/api/health` en `/api/ready`.
+
+**Betalingen**: v1 is gratis. Er is geen betaalprovider en `PAID_PLANS_AVAILABLE=false`
+in `src/config/plans.ts`: Plus/Familie/Organisatie staan als "nog niet beschikbaar",
+zonder prijs of koopknop. Er zijn dus geen Stripe/Mollie-producten of -prijzen aan te maken.
+
+De app **weigert te starten** in productie met fixture-prijzen, zonder e-mail, met het
+voorbeeld-`AUTH_SECRET`, zonder https of proxy, met s3-opslag, of zolang een
+ontwikkelaccount (`dev@`/`other@barakah.local`) het seed-wachtwoord nog aanvaardt.
+
 ## Bekende beperkingen
 
 - **Betalingen** zijn niet geïmplementeerd. De lancering gebeurt op het gratis
