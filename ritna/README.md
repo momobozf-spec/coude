@@ -11,6 +11,7 @@ De mijlpaal "klant boekt → vervoerder aanvaardt → chauffeur voert uit → co
 |---|---|
 | `packages/core` — ritstatus, vaste prijs, commissie, annulering, dienstgebied | ✅ 22 unit tests |
 | `apps/api` — API voor klant, chauffeur, taxibedrijf, platformbeheer | ✅ 23 end-to-end tests |
+| Webversie voor klant, taxibedrijf, chauffeur en beheer (`apps/api/web`, zelfde poort als de API) | ✅ lokaal testbaar |
 | Webdashboard taxibedrijf + beheeromgeving (Next.js) | ⏭ fase 2 |
 | Klantenapp + chauffeursapp (React Native/Expo) | ⏭ fase 3 |
 
@@ -45,7 +46,8 @@ export JWT_SECRET="minstens-32-tekens-willekeurige-string"
 export SEED_PASSWORD="kies-een-demowachtwoord"
 npm run db:migrate
 npm run db:seed          # demo: admin@, taxi@, chauffeur@, klant@ritna.local
-npm run dev:api          # http://localhost:3000/health
+npm run build -w @ritna/core
+npm run dev:api          # http://localhost:3000 (webversie) en /health
 
 # tests (aparte database, wordt leeggemaakt!)
 export TEST_DATABASE_URL="postgres://USER@localhost:5432/ritna_test"

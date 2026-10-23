@@ -1,0 +1,14 @@
+{
+  "name": "coude-lokaal",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Start alle coude-projecten lokaal: database, apps en startpagina.",
+  "scripts": {
+    "db": "node db.mjs",
+    "start": "node start.mjs"
+  },
+  "dependencies": {
+    "embedded-postgres": "17.10.0-beta.17"
+  }
+}

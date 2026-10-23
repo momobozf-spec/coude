@@ -1,0 +1,45 @@
+:root {
+  --bg: #f4f5f2; --card: #fff; --ink: #1b1f1d; --muted: #5f6763; --line: #dde1dc;
+  --accent: #f2b705; --accent-ink: #1b1f1d; --dark: #1b1f1d;
+  --ok: #1d7a46; --ok-soft: #e1f2e7; --warn: #9a5b00; --warn-soft: #fbefd6; --bad: #b3261e; --bad-soft: #fbe3e1; --info: #2a4fc4; --info-soft: #e5ebfb;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 "Segoe UI", system-ui, sans-serif; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 20px; background: var(--dark); color: #fff; flex-wrap: wrap; }
+.brand { font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+.brand small { font-weight: 400; color: #b8beba; font-size: 12px; }
+.logo { background: var(--accent); color: var(--accent-ink); width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; font-weight: 800; }
+.who { display: flex; gap: 10px; align-items: center; font-size: 14px; }
+main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+h1 { font-size: 24px; margin: 0 0 4px; } h2 { font-size: 18px; margin: 0 0 10px; } h3 { font-size: 15px; margin: 0 0 6px; }
+p { margin: 0 0 8px; } .muted { color: var(--muted); } .small { font-size: 13px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin: 12px 0 16px; border-bottom: 1px solid var(--line); }
+.tabs button { border: 0; background: none; padding: 8px 12px; cursor: pointer; font: inherit; color: var(--muted); border-bottom: 3px solid transparent; }
+.tabs button.on { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; }
+input, select, textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; width: 100%; }
+.fields { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 12px; }
+.btn { font: inherit; border: 1px solid var(--dark); background: var(--dark); color: #fff; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-weight: 600; }
+.btn.alt { background: #fff; color: var(--ink); border-color: var(--line); }
+.btn.yel { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.bad { background: #fff; color: var(--bad); border-color: var(--bad); }
+.btn.sm { padding: 4px 10px; font-size: 13px; }
+.btn:disabled { opacity: .5; cursor: default; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.tablewrap { overflow-x: auto; }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--info-soft); color: var(--info); white-space: nowrap; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); } .pill.warn { background: var(--warn-soft); color: var(--warn); } .pill.bad { background: var(--bad-soft); color: var(--bad); }
+.num { font-variant-numeric: tabular-nums; }
+.stat { font-size: 24px; font-weight: 700; }
+.option { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; }
+.timeline { list-style: none; padding: 0; margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+.login { max-width: 460px; margin: 40px auto; }
+.demo-accounts { display: grid; gap: 8px; margin-top: 12px; }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 10px 16px; border-radius: 8px; max-width: calc(100% - 32px); z-index: 10; }
+.toast.err { background: var(--bad); }
+.empty { color: var(--muted); padding: 10px 0; }

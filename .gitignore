@@ -24,6 +24,7 @@ build/
 !.env.example
 **/.env
 **/.env.*
+!**/.env.example
 
 # Logs / OS
 *.log
@@ -32,3 +33,7 @@ Thumbs.db
 
 # Generated Prisma client
 **/src/generated/prisma/
+
+# Lokaal testen (start-lokaal.cmd)
+lokaal/.pgdata/
+ketelcheck/lokaal/data.json

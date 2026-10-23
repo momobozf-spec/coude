@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coude lokaal</title>
+<style>
+  :root { --bg:#f3f4f1; --card:#fff; --ink:#1a1f1c; --muted:#5f6763; --line:#dde1dc; --ok:#1d7a46; --ok-soft:#e1f2e7; --warn:#9a5b00; --warn-soft:#fbefd6; --off:#6b6b6b; --off-soft:#ececec; --acc:#14213d; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 "Segoe UI", system-ui, sans-serif; }
+  header { background:var(--acc); color:#fff; padding:22px 20px; }
+  header h1 { margin:0; font-size:24px; } header p { margin:4px 0 0; color:#c9d0e0; }
+  main { max-width:1150px; margin:0 auto; padding:20px 16px 60px; }
+  h2 { font-size:15px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:26px 0 10px; }
+  .grid { display:grid; gap:14px; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; display:grid; gap:8px; align-content:start; }
+  .card h3 { margin:0; font-size:18px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+  .card p { margin:0; color:var(--muted); font-size:14px; }
+  .pill { font-size:12px; font-weight:600; padding:2px 9px; border-radius:999px; background:var(--off-soft); color:var(--off); white-space:nowrap; }
+  .pill.draait { background:var(--ok-soft); color:var(--ok); } .pill.start { background:var(--warn-soft); color:var(--warn); }
+  .links { display:flex; gap:8px; flex-wrap:wrap; }
+  a.btn { text-decoration:none; background:var(--acc); color:#fff; padding:7px 12px; border-radius:8px; font-weight:600; font-size:14px; }
+  a.btn.alt { background:#fff; color:var(--acc); border:1px solid var(--line); }
+  .login { font-size:13px; background:#f6f7f5; border-radius:8px; padding:8px 10px; }
+  .login code { font-size:12.5px; }
+  .note { font-size:13px; color:var(--warn); background:var(--warn-soft); border-radius:8px; padding:8px 10px; }
+</style>
+</head>
+<body>
+<header><h1>Coude · lokaal testen</h1><p>Alles draait op je eigen laptop. Niets wordt online gezet of verstuurd.</p></header>
+<main>
+  <h2>Apps met database</h2>
+  <div class="grid">
+    <div class="card"><h3>Ritna <span class="pill" data-s="ritna">…</span></h3>
+      <p>Taximarktplaats Brussel: klant boekt, taxibedrijf aanvaardt, chauffeur rijdt, commissie en uitbetaling.</p>
+      <div class="login">Klik op een demo-account op de aanmeldpagina. Wachtwoord: <code>ritna-demo-2026</code></div>
+      <div class="links"><a class="btn" href="http://localhost:4100" target="_blank">Open Ritna</a></div></div>
+    <div class="card"><h3>TenderKompas IT <span class="pill" data-s="tenderkompas">…</span></h3>
+      <p>Selectie van overheidsopdrachten voor kleine data/cloud-bureaus. Beheer + klantportaal, met fictieve demo-opdrachten.</p>
+      <div class="login">Beheer: <code>demo-beheer@tenderkompas.test</code><br>Klant: <code>demo-klant@tenderkompas.test</code><br>Wachtwoord: <code>tenderkompas-demo-2026</code></div>
+      <div class="note">De eerste keer laden duurt even (Next.js compileert).</div>
+      <div class="links"><a class="btn" href="http://localhost:4200/login" target="_blank">Open TenderKompas</a></div></div>
+    <div class="card"><h3>KetelCheck <span class="pill" data-s="ketelcheck">…</span></h3>
+      <p>Tweede offerte voor gasketelvervanging. Backend (Code.gs) draait lokaal in een nagebootste Google-omgeving, mails komen in de lokale mailbox.</p>
+      <div class="login">Vul het formulier in met een postcode 1000–1299 of 1500–1999, daarna in Beheer: Gecontroleerd → Doorsturen → partnerlink in de Mailbox.</div>
+      <div class="links"><a class="btn" href="http://localhost:4300/" target="_blank">Formulier NL</a><a class="btn alt" href="http://localhost:4300/fr/" target="_blank">FR</a><a class="btn alt" href="http://localhost:4300/beheer" target="_blank">Beheer + mailbox</a></div></div>
+    <div class="card"><h3>Overnamemarkt <span class="pill" data-s="overnamemarkt">…</span></h3>
+      <p>Marktplaats voor online bedrijven (Next.js + Supabase).</p>
+      <div class="note" id="om-note">Heeft een (gratis) Supabase-project nodig voor login en database. Zet de sleutels in <code>overnamemarkt\.env.local</code> en herstart.</div>
+      <div class="links"><a class="btn" href="http://localhost:4400" target="_blank">Open Overnamemarkt</a></div></div>
+  </div>
+
+  <h2>Demo's zonder backend</h2>
+  <div class="grid">
+    <div class="card"><h3>Pompkompas</h3><p>Warmtepomp-leadplatform: klantformulier, installateursportaal en beheer (fictieve data, in het geheugen).</p>
+      <div class="links"><a class="btn" href="/pompkompas/" target="_blank">Open</a></div></div>
+    <div class="card"><h3>Kleine Qamar</h3><p>Islamitische kinderapp (webversie) en de wachtlijstpagina.</p>
+      <div class="links"><a class="btn" href="/kleine-qamar/app/" target="_blank">App</a><a class="btn alt" href="/kleine-qamar/wachtlijst/" target="_blank">Wachtlijst</a></div></div>
+    <div class="card"><h3>SaaS Overdracht</h3><p>Introductiedienst softwareovernames: website + intern overzicht.</p>
+      <div class="note">De "Markt"-demo bewaart gegevens via Claude en werkt lokaal alleen als kijkversie.</div>
+      <div class="links"><a class="btn" href="/saas-overdracht/introductie-demo/" target="_blank">Introductiedienst</a><a class="btn alt" href="/saas-overdracht/markt/" target="_blank">Markt</a></div></div>
+  </div>
+
+  <h2>Documenten</h2>
+  <div class="grid">
+    <div class="card"><h3>Onderzoek & plannen</h3>
+      <div class="links"><a class="btn alt" href="/platformideeen/platformideeen-belgie-top3.md" target="_blank">Platformideeën top 3</a><a class="btn alt" href="/saas-overdracht/docs/startplan-introductiedienst.md" target="_blank">Startplan introductiedienst</a></div></div>
+  </div>
+</main>
+<script>
+  const label = { draait: 'draait', 'start op': 'start op…', fout: 'fout', uit: 'niet ingesteld' };
+  async function poll() {
+    try {
+      const s = await (await fetch('/status')).json();
+      document.querySelectorAll('[data-s]').forEach((el) => {
+        const v = s[el.dataset.s] || '…';
+        el.textContent = label[v] || v;
+        el.className = 'pill ' + (v === 'draait' ? 'draait' : v === 'start op' ? 'start' : '');
+      });
+      document.getElementById('om-note').style.display = s.overnamemarkt === 'uit' ? '' : 'none';
+    } catch (e) {}
+  }
+  poll(); setInterval(poll, 3000);
+</script>
+</body>
+</html>

@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { DbNotifier, FakePaymentProvider, StraightLineRouting } from './adapters.js';
 import { buildApp } from './app.js';
 import { loadConfig } from './config.js';
@@ -25,6 +28,17 @@ const ctx: Ctx = {
 };
 
 const app = await buildApp(ctx, { jwtSecret: config.jwtSecret, logger: true });
+
+// Webversie (apps/api/web) op dezelfde poort serveren, enkel lokaal/ontwikkeling.
+const webDir = fileURLToPath(new URL('../web/', import.meta.url));
+const types: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8' };
+for (const file of ['index.html', 'app.js', 'styles.css']) {
+  const route = file === 'index.html' ? '/' : `/${file}`;
+  app.get(route, async (_req, reply) => {
+    const body = await readFile(path.join(webDir, file));
+    return reply.type(types[path.extname(file)] ?? 'text/plain').header('cache-control', 'no-store').send(body);
+  });
+}
 
 const timer = setInterval(() => {
   processExpiries(ctx).catch((e) => app.log.error(e, 'processExpiries mislukt'));
