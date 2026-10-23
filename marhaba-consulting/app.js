@@ -60,14 +60,60 @@ replay.addEventListener('click', async () => {
 document.querySelectorAll('[data-interest]').forEach(link => link.addEventListener('click', () => {
   document.querySelector('#interest').value = link.dataset.interest;
 }));
-document.querySelector('#project-form').addEventListener('submit', event => {
+const config = window.MARHABA_CONFIG;
+const contact = window.MarhabaContact;
+const form = document.querySelector('#project-form');
+const formStatus = document.querySelector('#form-status');
+const mailtoFallback = document.querySelector('#mailto-fallback');
+function formFields() {
+  const data = new FormData(form);
+  return { name: data.get('name'), company: data.get('company'), email: data.get('email'), interest: data.get('interest'), message: data.get('message') };
+}
+function openMailto(fields, prefix) {
+  const href = contact.buildMailto(config.contactEmail, fields);
+  mailtoFallback.href = href;
+  mailtoFallback.hidden = false;
+  formStatus.textContent = (prefix ? prefix + ' ' : '') + 'Je e-mailprogramma opent met een voorgevuld bericht aan ' + config.contactEmail + '. Klik daar op verzenden. Opent er niets? Gebruik de link hieronder of mail rechtstreeks.';
+  window.location.href = href;
+}
+form.addEventListener('submit', async event => {
   event.preventDefault();
-  const data = new FormData(event.currentTarget);
-  const brief = `MARHABA — PROJECTBRIEF\n\nNaam: ${data.get('name')}\nOrganisatie: ${data.get('company') || 'Niet opgegeven'}\nE-mail: ${data.get('email')}\nInteresse: ${data.get('interest')}\n\nUITDAGING\n${data.get('message')}\n\nDeze projectbrief is lokaal aangemaakt. Er is geen aanvraag verzonden.\n`;
+  if (form.elements.website && form.elements.website.value) return; // honeypot: bots vullen dit verborgen veld in
+  const fields = formFields();
+  const errors = contact.validate(fields);
+  if (errors.length) { formStatus.textContent = errors.join(' '); return; }
+  const submit = form.querySelector('button[type="submit"]');
+  if (!config.formEndpoint) { openMailto(fields); return; }
+  submit.disabled = true;
+  formStatus.textContent = 'Je bericht wordt verzonden…';
+  try {
+    const response = await fetch(config.formEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(contact.endpointPayload(fields))
+    });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    form.reset();
+    mailtoFallback.hidden = true;
+    formStatus.textContent = 'Bedankt! Je bericht is verzonden. We antwoorden zo snel mogelijk per e-mail.';
+  } catch {
+    openMailto(fields, 'Verzenden via het formulier lukte niet.');
+  } finally {
+    submit.disabled = false;
+  }
+});
+document.querySelector('#download-brief').addEventListener('click', () => {
+  const fields = formFields();
+  const brief = 'MARHABA — PROJECTBRIEF\n\n' + contact.briefText(fields) + '\nDeze projectbrief is lokaal aangemaakt en niet verzonden.\n';
   const url = URL.createObjectURL(new Blob(['\uFEFF', brief], { type: 'text/plain;charset=utf-8' }));
   const link = document.createElement('a'); link.href = url; link.download = 'marhaba-projectbrief.txt';
   document.body.append(link); link.click(); link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  document.querySelector('#form-status').textContent = 'Je projectbrief is aangemaakt. Bewaar het bestand; er is nog geen aanvraag verstuurd.';
+  formStatus.textContent = 'Je projectbrief is gedownload. Er is niets verzonden.';
+});
+document.querySelectorAll('[data-legal-line]').forEach(node => { node.textContent = contact.legalLine(config.legal); });
+document.querySelectorAll('[data-contact-email]').forEach(node => {
+  node.textContent = config.contactEmail;
+  if (node.tagName === 'A') node.href = 'mailto:' + config.contactEmail;
 });
 document.querySelector('#year').textContent = new Date().getFullYear();
