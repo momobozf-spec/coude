@@ -12,7 +12,18 @@ export const url = (db) => `postgres://${PG.user}:${PG.password}@${PG.host}:${PG
 const here = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(here, '.pgdata');
 
+async function alreadyRunning() {
+  const { default: pgLib } = await import('pg');
+  const c = new pgLib.Client({ connectionString: url('postgres'), connectionTimeoutMillis: 1500 });
+  try { await c.connect(); await c.end(); return true; } catch { return false; }
+}
+
 export async function startDb() {
+  // Venster hard gesloten bij een vorige run? Dan draait postgres soms nog: gewoon hergebruiken.
+  if (await alreadyRunning()) {
+    console.log(`[db] PostgreSQL draaide nog op poort ${PG.port}, wordt hergebruikt`);
+    return { stop: async () => {} , reused: true };
+  }
   const pg = new EmbeddedPostgres({
     databaseDir: dataDir,
     user: PG.user,
