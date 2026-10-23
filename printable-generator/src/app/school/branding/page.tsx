@@ -1,17 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function SchoolBrandingPage() {
   const [form, setForm] = useState({ logoUrl: "", primaryColor: "#1a6b4a", secondaryColor: "#c9920a", schoolName: "", schoolNameAr: "", welcomeMessage: "", footerText: "" });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading] = useState(false); // TODO: load from API when this module is enabled
 
-  useEffect(() => {
-    // Would fetch current branding from API
-    setLoading(false);
-  }, []);
 
   function update(field: string, value: string) { setForm(f => ({ ...f, [field]: value })); setSaved(false); }
 

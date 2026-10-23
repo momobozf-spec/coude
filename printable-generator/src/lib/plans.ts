@@ -1,42 +1,37 @@
+import { PRICES } from "@/lib/pricing";
+
+// Feature lists only describe what is actually implemented in the core product.
 export const PLANS = {
   free: {
     name: "Free",
     generationLimit: 3,
     features: [
-      "3 printable sheets",
+      "3 printable sheets (+ bonus sheets via referrals)",
       "All activity types",
-      "Digital coloring (3 templates)",
-      "Watermarked exports",
+      "Digital coloring",
     ],
   },
   pro: {
     name: "Pro",
-    priceMonthly: 12,
-    priceYearly: 97, // ~$8/mo, saves $47/yr
+    priceMonthly: PRICES.pro.monthly,
+    priceYearly: PRICES.pro.yearly,
     generationLimit: Infinity,
     features: [
       "Unlimited printable sheets",
       "All activity types",
-      "All digital coloring templates",
-      "No watermarks",
-      "Priority new themes",
-      "Commercial use license",
+      "Digital coloring",
+      "Use in your own family, classes and lessons (see terms)",
     ],
   },
   school: {
     name: "School",
-    priceMonthly: 49,
-    priceYearly: 397, // ~$33/mo, saves $191/yr
+    priceMonthly: PRICES.school.monthly,
+    priceYearly: PRICES.school.yearly,
     generationLimit: Infinity,
     features: [
       "Everything in Pro",
-      "Up to 25 teacher accounts",
-      "Bulk PDF generation",
-      "Custom school branding",
-      "Classroom management",
-      "Curriculum-aligned themes",
-      "Priority support",
-      "Invoice billing",
+      "For schools and weekend schools",
+      "Invoice billing on request",
     ],
   },
 } as const;

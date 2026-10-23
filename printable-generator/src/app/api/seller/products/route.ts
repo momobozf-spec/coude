@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isAllowedFileUrl } from "@/lib/signed-download";
 
 export async function GET() {
   try {
@@ -43,8 +44,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "title, description, category, price required" }, { status: 400 });
     }
 
+    if (fileUrl && !isAllowedFileUrl(String(fileUrl))) {
+      return NextResponse.json({ error: "fileUrl must be an https URL on the configured storage host" }, { status: 400 });
+    }
+
     if (price > 0 && price < 1.99) {
-      return NextResponse.json({ error: "Minimum price is $1.99 (or $0 for free)" }, { status: 400 });
+      return NextResponse.json({ error: "Minimum price is 1.99 (or 0 for free)" }, { status: 400 });
     }
 
     const product = await prisma.marketplaceProduct.create({

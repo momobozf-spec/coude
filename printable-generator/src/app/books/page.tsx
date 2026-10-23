@@ -72,26 +72,6 @@ export default function BooksPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="px-4 py-16 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">What Families Say</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              { quote: "Ordered for Eid — my daughter cried happy tears!", name: "Fatima", city: "Rotterdam" },
-              { quote: "The quality is amazing. Already ordered a second one!", name: "Sara", city: "London" },
-              { quote: "Our whole class got one. Best end-of-year gift!", name: "Teacher Aisha", city: "Amsterdam" },
-            ].map((t, i) => (
-              <div key={i} className="card">
-                <div className="text-yellow-400 text-sm mb-2">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                <p className="text-sm text-gray-600 italic mb-2">&ldquo;{t.quote}&rdquo;</p>
-                <p className="text-xs text-gray-400">{t.name}, {t.city}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="px-4 py-20 text-center" style={{ background: "linear-gradient(135deg, #1a6b4a, #145239)" }}>
         <h2 className="text-3xl font-extrabold text-white mb-4">Create a Book Your Child Will Treasure</h2>

@@ -37,12 +37,14 @@ function PatternPuzzleGame({ level, difficulty, onComplete }: { level: number; d
       emptyIdx = swap;
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- time is up: end the game
     setTiles(state); setMoves(0); setTimer(timeLimit); setDone(false);
   }, [level, difficulty, gridSize, timeLimit]);
 
   useEffect(() => {
     if (done || timeLimit === 0) return;
     if (timer <= 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- time is up: end the game
       setDone(true);
       onComplete({ level, difficulty, score: 50, stars: 1, timeSeconds: timeLimit, xpEarned: XP_PER_DIFFICULTY[difficulty] });
       return;

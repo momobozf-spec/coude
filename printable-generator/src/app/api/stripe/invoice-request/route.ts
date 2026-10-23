@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { createElement } from "react";
+import { sendEmail } from "@/lib/emails/send";
+import { PRICES, formatPrice } from "@/lib/pricing";
 
 const invoiceSchema = z.object({
   schoolName: z.string().min(2).max(200),
@@ -38,52 +41,44 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // In production, send this to your admin inbox via email service (Resend, SendGrid, etc.)
-    // For now, log it and store it as a lead so the admin can process it manually.
-    const invoiceRequest = {
-      userId: session.user.id,
-      schoolName,
-      contactName,
-      contactEmail,
-      billingAddress,
-      vatNumber: vatNumber || "N/A",
-      plan,
-      priceDisplay: plan === "school_yearly" ? "€397/year" : "€49/month",
-      requestedAt: new Date().toISOString(),
-    };
-
-    console.log("[Invoice Request]", JSON.stringify(invoiceRequest, null, 2));
+    const priceDisplay =
+      plan === "school_yearly"
+        ? `${formatPrice(PRICES.school.yearly)}/jaar`
+        : `${formatPrice(PRICES.school.monthly)}/maand`;
 
     // Store the contact as a lead for follow-up
     await prisma.lead.upsert({
       where: { email: contactEmail },
       update: {},
-      create: {
-        email: contactEmail,
-        source: `invoice_request_${plan}`,
-      },
+      create: { email: contactEmail, source: `invoice_request_${plan}` },
     });
 
-    // TODO: Replace with actual email sending
-    // await sendEmail({
-    //   to: process.env.ADMIN_EMAIL || "admin@noorprintables.com",
-    //   subject: `🏫 New School Invoice Request: ${schoolName}`,
-    //   body: `
-    //     School: ${schoolName}
-    //     Contact: ${contactName} (${contactEmail})
-    //     Address: ${billingAddress}
-    //     VAT: ${vatNumber || "N/A"}
-    //     Plan: ${plan === "school_yearly" ? "School Yearly (€397/year)" : "School Monthly (€49/month)"}
-    //     User ID: ${session.user.id}
-    //   `,
-    // });
+    // Notify the admin inbox (no personal data in server logs).
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail) {
+      const lines = [
+        `School: ${schoolName}`,
+        `Contact: ${contactName} (${contactEmail})`,
+        `Adres: ${billingAddress}`,
+        `Btw: ${vatNumber || "n.v.t."}`,
+        `Plan: ${plan} (${priceDisplay})`,
+        `User ID: ${session.user.id}`,
+      ];
+      await sendEmail({
+        to: adminEmail,
+        subject: `Factuuraanvraag School-plan: ${schoolName}`,
+        react: createElement("pre", null, lines.join("\n")),
+      }).catch(() => {});
+    } else {
+      console.warn("[Invoice Request] received but ADMIN_EMAIL is not set");
+    }
 
     return NextResponse.json({
       success: true,
       message: "Invoice request received. We'll send the invoice within 1 business day.",
     });
   } catch (error) {
-    console.error("Invoice request error:", error);
+    console.error("Invoice request error:", error instanceof Error ? error.message : "unknown");
     return NextResponse.json(
       { error: "Failed to submit invoice request" },
       { status: 500 }

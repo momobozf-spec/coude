@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 const faqs = [
   { q: "What age are these coloring pages designed for?", a: "Our Islamic coloring pages are designed for children aged 4-8, with varying complexity levels. Simpler pages (crescents, stars) suit ages 4-5, while detailed geometric patterns challenge ages 6-8." },
-  { q: "Can I use these in my Islamic school?", a: "Absolutely! Our School plan ($49/mo) gives you up to 25 teacher accounts with unlimited downloads. Many Islamic weekend schools and full-time schools use our worksheets." },
+  { q: "Can I use these in my Islamic school?", a: "Yes. The School plan gives unlimited worksheets for use in your classes. See the pricing section for current prices." },
   { q: "Are the designs reviewed for Islamic appropriateness?", a: "Yes. All designs are curated to be age-appropriate and aligned with mainstream Islamic values. We do not include any depictions of prophets or living beings in our mosque/Islamic architecture designs." },
   { q: "Can I print these at home?", a: "Yes! All coloring pages are generated as A4 PDF files optimized for home printing. They work perfectly on any standard printer." },
   { q: "How often are new designs added?", a: "We add new Islamic coloring page themes every week. Pro and School subscribers get priority access to new designs." },
@@ -56,7 +56,7 @@ export default function IslamicColoringPages() {
           },
           {
             heading: "How to Get Started",
-            text: "Getting your first Islamic coloring page takes less than 30 seconds: create a free account, choose 'Coloring Page' as your activity type, enter a theme like 'Mosque' or 'Ramadan', and click generate. Your PDF downloads instantly. Free accounts get 3 worksheets to try. Upgrade to Pro ($12/month or $97/year) for unlimited access, no watermarks, and commercial use rights. Schools get bulk generation and multi-teacher accounts for $49/month."
+            text: "Getting your first Islamic coloring page takes less than 30 seconds: create a free account, choose 'Coloring Page' as your activity type, enter a theme like 'Mosque' or 'Ramadan', and click generate. Your PDF downloads instantly. Free accounts get 3 worksheets to try. Upgrade to Pro for unlimited access and use in your own classes and lessons. Schools can choose the School plan with invoice billing."
           },
         ]}
         faqs={faqs}

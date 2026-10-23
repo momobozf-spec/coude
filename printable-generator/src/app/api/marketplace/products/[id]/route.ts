@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { PUBLIC_PRODUCT_SELECT, toPublicProduct } from "@/lib/marketplace-public";
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -11,27 +12,31 @@ export async function GET(_req: NextRequest, { params }: Props) {
 
     const product = await prisma.marketplaceProduct.findUnique({
       where: { id },
-      include: {
+      select: {
+        ...PUBLIC_PRODUCT_SELECT,
+        isApproved: true,
         seller: { select: { id: true, name: true, image: true } },
         reviews: {
           orderBy: { createdAt: "desc" },
           take: 10,
-          select: { rating: true, comment: true, buyerId: true, createdAt: true },
+          select: { rating: true, comment: true, createdAt: true },
         },
       },
     });
 
-    if (!product || (!product.isPublished && product.sellerId !== session?.user?.id)) {
+    if (!product || ((!product.isPublished || !product.isApproved) && product.sellerId !== session?.user?.id)) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
     // Check if current user purchased this
     let purchased = false;
+    let purchaseId: string | null = null;
     if (session?.user?.id) {
       const purchase = await prisma.marketplacePurchase.findUnique({
         where: { buyerId_productId: { buyerId: session.user.id, productId: id } },
       });
       purchased = !!purchase;
+      purchaseId = purchase?.id ?? null;
     }
 
     // Get seller profile
@@ -48,13 +53,10 @@ export async function GET(_req: NextRequest, { params }: Props) {
     });
 
     return NextResponse.json({
-      product: {
-        ...product,
-        languages: product.languages.split(","),
-        tags: product.tags ? product.tags.split(",") : [],
-      },
+      product: toPublicProduct(product),
       sellerProfile,
       purchased,
+      purchaseId,
       related,
     });
   } catch (error) {

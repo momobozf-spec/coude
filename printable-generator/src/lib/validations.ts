@@ -13,8 +13,11 @@ export const registerSchema = z.object({
     .trim(),
   password: z
     .string()
-    .min(6, "Password must be at least 6 characters")
+    .min(8, "Password must be at least 8 characters")
     .max(100, "Password must be under 100 characters"),
+  // GDPR art. 8 / terms: the account holder must be an adult (parent, guardian or teacher)
+  // and accept the terms and privacy policy.
+  acceptTerms: z.literal(true, { error: "Please confirm you are 18+ and accept the terms and privacy policy" }),
 });
 
 export const loginSchema = z.object({

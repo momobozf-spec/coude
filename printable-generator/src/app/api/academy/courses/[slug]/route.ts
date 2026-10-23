@@ -25,7 +25,7 @@ export async function GET(_req: NextRequest, { params }: Props) {
     }
 
     let enrollment = null;
-    let lessonProgress: Record<string, { watchedSeconds: number; completed: boolean }> = {};
+    const lessonProgress: Record<string, { watchedSeconds: number; completed: boolean }> = {};
 
     if (userId) {
       enrollment = await prisma.enrollment.findUnique({

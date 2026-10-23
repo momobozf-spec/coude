@@ -47,8 +47,7 @@ export function MonthlyDigestEmail({ name, sheetsGenerated, topThemes, plan, app
       {plan === "free" ? (
         <>
           <Text style={{ fontSize: 14, color: "#555", margin: "0 0 16px" }}>
-            &#128161; <strong>Tip:</strong> Upgrade to Pro for unlimited sheets, no watermarks,
-            and new themes every week. Starting at just $8/month.
+            &#128161; <strong>Tip:</strong> Upgrade to Pro for unlimited sheets.
           </Text>
           <Section style={{ textAlign: "center" as const }}>
             <GoldButton href={`${appUrl}/dashboard`}>

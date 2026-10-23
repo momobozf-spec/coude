@@ -8,8 +8,6 @@ interface Stats {
     signupsToday: number;
     signupsWeek: number;
     signupsMonth: number;
-    mrr: number;
-    mrrYearlyEstimate: number;
   };
   plans: { free: number; pro: number; school: number };
   generations: { total: number; today: number; week: number };
@@ -36,6 +34,7 @@ export default function AdminPage() {
     setError("");
     try {
       const res = await fetch("/api/admin/stats");
+      if (res.status === 401 || res.status === 403) { setError("Geen toegang: log in met een admin-account."); return; }
       if (!res.ok) { setError("Failed to load stats"); return; }
       const data = await res.json();
       setStats(data);
@@ -47,6 +46,7 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch data on mount / when the session becomes available
     fetchStats();
   }, [fetchStats]);
 
@@ -58,7 +58,7 @@ export default function AdminPage() {
     );
   }
 
-  if (!stats) return <div style={{ padding: 40, textAlign: "center", fontFamily: "Inter, sans-serif" }}>Loading...</div>;
+  if (!stats) return <div style={{ padding: 40, textAlign: "center", fontFamily: "Inter, sans-serif" }}>{error || "Loading..."}</div>;
 
   const S: React.CSSProperties = { fontFamily: "Inter, sans-serif", background: "#f8f9fa", minHeight: "100vh", padding: "24px 16px" };
   const Card: React.CSSProperties = { background: "#fff", borderRadius: 12, padding: 20, border: "1px solid #e8e4dc" };
@@ -78,8 +78,6 @@ export default function AdminPage() {
         <div style={{ ...Grid, gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
           {[
             { label: "Total Users", value: stats.overview.totalUsers, color: "#333" },
-            { label: "MRR", value: `$${stats.overview.mrr}`, color: "#1a6b4a" },
-            { label: "ARR (est.)", value: `$${stats.overview.mrrYearlyEstimate.toLocaleString()}`, color: "#1a6b4a" },
             { label: "Signups Today", value: stats.overview.signupsToday, color: "#2563eb" },
             { label: "Signups (7d)", value: stats.overview.signupsWeek, color: "#2563eb" },
             { label: "Signups (30d)", value: stats.overview.signupsMonth, color: "#2563eb" },

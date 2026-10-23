@@ -47,15 +47,21 @@ export async function POST(req: NextRequest) {
 
     const pdfBuffer = await generatePdf({ activityType, theme });
 
-    await prisma.$transaction([
-      prisma.generation.create({
-        data: { userId: session.user.id, activityType, theme },
-      }),
-      prisma.user.update({
-        where: { id: session.user.id },
-        data: { generationsCount: { increment: 1 } },
-      }),
-    ]);
+    // Count atomically: for limited plans the increment only succeeds while still under
+    // the limit, so parallel requests cannot exceed the free quota.
+    const counted = await prisma.user.updateMany({
+      where: {
+        id: session.user.id,
+        ...(limit === Infinity ? {} : { generationsCount: { lt: limit } }),
+      },
+      data: { generationsCount: { increment: 1 } },
+    });
+    if (counted.count === 0) {
+      return NextResponse.json({ error: "Generation limit reached.", limitReached: true }, { status: 403 });
+    }
+    await prisma.generation.create({
+      data: { userId: session.user.id, activityType, theme },
+    });
 
     return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
@@ -64,7 +70,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Generate error:", error);
+    console.error("Generate error:", error instanceof Error ? error.message : "unknown");
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

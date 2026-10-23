@@ -1,7 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/authz";
 
-export async function GET(_req: NextRequest) {
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  const admin = await requireAdmin();
+  if (!admin.ok) return admin.response;
 
   try {
     const now = new Date();
@@ -58,9 +63,8 @@ export async function GET(_req: NextRequest) {
       }),
     ]);
 
-    // MRR calculation (estimated)
-    const mrr = proUsers * 12 + schoolUsers * 49;
-    const mrrYearlyEstimate = mrr * 12;
+    // Revenue/MRR is intentionally not estimated here (monthly vs yearly plans, discounts,
+    // VAT): use the Stripe dashboard for real revenue figures.
 
     // Conversion funnel
     const usersWhoGenerated = await prisma.user.count({
@@ -75,8 +79,6 @@ export async function GET(_req: NextRequest) {
         signupsToday,
         signupsWeek,
         signupsMonth,
-        mrr,
-        mrrYearlyEstimate,
       },
       plans: {
         free: freeUsers,

@@ -18,6 +18,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({ priceKey: "pro_monthly" }));
     const parsed = checkoutSchema.safeParse(body);
     const priceKey: StripePriceKey = parsed.success ? parsed.data.priceKey : "pro_monthly";
+    const priceId = STRIPE_PRICES[priceKey];
+    if (!priceId) {
+      return NextResponse.json({ error: "This plan is not available yet." }, { status: 503 });
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -59,10 +63,21 @@ export async function POST(req: NextRequest) {
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
-      payment_method_types: ["card", "ideal", "bancontact", "sepa_debit"],
-      line_items: [{ price: STRIPE_PRICES[priceKey], quantity: 1 }],
+      // Payment methods (card, Bancontact, iDEAL, SEPA…) are managed in the Stripe
+      // Dashboard (dynamic payment methods) instead of being hard-coded here.
+      locale: "auto",
+      line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${appUrl}/dashboard?upgraded=${plan}`,
       cancel_url: `${appUrl}/dashboard?cancelled=true`,
+
+      // Consumer law (WER art. VI.47 / VI.53): the customer asks for immediate start and
+      // acknowledges the consequence for the 14-day right of withdrawal.
+      custom_text: {
+        submit: {
+          message:
+            "Door te betalen vraag je dat je abonnement meteen start. Je behoudt 14 dagen herroepingsrecht; bij herroeping betaal je voor de reeds geleverde periode. / By paying you ask for immediate start. You keep a 14-day right of withdrawal; on withdrawal you pay for the period already provided.",
+        },
+      },
 
       // Promo codes enabled for Ramadan campaigns etc.
       allow_promotion_codes: true,
@@ -80,9 +95,15 @@ export async function POST(req: NextRequest) {
         },
       },
 
-      // Tax collection (for EU VAT)
-      // Uncomment when Stripe Tax is enabled:
-      // automatic_tax: { enabled: true },
+      // EU VAT via Stripe Tax (enable Stripe Tax in the dashboard first, then set
+      // STRIPE_AUTOMATIC_TAX=true).
+      ...(process.env.STRIPE_AUTOMATIC_TAX === "true"
+        ? {
+            automatic_tax: { enabled: true },
+            tax_id_collection: { enabled: true },
+            customer_update: { address: "auto" as const, name: "auto" as const },
+          }
+        : {}),
     });
 
     return NextResponse.json({ url: checkoutSession.url });

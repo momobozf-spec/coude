@@ -43,17 +43,10 @@ function QuizGame({ level, difficulty, onComplete }: { level: number; difficulty
   const [started, setStarted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset the game board when level/difficulty changes
     setQuestions(generateQuestions(qCount, optCount));
     setCurrent(0); setScore(0); setStreak(0); setAnswered(null); setTimer(timeLimit); setStarted(false);
   }, [level, difficulty, qCount, optCount, timeLimit]);
-
-  // Timer
-  useEffect(() => {
-    if (!started || timeLimit === 0 || answered !== null) return;
-    if (timer <= 0) { handleAnswer(-1); return; }
-    const t = setTimeout(() => setTimer(s => s - 1), 1000);
-    return () => clearTimeout(t);
-  }, [timer, started, answered, timeLimit]);
 
   const handleAnswer = useCallback((idx: number) => {
     if (answered !== null || !questions[current]) return;
@@ -85,6 +78,15 @@ function QuizGame({ level, difficulty, onComplete }: { level: number; difficulty
       }
     }, 1200);
   }, [answered, current, questions, score, streak, level, difficulty, onComplete, qCount, timeLimit]);
+
+  // Timer
+  useEffect(() => {
+    if (!started || timeLimit === 0 || answered !== null) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset the game board when level/difficulty changes
+    if (timer <= 0) { handleAnswer(-1); return; }
+    const t = setTimeout(() => setTimer(s => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [timer, started, answered, timeLimit, handleAnswer]);
 
   if (!questions.length) return null;
 

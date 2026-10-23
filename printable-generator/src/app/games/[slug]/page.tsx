@@ -25,6 +25,7 @@ export default function GamePage({ params }: { params: Promise<{ slug: string }>
   const [fact, setFact] = useState("");
   const [soundOn, setSoundOn] = useState(true);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- read client-only value after mount (not available during SSR)
   useEffect(() => { setSoundOn(isSoundEnabled()); }, []);
 
   const submitScore = useCallback(async (s: number, meta: Record<string, number>) => {

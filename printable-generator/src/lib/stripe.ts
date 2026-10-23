@@ -17,12 +17,12 @@ export const stripe = new Proxy({} as Stripe, {
   },
 });
 
-export const STRIPE_PRICES = {
-  pro_monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID!,
-  pro_yearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID!,
-  school_monthly: process.env.STRIPE_SCHOOL_MONTHLY_PRICE_ID!,
-  school_yearly: process.env.STRIPE_SCHOOL_YEARLY_PRICE_ID!,
-} as const;
+export const STRIPE_PRICES: Record<"pro_monthly" | "pro_yearly" | "school_monthly" | "school_yearly", string | undefined> = {
+  pro_monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID,
+  pro_yearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID,
+  school_monthly: process.env.STRIPE_SCHOOL_MONTHLY_PRICE_ID,
+  school_yearly: process.env.STRIPE_SCHOOL_YEARLY_PRICE_ID,
+};
 
 export type StripePriceKey = keyof typeof STRIPE_PRICES;
 
@@ -36,10 +36,9 @@ export function planFromPriceId(priceId: string): "pro" | "school" | null {
     process.env.STRIPE_SCHOOL_YEARLY_PRICE_ID,
   ];
 
+  if (!priceId) return null;
   if (proIds.includes(priceId)) return "pro";
   if (schoolIds.includes(priceId)) return "school";
   return null;
 }
 
-export const STRIPE_PRO_PRICE_ID =
-  process.env.STRIPE_PRO_MONTHLY_PRICE_ID || process.env.STRIPE_PRO_PRICE_ID!;

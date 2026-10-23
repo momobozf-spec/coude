@@ -68,7 +68,7 @@ export function RamadanCampaignEmail({ name, discountCode, discountPercent, expi
         Ramadan theme ideas for your kids:
       </Text>
       <Text style={{ fontSize: 14, color: "#555", margin: "0 0 6px" }}>&#127769; Ramadan Moon &amp; Lanterns coloring</Text>
-      <Text style={{ fontSize: 14, color: "#555", margin: "0 0 6px" }}>&#128300; "Find the path to Iftar" maze</Text>
+      <Text style={{ fontSize: 14, color: "#555", margin: "0 0 6px" }}>&#128300; &ldquo;Find the path to Iftar&rdquo; maze</Text>
       <Text style={{ fontSize: 14, color: "#555", margin: "0 0 6px" }}>&#128260; Ramadan vocabulary word search</Text>
       <Text style={{ fontSize: 14, color: "#555", margin: "0 0 6px" }}>&#127912; Digital coloring on tablet during Taraweeh breaks</Text>
 

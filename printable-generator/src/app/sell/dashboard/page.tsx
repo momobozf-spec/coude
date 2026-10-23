@@ -30,6 +30,7 @@ export default function SellerDashboard() {
     setLoading(false);
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch data on mount / when the session becomes available
   useEffect(() => { if (session) fetchData(); }, [session, fetchData]);
 
   async function handleRegister(e: React.FormEvent) {

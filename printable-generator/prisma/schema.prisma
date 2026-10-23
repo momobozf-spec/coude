@@ -29,6 +29,8 @@ model User {
   updatedAt             DateTime         @updatedAt @map("updated_at")
   whiteLabelId          String?          @map("white_label_id")
   whiteLabelRole        String?          @map("white_label_role") // admin | teacher
+  role                  String           @default("user") // user | admin  (platform role, checked server-side)
+  termsAcceptedAt       DateTime?        @map("terms_accepted_at")
   generations           Generation[]
   accounts              Account[]
   enrollments           Enrollment[]
@@ -72,6 +74,16 @@ model Generation {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("generations")
+}
+
+// Idempotency log for incoming webhooks (Stripe, Printful). One row per processed event.
+model ProcessedWebhookEvent {
+  id        String   @id // provider event id, e.g. "stripe:evt_123"
+  provider  String
+  type      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("processed_webhook_events")
 }
 
 model Lead {

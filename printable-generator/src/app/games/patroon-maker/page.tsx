@@ -16,6 +16,7 @@ function PatternMakerGame({ level, difficulty, onComplete }: { level: number; di
   const [moves, setMoves] = useState(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset the game board when level/difficulty changes
     setGrid(Array.from({ length: gridSize }, () => Array.from({ length: gridSize }, () => -1)));
     setActiveColor(0); setMoves(0);
   }, [level, difficulty, gridSize]);

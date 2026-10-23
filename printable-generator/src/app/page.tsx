@@ -1,27 +1,45 @@
 import Link from "next/link";
 import { Metadata } from "next";
+import { getFeatures, type FeatureName } from "@/lib/features";
+import { PRICES, formatPrice, tbcSuffix } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Noor Printables — Islamitisch Educatief Platform voor Kinderen",
 };
 
-const features = [
-  { icon: "📄", title: "Werkbladen", desc: "500+ islamitische werkbladen voor elke leeftijd", href: "/dashboard", color: "#1a6b4a" },
-  { icon: "🎮", title: "12 Educatieve Games", desc: "Interactieve spelletjes die leren leuk maken", href: "/games", color: "#c9920a" },
-  { icon: "🎓", title: "Noor Academy", desc: "Video cursussen van gecertificeerde leraren", href: "/academy", color: "#1a6b4a" },
-  { icon: "🎨", title: "Kleurboek Maken", desc: "Gepersonaliseerde islamitische kleurboeken", href: "/books", color: "#c9920a" },
-  { icon: "👨\u200d👩\u200d👧", title: "Community", desc: "Connect met ouders en leraren wereldwijd", href: "/marketplace", color: "#1a6b4a" },
-  { icon: "🌙", title: "Ramadan Challenge", desc: "Speciale Ramadan activiteiten voor gezinnen", href: "/ramadan-challenge", color: "#c9920a" },
-];
-
-const stats = [
-  { value: "10,000+", label: "Families" },
-  { value: "500+", label: "Werkbladen" },
-  { value: "12", label: "Spelletjes" },
-  { value: "4", label: "Talen" },
+const allFeatures: { icon: string; title: string; desc: string; href: string; color: string; feature?: FeatureName }[] = [
+  { icon: "📄", title: "Werkbladen", desc: "Islamitische kleurplaten, doolhoven en woordzoekers als PDF", href: "/dashboard", color: "#1a6b4a" },
+  { icon: "🖍️", title: "Digitaal kleuren", desc: "Kleur werkbladen rechtstreeks op tablet of computer", href: "/color", color: "#c9920a" },
+  { icon: "🕌", title: "Gebedstijden", desc: "Gebedstijden voor jouw stad", href: "/prayer", color: "#1a6b4a" },
+  { icon: "🎮", title: "Educatieve games", desc: "Interactieve spelletjes die leren leuk maken", href: "/games", color: "#c9920a", feature: "games" },
+  { icon: "🎓", title: "Noor Academy", desc: "Videocursussen", href: "/academy", color: "#1a6b4a", feature: "academy" },
+  { icon: "🎨", title: "Kleurboek maken", desc: "Gepersonaliseerde islamitische kleurboeken", href: "/books", color: "#c9920a", feature: "books" },
+  { icon: "🛒", title: "Marktplaats", desc: "Werkbladen van andere leerkrachten", href: "/marketplace", color: "#1a6b4a", feature: "marketplace" },
+  { icon: "🌙", title: "Ramadan Challenge", desc: "Speciale Ramadan-activiteiten voor gezinnen", href: "/ramadan-challenge", color: "#c9920a", feature: "ramadanChallenge" },
 ];
 
 export default function HomePage() {
+  const enabled = getFeatures();
+  const features = allFeatures.filter((f) => !f.feature || enabled[f.feature]);
+  const tbc = tbcSuffix("nl");
+  const plans = [
+    { name: "Gratis", price: formatPrice(0), period: "", items: ["3 werkbladen om te proberen", "Alle activiteitstypes", "Digitaal kleuren"] },
+    {
+      name: "Pro",
+      price: formatPrice(PRICES.pro.monthly),
+      period: "/maand",
+      alt: `of ${formatPrice(PRICES.pro.yearly)}/jaar`,
+      items: ["Onbeperkt werkbladen", "Alle activiteitstypes", "Gebruik in eigen gezin, klas en lessen"],
+    },
+    {
+      name: "School",
+      price: formatPrice(PRICES.school.monthly),
+      period: "/maand",
+      alt: `of ${formatPrice(PRICES.school.yearly)}/jaar`,
+      items: ["Alles uit Pro", "Voor scholen en weekendscholen", "Facturatie op aanvraag"],
+    },
+  ];
+
   return (
     <div className="overflow-hidden">
       {/* ── Hero Section ── */}
@@ -70,30 +88,19 @@ export default function HomePage() {
             </h1>
 
             <p className="text-xl text-gray-600 mb-10 max-w-2xl leading-relaxed animate-fade-in" style={{ animationDelay: "300ms" }}>
-              Ontdek honderden islamitische werkbladen, interactieve spelletjes en videolessen
-              speciaal gemaakt voor kinderen van 4 tot 8 jaar oud.
+              Maak islamitische werkbladen — kleurplaten, doolhoven en woordzoekers — speciaal
+              voor kinderen van 4 tot 8 jaar, klaar om af te drukken of digitaal te kleuren.
             </p>
 
             <div className="flex flex-wrap gap-4 animate-fade-in" style={{ animationDelay: "400ms" }}>
               <Link href="/register" className="btn-primary text-lg px-8 py-4 rounded-2xl">
                 &#128640; Gratis Beginnen
               </Link>
-              <Link href="/games" className="btn-outline text-lg px-8 py-4 rounded-2xl">
-                &#127918; Bekijk Games
+              <Link href="/#pricing" className="btn-outline text-lg px-8 py-4 rounded-2xl">
+                Bekijk prijzen
               </Link>
             </div>
 
-            {/* Trust badges */}
-            <div className="flex flex-wrap gap-6 mt-12 animate-fade-in" style={{ animationDelay: "500ms" }}>
-              {stats.map((stat) => (
-                <div key={stat.label}>
-                  <div className="text-2xl font-bold" style={{ color: "#1a6b4a" }}>
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-gray-500">{stat.label}</div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
@@ -134,13 +141,43 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Pricing ── */}
+      <section id="pricing" className="py-24 px-4 max-w-6xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="section-title text-4xl">Prijzen</h2>
+          <p className="section-subtitle text-lg">
+            Prijzen incl. btw{tbc}. Opzeggen kan altijd via je account; het abonnement loopt dan tot het einde van de betaalde periode.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {plans.map((plan) => (
+            <div key={plan.name} className="card-islamic p-6 flex flex-col">
+              <h3 className="font-bold text-xl mb-2" style={{ color: "#1a6b4a" }}>{plan.name}</h3>
+              <div className="text-3xl font-bold mb-1">
+                {plan.price}
+                <span className="text-base font-normal text-gray-500">{plan.period}</span>
+              </div>
+              {plan.alt && <p className="text-sm text-gray-500 mb-4">{plan.alt}</p>}
+              <ul className="text-sm text-gray-600 space-y-2 mb-6 flex-1">
+                {plan.items.map((item) => (
+                  <li key={item}>&#10003; {item}</li>
+                ))}
+              </ul>
+              <Link href="/register" className="btn-primary text-center">
+                {plan.name === "Gratis" ? "Gratis beginnen" : `Kies ${plan.name}`}
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── Pricing CTA ── */}
       <section className="py-24 px-4" style={{ background: "linear-gradient(135deg, #0f3d2a 0%, #1a6b4a 100%)" }}>
         <div className="max-w-4xl mx-auto text-center text-white">
           <p className="text-amber-300 font-arabic text-xl mb-4">اَللّٰهُ نُوْرُ السَّمٰوٰتِ وَالْاَرْضِ</p>
           <h2 className="text-4xl font-bold mb-4">Begin vandaag nog &mdash; gratis</h2>
           <p className="text-emerald-200 text-lg mb-10 max-w-2xl mx-auto">
-            Krijg toegang tot 50+ gratis werkbladen en 3 spelletjes. Upgrade naar Pro voor onbeperkte toegang.
+            Maak gratis je eerste 3 werkbladen. Upgrade naar Pro voor onbeperkte toegang.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/register" className="btn-gold text-lg px-10 py-4 rounded-2xl">

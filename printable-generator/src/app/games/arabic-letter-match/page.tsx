@@ -40,6 +40,7 @@ function LetterMatchGame({ level, difficulty, onComplete }: { level: number; dif
       cardPairs.push({ id: i * 2, content: l.ar, pairId: i, flipped: false, matched: false, type: "arabic" });
       cardPairs.push({ id: i * 2 + 1, content: difficulty === "hard" ? l.sound : l.name, pairId: i, flipped: false, matched: false, type: "name" });
     });
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset the game board when level/difficulty changes
     setCards(shuffle(cardPairs));
     setFlipped([]); setScore(0); setMoves(0); setMatches(0); setCombo(0); setTimer(timeLimit); setDone(false); setStarted(false);
   }, [level, difficulty, pairCount, timeLimit]);
@@ -47,6 +48,7 @@ function LetterMatchGame({ level, difficulty, onComplete }: { level: number; dif
   useEffect(() => {
     if (!started || done) return;
     if (timer <= 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- time is up: end the game
       setDone(true);
       const stars = calculateStars(matches, pairCount);
       onComplete({ level, difficulty, score, stars, timeSeconds: timeLimit, xpEarned: XP_PER_DIFFICULTY[difficulty] * stars });

@@ -44,6 +44,7 @@ function ColorByNumberGame({ level, difficulty, onComplete }: { level: number; d
   const colorCount = difficulty === "easy" ? 5 : difficulty === "medium" ? 10 : 16;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset the game board when level/difficulty changes
     setRegions(generateRegions(difficulty, level));
     setActiveColor(0); setFilled(0); setErrors(0); setDone(false);
   }, [level, difficulty]);
