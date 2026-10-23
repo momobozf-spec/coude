@@ -1,16 +1,23 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useId, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 import { Button, type ButtonProps } from '@/components/ui/button'
+import { t } from '@/i18n'
 
 /**
  * Starts a checkout, or opens the customer portal.
  *
- * The button sends only a plan and an interval. The price is resolved on the
- * server, so nothing here can influence what is charged.
+ * The button sends only a plan, an interval and the member's express request
+ * to start immediately. The price is resolved on the server, so nothing here
+ * can influence what is charged.
+ *
+ * EU consumer law: a subscription that starts during the 14-day withdrawal
+ * period needs the consumer's express request and acknowledgement that a
+ * withdrawal then costs the part already provided. The checkbox must be ticked
+ * before checkout starts; the server refuses the request without it.
  */
 export function CheckoutButton({
   plan = 'PREMIUM',
@@ -25,8 +32,14 @@ export function CheckoutButton({
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [busy, setBusy] = useState(false)
+  const [consented, setConsented] = useState(false)
+  const consentId = useId()
 
   function start() {
+    if (!consented) {
+      toast.error(t('pricing.immediateStartRequired'))
+      return
+    }
     setBusy(true)
 
     startTransition(async () => {
@@ -34,7 +47,7 @@ export function CheckoutButton({
         const response = await fetch('/api/billing/checkout', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ plan, interval }),
+          body: JSON.stringify({ plan, interval, immediateStart: true }),
         })
 
         const payload = await response.json()
@@ -57,9 +70,21 @@ export function CheckoutButton({
   }
 
   return (
-    <Button {...buttonProps} onClick={start} loading={pending || busy}>
-      {label}
-    </Button>
+    <div className="space-y-2">
+      <label htmlFor={consentId} className="flex cursor-pointer items-start gap-2 text-start text-xs leading-snug text-muted-foreground">
+        <input
+          id={consentId}
+          type="checkbox"
+          checked={consented}
+          onChange={(event) => setConsented(event.target.checked)}
+          className="mt-0.5 size-4 shrink-0 cursor-pointer accent-[var(--primary)]"
+        />
+        <span>{t('pricing.immediateStartConsent')}</span>
+      </label>
+      <Button {...buttonProps} onClick={start} loading={pending || busy} disabled={!consented}>
+        {label}
+      </Button>
+    </div>
   )
 }
 

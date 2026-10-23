@@ -107,6 +107,42 @@ describe('checkProductionEnv', () => {
     expect(report.errors.join(' ')).toMatch(/STRIPE_WEBHOOK_SECRET/)
   })
 
+  it('refuses fake providers, test keys and demo data unless STAGING=1', () => {
+    const fake = {
+      ...good,
+      ALLOW_STUB_PAYMENTS_IN_PRODUCTION: 'true',
+      ALLOW_MOCK_AI_IN_PRODUCTION: 'true',
+      SEED_DEMO_LISTINGS: '1',
+      PAYMENTS_PROVIDER: 'stripe',
+      STRIPE_SECRET_KEY: 'sk_test_x',
+      STRIPE_WEBHOOK_SECRET: 'whsec_x',
+    } as unknown as NodeJS.ProcessEnv
+    const report = checkProductionEnv(fake)
+    expect(report.errors.join(' ')).toMatch(/ALLOW_STUB_PAYMENTS_IN_PRODUCTION/)
+    expect(report.errors.join(' ')).toMatch(/ALLOW_MOCK_AI_IN_PRODUCTION/)
+    expect(report.errors.join(' ')).toMatch(/SEED_DEMO_LISTINGS/)
+    expect(report.errors.join(' ')).toMatch(/test key/)
+    expect(checkProductionEnv({ ...fake, STAGING: '1' } as NodeJS.ProcessEnv).errors).toEqual([])
+  })
+
+  it('refuses a placeholder AUTH_SECRET', () => {
+    const report = checkProductionEnv({
+      ...good,
+      AUTH_SECRET: 'dummysecretdummysecretdummysecret12',
+    } as NodeJS.ProcessEnv)
+    expect(report.errors.join(' ')).toMatch(/placeholder/)
+    // The .env.example value is 40 characters long, so only this list catches it.
+    const example = checkProductionEnv({
+      ...good,
+      AUTH_SECRET: 'replace-me-with-a-32-byte-random-string',
+    } as NodeJS.ProcessEnv)
+    expect(example.errors.join(' ')).toMatch(/placeholder/)
+  })
+
+  it('warns while the registered-office address is missing', () => {
+    expect(checkProductionEnv(good).warnings.join(' ')).toMatch(/LEGAL_ENTITY_ADDRESS/)
+  })
+
   it('does nothing outside production', () => {
     expect(checkProductionEnv({ NODE_ENV: 'development' } as NodeJS.ProcessEnv)).toEqual({
       errors: [],
@@ -121,13 +157,17 @@ describe('runtime configuration', () => {
     expect(appUrl({} as NodeJS.ProcessEnv)).toBe('http://localhost:3000')
   })
 
-  it('never invents legal details', () => {
+  it('names Marhaba Data & AI Agent BV by default and never invents a street address', () => {
     expect(legalEntity({ LEGAL_ENTITY_NAME: '  ' } as unknown as NodeJS.ProcessEnv)).toEqual({
-      name: null,
-      vat: null,
+      name: 'Marhaba Data & AI Agent BV',
+      vat: 'BE 1003.552.102',
       address: null,
-      email: null,
+      displayAddress: 'Zaventem, Belgium',
+      email: 'momobozf@gmail.com',
     })
+    const configured = legalEntity({ LEGAL_ENTITY_ADDRESS: 'Straat 1, 1930 Zaventem' } as unknown as NodeJS.ProcessEnv)
+    expect(configured.displayAddress).toBe('Straat 1, 1930 Zaventem')
+    expect(JSON.stringify(legalEntity({} as NodeJS.ProcessEnv))).not.toMatch(/Cooperation/i)
   })
 })
 

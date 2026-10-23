@@ -19,6 +19,19 @@ function isHttps(value: string | undefined): boolean {
   }
 }
 
+/** Example secrets from docs and tutorials that must never reach production. */
+const KNOWN_PLACEHOLDER_SECRETS = new Set([
+  'changeme',
+  'change-me',
+  'secret',
+  'your-secret',
+  'your_secret_here',
+  'supersecret',
+  'dummysecretdummysecretdummysecret12',
+  // The value shipped in .env.example: long enough to pass the length check.
+  'replace-me-with-a-32-byte-random-string',
+])
+
 export function checkProductionEnv(env: NodeJS.ProcessEnv = process.env): EnvReport {
   const errors: string[] = []
   const warnings: string[] = []
@@ -33,6 +46,27 @@ export function checkProductionEnv(env: NodeJS.ProcessEnv = process.env): EnvRep
   }
   if (env.AUTH_URL && env.APP_URL && safeOrigin(env.AUTH_URL) !== safeOrigin(env.APP_URL)) {
     errors.push('AUTH_URL and APP_URL must point at the same origin')
+  }
+
+  // STAGING=1 marks a deliberate test deployment (e.g. the free Render setup).
+  // Only there may the app run with fake providers, test keys or demo data.
+  const staging = env.STAGING === '1'
+  if (env.AUTH_SECRET && KNOWN_PLACEHOLDER_SECRETS.has(env.AUTH_SECRET.trim().toLowerCase())) {
+    errors.push('AUTH_SECRET is a placeholder value: generate your own (openssl rand -base64 32)')
+  }
+  if (!staging) {
+    if (env.ALLOW_STUB_PAYMENTS_IN_PRODUCTION === 'true') {
+      errors.push('ALLOW_STUB_PAYMENTS_IN_PRODUCTION=true would hand out Premium without payment: only allowed with STAGING=1')
+    }
+    if (env.ALLOW_MOCK_AI_IN_PRODUCTION === 'true') {
+      errors.push('ALLOW_MOCK_AI_IN_PRODUCTION=true serves canned assistant replies: only allowed with STAGING=1')
+    }
+    if (env.SEED_DEMO_LISTINGS === '1') {
+      errors.push('SEED_DEMO_LISTINGS=1 publishes fictional listings: only allowed with STAGING=1')
+    }
+    if (env.STRIPE_SECRET_KEY?.startsWith('sk_test_') || env.STRIPE_SECRET_KEY?.startsWith('rk_test_')) {
+      errors.push('STRIPE_SECRET_KEY is a test key in production: use a live key, or set STAGING=1 for a test deployment')
+    }
   }
 
   if (env.PAYMENTS_PROVIDER === 'stripe') {
@@ -53,8 +87,8 @@ export function checkProductionEnv(env: NodeJS.ProcessEnv = process.env): EnvRep
     warnings.push('EMAIL_FROM uses resend.dev: Resend only delivers to the account owner, members get nothing')
   }
 
-  if (!env.LEGAL_ENTITY_NAME || !env.LEGAL_ENTITY_VAT || !env.LEGAL_ENTITY_ADDRESS || !env.LEGAL_CONTACT_EMAIL) {
-    warnings.push('LEGAL_ENTITY_* / LEGAL_CONTACT_EMAIL incomplete: the legal pages cannot name the operator')
+  if (!env.LEGAL_ENTITY_ADDRESS) {
+    warnings.push('LEGAL_ENTITY_ADDRESS missing: the legal pages show only "Zaventem" instead of the full registered-office address')
   }
   if (!env.HEALTH_CHECK_TOKEN || env.HEALTH_CHECK_TOKEN.length < 32) {
     warnings.push('HEALTH_CHECK_TOKEN missing or short: the maintenance job (account deletions) is disabled')

@@ -11,6 +11,32 @@ export async function register() {
   for (const warning of warnings) {
     console.warn(JSON.stringify({ level: 'warn', message: 'config.warning', detail: warning }))
   }
+
+  // Demo accounts with the published seed password must never live in production.
+  if (process.env.NODE_ENV === 'production' && errors.length === 0) {
+    try {
+      const [{ prisma }, { findDemoAccountsWithDefaultPassword }] = await Promise.all([
+        import('@/server/db/prisma'),
+        import('@/server/ops/demo-account-guard'),
+      ])
+      const exposed = await findDemoAccountsWithDefaultPassword(prisma)
+      if (exposed.length > 0) {
+        errors.push(
+          `Demo account(s) with the published seed password exist: ${exposed.join(', ')}. Delete them or change their password.`,
+        )
+      }
+    } catch (error) {
+      // The database may still be starting; /api/ready reports that separately.
+      console.warn(
+        JSON.stringify({
+          level: 'warn',
+          message: 'config.demo_account_check_skipped',
+          detail: error instanceof Error ? error.message : String(error),
+        }),
+      )
+    }
+  }
+
   if (errors.length > 0) {
     for (const error of errors) {
       console.error(JSON.stringify({ level: 'error', message: 'config.error', detail: error }))

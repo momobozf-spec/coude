@@ -123,7 +123,8 @@
     "startHabitsHint": "Pick from Islamic and everyday presets, or create your own.",
     "viewPlanner": "Open planner",
     "viewHabits": "Open habits",
-    "viewDeals": "Browse deals"
+    "viewDeals": "Browse deals",
+    "reminderUnderReview": "Under review: these texts are still being checked by someone with religious knowledge. Verify them with a qualified source."
   },
   "onboarding": {
     "title": "Let's set up Muslim Life",
@@ -311,7 +312,8 @@
       "privacy": "Privacy",
       "terms": "Terms",
       "rights": "All rights reserved.",
-      "disclaimer": "Muslim Life is a lifestyle and productivity product. It does not provide religious rulings, medical, legal or financial advice."
+      "disclaimer": "Muslim Life is a lifestyle and productivity product. It does not provide religious rulings, medical, legal or financial advice.",
+      "withdrawal": "Withdraw from contract"
     }
   },
   "pricing": {
@@ -357,7 +359,9 @@
       "all": "All",
       "included": "Included",
       "notIncluded": "Not included"
-    }
+    },
+    "immediateStartConsent": "I ask for Premium to start immediately. I understand that if I withdraw within 14 days, I pay for the part of the period already provided.",
+    "immediateStartRequired": "Please tick the box to confirm Premium may start immediately."
   },
   "upgrade": {
     "title": "This is a Premium feature",

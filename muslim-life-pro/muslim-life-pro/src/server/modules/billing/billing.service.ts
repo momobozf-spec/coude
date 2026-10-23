@@ -46,6 +46,13 @@ export {
 export const checkoutInputSchema = z.object({
   plan: z.enum(['PREMIUM']),
   interval: z.enum(['MONTHLY', 'YEARLY']),
+  /**
+   * The member's express request that Premium starts immediately, with the
+   * acknowledgement that withdrawing within 14 days means paying for the part
+   * already provided (WER art. VI.47 §3 / Directive 2011/83/EU art. 14(3)).
+   * Without it there is no checkout.
+   */
+  immediateStart: z.literal(true),
 })
 
 export type CheckoutInput = z.infer<typeof checkoutInputSchema>

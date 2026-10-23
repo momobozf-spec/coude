@@ -226,6 +226,57 @@ than a request. This is enforced by an ESLint rule and by `import 'server-only'`
 
 ---
 
+## Live zetten
+
+Operator: **Marhaba Data & AI Agent BV** (BE 1003.552.102, Zaventem) — see
+`src/config/legal.ts`. The app needs PostgreSQL and a daily maintenance call, so it runs
+as a Docker web service on **Render (Frankfurt)** with **Neon Postgres (Frankfurt)**.
+Free test setup: [docs/DEPLOY-RENDER-FREE.md](docs/DEPLOY-RENDER-FREE.md). For real members:
+
+1. **Neon** — project in *AWS Europe Central 1 (Frankfurt)*, Postgres 17, a paid plan with
+   point-in-time restore. Copy the connection string (pooling off).
+2. **Stripe** (account on the BV) — create product **"Muslim Life Premium"** with two
+   recurring prices, **€7.99/month** and **€79/year**, *tax-inclusive* (as shown on the
+   site; amounts live in `src/config/plans.ts`). Enable the **Customer Portal**
+   (cancel, update card). Add a webhook endpoint `https://<domain>/api/webhooks/stripe`
+   with events `checkout.session.completed`, `customer.subscription.created`,
+   `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`,
+   `invoice.payment_failed`; copy its signing secret.
+3. **Resend** — add your domain and set the SPF/DKIM records.
+4. **Render** — New → Blueprint with `render.free.yaml` as a base, but on a paid plan,
+   **without `STAGING`**, without `SEED_DEMO_LISTINGS` and without the `ALLOW_*` flags, and
+   with the variables below. Attach the custom domain (https is automatic).
+5. Register your own account, set `BOOTSTRAP_ADMIN_EMAIL` to it once, restart, then clear it.
+6. **GitHub Actions** — copy `deploy/github-cron.yml` to `.github/workflows/cron.yml`,
+   secrets `APP_URL` and `HEALTH_CHECK_TOKEN` (daily maintenance: due account deletions).
+7. Uptime monitor on `/api/health` (liveness) and `/api/ready` (database).
+
+| Variable | Required | Value |
+| --- | --- | --- |
+| `DATABASE_URL` | yes | Neon connection string |
+| `APP_URL`, `AUTH_URL`, `NEXT_PUBLIC_APP_URL` | yes | `https://<domain>` (identical) |
+| `AUTH_SECRET` | yes | `openssl rand -base64 32` (the `.env.example` value is refused) |
+| `TRUSTED_PROXY_HOPS` | yes | `1` on Render |
+| `PAYMENTS_PROVIDER` | yes | `stripe` |
+| `STRIPE_SECRET_KEY` | yes | `sk_live_…` (`sk_test_…` only with `STAGING=1`) |
+| `STRIPE_WEBHOOK_SECRET` | yes | `whsec_…` from the webhook endpoint |
+| `STRIPE_PRICE_PREMIUM_MONTHLY`, `STRIPE_PRICE_PREMIUM_YEARLY` | yes | the two `price_…` ids |
+| `RESEND_API_KEY`, `EMAIL_FROM` | yes | `Muslim Life <noreply@<domain>>` |
+| `HEALTH_CHECK_TOKEN` | yes | ≥ 32 random characters |
+| `LEGAL_ENTITY_ADDRESS` | yes | street, number, postcode of the registered office (TODO) |
+| `LEGAL_ENTITY_NAME`, `LEGAL_ENTITY_VAT`, `LEGAL_CONTACT_EMAIL` | no | default to the BV |
+| `AI_PROVIDER` + `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | no | without a key the assistant is unavailable |
+| `ANALYTICS_PROVIDER` | no | `database` (default) |
+| `LEGAL_TEXTS_REVIEWED`, `RELIGIOUS_CONTENT_REVIEWED` | no | `1` only after the reviews |
+
+The server **refuses to start** in production on: missing database, short or placeholder
+`AUTH_SECRET`, non-https or mismatched URLs, Stripe without webhook secret, and — unless
+`STAGING=1` — mock AI, stub payments, demo listings or a Stripe test key. It also refuses to
+boot while a seed demo account (`demo@`/`admin@muslimlife.app`) still accepts the published
+demo password.
+
+---
+
 ## Privacy
 
 Prayer and habit data is private by default and has no public read path anywhere in the

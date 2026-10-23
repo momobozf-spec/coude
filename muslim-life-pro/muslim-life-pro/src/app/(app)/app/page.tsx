@@ -16,6 +16,7 @@ import { getMyDay } from '@/server/modules/my-day/my-day.service'
 import { formatDate } from '@/lib/dates'
 import { firstName } from '@/lib/utils'
 import { t } from '@/i18n'
+import { getTranslations } from '@/i18n/server'
 
 export const metadata: Metadata = {
   title: 'My Day',
@@ -28,6 +29,11 @@ export const dynamic = 'force-dynamic'
 export default async function MyDayPage() {
   const actor = await requireActor()
   const day = await getMyDay(actor)
+  const tr = await getTranslations()
+  // Verses, hadith and du'as come from prisma/seed/content.ts and have not yet
+  // been checked by someone with religious knowledge. Until they are, every
+  // reminder says so. Set RELIGIOUS_CONTENT_REVIEWED=1 only after that review.
+  const contentReviewed = process.env.RELIGIOUS_CONTENT_REVIEWED === '1'
 
   const name = firstName(actor.name)
   const nonPriorityTasks = day.tasks.filter((task) => !task.isDailyPriority)
@@ -198,6 +204,11 @@ export default async function MyDayPage() {
                 {day.reminder.translation}
               </p>
               <p className="mt-2.5 text-xs text-muted-foreground">{day.reminder.reference}</p>
+              {contentReviewed ? null : (
+                <p className="mt-3 rounded-md border border-warning/40 bg-warning-subtle px-2.5 py-1.5 text-[0.6875rem] leading-snug text-muted-foreground">
+                  {tr('dashboard.reminderUnderReview')}
+                </p>
+              )}
             </Card>
           ) : null}
 

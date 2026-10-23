@@ -254,19 +254,19 @@ describe('grantsAccess', () => {
 
 describe('checkout input', () => {
   it('accepts the supported plan and intervals', () => {
-    expect(checkoutInputSchema.safeParse({ plan: 'PREMIUM', interval: 'MONTHLY' }).success).toBe(true)
-    expect(checkoutInputSchema.safeParse({ plan: 'PREMIUM', interval: 'YEARLY' }).success).toBe(true)
+    expect(checkoutInputSchema.safeParse({ plan: 'PREMIUM', interval: 'MONTHLY', immediateStart: true }).success).toBe(true)
+    expect(checkoutInputSchema.safeParse({ plan: 'PREMIUM', interval: 'YEARLY', immediateStart: true }).success).toBe(true)
   })
 
   it('rejects an unsupported plan', () => {
-    expect(checkoutInputSchema.safeParse({ plan: 'ENTERPRISE', interval: 'MONTHLY' }).success).toBe(
+    expect(checkoutInputSchema.safeParse({ plan: 'ENTERPRISE', interval: 'MONTHLY', immediateStart: true }).success).toBe(
       false,
     )
-    expect(checkoutInputSchema.safeParse({ plan: 'FREE', interval: 'MONTHLY' }).success).toBe(false)
+    expect(checkoutInputSchema.safeParse({ plan: 'FREE', interval: 'MONTHLY', immediateStart: true }).success).toBe(false)
   })
 
   it('rejects an unsupported interval', () => {
-    expect(checkoutInputSchema.safeParse({ plan: 'PREMIUM', interval: 'WEEKLY' }).success).toBe(false)
+    expect(checkoutInputSchema.safeParse({ plan: 'PREMIUM', interval: 'WEEKLY', immediateStart: true }).success).toBe(false)
   })
 
   it('has no field through which a price could be supplied', () => {
@@ -274,11 +274,12 @@ describe('checkout input', () => {
     const parsed = checkoutInputSchema.parse({
       plan: 'PREMIUM',
       interval: 'MONTHLY',
+      immediateStart: true,
       priceId: 'price_free_lol',
       amount: 0,
     })
 
-    expect(parsed).toEqual({ plan: 'PREMIUM', interval: 'MONTHLY' })
+    expect(parsed).toEqual({ plan: 'PREMIUM', interval: 'MONTHLY', immediateStart: true })
     expect('priceId' in parsed).toBe(false)
   })
 })

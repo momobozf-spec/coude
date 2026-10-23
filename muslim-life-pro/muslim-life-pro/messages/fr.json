@@ -123,7 +123,8 @@
     "startHabitsHint": "Choisissez parmi des modèles islamiques et quotidiens, ou créez le vôtre.",
     "viewPlanner": "Ouvrir l'agenda",
     "viewHabits": "Ouvrir les habitudes",
-    "viewDeals": "Parcourir les offres"
+    "viewDeals": "Parcourir les offres",
+    "reminderUnderReview": "Contenu en cours de relecture : ces textes sont encore vérifiés par une personne ayant des connaissances religieuses. Vérifiez-les auprès d'une source qualifiée."
   },
   "onboarding": {
     "title": "Configurons Muslim Life",
@@ -311,7 +312,8 @@
       "privacy": "Confidentialité",
       "terms": "Conditions",
       "rights": "Tous droits réservés.",
-      "disclaimer": "Muslim Life est un produit de style de vie et de productivité. Il ne rend pas d'avis religieux et ne fournit aucun conseil médical, juridique ou financier."
+      "disclaimer": "Muslim Life est un produit de style de vie et de productivité. Il ne rend pas d'avis religieux et ne fournit aucun conseil médical, juridique ou financier.",
+      "withdrawal": "Se rétracter du contrat"
     }
   },
   "pricing": {
@@ -357,7 +359,9 @@
       "all": "Toutes",
       "included": "Inclus",
       "notIncluded": "Non inclus"
-    }
+    },
+    "immediateStartConsent": "Je demande que Premium commence immédiatement. Je comprends qu'en cas de rétractation dans les 14 jours, je paie la partie de la période déjà fournie.",
+    "immediateStartRequired": "Cochez la case pour confirmer que Premium peut commencer immédiatement."
   },
   "upgrade": {
     "title": "Cette fonctionnalité est réservée au Premium",

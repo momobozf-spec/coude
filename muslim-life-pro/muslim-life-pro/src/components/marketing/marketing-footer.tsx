@@ -28,9 +28,8 @@ export function MarketingFooter() {
       links: [
         { href: '/legal/privacy', label: t('landing.footer.privacy') },
         { href: '/legal/terms', label: t('landing.footer.terms') },
-        ...(legal.email
-          ? [{ href: `mailto:${legal.email}`, label: t('landing.footer.contact') }]
-          : []),
+        { href: '/legal/withdrawal', label: t('landing.footer.withdrawal') },
+        { href: `mailto:${legal.email}`, label: t('landing.footer.contact') },
       ],
     },
   ]
@@ -72,9 +71,8 @@ export function MarketingFooter() {
             {t('landing.footer.disclaimer')}
           </p>
           <p className="mt-4 text-xs text-muted-foreground">
-            © {new Date().getFullYear()} {legal.name ?? siteConfig.name}
-            {legal.vat ? ` · ${legal.vat}` : ''}
-            {legal.address ? ` · ${legal.address}` : ''}. {t('landing.footer.rights')}
+            © {new Date().getFullYear()} {legal.name} · {legal.vat} · {legal.displayAddress}.{' '}
+            {t('landing.footer.rights')}
           </p>
         </div>
       </div>

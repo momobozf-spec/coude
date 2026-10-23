@@ -123,7 +123,8 @@
     "startHabitsHint": "Kies uit islamitische en alledaagse voorbeelden, of maak je eigen.",
     "viewPlanner": "Planner openen",
     "viewHabits": "Gewoontes openen",
-    "viewDeals": "Aanbiedingen bekijken"
+    "viewDeals": "Aanbiedingen bekijken",
+    "reminderUnderReview": "Inhoud wordt nagelezen: deze teksten worden nog gecontroleerd door iemand met religieuze kennis. Controleer ze bij een bevoegde bron."
   },
   "onboarding": {
     "title": "Laten we Muslim Life instellen",
@@ -311,7 +312,8 @@
       "privacy": "Privacy",
       "terms": "Voorwaarden",
       "rights": "Alle rechten voorbehouden.",
-      "disclaimer": "Muslim Life is een lifestyle- en productiviteitsproduct. Het geeft geen religieuze uitspraken en geen medisch, juridisch of financieel advies."
+      "disclaimer": "Muslim Life is een lifestyle- en productiviteitsproduct. Het geeft geen religieuze uitspraken en geen medisch, juridisch of financieel advies.",
+      "withdrawal": "Overeenkomst herroepen"
     }
   },
   "pricing": {
@@ -357,7 +359,9 @@
       "all": "Alles",
       "included": "Inbegrepen",
       "notIncluded": "Niet inbegrepen"
-    }
+    },
+    "immediateStartConsent": "Ik vraag dat Premium meteen start. Ik begrijp dat ik bij herroeping binnen 14 dagen betaal voor het deel van de periode dat al geleverd is.",
+    "immediateStartRequired": "Vink het vakje aan om te bevestigen dat Premium meteen mag starten."
   },
   "upgrade": {
     "title": "Dit is een Premium-functie",

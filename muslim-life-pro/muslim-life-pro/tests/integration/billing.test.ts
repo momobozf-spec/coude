@@ -79,26 +79,26 @@ describeIfDb('checkout', () => {
   })
 
   it('creates a session for a monthly plan', async () => {
-    const result = await createCheckout(actor, { plan: 'PREMIUM', interval: 'MONTHLY' })
+    const result = await createCheckout(actor, { plan: 'PREMIUM', interval: 'MONTHLY', immediateStart: true })
 
     expect(result.url.length).toBeGreaterThan(0)
     expect(result.isDemoBilling).toBe(true)
   })
 
   it('creates a session for a yearly plan', async () => {
-    const result = await createCheckout(actor, { plan: 'PREMIUM', interval: 'YEARLY' })
+    const result = await createCheckout(actor, { plan: 'PREMIUM', interval: 'YEARLY', immediateStart: true })
     expect(result.url).toContain('YEARLY')
   })
 
   it('rejects an unsupported plan', async () => {
     await expect(
-      createCheckout(actor, { plan: 'ENTERPRISE', interval: 'MONTHLY' } as never),
+      createCheckout(actor, { plan: 'ENTERPRISE', interval: 'MONTHLY', immediateStart: true } as never),
     ).rejects.toThrow()
   })
 
   it('rejects an unsupported interval', async () => {
     await expect(
-      createCheckout(actor, { plan: 'PREMIUM', interval: 'WEEKLY' } as never),
+      createCheckout(actor, { plan: 'PREMIUM', interval: 'WEEKLY', immediateStart: true } as never),
     ).rejects.toThrow()
   })
 
@@ -107,6 +107,7 @@ describeIfDb('checkout', () => {
     const result = await createCheckout(actor, {
       plan: 'PREMIUM',
       interval: 'MONTHLY',
+      immediateStart: true,
       priceId: 'price_free_lol',
     } as never)
 
@@ -130,7 +131,7 @@ describeIfDb('checkout', () => {
 
     // Charging someone twice for the same thing is the failure mode here.
     await expect(
-      createCheckout(subscriber, { plan: 'PREMIUM', interval: 'MONTHLY' }),
+      createCheckout(subscriber, { plan: 'PREMIUM', interval: 'MONTHLY', immediateStart: true }),
     ).rejects.toThrow(BillingError)
   })
 

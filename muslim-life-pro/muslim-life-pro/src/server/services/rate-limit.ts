@@ -40,6 +40,8 @@ export const RATE_LIMITS = {
   'privacy.export': { limit: 3, windowSeconds: 24 * 60 * 60 },
   'privacy.deleteActivity': { limit: 3, windowSeconds: 60 * 60 },
   'privacy.deleteAccount': { limit: 5, windowSeconds: 60 * 60 },
+  /** Online withdrawal statements (Directive (EU) 2023/2673), per IP. */
+  'billing.withdrawal': { limit: 5, windowSeconds: 60 * 60 },
   /** Each reconcile is an outbound provider call made by hand. */
   'admin.reconcile': { limit: 30, windowSeconds: 60 * 60 },
 } as const satisfies Record<string, RateLimitRule>

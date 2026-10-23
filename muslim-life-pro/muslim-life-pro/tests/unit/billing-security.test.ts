@@ -115,17 +115,25 @@ describe('client cannot influence what is charged', () => {
     const parsed = checkoutInputSchema.parse({
       plan: 'PREMIUM',
       interval: 'MONTHLY',
+      immediateStart: true,
       priceId: 'price_free',
       price: 0,
       amount: 0,
       currency: 'XXX',
     })
 
-    expect(Object.keys(parsed).sort()).toEqual(['interval', 'plan'])
+    expect(Object.keys(parsed).sort()).toEqual(['immediateStart', 'interval', 'plan'])
+  })
+
+  it('refuses a checkout without the express request to start immediately', () => {
+    expect(checkoutInputSchema.safeParse({ plan: 'PREMIUM', interval: 'MONTHLY' }).success).toBe(false)
+    expect(
+      checkoutInputSchema.safeParse({ plan: 'PREMIUM', interval: 'MONTHLY', immediateStart: false }).success,
+    ).toBe(false)
   })
 
   it('rejects a plan that is not sellable', () => {
-    expect(checkoutInputSchema.safeParse({ plan: 'FREE', interval: 'MONTHLY' }).success).toBe(false)
+    expect(checkoutInputSchema.safeParse({ plan: 'FREE', interval: 'MONTHLY', immediateStart: true }).success).toBe(false)
   })
 
   it('resolves the price server-side in the checkout route', () => {

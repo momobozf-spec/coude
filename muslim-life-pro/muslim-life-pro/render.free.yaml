@@ -38,8 +38,18 @@ services:
         value: stub
       - key: SEED_DEMO_LISTINGS
         value: '1'
+      # Test deployment: mock AI, stub payments and demo listings are only
+      # accepted in production together with STAGING=1.
+      - key: STAGING
+        value: '1'
+      # Operator. Name, enterprise number and e-mail are also the defaults in
+      # src/config/legal.ts; fill in LEGAL_ENTITY_ADDRESS yourself.
       - key: LEGAL_ENTITY_NAME
-        value: Marhaba Cooperation BV
+        value: Marhaba Data & AI Agent BV
+      - key: LEGAL_ENTITY_VAT
+        value: BE 1003.552.102
+      - key: LEGAL_CONTACT_EMAIL
+        value: momobozf@gmail.com
       - key: AUTH_SECRET
         generateValue: true
       - key: HEALTH_CHECK_TOKEN
@@ -55,11 +65,7 @@ services:
         sync: false
       - key: EMAIL_FROM
         sync: false
-      - key: LEGAL_ENTITY_VAT
-        sync: false
       - key: LEGAL_ENTITY_ADDRESS
-        sync: false
-      - key: LEGAL_CONTACT_EMAIL
         sync: false
       - key: BOOTSTRAP_ADMIN_EMAIL
         sync: false
