@@ -1,0 +1,20 @@
+{
+  "name": "ritna",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Ritna - taximarktplaats: klanten boeken, erkende taxibedrijven voeren uit, platform verdient commissie per uitgevoerde rit.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "typecheck": "tsc -b packages/core apps/api",
+    "test": "npm run test -w @ritna/core && npm run test -w @ritna/api",
+    "db:migrate": "npm run db:migrate -w @ritna/api",
+    "db:seed": "npm run db:seed -w @ritna/api",
+    "dev:api": "npm run dev -w @ritna/api"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

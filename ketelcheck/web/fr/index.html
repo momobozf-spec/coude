@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deuxième devis pour votre nouvelle chaudière | KetelCheck</title>
+<meta name="description" content="Déjà un devis pour remplacer votre chaudière gaz ? Un installateur de Bruxelles ou de la périphérie établit un deuxième devis. Gratuit et sans engagement.">
+<link rel="alternate" hreflang="nl" href="/">
+<link rel="alternate" hreflang="fr" href="/fr/">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="/fr/">KetelCheck</a>
+    <nav class="lang"><a href="/">NL</a><a href="/fr/" aria-current="true">FR</a></nav>
+  </header>
+
+  <main class="hero">
+    <div>
+      <h1>Déjà un devis pour remplacer votre chaudière gaz ? Faites vérifier par un deuxième installateur.</h1>
+      <p class="lead">Pour Bruxelles et la périphérie flamande. Un seul installateur, pas cinq qui appellent en même temps. Gratuit et sans engagement.</p>
+      <ol class="steps">
+        <li><b>1</b><span>Vous indiquez votre chaudière, votre situation et (si vous le souhaitez) le montant de votre premier devis.</span></li>
+        <li><b>2</b><span>Nous vérifions votre demande et cherchons un installateur qui couvre votre commune et a de la place maintenant.</span></li>
+        <li><b>3</b><span>Nous vous envoyons son nom par e-mail. L'installateur vous contacte, passe voir l'installation et fait son propre devis.</span></li>
+      </ol>
+      <p class="facts">Nous travaillons uniquement avec des installateurs dont nous avons vérifié l'agrément régional dans les listes officielles de Bruxelles ou de Flandre. Vous ne vous engagez à rien. Prix, planning et exécution se règlent directement avec l'installateur.</p>
+    </div>
+
+    <div class="card" id="formcard">
+      <form id="aanvraag" novalidate>
+        <h2>Demandez un deuxième devis</h2>
+        <p class="sub">2 minutes. Les champs marqués * sont obligatoires.</p>
+
+        <div class="row">
+          <fieldset><label class="l" for="postcode">Code postal *</label><input id="postcode" name="postcode" type="text" inputmode="numeric" maxlength="4" autocomplete="postal-code" required></fieldset>
+          <fieldset><label class="l" for="gemeente">Commune</label><input id="gemeente" name="gemeente" type="text" autocomplete="address-level2"></fieldset>
+        </div>
+
+        <div class="row">
+          <fieldset><label class="l" for="brandstof">Chaudière actuelle *</label>
+            <select id="brandstof" name="brandstof" required>
+              <option value="">Choisir…</option><option value="gas">Chaudière gaz</option><option value="andere">Mazout ou autre (pas encore possible)</option>
+            </select></fieldset>
+          <fieldset><label class="l" for="leeftijd">Âge de la chaudière</label>
+            <select id="leeftijd" name="leeftijd">
+              <option value="">Je ne sais pas</option><option value="<10">Moins de 10 ans</option><option value="10-15">10 à 15 ans</option><option value="15-20">15 à 20 ans</option><option value=">20">Plus de 20 ans</option>
+            </select></fieldset>
+        </div>
+
+        <fieldset><label class="l" for="merk">Marque (si vous la connaissez)</label><input id="merk" name="merk" type="text" placeholder="p.ex. Vaillant, Bulex, Viessmann, Remeha"></fieldset>
+
+        <fieldset><legend>Situation *</legend>
+          <div class="chips">
+            <label><input type="radio" name="situatie" value="defect"> Chaudière en panne</label>
+            <label><input type="radio" name="situatie" value="vervangen_aangeraden"> Remplacement conseillé</label>
+            <label><input type="radio" name="situatie" value="wil_vervangen"> Je souhaite remplacer</label>
+          </div></fieldset>
+
+        <div class="row">
+          <fieldset><label class="l" for="offerte">Déjà un devis ? *</label>
+            <select id="offerte" name="offerte" required>
+              <option value="">Choisir…</option><option value="ja">Oui</option><option value="nee">Pas encore</option>
+            </select></fieldset>
+          <fieldset><label class="l" for="offerte_bedrag">Montant du premier devis (€, facultatif)</label><input id="offerte_bedrag" name="offerte_bedrag" type="number" min="0" step="50"></fieldset>
+        </div>
+
+        <div class="row">
+          <fieldset><label class="l" for="termijn">Quand ? *</label>
+            <select id="termijn" name="termijn" required>
+              <option value="">Choisir…</option><option value="dringend">Le plus vite possible</option><option value="<1m">Dans le mois</option><option value="1-3m">Dans les 3 mois</option><option value="later">Dans plus de 3 mois</option>
+            </select></fieldset>
+          <fieldset><label class="l" for="eigenaar">Vous êtes *</label>
+            <select id="eigenaar" name="eigenaar" required>
+              <option value="">Choisir…</option><option value="eigenaar">Propriétaire occupant</option><option value="verhuurder">Propriétaire bailleur</option><option value="huurder">Locataire (le propriétaire décide)</option>
+            </select></fieldset>
+        </div>
+
+        <fieldset><label class="l" for="naam">Nom *</label><input id="naam" name="naam" type="text" autocomplete="name" required></fieldset>
+        <div class="row">
+          <fieldset><label class="l" for="telefoon">Téléphone *</label><input id="telefoon" name="telefoon" type="tel" autocomplete="tel" required></fieldset>
+          <fieldset><label class="l" for="email">E-mail *</label><input id="email" name="email" type="email" autocomplete="email" required></fieldset>
+        </div>
+        <fieldset><label class="l" for="opmerking">Remarque</label><input id="opmerking" name="opmerking" type="text" maxlength="1000"></fieldset>
+
+        <div class="hp" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+
+        <label class="consent"><input type="checkbox" name="toestemming" required>
+          <span>Je demande que mes données soient transmises à un installateur de la <a href="/partners.html" target="_blank">liste des partenaires</a> (et à un second si le premier n'a pas de disponibilité), afin qu'il me contacte pour ce devis. Je serai informé·e par e-mail de qui il s'agit. Voir la <a href="/privacy.html#fr" target="_blank">déclaration de confidentialité</a>.</span></label>
+
+        <button class="cta" type="submit">Envoyer la demande</button>
+        <div id="msg" class="msg" role="status" aria-live="polite"></div>
+      </form>
+
+      <div id="done" class="done">
+        <h2>Demande reçue</h2>
+        <p>Merci. Nous examinons votre demande et vous écrivons dès qu'un installateur l'accepte.</p>
+      </div>
+    </div>
+  </main>
+
+  <section class="block">
+    <h2>Pourquoi un deuxième devis ?</h2>
+    <div class="grid3">
+      <div><b>Comparer sans être harcelé</b><p>Votre demande va à un seul installateur à la fois, pas à toute une liste.</p></div>
+      <div><b>Une demande claire</b><p>Nous nous concentrons sur une seule chose : le remplacement de votre chaudière gaz. Les alternatives se discutent directement avec l'installateur.</p></div>
+      <div><b>Vous décidez</b><p>Un deuxième devis est sans engagement. Vous choisissez librement.</p></div>
+    </div>
+  </section>
+
+  <section class="block faq">
+    <h2>Questions fréquentes</h2>
+    <details><summary>Combien ça coûte ?</summary><p>Rien pour vous. L'installateur nous paie une rémunération s'il accepte votre demande.</p></details>
+    <details><summary>Qui reçoit mes données ?</summary><p>Un installateur de notre liste de partenaires. S'il n'a pas de disponibilité, éventuellement un autre. Nous vous disons chaque fois qui. Jamais plus de deux.</p></details>
+    <details><summary>Faites-vous aussi l'entretien ou les réparations ?</summary><p>Pas pour l'instant. Cette page concerne uniquement le remplacement d'une chaudière gaz.</p></details>
+    <details><summary>Garantissez-vous un prix ou un délai ?</summary><p>Non. Prix, planning et exécution se règlent directement avec l'installateur.</p></details>
+  </section>
+
+  <footer>
+    KetelCheck est un service de Marhaba Data &amp; AI Agent BV · TVA BE1003552102 · <a href="/privacy.html#fr">Confidentialité</a> · <a href="/partners.html">Partenaires</a>
+  </footer>
+</div>
+<script src="/assets/app.js"></script>
+</body>
+</html>

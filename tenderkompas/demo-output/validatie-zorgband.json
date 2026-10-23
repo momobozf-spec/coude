@@ -1,0 +1,144 @@
+{
+  "procedure": {
+    "id": "6856e86d-23ea-4ae1-8db8-e8c15082f2c7",
+    "sourceId": "be-eprocurement",
+    "externalId": "PPP1FN-206/6004/2026/206",
+    "title": "Data project framework agreement",
+    "titleLanguage": "ENG",
+    "buyerName": "Zorgband Leie & Schelde",
+    "buyerCountry": "BEL",
+    "performanceCountries": [],
+    "performanceNuts": [],
+    "officialLanguages": [],
+    "procedureType": null,
+    "contractNature": null,
+    "cpvCodes": [
+      "72316000"
+    ],
+    "description": "Raamovereenkomst: use cases omzetten in bruikbare inzichten binnen het bestaande Microsoft Fabric-dataplatform en de Power BI-omgeving (KPI's, dashboards, datapijplijnen, governance, gefaseerde groei van analytics, opleiding gebruikers). Samengevat uit de openbare pagina van het Publicatiebureau.",
+    "lifecycle": "open",
+    "lifecycleOverride": null,
+    "lifecycleOverrideNote": null,
+    "summaryNl": null,
+    "summaryIsTranslation": false,
+    "summaryMethod": null,
+    "summaryVerified": false,
+    "fingerprint": "ec3755de2d00b23d99558d4353598e1bf9cb2345376293bb39f2fc38fd5d6532",
+    "fingerprintChangedAt": "2026-10-23T01:24:16.589Z",
+    "lastCheckedAt": "2026-10-23T01:24:16.589Z",
+    "isDemo": false,
+    "createdAt": "2026-10-23T01:24:16.557Z",
+    "updatedAt": "2026-10-23T01:24:16.589Z"
+  },
+  "assessment": {
+    "id": "e5831586-437a-4f35-ad6f-7fe6176fdfa6",
+    "organizationId": "fcb25ac6-8162-42cf-b464-16c15eb80741",
+    "procedureId": "6856e86d-23ea-4ae1-8db8-e8c15082f2c7",
+    "version": 1,
+    "status": "draft",
+    "isCurrent": true,
+    "scoringConfigVersion": 1,
+    "profileVersion": 1,
+    "procedureFingerprint": "ec3755de2d00b23d99558d4353598e1bf9cb2345376293bb39f2fc38fd5d6532",
+    "stale": false,
+    "staleReason": null,
+    "relevanceScore": 43,
+    "relevance": {
+      "score": 43,
+      "criteria": [
+        {
+          "key": "services",
+          "label": "Diensten",
+          "points": 30,
+          "result": "match",
+          "weight": 30,
+          "explanation": "Overeenkomst: Databricks en data-engineering (CPV 72316000, dataplatform); Microsoft Fabric en Power BI (CPV 72316000, power bi, microsoft fabric, dashboards)."
+        },
+        {
+          "key": "technology",
+          "label": "Technologie",
+          "points": 12.5,
+          "result": "partial",
+          "weight": 25,
+          "explanation": "Genoemd in de opdracht: Power BI."
+        },
+        {
+          "key": "language",
+          "label": "Taal",
+          "points": 0,
+          "result": "unknown",
+          "weight": 15,
+          "explanation": "Taal van de procedure of het profiel onbekend."
+        },
+        {
+          "key": "region",
+          "label": "Regio",
+          "points": 0,
+          "result": "unknown",
+          "weight": 10,
+          "explanation": "Geen werkregio's in profiel."
+        },
+        {
+          "key": "contractSize",
+          "label": "Contractomvang",
+          "points": 0,
+          "result": "unknown",
+          "weight": 10,
+          "explanation": "Geen geschatte waarde gepubliceerd."
+        },
+        {
+          "key": "capacity",
+          "label": "Capaciteit",
+          "points": 0,
+          "result": "unknown",
+          "weight": 10,
+          "explanation": "Beschikbare capaciteit niet opgegeven."
+        }
+      ],
+      "disclaimer": "Relevantiescore = inhoudelijke aansluiting op het profiel. Geen winkans en geen toelatingsoordeel.",
+      "knownScore": null,
+      "adviceReason": "Harde blokkade aanwezig (gaat altijd voor op de relevantiescore).",
+      "unknownCount": 4,
+      "criticalMissing": [
+        "Toelatingsvoorwaarden nog niet vastgelegd: voldoen kan niet worden vastgesteld."
+      ]
+    },
+    "conditions": [],
+    "feasibility": {
+      "notes": [
+        "Geen toekomstige deadline bekend.",
+        "Beschikbare capaciteit niet opgegeven in profiel."
+      ],
+      "result": "unknown",
+      "capacity": "unknown",
+      "deadlineKind": null,
+      "daysToFirstDeadline": null
+    },
+    "blockers": [
+      {
+        "code": "status_expired",
+        "hard": true,
+        "label": "Alle bekende deadlines zijn verstreken."
+      }
+    ],
+    "missingInfo": [
+      "Toelatingsvoorwaarden nog niet vastgelegd: voldoen kan niet worden vastgesteld.",
+      "Geen toekomstige deadline bekend.",
+      "Beschikbare capaciteit niet opgegeven in profiel.",
+      "Taal: Taal van de procedure of het profiel onbekend.",
+      "Regio: Geen werkregio's in profiel.",
+      "Contractomvang: Geen geschatte waarde gepubliceerd.",
+      "Capaciteit: Beschikbare capaciteit niet opgegeven."
+    ],
+    "advice": "not_suitable",
+    "fitExplanation": null,
+    "obstaclesNote": null,
+    "nextAction": null,
+    "createdByUserId": "8f3f4736-851d-4cc7-b38e-a4a221c4d7ed",
+    "approvedAt": null,
+    "approvedByUserId": null,
+    "publishedAt": null,
+    "createdAt": "2026-10-23T01:24:16.648Z",
+    "updatedAt": "2026-10-23T01:24:16.648Z"
+  }
+}

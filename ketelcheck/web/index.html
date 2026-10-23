@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tweede offerte voor je nieuwe verwarmingsketel | KetelCheck</title>
+<meta name="description" content="Al een offerte om je gasketel te vervangen? Laat één installateur uit Brussel of de Vlaamse Rand een tweede offerte maken. Gratis en vrijblijvend.">
+<link rel="alternate" hreflang="fr" href="/fr/">
+<link rel="alternate" hreflang="nl" href="/">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="/">KetelCheck</a>
+    <nav class="lang"><a href="/" aria-current="true">NL</a><a href="/fr/">FR</a></nav>
+  </header>
+
+  <main class="hero">
+    <div>
+      <h1>Al een offerte om je gasketel te vervangen? Laat een tweede installateur kijken.</h1>
+      <p class="lead">Voor Brussel en de Vlaamse Rand. Eén installateur, niet vijf die tegelijk bellen. Gratis en vrijblijvend.</p>
+      <ol class="steps">
+        <li><b>1</b><span>Je vult in wat je hebt: ketel, situatie en (als je wil) het bedrag van je eerste offerte.</span></li>
+        <li><b>2</b><span>We bekijken je aanvraag en zoeken een installateur die jouw gemeente bedient en nu tijd heeft.</span></li>
+        <li><b>3</b><span>We mailen je wie het is. De installateur neemt contact op, komt kijken en maakt zijn eigen offerte.</span></li>
+      </ol>
+      <p class="facts">We werken alleen met installateurs waarvan we de gewestelijke erkenning in de officiële lijsten van Brussel of Vlaanderen hebben nagekeken. Je zit nergens aan vast. Prijs, planning en uitvoering spreek je rechtstreeks af met de installateur.</p>
+    </div>
+
+    <div class="card" id="formcard">
+      <form id="aanvraag" novalidate>
+        <h2>Vraag een tweede offerte aan</h2>
+        <p class="sub">2 minuten. Velden met * zijn verplicht.</p>
+
+        <div class="row">
+          <fieldset><label class="l" for="postcode">Postcode *</label><input id="postcode" name="postcode" type="text" inputmode="numeric" maxlength="4" autocomplete="postal-code" required></fieldset>
+          <fieldset><label class="l" for="gemeente">Gemeente</label><input id="gemeente" name="gemeente" type="text" autocomplete="address-level2"></fieldset>
+        </div>
+
+        <div class="row">
+          <fieldset><label class="l" for="brandstof">Huidige ketel *</label>
+            <select id="brandstof" name="brandstof" required>
+              <option value="">Kies…</option><option value="gas">Gasketel</option><option value="andere">Stookolie of andere (nog niet mogelijk)</option>
+            </select></fieldset>
+          <fieldset><label class="l" for="leeftijd">Leeftijd ketel</label>
+            <select id="leeftijd" name="leeftijd">
+              <option value="">Weet niet</option><option value="<10">Minder dan 10 jaar</option><option value="10-15">10 tot 15 jaar</option><option value="15-20">15 tot 20 jaar</option><option value=">20">Meer dan 20 jaar</option>
+            </select></fieldset>
+        </div>
+
+        <fieldset><label class="l" for="merk">Merk (als je het weet)</label><input id="merk" name="merk" type="text" placeholder="bv. Vaillant, Bulex, Viessmann, Remeha"></fieldset>
+
+        <fieldset><legend>Situatie *</legend>
+          <div class="chips">
+            <label><input type="radio" name="situatie" value="defect"> Ketel is defect</label>
+            <label><input type="radio" name="situatie" value="vervangen_aangeraden"> Vervanging aangeraden</label>
+            <label><input type="radio" name="situatie" value="wil_vervangen"> Ik wil zelf vervangen</label>
+          </div></fieldset>
+
+        <div class="row">
+          <fieldset><label class="l" for="offerte">Al een offerte? *</label>
+            <select id="offerte" name="offerte" required>
+              <option value="">Kies…</option><option value="ja">Ja</option><option value="nee">Nog niet</option>
+            </select></fieldset>
+          <fieldset><label class="l" for="offerte_bedrag">Bedrag eerste offerte (€, optioneel)</label><input id="offerte_bedrag" name="offerte_bedrag" type="number" min="0" step="50"></fieldset>
+        </div>
+
+        <div class="row">
+          <fieldset><label class="l" for="termijn">Wanneer? *</label>
+            <select id="termijn" name="termijn" required>
+              <option value="">Kies…</option><option value="dringend">Zo snel mogelijk</option><option value="<1m">Binnen 1 maand</option><option value="1-3m">Binnen 3 maanden</option><option value="later">Later dan 3 maanden</option>
+            </select></fieldset>
+          <fieldset><label class="l" for="eigenaar">Je bent *</label>
+            <select id="eigenaar" name="eigenaar" required>
+              <option value="">Kies…</option><option value="eigenaar">Eigenaar-bewoner</option><option value="verhuurder">Eigenaar-verhuurder</option><option value="huurder">Huurder (eigenaar beslist)</option>
+            </select></fieldset>
+        </div>
+
+        <fieldset><label class="l" for="naam">Naam *</label><input id="naam" name="naam" type="text" autocomplete="name" required></fieldset>
+        <div class="row">
+          <fieldset><label class="l" for="telefoon">Telefoon *</label><input id="telefoon" name="telefoon" type="tel" autocomplete="tel" required></fieldset>
+          <fieldset><label class="l" for="email">E-mail *</label><input id="email" name="email" type="email" autocomplete="email" required></fieldset>
+        </div>
+        <fieldset><label class="l" for="opmerking">Opmerking</label><input id="opmerking" name="opmerking" type="text" maxlength="1000"></fieldset>
+
+        <div class="hp" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+
+        <label class="consent"><input type="checkbox" name="toestemming" required>
+          <span>Ik vraag om mijn gegevens door te geven aan één installateur uit de <a href="/partners.html" target="_blank">partnerlijst</a> (en een tweede als de eerste geen tijd heeft), zodat die mij contacteert over deze offerte. Ik krijg per mail te horen wie. Zie de <a href="/privacy.html" target="_blank">privacyverklaring</a>.</span></label>
+
+        <button class="cta" type="submit">Verstuur aanvraag</button>
+        <div id="msg" class="msg" role="status" aria-live="polite"></div>
+      </form>
+
+      <div id="done" class="done">
+        <h2>Aanvraag ontvangen</h2>
+        <p>Dank je. We bekijken je aanvraag en mailen je zodra een installateur ze aanneemt.</p>
+      </div>
+    </div>
+  </main>
+
+  <section class="block">
+    <h2>Waarom een tweede offerte?</h2>
+    <div class="grid3">
+      <div><b>Vergelijken zonder telefoonstorm</b><p>Je aanvraag gaat naar één installateur tegelijk, niet naar een hele lijst.</p></div>
+      <div><b>Eén duidelijke vraag</b><p>We focussen op één ding: de vervanging van je gasketel. Alternatieven bespreek je rechtstreeks met de installateur.</p></div>
+      <div><b>Jij beslist</b><p>Een tweede offerte is vrijblijvend. Je kiest zelf met wie je verder gaat.</p></div>
+    </div>
+  </section>
+
+  <section class="block faq">
+    <h2>Veelgestelde vragen</h2>
+    <details><summary>Wat kost dit?</summary><p>Niets voor jou. De installateur betaalt ons een vergoeding als hij je aanvraag aanneemt.</p></details>
+    <details><summary>Wie krijgt mijn gegevens?</summary><p>Eén installateur uit onze partnerlijst. Heeft die geen tijd, dan eventueel één andere. We mailen je telkens wie. Nooit meer dan twee.</p></details>
+    <details><summary>Doen jullie ook gewoon onderhoud of herstellingen?</summary><p>Voorlopig niet. Deze pagina is enkel voor de vervanging van een gasketel.</p></details>
+    <details><summary>Garanderen jullie een prijs of termijn?</summary><p>Nee. Prijs, planning en uitvoering spreek je rechtstreeks af met de installateur.</p></details>
+  </section>
+
+  <footer>
+    KetelCheck is een dienst van Marhaba Data &amp; AI Agent BV · BTW BE1003552102 · <a href="/privacy.html">Privacy</a> · <a href="/partners.html">Partners</a>
+  </footer>
+</div>
+<script src="/assets/app.js"></script>
+</body>
+</html>
