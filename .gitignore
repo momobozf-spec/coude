@@ -37,3 +37,4 @@ Thumbs.db
 # Lokaal testen (start-lokaal.cmd)
 lokaal/.pgdata/
 ketelcheck/lokaal/data.json
+lokaal/bron/
