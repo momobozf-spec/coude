@@ -1,0 +1,460 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>SaaS Overdracht</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column, a quiet top bar with two views (public website / internal overview); website reads like a short brief, the overview like a ledger. */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --sunk:#eceef3; --ink:#161a24; --muted:#5b6274; --line:#d9dce5;
+  --accent:#2a49c4; --accent-ink:#ffffff; --accent-soft:#e5eafb;
+  --good:#1f7a4d; --good-soft:#e1f2e8; --warn:#9a5b00; --warn-soft:#fbefd9; --bad:#b3261e; --bad-soft:#fbe4e2;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11141b; --surface:#191d27; --sunk:#222736; --ink:#e8eaf0; --muted:#a2a8b8; --line:#2f3546;
+  --accent:#8ea2ff; --accent-ink:#0d1020; --accent-soft:#25305a;
+  --good:#6fd39f; --good-soft:#163a28; --warn:#f0b75c; --warn-soft:#3d2c10; --bad:#ff8a80; --bad-soft:#47201d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11141b; --surface:#191d27; --sunk:#222736; --ink:#e8eaf0; --muted:#a2a8b8; --line:#2f3546;
+  --accent:#8ea2ff; --accent-ink:#0d1020; --accent-soft:#25305a;
+  --good:#6fd39f; --good-soft:#163a28; --warn:#f0b75c; --warn-soft:#3d2c10; --bad:#ff8a80; --bad-soft:#47201d; color-scheme:dark}
+
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top, 0px);z-index:10;background:var(--bg)}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+p{margin:0}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top, 0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:12px}
+.brand{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:-.01em}
+.brand small{font-family:var(--mono);font-weight:400;font-size:11px;color:var(--muted);margin-left:6px;letter-spacing:.04em}
+.tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:10px;margin-left:auto}
+.tabs button{border:0;background:transparent;padding:6px 14px;border-radius:7px;cursor:pointer;color:var(--muted);font-weight:500}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.demo{width:100%;font-family:var(--mono);font-size:12px;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 10px}
+
+/* website */
+.hero{padding-block:48px 32px;display:grid;gap:16px;max-width:680px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.hero h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em}
+.hero p{font-size:17px;color:var(--muted);max-width:62ch}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:9px;padding:10px 18px;font-weight:600;cursor:pointer;border:1px solid var(--accent);text-decoration:none}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;padding-block:24px;border-top:1px solid var(--line)}
+.grid2>*{min-width:0}
+.block h2{font-size:22px;margin-bottom:10px}
+.block ul{margin:0;padding-left:18px;display:grid;gap:4px}
+.steps{list-style:none;padding:0;margin:0;display:grid;gap:12px;counter-reset:s}
+.steps li{display:grid;grid-template-columns:28px 1fr;gap:10px;counter-increment:s}
+.steps li::before{content:counter(s);font-family:var(--mono);font-size:13px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-weight:500}
+.note{background:var(--sunk);border-radius:12px;padding:16px 18px;display:grid;gap:6px}
+.note strong{font-family:var(--display);font-size:17px}
+
+/* form */
+.formcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;margin-block:24px;display:grid;gap:20px}
+.formcard h2{font-size:24px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.field{display:grid;gap:6px;min-width:0}
+.field.full{grid-column:1/-1}
+label{font-weight:500;font-size:14px}
+.hint{font-size:12.5px;color:var(--muted)}
+input[type=text],input[type=email],input[type=tel],input[type=url],select,textarea{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+textarea{min-height:76px;resize:vertical}
+.check{display:grid;grid-template-columns:20px 1fr;gap:10px;align-items:start;font-size:14px}
+.check input{margin-top:3px;width:16px;height:16px;accent-color:var(--accent)}
+.err{color:var(--bad);font-size:13px}
+.confirm{background:var(--good-soft);border-radius:12px;padding:20px;display:grid;gap:10px}
+.confirm h3{font-size:20px;color:var(--good)}
+.foot{border-top:1px solid var(--line);padding-top:16px;font-size:13px;color:var(--muted);display:grid;gap:4px}
+
+/* internal */
+.ihead{padding-block:28px 12px;display:grid;gap:6px}
+.ihead h1{font-size:28px}
+.ihead p{color:var(--muted)}
+.funnel{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-block:12px 24px}
+.funnel div{background:var(--surface);padding:14px 16px;display:grid;gap:2px}
+.funnel span{font-size:12px;color:var(--muted)}
+.funnel b{font-family:var(--display);font-size:26px;font-variant-numeric:tabular-nums}
+.funnel .cash b{color:var(--good)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:860px;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.mono,.mono{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
+td select{padding:5px 8px;font-size:13px}
+td input.hours{width:64px;padding:5px 8px;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);border-radius:6px;font-family:var(--mono);font-size:13px}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.p-ok{background:var(--good-soft);color:var(--good)}
+.p-warn{background:var(--warn-soft);color:var(--warn)}
+.p-bad{background:var(--bad-soft);color:var(--bad)}
+.p-info{background:var(--accent-soft);color:var(--accent)}
+.sub{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.tag{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:28px;align-items:start}
+.calc>*{min-width:0}
+.calc .formcard{margin:0}
+.res{display:grid;grid-template-columns:1fr auto;gap:6px 16px;font-size:14px}
+.res .mono{text-align:right}
+.res .tot{font-weight:600;border-top:1px solid var(--line);padding-top:6px}
+.legend{display:grid;gap:8px;font-size:14px}
+@media (prefers-reduced-motion: no-preference){.confirm{animation:in .25s ease-out}@keyframes in{from{transform:translateY(4px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="brand">SaaS Overdracht<small>WERKNAAM</small></div>
+    <nav class="tabs" role="tablist" aria-label="Weergave">
+      <button id="tab-website" role="tab" aria-selected="true" aria-controls="view-website">Website</button>
+      <button id="tab-intern" role="tab" aria-selected="false" aria-controls="view-intern">Intern overzicht</button>
+    </nav>
+    <p class="demo">Demo: niets wordt verstuurd of opgeslagen. Ingevulde gegevens blijven alleen in dit venster tot je het sluit. Dossiers gemarkeerd "voorbeeld" zijn fictief.</p>
+  </div>
+</header>
+
+<main class="wrap">
+<!-- ================= WEBSITE ================= -->
+<section id="view-website" role="tabpanel" aria-labelledby="tab-website">
+  <div class="hero">
+    <p class="eyebrow">Voor eigenaars van B2B-software in Vlaanderen en Nederland</p>
+    <h1>Je softwareproduct verkopen, zonder zelf de kopersmarkt te moeten uitzoeken</h1>
+    <p>Heb je een klein B2B-SaaS-product met betalende klanten en wil je het verkopen of overdragen? In één gesprek bekijk ik of je product verkoopklaar is voor een gespecialiseerd overnameplatform. Past het, dan introduceer ik je bij een partij die past.</p>
+    <div class="cta">
+      <a class="btn primary" href="#intake" id="cta-form">Vul het formulier in</a>
+      <a class="btn ghost" href="#plan" id="cta-plan">Plan een gesprek van 20 minuten</a>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="block">
+      <h2>Voor wie</h2>
+      <ul>
+        <li>Minstens één jaar betalende klanten</li>
+        <li>Terugkerende omzet, grofweg vanaf €20.000 per jaar</li>
+        <li>Het product kan los van jou of je bureau draaien</li>
+        <li>Je wilt binnen 12 maanden verkopen en weet waarom</li>
+      </ul>
+    </div>
+    <div class="block">
+      <h2>Voor wie niet</h2>
+      <ul>
+        <li>Producten zonder omzet of jonger dan een jaar</li>
+        <li>Producten die al op een overnameplatform staan of bij een broker in verkoop zijn</li>
+        <li>Bedrijven met een complexe structuur of ruim boven €2 miljoen: daarvoor verwijs ik door naar een M&amp;A-adviseur</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="block">
+      <h2>Hoe het werkt</h2>
+      <ol class="steps">
+        <li><span>Je vult het korte formulier in (5 minuten).</span></li>
+        <li><span>We hebben een gesprek van 20 minuten. Je hoort meteen of het past.</span></li>
+        <li><span>Met jouw schriftelijke toestemming introduceer ik je bij een overnamepartner.</span></li>
+        <li><span>De partner begeleidt de verkoop. Ik volg op tot er een beslissing is.</span></li>
+      </ol>
+    </div>
+    <div class="block" style="display:grid;gap:16px">
+      <div class="note">
+        <strong>Wat het kost</strong>
+        <p>Niets voor jou. Verkoopt je bedrijf via de partner, dan krijg ik van die partner een deel van hun vergoeding. Bij welke partner en hoeveel, hoor je vóór de introductie. Je kunt je altijd ook zelf rechtstreeks aanmelden.</p>
+      </div>
+      <div class="note">
+        <strong>Wat ik niet doe</strong>
+        <p>Ik geef geen waardering, prijsadvies, juridisch of fiscaal advies, en ik onderhandel niet. Daarvoor werk je met de partner, je accountant of je advocaat.</p>
+      </div>
+    </div>
+  </div>
+
+  <form class="formcard" id="intake" novalidate>
+    <div style="display:grid;gap:6px">
+      <h2>Aanvraag</h2>
+      <p class="hint">8 korte vragen. Je gegevens worden met niemand gedeeld zonder jouw aparte, schriftelijke toestemming.</p>
+    </div>
+    <div style="display:grid;gap:10px">
+      <p class="demo">Demo: het formulier is al ingevuld met een fictief voorbeeld. Klik op "Aanvraag versturen" om de flow te tonen. In de echte versie is alles leeg en staan de toestemmingsvakjes uit.</p>
+      <div class="cta" style="margin:0"><button type="button" class="btn ghost" id="f-fill">Ander voorbeeld invullen</button><button type="button" class="btn ghost" id="f-clear">Formulier leegmaken</button></div>
+    </div>
+    <div class="fields">
+      <div class="field"><label for="f-naam">Naam</label><input id="f-naam" type="text" autocomplete="name" required></div>
+      <div class="field"><label for="f-email">E-mail</label><input id="f-email" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="f-tel">Telefoon <span class="hint">(optioneel)</span></label><input id="f-tel" type="tel" autocomplete="tel"></div>
+      <div class="field"><label for="f-product">Naam van het product</label><input id="f-product" type="text" required></div>
+      <div class="field full"><label for="f-url">Website van het product</label><input id="f-url" type="url" placeholder="https://"></div>
+      <div class="field"><label for="f-jaren">Hoe lang zijn er betalende klanten?</label>
+        <select id="f-jaren" required><option value="">Kies…</option><option value="lt1">Minder dan 1 jaar</option><option value="1-3">1 tot 3 jaar</option><option value="gt3">Meer dan 3 jaar</option></select></div>
+      <div class="field"><label for="f-omzet">Omzet laatste 12 maanden</label>
+        <select id="f-omzet" required><option value="">Kies…</option><option value="lt20">Minder dan €20.000</option><option value="20-50">€20.000 – €50.000</option><option value="50-250">€50.000 – €250.000</option><option value="gt250">Meer dan €250.000</option></select></div>
+      <div class="field"><label for="f-termijn">Binnen welke termijn wil je verkopen?</label>
+        <select id="f-termijn" required><option value="">Kies…</option><option value="lt6">Binnen 6 maanden</option><option value="6-12">6 tot 12 maanden</option><option value="gt12">Later dan 12 maanden</option><option value="weet">Weet ik nog niet</option></select></div>
+      <div class="field"><label for="f-los">Kan het product los van jou of je bureau draaien?</label>
+        <select id="f-los" required><option value="">Kies…</option><option value="ja">Ja</option><option value="deels">Deels</option><option value="nee">Nee</option></select></div>
+      <div class="field full"><label for="f-platform">Stond je product de laatste 2 jaar op een overnameplatform of bij een broker?</label>
+        <select id="f-platform" required><option value="">Kies…</option><option value="nee">Nee</option><option value="ja">Ja</option></select></div>
+      <div class="field full"><label for="f-reden">Waarom overweeg je verkoop?</label><textarea id="f-reden" placeholder="Bijvoorbeeld: ik wil een nieuw project starten, of ik wil me op ons bureauwerk focussen."></textarea></div>
+      <div class="field full" style="gap:10px">
+        <label class="check" for="f-c1"><input id="f-c1" type="checkbox" required><span>Ik geef toestemming dat deze gegevens gebruikt worden om mijn aanvraag te beoordelen.</span></label>
+        <label class="check" for="f-c2"><input id="f-c2" type="checkbox" required><span>Ik begrijp dat mijn gegevens pas met een overnamepartner worden gedeeld nadat ik daar apart en schriftelijk mee heb ingestemd.</span></label>
+      </div>
+    </div>
+    <p class="err" id="f-err" hidden></p>
+    <div><button class="btn primary" type="submit" id="f-submit">Aanvraag versturen</button></div>
+    <div class="confirm" id="f-ok" hidden>
+      <h3>Bedankt, <span id="ok-naam"></span>. Je aanvraag is goed ontvangen.</h3>
+      <p>Ik bekijk ze binnen 2 werkdagen en laat je weten of een gesprek zinvol is. Je gegevens worden met niemand gedeeld zonder jouw aparte toestemming.</p>
+      <p class="hint">Demo: de aanvraag staat nu bovenaan in het tabblad <a href="#intern" id="ok-link">Intern overzicht</a>, met het automatische selectieresultaat.</p>
+    </div>
+  </form>
+
+  <div class="note" id="plan">
+    <strong>Plan een gesprek</strong>
+    <p>In de echte versie staat hier een agendalink (20 minuten, online). In deze demo wordt geen afspraak gemaakt.</p>
+  </div>
+
+  <div class="foot" style="margin-top:24px">
+    <span>Marhaba Data &amp; AI Agent BV · BTW BE1003552102 · Zaventem</span>
+    <span>Privacyverklaring: volgt in de echte versie. Gegevens worden max. 24 maanden na laatste contact bewaard.</span>
+  </div>
+</section>
+
+<!-- ================= INTERN ================= -->
+<section id="view-intern" role="tabpanel" aria-labelledby="tab-intern" hidden>
+  <div class="ihead">
+    <p class="eyebrow">Intern · alleen voor jou</p>
+    <h1>Dossiers en partnerstatus</h1>
+    <p>Pas status en uren aan om de pijplijn te demonstreren. Alleen een closing met uitbetaalde commissie telt als inkomen.</p>
+  </div>
+
+  <div class="funnel" id="funnel" aria-label="Pijplijn"></div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>Dossier</th><th>Product</th><th>Selectie</th><th>Status</th><th>Partner</th><th>Introductie</th><th>Venster tot</th><th>Uren</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <div class="calc">
+    <form class="formcard" id="calc" onsubmit="return false">
+      <h2 style="font-size:20px">Commissie per verkoop</h2>
+      <div class="fields">
+        <div class="field"><label for="c-prijs">Verkoopprijs (USD)</label><input id="c-prijs" type="text" inputmode="numeric" value="200000"></div>
+        <div class="field"><label for="c-fx">Koers: 1 USD = … EUR</label><input id="c-fx" type="text" inputmode="decimal" value="0,87"></div>
+      </div>
+      <div class="res" id="c-res"></div>
+      <p class="hint">Standaardtarief Acquire-verkoper (8% onder $250k, 7% tot $1M, 6% daarboven), jouw deel 25%. Gecontroleerd op 23-10-2026; de individuele referralovereenkomst kan afwijken. Koers is een aanname.</p>
+    </form>
+    <div class="legend">
+      <h2 style="font-size:20px">Selectieregels</h2>
+      <p><span class="pill p-ok">Gekwalificeerd</span> alle criteria gehaald: bellen</p>
+      <p><span class="pill p-warn">Later opvolgen</span> verkoop pas na 12 maanden of onbekend</p>
+      <p><span class="pill p-warn">Doorverwijzen</span> omzet onder €20.000 per jaar</p>
+      <p><span class="pill p-bad">Afwijzen</span> &lt; 1 jaar klanten, al op platform of bij broker, of niet los te koppelen</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+(function(){
+  var STATUSES = ["Nieuw","Gesprek","Toestemming","Introductie verstuurd","Geaccepteerd door partner","Verkooptraject","Closing","Commissie ontvangen","Afgewezen","Doorverwezen"];
+  var dossiers = [
+    {id:"D-001", ex:true, product:"Roosterplanner voor zorgpraktijken", owner:"Solo-founder", jaren:"1-3", omzet:"50-250", termijn:"6-12", los:"ja", platform:"nee", status:"Geaccepteerd door partner", partner:"Acquire.com", intro:"2026-10-02", uren:3.5},
+    {id:"D-002", ex:true, product:"Klantportaal van een webbureau", owner:"Bureau-eigenaar", jaren:"gt3", omzet:"20-50", termijn:"lt6", los:"deels", platform:"nee", status:"Toestemming", partner:"", intro:"", uren:2},
+    {id:"D-003", ex:true, product:"Offertetool voor installateurs", owner:"Twee oprichters", jaren:"1-3", omzet:"50-250", termijn:"weet", los:"ja", platform:"nee", status:"Gesprek", partner:"", intro:"", uren:1},
+    {id:"D-004", ex:true, product:"Voorraadapp voor webwinkels", owner:"Solo-founder", jaren:"gt3", omzet:"20-50", termijn:"lt6", los:"ja", platform:"ja", status:"Afgewezen", partner:"", intro:"", uren:0.5},
+    {id:"D-005", ex:true, product:"Boekingsmodule (zijproject)", owner:"Freelancer", jaren:"lt1", omzet:"lt20", termijn:"lt6", los:"ja", platform:"nee", status:"Afgewezen", partner:"", intro:"", uren:0.25}
+  ];
+  var nextId = 6;
+
+  function select(d){
+    if(d.platform === "ja") return {k:"p-bad", t:"Afwijzen", why:"Al op platform of bij broker: niet introduceren"};
+    if(d.jaren === "lt1") return {k:"p-bad", t:"Afwijzen", why:"Minder dan 1 jaar betalende klanten"};
+    if(d.los === "nee") return {k:"p-bad", t:"Afwijzen", why:"Niet los te koppelen van eigenaar of bureau"};
+    if(d.omzet === "lt20") return {k:"p-warn", t:"Doorverwijzen", why:"Omzet onder €20.000 per jaar"};
+    if(d.termijn === "gt12" || d.termijn === "weet") return {k:"p-warn", t:"Later opvolgen", why:"Geen verkoop binnen 12 maanden"};
+    if(d.los === "deels") return {k:"p-ok", t:"Gekwalificeerd", why:"Check in gesprek: product deels verweven"};
+    return {k:"p-ok", t:"Gekwalificeerd", why:"Alle criteria gehaald"};
+  }
+  var LABEL = {"lt1":"< 1 jaar","1-3":"1–3 jaar","gt3":"> 3 jaar","lt20":"< €20k","20-50":"€20–50k","50-250":"€50–250k","gt250":"> €250k"};
+
+  function plus24(iso){
+    if(!iso) return "";
+    var y = Number(iso.slice(0,4)) + 2;
+    return y + iso.slice(4);
+  }
+  function fmtDate(iso){
+    if(!iso) return "—";
+    return iso.slice(8,10) + "-" + iso.slice(5,7) + "-" + iso.slice(0,4);
+  }
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
+  function today(){
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  }
+
+  function renderFunnel(){
+    var idx = function(s){ return STATUSES.indexOf(s); };
+    var qual = dossiers.filter(function(d){ return select(d).t === "Gekwalificeerd"; }).length;
+    var accepted = dossiers.filter(function(d){ var i = idx(d.status); return i >= 4 && i <= 7; }).length;
+    var closings = dossiers.filter(function(d){ var i = idx(d.status); return i === 6 || i === 7; }).length;
+    var paid = dossiers.filter(function(d){ return d.status === "Commissie ontvangen"; }).length;
+    var hours = dossiers.reduce(function(s,d){ return s + (Number(d.uren) || 0); }, 0);
+    var cells = [
+      ["Aanvragen", dossiers.length, ""],
+      ["Gekwalificeerd", qual, ""],
+      ["Geaccepteerde introducties", accepted, ""],
+      ["Closings", closings, ""],
+      ["Commissie ontvangen", paid, "cash"],
+      ["Uren besteed", hours.toLocaleString("nl-BE",{maximumFractionDigits:2}) + " u", ""],
+      ["Tijd tegen €75/u", "€" + Math.round(hours*75).toLocaleString("nl-BE"), ""]
+    ];
+    document.getElementById("funnel").innerHTML = cells.map(function(c){
+      return '<div class="' + c[2] + '"><span>' + c[0] + '</span><b>' + c[1] + '</b></div>';
+    }).join("");
+  }
+
+  function renderRows(){
+    var tb = document.getElementById("rows");
+    tb.innerHTML = dossiers.map(function(d, i){
+      var s = select(d);
+      var opts = STATUSES.map(function(st){ return '<option' + (st === d.status ? ' selected' : '') + '>' + st + '</option>'; }).join("");
+      return '<tr>' +
+        '<td class="mono">' + d.id + (d.ex ? '<span class="sub tag">voorbeeld</span>' : (d.isNew ? '<span class="sub tag">nieuw · demo</span>' : '')) + '</td>' +
+        '<td>' + esc(d.product) + '<span class="sub">' + esc(d.owner) + ' · ' + (LABEL[d.jaren]||"") + ' · ' + (LABEL[d.omzet]||"") + '</span></td>' +
+        '<td><span class="pill ' + s.k + '">' + s.t + '</span><span class="sub">' + s.why + '</span></td>' +
+        '<td><label class="tag" for="st-' + i + '" hidden>Status</label><select id="st-' + i + '" data-i="' + i + '" class="st">' + opts + '</select></td>' +
+        '<td>' + (d.partner ? esc(d.partner) : '<span class="sub">—</span>') + '</td>' +
+        '<td class="mono">' + fmtDate(d.intro) + '</td>' +
+        '<td class="mono">' + fmtDate(plus24(d.intro)) + '</td>' +
+        '<td><input class="hours" id="h-' + i + '" data-i="' + i + '" type="text" inputmode="decimal" value="' + String(d.uren).replace(".", ",") + '" aria-label="Uren voor ' + d.id + '"></td>' +
+      '</tr>';
+    }).join("");
+  }
+
+  function render(){ renderFunnel(); renderRows(); }
+
+  document.getElementById("rows").addEventListener("change", function(e){
+    var t = e.target, i = Number(t.getAttribute("data-i"));
+    if(isNaN(i) || !dossiers[i]) return;
+    var d = dossiers[i];
+    if(t.classList.contains("st")){
+      d.status = t.value;
+      var pos = STATUSES.indexOf(d.status);
+      if(pos >= 3 && pos <= 7){
+        if(!d.intro) d.intro = today();
+        if(!d.partner) d.partner = "Acquire.com";
+      }
+    } else if(t.classList.contains("hours")){
+      var v = parseFloat(String(t.value).replace(",", "."));
+      d.uren = isNaN(v) || v < 0 ? 0 : v;
+    }
+    render();
+  });
+
+  /* tabs */
+  function show(view){
+    var web = view !== "intern";
+    document.getElementById("view-website").hidden = !web;
+    document.getElementById("view-intern").hidden = web;
+    document.getElementById("tab-website").setAttribute("aria-selected", web ? "true" : "false");
+    document.getElementById("tab-intern").setAttribute("aria-selected", web ? "false" : "true");
+  }
+  document.getElementById("tab-website").addEventListener("click", function(){ show("website"); });
+  document.getElementById("tab-intern").addEventListener("click", function(){ show("intern"); window.scrollTo(0,0); });
+  document.getElementById("ok-link").addEventListener("click", function(e){ e.preventDefault(); show("intern"); window.scrollTo(0,0); });
+  if(location.hash === "#intern") show("intern");
+
+  /* intake */
+  var form = document.getElementById("intake");
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var v = function(id){ return document.getElementById(id).value.trim(); };
+    var missing = [];
+    if(!v("f-naam")) missing.push("naam");
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("f-email"))) missing.push("een geldig e-mailadres");
+    if(!v("f-product")) missing.push("productnaam");
+    ["f-jaren","f-omzet","f-termijn","f-los","f-platform"].forEach(function(id){ if(!v(id)) missing.push(document.querySelector('label[for="' + id + '"]').textContent.toLowerCase()); });
+    var err = document.getElementById("f-err");
+    if(missing.length){
+      err.textContent = "Vul nog in: " + missing.join(", ") + ".";
+      err.hidden = false; return;
+    }
+    if(!document.getElementById("f-c1").checked || !document.getElementById("f-c2").checked){
+      err.textContent = "Vink beide toestemmingen aan om je aanvraag te versturen.";
+      err.hidden = false; return;
+    }
+    err.hidden = true;
+    var d = {id:"D-" + String(nextId++).padStart(3,"0"), isNew:true, product:v("f-product"), owner:v("f-naam"),
+      jaren:v("f-jaren"), omzet:v("f-omzet"), termijn:v("f-termijn"), los:v("f-los"), platform:v("f-platform"),
+      status:"Nieuw", partner:"", intro:"", uren:0.25};
+    if(select(d).t === "Afwijzen") d.status = "Afgewezen";
+    if(select(d).t === "Doorverwijzen") d.status = "Doorverwezen";
+    dossiers.unshift(d);
+    render();
+    document.getElementById("ok-naam").textContent = v("f-naam");
+    document.getElementById("f-ok").hidden = false;
+    document.getElementById("f-submit").hidden = true;
+  });
+
+  /* calculator */
+  function num(s){ return parseFloat(String(s).replace(/\./g,"").replace(",", ".")); }
+  function calc(){
+    var p = num(document.getElementById("c-prijs").value);
+    var fx = parseFloat(String(document.getElementById("c-fx").value).replace(",", "."));
+    var out = document.getElementById("c-res");
+    if(isNaN(p) || p <= 0 || isNaN(fx) || fx <= 0){ out.innerHTML = '<span class="err">Vul een positief bedrag en koers in.</span><span></span>'; return; }
+    var pct = p < 250000 ? 0.08 : (p <= 1000000 ? 0.07 : 0.06);
+    var fee = p * pct, mine = fee * 0.25;
+    var usd = function(n){ return "$" + Math.round(n).toLocaleString("nl-BE"); };
+    out.innerHTML =
+      '<span>Closing fee partner (' + Math.round(pct*100) + '%)</span><span class="mono">' + usd(fee) + '</span>' +
+      '<span>Jouw deel (25%)</span><span class="mono">' + usd(mine) + '</span>' +
+      '<span class="tot">Jouw commissie in euro</span><span class="mono tot">€' + Math.round(mine*fx).toLocaleString("nl-BE") + '</span>' +
+      '<span>Als % van de verkoopprijs</span><span class="mono">' + (mine/p*100).toLocaleString("nl-BE",{maximumFractionDigits:2}) + '%</span>';
+  }
+  document.getElementById("c-prijs").addEventListener("input", calc);
+  document.getElementById("c-fx").addEventListener("input", calc);
+
+  /* demo: vooraf ingevulde voorbeelden */
+  var EXAMPLES = [
+    {naam:"Sam (voorbeeld)", email:"sam@example.com", tel:"", product:"Planbord voor schoonmaakbedrijven", url:"https://example.com", jaren:"1-3", omzet:"50-250", termijn:"6-12", los:"ja", platform:"nee", reden:"Ik wil me volledig op een nieuw project richten en heb geen tijd meer om het product verder te ontwikkelen."},
+    {naam:"Noor (voorbeeld)", email:"noor@example.com", tel:"", product:"Klantportaal van ons webbureau", url:"https://example.com", jaren:"gt3", omzet:"20-50", termijn:"lt6", los:"deels", platform:"nee", reden:"Ons bureau wil zich opnieuw op projectwerk focussen; het portaal is een zijproduct geworden."},
+    {naam:"Robin (voorbeeld)", email:"robin@example.com", tel:"", product:"Boekingsplugin voor sportclubs", url:"https://example.com", jaren:"lt1", omzet:"lt20", termijn:"lt6", los:"ja", platform:"nee", reden:"Snel verkopen, ik heb er geen tijd meer voor."}
+  ];
+  var exIdx = 0;
+  var FIELDS = {naam:"f-naam", email:"f-email", tel:"f-tel", product:"f-product", url:"f-url", jaren:"f-jaren", omzet:"f-omzet", termijn:"f-termijn", los:"f-los", platform:"f-platform", reden:"f-reden"};
+  function resetState(){
+    document.getElementById("f-err").hidden = true;
+    document.getElementById("f-ok").hidden = true;
+    document.getElementById("f-submit").hidden = false;
+  }
+  function fill(ex){
+    Object.keys(FIELDS).forEach(function(k){ document.getElementById(FIELDS[k]).value = ex ? ex[k] : ""; });
+    document.getElementById("f-c1").checked = !!ex;
+    document.getElementById("f-c2").checked = !!ex;
+    resetState();
+  }
+  document.getElementById("f-fill").addEventListener("click", function(){ exIdx = (exIdx + 1) % EXAMPLES.length; fill(EXAMPLES[exIdx]); });
+  document.getElementById("f-clear").addEventListener("click", function(){ fill(null); });
+  fill(EXAMPLES[0]);
+
+  render(); calc();
+})();
+</script>
+
+</body></html>

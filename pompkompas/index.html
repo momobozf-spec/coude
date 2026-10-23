@@ -1,0 +1,539 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Pompkompas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: werkapp met vaste topbalk, drie schermen (klant, installateur, beheer); klantscherm = tekst links, formulierkaart rechts. Kleur afgeleid van het EU-energielabel. */
+:root{
+  --bg:#f5f7f4; --surface:#ffffff; --fg:#17231c; --muted:#5b6b61; --line:#d9e2db;
+  --accent:#16784a; --accent-ink:#ffffff; --accent-soft:#e3f1e8;
+  --heat:#c2410c; --heat-soft:#fbe9df;
+  --ok:#16784a; --warn:#a16207; --warn-soft:#fdf3d7; --bad:#b42318; --bad-soft:#fde8e6; --info:#1d4ed8; --info-soft:#e4ebfd;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1712; --surface:#17221b; --fg:#e6efe8; --muted:#9db0a3; --line:#2a3a30;
+  --accent:#4cc58a; --accent-ink:#06120b; --accent-soft:#183326;
+  --heat:#f08a4b; --heat-soft:#3a2218;
+  --ok:#4cc58a; --warn:#e3b341; --warn-soft:#3a2f12; --bad:#f2786d; --bad-soft:#3d1a17; --info:#7da2ff; --info-soft:#1b2544;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1712; --surface:#17221b; --fg:#e6efe8; --muted:#9db0a3; --line:#2a3a30;
+  --accent:#4cc58a; --accent-ink:#06120b; --accent-soft:#183326;
+  --heat:#f08a4b; --heat-soft:#3a2218;
+  --ok:#4cc58a; --warn:#e3b341; --warn-soft:#3a2f12; --bad:#f2786d; --bad-soft:#3d1a17; --info:#7da2ff; --info-soft:#1b2544;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(1.9rem,4vw,2.8rem);font-weight:700}
+h2{font-size:1.45rem;font-weight:700}
+h3{font-size:1.05rem;font-weight:700}
+p{margin:0}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* topbalk */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:1.25rem}
+.brand svg{flex:none}
+.tabs{display:flex;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px;margin-left:auto}
+.tabs button{border:0;background:transparent;padding:6px 14px;border-radius:999px;cursor:pointer;font-weight:600;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.demo{background:var(--heat-soft);color:var(--fg);font-size:.88rem}
+.demo .wrap{padding-block:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.demo b{color:var(--heat)}
+
+main .wrap{padding-block:32px 56px;display:grid;gap:32px}
+.view[hidden]{display:none!important}
+
+/* klant */
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:40px;align-items:start}
+.hero-copy{display:grid;gap:18px;min-width:0}
+.lead{font-size:1.15rem;color:var(--muted);max-width:56ch}
+.facts{display:grid;gap:10px;padding:0;margin:0;list-style:none}
+.facts li{display:flex;gap:10px;align-items:baseline}
+.facts .tick{color:var(--accent);font-weight:700}
+.lang{display:inline-flex;gap:4px;align-self:start}
+.lang button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 10px;cursor:pointer;font-family:var(--mono);font-size:.85rem}
+.lang button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);font-weight:600}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px;min-width:0}
+.form-card{box-shadow:0 10px 30px -18px rgba(10,40,25,.45)}
+.steps{display:flex;gap:6px;margin-bottom:18px}
+.steps span{flex:1;height:4px;border-radius:4px;background:var(--line)}
+.steps span.on{background:var(--accent)}
+.field{display:grid;gap:6px;margin-bottom:16px}
+.field label,.legend{font-weight:600;font-size:.95rem}
+.field input,.field select{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:10px 12px;width:100%}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.choice{position:relative}
+.choice input{position:absolute;opacity:0;inset:0}
+.choice span{display:block;border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;background:var(--bg);height:100%}
+.choice span small{display:block;color:var(--muted);font-size:.82rem}
+.choice input:checked+span{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.choice input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{border:0;background:var(--accent);color:var(--accent-ink);padding:11px 18px;border-radius:8px;font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.small{padding:6px 12px;font-size:.88rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.err{color:var(--bad);font-size:.9rem;min-height:1.2em}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;color:var(--muted);margin-bottom:12px}
+.consent input{margin-top:4px}
+.code-hint{background:var(--info-soft);color:var(--info);border-radius:8px;padding:8px 12px;font-size:.9rem;margin-bottom:12px}
+
+.calc{display:grid;gap:14px}
+.calc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg)}
+.stat .k{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:1.15rem;font-weight:500;font-variant-numeric:tabular-nums}
+.note{font-size:.85rem;color:var(--muted)}
+.note a{color:var(--accent)}
+.label-scale{display:flex;gap:2px;margin-top:4px}
+.label-scale i{flex:1;height:8px;border-radius:2px}
+
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:0;margin:0;list-style:none;counter-reset:s}
+.how li{counter-increment:s;display:grid;gap:6px;border-top:2px solid var(--accent);padding-top:12px}
+.how li::before{content:"Stap " counter(s);font-family:var(--mono);font-size:.8rem;color:var(--accent)}
+
+/* portaal & beheer */
+.head{display:flex;gap:16px;align-items:end;justify-content:space-between;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:.93rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+.sub{display:block;color:var(--muted);font-size:.84rem}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.8rem;font-weight:600;white-space:nowrap}
+.p-new{background:var(--info-soft);color:var(--info)}
+.p-ok{background:var(--accent-soft);color:var(--ok)}
+.p-warn{background:var(--warn-soft);color:var(--warn)}
+.p-bad{background:var(--bad-soft);color:var(--bad)}
+.p-heat{background:var(--heat-soft);color:var(--heat)}
+td select{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:4px 6px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.inst-list{display:grid;gap:10px}
+.inst{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg)}
+.inst .row{gap:6px}
+.settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;z-index:20;max-width:calc(100% - 32px)}
+
+@media (max-width:860px){
+  .hero,.grid2{grid-template-columns:minmax(0,1fr)}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .how{grid-template-columns:minmax(0,1fr)}
+  .tabs{margin-left:0}
+}
+@media (max-width:480px){
+  .calc-grid,.settings,.choices{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/><path d="M14 5 L17 14 L14 23 L11 14 Z" fill="var(--heat)"/><circle cx="14" cy="14" r="2" fill="var(--accent)"/></svg>
+      Pompkompas
+    </div>
+    <div class="tabs" role="tablist" aria-label="Scherm kiezen">
+      <button role="tab" id="tab-klant" aria-selected="true" data-view="klant">Klant</button>
+      <button role="tab" id="tab-inst" aria-selected="false" data-view="inst">Installateur</button>
+      <button role="tab" id="tab-admin" aria-selected="false" data-view="admin">Beheer</button>
+    </div>
+  </div>
+</header>
+<div class="demo"><div class="wrap"><b>Demo</b><span>Werknaam, fictieve bedrijven en aanvragen. Er wordt niets verstuurd. Een aanvraag die je als klant indient, verschijnt live bij de installateur en in beheer.</span></div></div>
+
+<main>
+<div class="wrap">
+
+<!-- KLANT -->
+<section class="view" id="view-klant" aria-labelledby="tab-klant">
+  <div class="hero">
+    <div class="hero-copy">
+      <div class="lang" role="group" aria-label="Taal">
+        <button id="lang-nl" aria-pressed="true" data-lang="nl">NL</button>
+        <button id="lang-fr" aria-pressed="false" data-lang="fr">FR</button>
+      </div>
+      <h1 data-i="h1">Een erkende warmtepomp-installateur in je buurt, met je premie al berekend</h1>
+      <p class="lead" data-i="lead">Vul in 2 minuten je situatie in. Wij sturen je aanvraag naar maximaal 2 RESCert-installateurs in jouw regio. Gratis en vrijblijvend.</p>
+      <ul class="facts">
+        <li><span class="tick">✓</span><span data-i="f1">Alleen installateurs met RESCert-certificaat, verplicht voor Mijn VerbouwPremie</span></li>
+        <li><span class="tick">✓</span><span data-i="f2">6% btw op levering en plaatsing van een warmtepomp, tot eind 2030</span></li>
+        <li><span class="tick">✓</span><span data-i="f3">Nooit meer dan 2 installateurs: geen telefoonstorm</span></li>
+      </ul>
+
+      <div class="card calc" aria-live="polite">
+        <h3 data-i="calcT">Indicatie voor jouw keuze</h3>
+        <div class="calc-grid">
+          <div class="stat"><div class="k" data-i="kPrice">Richtprijs</div><div class="v" id="c-price">€ 8.000 – 18.000</div></div>
+          <div class="stat"><div class="k" data-i="kVat">Btw</div><div class="v" id="c-vat">6%</div></div>
+          <div class="stat"><div class="k" data-i="kPrem">Basispremie</div><div class="v" id="c-prem">€ 1.500</div></div>
+        </div>
+        <p class="note" id="c-note"></p>
+        <p class="note"><span data-i="src">Bronnen:</span> <a href="https://www.vlaanderen.be/bouwen-wonen-en-energie/bouwen-en-verbouwen/premies-voor-renovatie/mijn-verbouwpremie/wijzigingen-mijn-verbouwpremie-vanaf-2026" target="_blank" rel="noopener">Mijn VerbouwPremie 2026</a> · <a href="https://selectra.be/nl/energie/verwarming" target="_blank" rel="noopener">Selectra, richtprijzen</a></p>
+      </div>
+    </div>
+
+    <form class="card form-card" id="lead-form" novalidate>
+      <div class="steps" aria-hidden="true"><span id="st1" class="on"></span><span id="st2"></span><span id="st3"></span><span id="st4"></span></div>
+
+      <div id="step1">
+        <h2 data-i="s1T">Welke warmtepomp?</h2>
+        <p class="muted" data-i="s1S" style="margin:4px 0 14px">Twijfel je? Kies wat het dichtst in de buurt komt.</p>
+        <div class="field">
+          <span class="legend" data-i="lType">Type</span>
+          <div class="choices" id="types"></div>
+        </div>
+        <div class="field">
+          <span class="legend" data-i="lHome">Woning</span>
+          <div class="choices" id="homes"></div>
+        </div>
+        <div class="row"><button type="button" class="btn" id="to2" data-i="next">Verder</button></div>
+      </div>
+
+      <div id="step2" hidden>
+        <h2 data-i="s2T">Waar en wanneer?</h2>
+        <div class="field" style="margin-top:14px">
+          <label for="pc" data-i="lPc">Postcode</label>
+          <input id="pc" inputmode="numeric" maxlength="4" placeholder="1930" autocomplete="postal-code">
+        </div>
+        <div class="field">
+          <label for="when" data-i="lWhen">Wanneer wil je installeren?</label>
+          <select id="when"></select>
+        </div>
+        <div class="field">
+          <label for="heat" data-i="lHeat">Huidige verwarming</label>
+          <select id="heat"></select>
+        </div>
+        <p class="err" id="err2"></p>
+        <div class="row"><button type="button" class="btn ghost" id="back1" data-i="back">Terug</button><button type="button" class="btn" id="to3" data-i="next">Verder</button></div>
+      </div>
+
+      <div id="step3" hidden>
+        <h2 data-i="s3T">Waar mogen de installateurs je bereiken?</h2>
+        <div class="field" style="margin-top:14px"><label for="nm" data-i="lName">Naam</label><input id="nm" autocomplete="name"></div>
+        <div class="field"><label for="em" data-i="lMail">E-mail</label><input id="em" type="email" autocomplete="email"></div>
+        <div class="field"><label for="ph" data-i="lPhone">Gsm-nummer</label><input id="ph" type="tel" placeholder="04xx xx xx xx" autocomplete="tel"></div>
+        <label class="consent" for="ok"><input type="checkbox" id="ok"><span data-i="consent">Ik geef toestemming om mijn gegevens te delen met maximaal 2 erkende installateurs in mijn regio, enkel voor deze aanvraag. Je kunt dit altijd intrekken.</span></label>
+        <p class="err" id="err3"></p>
+        <div class="row"><button type="button" class="btn ghost" id="back2" data-i="back">Terug</button><button type="button" class="btn" id="to4" data-i="sendCode">Stuur sms-code</button></div>
+      </div>
+
+      <div id="step4" hidden>
+        <h2 data-i="s4T">Bevestig je gsm-nummer</h2>
+        <p class="muted" style="margin:4px 0 12px"><span data-i="s4S">We stuurden een code naar</span> <span class="mono" id="ph-echo"></span>.</p>
+        <p class="code-hint" data-i="codeHint">Demo: de code is 1234.</p>
+        <div class="field"><label for="code" data-i="lCode">Code</label><input id="code" inputmode="numeric" maxlength="4" class="mono"></div>
+        <p class="err" id="err4"></p>
+        <div class="row"><button type="button" class="btn ghost" id="back3" data-i="back">Terug</button><button type="submit" class="btn" data-i="confirm">Bevestig aanvraag</button></div>
+      </div>
+
+      <div id="step5" hidden>
+        <h2 data-i="doneT">Aanvraag bevestigd</h2>
+        <p class="muted" style="margin:6px 0 14px" id="done-txt"></p>
+        <div id="done-list" class="inst-list"></div>
+        <div class="row" style="margin-top:16px"><button type="button" class="btn ghost" id="again" data-i="again">Nieuwe aanvraag</button><button type="button" class="btn" id="see-inst" data-i="seeInst">Bekijk als installateur</button></div>
+      </div>
+    </form>
+  </div>
+
+  <ol class="how">
+    <li><h3 data-i="h1T">Je beschrijft je woning</h3><p class="muted" data-i="h1D">Type warmtepomp, postcode en timing. Je ziet meteen premie, btw en richtprijs.</p></li>
+    <li><h3 data-i="h2T">Wij controleren en koppelen</h3><p class="muted" data-i="h2D">Je gsm-nummer wordt bevestigd. Je aanvraag gaat naar maximaal 2 RESCert-installateurs die in jouw postcode werken.</p></li>
+    <li><h3 data-i="h3T">De installateur komt langs</h3><p class="muted" data-i="h3D">Offerte, plaatsing en garantie regel je rechtstreeks met de installateur. Wij verkopen niets.</p></li>
+  </ol>
+</section>
+
+<!-- INSTALLATEUR -->
+<section class="view" id="view-inst" aria-labelledby="tab-inst" hidden>
+  <div class="head">
+    <div><p class="muted">Installateursportaal</p><h2 id="inst-title">Leads</h2></div>
+    <div class="field" style="margin:0;min-width:220px"><label for="inst-pick">Bekijk als</label><select id="inst-pick"></select></div>
+  </div>
+  <div class="kpis">
+    <div class="stat"><div class="k">Leads deze maand</div><div class="v" id="i-n">0</div></div>
+    <div class="stat"><div class="k">Te factureren</div><div class="v" id="i-cost">€ 0</div></div>
+    <div class="stat"><div class="k">Gewonnen</div><div class="v" id="i-won">0</div></div>
+    <div class="stat"><div class="k">Creditaanvragen</div><div class="v" id="i-cred">0</div></div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Ontvangen</th><th>Klant</th><th>Gemeente</th><th>Project</th><th>Timing</th><th>Status</th><th>Prijs</th><th></th></tr></thead>
+    <tbody id="inst-rows"></tbody>
+  </table></div>
+  <p class="note">Facturatie: één maandfactuur via Peppol, betaling binnen 30 dagen. Een lead met vals of onbereikbaar nummer kun je binnen 7 dagen laten crediteren.</p>
+</section>
+
+<!-- BEHEER -->
+<section class="view" id="view-admin" aria-labelledby="tab-admin" hidden>
+  <div class="head"><div><p class="muted">Beheer</p><h2>Aanvragen en routering</h2></div></div>
+  <div class="kpis">
+    <div class="stat"><div class="k">Aanvragen</div><div class="v" id="a-n">0</div></div>
+    <div class="stat"><div class="k">Bevestigd via sms</div><div class="v" id="a-ver">0%</div></div>
+    <div class="stat"><div class="k">Gem. installateurs per aanvraag</div><div class="v" id="a-avg">0</div></div>
+    <div class="stat"><div class="k">Omzet na credits (excl. btw)</div><div class="v" id="a-rev">€ 0</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Instellingen</h3>
+      <div class="settings" style="margin-top:12px">
+        <div class="field"><label for="set-price">Prijs per lead per installateur (€, excl. btw)</label><input id="set-price" type="number" min="0" step="5" value="45" class="mono"></div>
+        <div class="field"><label for="set-max">Max. installateurs per aanvraag</label><select id="set-max"><option>1</option><option selected>2</option><option>3</option></select></div>
+      </div>
+      <p class="note">Wijzigingen gelden voor nieuwe aanvragen. De prijs is een toetsprijs voor de test, geen marktprijs.</p>
+    </div>
+    <div class="card">
+      <h3>Installateurs</h3>
+      <div class="inst-list" id="inst-list" style="margin-top:12px"></div>
+    </div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Ontvangen</th><th>Klant</th><th>Postcode</th><th>Project</th><th>Sms</th><th>Doorgestuurd naar</th><th>Credits</th><th>Actie</th></tr></thead>
+    <tbody id="admin-rows"></tbody>
+  </table></div>
+</section>
+
+</div>
+</main>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const eur=n=>"€ "+Math.round(n).toLocaleString("nl-BE");
+
+/* ---------- data ---------- */
+const TYPES={
+  lw:{nl:"Lucht-water",fr:"Air-eau",subnl:"Vervangt cv-ketel",subfr:"Remplace la chaudière",price:"€ 8.000 – 18.000",prem:1500},
+  hy:{nl:"Hybride",fr:"Hybride",subnl:"Samen met gasketel",subfr:"Avec chaudière gaz",price:"€ 5.000 – 12.000",prem:null},
+  ll:{nl:"Lucht-lucht",fr:"Air-air",subnl:"Verwarmt en koelt",subfr:"Chauffe et refroidit",price:"op offerte",prem:300},
+  bw:{nl:"Bodem-water",fr:"Géothermie",subnl:"Geothermisch",subfr:"Sol-eau",price:"€ 18.000 – 30.000",prem:null}
+};
+const HOMES={hu:{nl:"Bestaande woning",fr:"Logement existant"},ap:{nl:"Appartement",fr:"Appartement"},nb:{nl:"Nieuwbouw",fr:"Construction neuve"},re:{nl:"Totaalrenovatie",fr:"Rénovation totale"}};
+const WHEN={nl:["Binnen 3 maanden","3 tot 6 maanden","Later dan 6 maanden","Ik oriënteer me"],fr:["Dans les 3 mois","De 3 à 6 mois","Plus de 6 mois","Je m'informe"]};
+const HEAT={nl:["Aardgas","Stookolie","Elektrisch","Geen (nieuwbouw)"],fr:["Gaz naturel","Mazout","Électrique","Aucun (neuf)"]};
+const PCS={"1930":"Zaventem","1800":"Vilvoorde","3000":"Leuven","3080":"Tervuren","1500":"Halle","3200":"Aarschot","3290":"Diest","3300":"Tienen","1820":"Steenokkerzeel","1970":"Wezembeek-Oppem","3010":"Kessel-Lo","3020":"Herent"};
+const town=pc=>PCS[pc]||("postcode "+pc);
+
+const installers=[
+  {id:"a",name:"Demo Installatie Noordrand",pcs:["18","19"],active:true},
+  {id:"b",name:"Demo Thermotechniek Leuven",pcs:["30","31","32"],active:true},
+  {id:"c",name:"Demo Klimaat Hageland",pcs:["32","33"],active:true},
+  {id:"d",name:"Demo Energie Zuidrand",pcs:["15","16","19"],active:true}
+];
+const settings={price:45,max:2};
+let leads=[];
+let seq=100;
+function d(daysAgo){const t=new Date();t.setDate(t.getDate()-daysAgo);return t;}
+function route(pc){
+  const pre=pc.slice(0,2);
+  const match=installers.filter(i=>i.active&&i.pcs.includes(pre));
+  match.sort((x,y)=>count(x.id)-count(y.id));
+  return match.slice(0,settings.max).map(i=>i.id);
+}
+function count(id){return leads.filter(l=>l.sent.some(s=>s.inst===id)).length;}
+function addLead(o){
+  const l={id:++seq,date:o.date||new Date(),name:o.name,email:o.email,phone:o.phone,pc:o.pc,type:o.type,home:o.home,when:o.when,heat:o.heat,verified:o.verified!==false,sent:[]};
+  if(l.verified){route(l.pc).forEach(id=>l.sent.push({inst:id,status:o.status||"Nieuw",price:settings.price,credit:o.credit||null}));}
+  leads.unshift(l);return l;
+}
+/* voorbeeldaanvragen, fictief */
+[
+  {date:d(1),name:"Voorbeeld: L. Peeters",email:"l.peeters@voorbeeld.be",phone:"0470 11 22 33",pc:"1930",type:"lw",home:"hu",when:0,heat:0,status:"Gecontacteerd"},
+  {date:d(2),name:"Voorbeeld: S. Janssens",email:"s.janssens@voorbeeld.be",phone:"0471 22 33 44",pc:"3000",type:"hy",home:"hu",when:1,heat:0,status:"Offerte gestuurd"},
+  {date:d(3),name:"Voorbeeld: M. Claes",email:"m.claes@voorbeeld.be",phone:"0472 33 44 55",pc:"3200",type:"lw",home:"re",when:0,heat:1,status:"Gewonnen"},
+  {date:d(4),name:"Voorbeeld: A. Wouters",email:"a.wouters@voorbeeld.be",phone:"0473 44 55 66",pc:"1800",type:"ll",home:"ap",when:2,heat:2,status:"Nieuw"},
+  {date:d(6),name:"Voorbeeld: K. Maes",email:"k.maes@voorbeeld.be",phone:"0474 55 66 77",pc:"1500",type:"lw",home:"hu",when:1,heat:0,status:"Verloren"},
+  {date:d(7),name:"Voorbeeld: N. Mertens",email:"n.mertens@voorbeeld.be",phone:"0475 66 77 88",pc:"3300",type:"bw",home:"nb",when:1,heat:3,status:"Gecontacteerd",credit:"aangevraagd"},
+  {date:d(0),name:"Voorbeeld: J. Willems",email:"j.willems@voorbeeld.be",phone:"0476 77 88 99",pc:"3080",type:"lw",home:"hu",when:0,heat:0,verified:false}
+].reverse().forEach(addLead);
+
+/* ---------- i18n klant ---------- */
+const FR={
+  h1:"Un installateur de pompe à chaleur agréé près de chez vous, avec votre prime déjà calculée",
+  lead:"Décrivez votre situation en 2 minutes. Nous transmettons votre demande à 2 installateurs RESCert maximum dans votre région. Gratuit et sans engagement.",
+  f1:"Uniquement des installateurs certifiés RESCert, obligatoire pour la Mijn VerbouwPremie",
+  f2:"TVA de 6% sur la fourniture et le placement d'une pompe à chaleur, jusqu'à fin 2030",
+  f3:"Jamais plus de 2 installateurs : pas de pluie d'appels",
+  calcT:"Indication pour votre choix",kPrice:"Prix indicatif",kVat:"TVA",kPrem:"Prime de base",src:"Sources :",
+  s1T:"Quelle pompe à chaleur ?",s1S:"Vous hésitez ? Choisissez l'option la plus proche.",lType:"Type",lHome:"Logement",next:"Continuer",back:"Retour",
+  s2T:"Où et quand ?",lPc:"Code postal",lWhen:"Quand souhaitez-vous installer ?",lHeat:"Chauffage actuel",
+  s3T:"Où les installateurs peuvent-ils vous joindre ?",lName:"Nom",lMail:"E-mail",lPhone:"Numéro de GSM",
+  consent:"J'accepte que mes données soient partagées avec 2 installateurs agréés maximum dans ma région, uniquement pour cette demande. Vous pouvez retirer ce consentement à tout moment.",
+  sendCode:"Envoyer le code SMS",s4T:"Confirmez votre numéro",s4S:"Nous avons envoyé un code au",codeHint:"Démo : le code est 1234.",lCode:"Code",confirm:"Confirmer la demande",
+  doneT:"Demande confirmée",again:"Nouvelle demande",seeInst:"Voir comme installateur",
+  h1T:"Vous décrivez votre logement",h1D:"Type de pompe, code postal et calendrier. Vous voyez directement prime, TVA et prix indicatif.",
+  h2T:"Nous vérifions et mettons en relation",h2D:"Votre numéro est confirmé. Votre demande part vers 2 installateurs RESCert maximum actifs dans votre code postal.",
+  h3T:"L'installateur passe chez vous",h3D:"Devis, placement et garantie se règlent directement avec l'installateur. Nous ne vendons rien."
+};
+const NL={};document.querySelectorAll("[data-i]").forEach(e=>{NL[e.dataset.i]=e.textContent;});
+let lang="nl";
+function setLang(l){
+  lang=l;
+  document.querySelectorAll("[data-i]").forEach(e=>{const k=e.dataset.i;e.textContent=(l==="fr"?FR[k]:NL[k])||NL[k];});
+  document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===l)));
+  document.documentElement.lang=l;
+  buildChoices();buildSelects();calc();
+}
+
+/* ---------- klantformulier ---------- */
+let sel={type:"lw",home:"hu"};
+function buildChoices(){
+  $("#types").innerHTML=Object.entries(TYPES).map(([k,t])=>`<label class="choice"><input type="radio" name="type" id="type-${k}" value="${k}" ${sel.type===k?"checked":""}><span>${t[lang]}<small>${lang==="fr"?t.subfr:t.subnl}</small></span></label>`).join("");
+  $("#homes").innerHTML=Object.entries(HOMES).map(([k,h])=>`<label class="choice"><input type="radio" name="home" id="home-${k}" value="${k}" ${sel.home===k?"checked":""}><span>${h[lang]}</span></label>`).join("");
+}
+function buildSelects(){
+  const w=$("#when").selectedIndex,h=$("#heat").selectedIndex;
+  $("#when").innerHTML=WHEN[lang].map((t,i)=>`<option value="${i}">${t}</option>`).join("");
+  $("#heat").innerHTML=HEAT[lang].map((t,i)=>`<option value="${i}">${t}</option>`).join("");
+  if(w>=0)$("#when").selectedIndex=w; if(h>=0)$("#heat").selectedIndex=h;
+}
+function calc(){
+  const t=TYPES[sel.type];
+  $("#c-price").textContent=t.price==="op offerte"?(lang==="fr"?"sur devis":"op offerte"):t.price;
+  $("#c-vat").textContent=sel.home==="nb"?"21%":"6%";
+  $("#c-prem").textContent=t.prem?("€ "+t.prem.toLocaleString("nl-BE")):(lang==="fr"?"selon revenu":"volgens inkomen");
+  let n;
+  if(lang==="fr"){
+    n="Prime de base 2026 pour la plupart des propriétaires, plafonnée à 20–25% de la facture. Revenus plus bas : prime plus élevée, jusqu'à ± € 8.000.";
+    if(sel.type==="ll")n+=" Air-air : seulement si c'est le seul chauffage central et que le logement est sans combustible fossile.";
+    if(sel.home==="nb")n+=" Construction neuve : TVA 6% non applicable en règle générale.";
+  }else{
+    n="Basispremie 2026 voor de meeste eigenaars, begrensd op 20–25% van de factuur. Lagere inkomens: hogere premie, tot ± € 8.000.";
+    if(sel.type==="ll")n+=" Lucht-lucht: alleen als het de enige centrale verwarming is en de woning fossielvrij is.";
+    if(sel.home==="nb")n+=" Nieuwbouw: 6% btw geldt hier in de regel niet.";
+  }
+  $("#c-note").textContent=n;
+}
+document.addEventListener("change",e=>{
+  if(e.target.name==="type"){sel.type=e.target.value;calc();}
+  if(e.target.name==="home"){sel.home=e.target.value;calc();}
+});
+function show(step){
+  for(let i=1;i<=5;i++){$("#step"+i).hidden=i!==step;}
+  for(let i=1;i<=4;i++){$("#st"+i).classList.toggle("on",i<=Math.min(step,4));}
+}
+const T=(nl,fr)=>lang==="fr"?fr:nl;
+$("#to2").onclick=()=>show(2);
+$("#back1").onclick=()=>show(1);
+$("#to3").onclick=()=>{
+  const pc=$("#pc").value.trim();
+  if(!/^\d{4}$/.test(pc)){$("#err2").textContent=T("Vul een Belgische postcode van 4 cijfers in.","Indiquez un code postal belge de 4 chiffres.");return;}
+  if(!installers.some(i=>i.active&&i.pcs.includes(pc.slice(0,2)))){$("#err2").textContent=T("In de demo werken installateurs in Vlaams-Brabant en de Brusselse rand, bv. 1930, 1800 of 3000.","Dans la démo, les installateurs couvrent le Brabant flamand et la périphérie, p.ex. 1930, 1800 ou 3000.");return;}
+  $("#err2").textContent="";show(3);
+};
+$("#back2").onclick=()=>show(2);
+$("#to4").onclick=()=>{
+  const nm=$("#nm").value.trim(),em=$("#em").value.trim(),ph=$("#ph").value.trim();
+  if(!nm||!/^\S+@\S+\.\S+$/.test(em)||ph.replace(/\D/g,"").length<9){$("#err3").textContent=T("Vul naam, een geldig e-mailadres en je gsm-nummer in.","Indiquez votre nom, un e-mail valide et votre numéro de GSM.");return;}
+  if(!$("#ok").checked){$("#err3").textContent=T("Zonder toestemming kunnen we je aanvraag niet doorsturen.","Sans consentement, nous ne pouvons pas transmettre votre demande.");return;}
+  $("#err3").textContent="";$("#ph-echo").textContent=ph;show(4);$("#code").focus();
+};
+$("#back3").onclick=()=>show(3);
+$("#lead-form").addEventListener("submit",e=>{
+  e.preventDefault();
+  if($("#code").value.trim()!=="1234"){$("#err4").textContent=T("Deze code klopt niet. In de demo is het 1234.","Ce code est incorrect. Dans la démo, c'est 1234.");return;}
+  $("#err4").textContent="";
+  const l=addLead({name:$("#nm").value.trim(),email:$("#em").value.trim(),phone:$("#ph").value.trim(),pc:$("#pc").value.trim(),type:sel.type,home:sel.home,when:+$("#when").value,heat:+$("#heat").value});
+  const names=l.sent.map(s=>installers.find(i=>i.id===s.inst).name);
+  $("#done-txt").textContent=T(`Je aanvraag voor ${town(l.pc)} is doorgestuurd naar ${names.length} erkende installateur${names.length>1?"s":""}. Zij nemen binnen 48 uur contact op.`,`Votre demande pour ${town(l.pc)} a été transmise à ${names.length} installateur${names.length>1?"s":""} agréé${names.length>1?"s":""}. Ils vous contactent dans les 48 heures.`);
+  $("#done-list").innerHTML=names.map(n=>`<div class="inst"><span>${n}</span><span class="pill p-ok">RESCert</span></div>`).join("");
+  show(5);renderAll();
+  if(l.sent[0])$("#inst-pick").value=l.sent[0].inst;
+  toast(T("Aanvraag bevestigd","Demande confirmée"));
+});
+$("#again").onclick=()=>{["nm","em","ph","pc","code"].forEach(id=>$("#"+id).value="");$("#ok").checked=false;show(1);};
+$("#see-inst").onclick=()=>go("inst");
+
+/* ---------- portaal ---------- */
+const STAT=["Nieuw","Gecontacteerd","Offerte gestuurd","Gewonnen","Verloren"];
+const statCls=s=>({"Nieuw":"p-new","Gecontacteerd":"p-warn","Offerte gestuurd":"p-heat","Gewonnen":"p-ok","Verloren":"p-bad"}[s]);
+const fmtD=t=>t.toLocaleDateString("nl-BE",{day:"2-digit",month:"2-digit"})+" "+t.toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"});
+const proj=l=>`${TYPES[l.type].nl}<span class="sub">${HOMES[l.home].nl} · nu ${HEAT.nl[l.heat].toLowerCase()}</span>`;
+function renderInst(){
+  const id=$("#inst-pick").value;
+  const me=installers.find(i=>i.id===id);
+  $("#inst-title").textContent=me.name;
+  const mine=leads.filter(l=>l.sent.some(s=>s.inst===id));
+  let cost=0,won=0,cred=0;
+  $("#inst-rows").innerHTML=mine.map(l=>{
+    const s=l.sent.find(x=>x.inst===id);
+    if(s.status==="Gewonnen")won++;
+    if(s.credit)cred++;
+    if(s.credit!=="toegekend")cost+=s.price;
+    const credCell=s.credit?`<span class="pill ${s.credit==="toegekend"?"p-ok":"p-warn"}">Credit ${s.credit}</span>`:`<button class="btn ghost small" data-credit="${l.id}">Credit aanvragen</button>`;
+    return `<tr><td class="mono">${fmtD(l.date)}</td><td>${l.name}<span class="sub mono">${l.phone}</span><span class="sub">${l.email}</span></td><td>${town(l.pc)}<span class="sub mono">${l.pc}</span></td><td>${proj(l)}</td><td>${WHEN.nl[l.when]}</td><td><label class="sr" for="st-${l.id}" hidden>Status</label><select id="st-${l.id}" data-status="${l.id}">${STAT.map(x=>`<option ${x===s.status?"selected":""}>${x}</option>`).join("")}</select> <span class="pill ${statCls(s.status)}">${s.status}</span></td><td class="mono">${s.credit==="toegekend"?"<s>"+eur(s.price)+"</s>":eur(s.price)}</td><td>${credCell}</td></tr>`;
+  }).join("")||`<tr><td colspan="8" class="muted">Nog geen leads voor deze installateur. Dien als klant een aanvraag in met een postcode uit zijn regio.</td></tr>`;
+  $("#i-n").textContent=mine.length;$("#i-cost").textContent=eur(cost);$("#i-won").textContent=won;$("#i-cred").textContent=cred;
+}
+$("#inst-rows").addEventListener("change",e=>{
+  const lid=e.target.dataset.status;if(!lid)return;
+  const s=leads.find(l=>l.id==lid).sent.find(x=>x.inst===$("#inst-pick").value);
+  s.status=e.target.value;renderAll();toast("Status bijgewerkt");
+});
+$("#inst-rows").addEventListener("click",e=>{
+  const lid=e.target.dataset.credit;if(!lid)return;
+  const s=leads.find(l=>l.id==lid).sent.find(x=>x.inst===$("#inst-pick").value);
+  s.credit="aangevraagd";renderAll();toast("Creditaanvraag verstuurd naar beheer");
+});
+
+/* ---------- beheer ---------- */
+function renderAdmin(){
+  const n=leads.length,ver=leads.filter(l=>l.verified).length;
+  const sentAll=leads.flatMap(l=>l.sent);
+  const rev=sentAll.filter(s=>s.credit!=="toegekend").reduce((a,s)=>a+s.price,0);
+  $("#a-n").textContent=n;
+  $("#a-ver").textContent=n?Math.round(ver/n*100)+"%":"0%";
+  $("#a-avg").textContent=ver?(sentAll.length/ver).toFixed(1).replace(".",","):"0";
+  $("#a-rev").textContent=eur(rev);
+  $("#inst-list").innerHTML=installers.map(i=>`<div class="inst"><div><strong>${i.name}</strong><span class="sub mono">postcodes ${i.pcs.map(p=>p+"xx").join(", ")} · ${count(i.id)} leads</span></div><div class="row"><span class="pill ${i.active?"p-ok":"p-bad"}">${i.active?"Actief":"Gepauzeerd"}</span><button class="btn ghost small" data-toggle="${i.id}">${i.active?"Pauzeer":"Activeer"}</button></div></div>`).join("");
+  $("#admin-rows").innerHTML=leads.map(l=>{
+    const to=l.sent.map(s=>installers.find(i=>i.id===s.inst).name.replace("Demo ","")).join("<br>")||'<span class="muted">nog niet</span>';
+    const creds=l.sent.filter(s=>s.credit).map(s=>`<span class="pill ${s.credit==="toegekend"?"p-ok":s.credit==="geweigerd"?"p-bad":"p-warn"}">${s.credit}</span>`).join(" ")||'<span class="muted">—</span>';
+    let act="";
+    if(!l.verified)act=`<button class="btn small" data-verify="${l.id}">Handmatig bevestigen</button>`;
+    else if(l.sent.some(s=>s.credit==="aangevraagd"))act=`<div class="row"><button class="btn small" data-grant="${l.id}">Credit toekennen</button><button class="btn ghost small" data-deny="${l.id}">Weigeren</button></div>`;
+    return `<tr><td class="mono">${fmtD(l.date)}</td><td>${l.name}<span class="sub mono">${l.phone}</span></td><td class="mono">${l.pc}<span class="sub">${town(l.pc)}</span></td><td>${proj(l)}</td><td><span class="pill ${l.verified?"p-ok":"p-warn"}">${l.verified?"Bevestigd":"Wacht op code"}</span></td><td>${to}</td><td>${creds}</td><td>${act}</td></tr>`;
+  }).join("");
+}
+$("#view-admin").addEventListener("click",e=>{
+  const t=e.target.dataset;
+  if(t.toggle){const i=installers.find(x=>x.id===t.toggle);i.active=!i.active;renderAll();toast(i.active?"Installateur geactiveerd":"Installateur gepauzeerd");}
+  if(t.verify){const l=leads.find(x=>x.id==t.verify);l.verified=true;route(l.pc).forEach(id=>l.sent.push({inst:id,status:"Nieuw",price:settings.price,credit:null}));renderAll();toast("Aanvraag bevestigd en doorgestuurd");}
+  if(t.grant||t.deny){const l=leads.find(x=>x.id==(t.grant||t.deny));l.sent.forEach(s=>{if(s.credit==="aangevraagd")s.credit=t.grant?"toegekend":"geweigerd";});renderAll();toast(t.grant?"Credit toegekend":"Credit geweigerd");}
+});
+$("#set-price").addEventListener("input",e=>{const v=parseFloat(e.target.value);if(!isNaN(v)&&v>=0)settings.price=v;});
+$("#set-max").addEventListener("change",e=>{settings.max=+e.target.value;});
+
+/* ---------- navigatie ---------- */
+function renderAll(){renderInst();renderAdmin();}
+function go(v){
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.view===v)));
+  ["klant","inst","admin"].forEach(x=>{$("#view-"+x).hidden=x!==v;});
+  renderAll();window.scrollTo({top:0});
+}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>go(b.dataset.view));
+document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+$("#inst-pick").innerHTML=installers.map(i=>`<option value="${i.id}">${i.name}</option>`).join("");
+$("#inst-pick").addEventListener("change",renderInst);
+
+let tt;function toast(m){const el=$("#toast");el.textContent=m;el.hidden=false;clearTimeout(tt);tt=setTimeout(()=>el.hidden=true,2200);}
+
+buildChoices();buildSelects();calc();renderAll();
+const h=location.hash.replace("#","");if(["klant","inst","admin"].includes(h))go(h);
+})();
+</script>
+
+</body></html>
