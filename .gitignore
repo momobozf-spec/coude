@@ -38,3 +38,7 @@ Thumbs.db
 lokaal/.pgdata/
 ketelcheck/lokaal/data.json
 lokaal/bron/
+
+# lokale dev-databases en sessiebestanden
+**/.devdb/
+**/cookies.txt

@@ -1,0 +1,65 @@
+# Muslim Life on Render — FREE test setup.
+#
+# Dashboard → New → Blueprint → repository `muslim-life` → Blueprint Path:
+# render.free.yaml. Step by step: docs/DEPLOY-RENDER-FREE.md.
+#
+# - Database: Neon (free, Frankfurt). Render allows one free database per
+#   workspace and ImmoRadar already uses it.
+# - Payments stay OFF (no Stripe keys): Premium cannot be bought on this setup.
+# - The assistant runs on the labelled mock provider until you add a real key.
+# - SEED_DEMO_LISTINGS=1 publishes the fictional demo listings (badged "Demo").
+# - The free web service sleeps after 15 minutes without traffic.
+
+services:
+  - type: web
+    name: muslim-life-test
+    runtime: docker
+    region: frankfurt
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerCommand: npm run start:render
+    healthCheckPath: /api/ready
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUSTED_PROXY_HOPS
+        value: '1'
+      - key: DATABASE_POOL_MAX
+        value: '3'
+      - key: AI_PROVIDER
+        value: mock
+      - key: ALLOW_MOCK_AI_IN_PRODUCTION
+        value: 'true'
+      - key: PAYMENTS_PROVIDER
+        value: stub
+      - key: ANALYTICS_PROVIDER
+        value: database
+      - key: NOTIFICATIONS_PROVIDER
+        value: stub
+      - key: SEED_DEMO_LISTINGS
+        value: '1'
+      - key: LEGAL_ENTITY_NAME
+        value: Marhaba Cooperation BV
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: HEALTH_CHECK_TOKEN
+        generateValue: true
+      # Paste these yourself in the Render dashboard (never in chat):
+      - key: DATABASE_URL
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: AUTH_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: LEGAL_ENTITY_VAT
+        sync: false
+      - key: LEGAL_ENTITY_ADDRESS
+        sync: false
+      - key: LEGAL_CONTACT_EMAIL
+        sync: false
+      - key: BOOTSTRAP_ADMIN_EMAIL
+        sync: false

@@ -1,0 +1,201 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BARAKAH — DESIGN TOKENS
+
+   Two layers:
+     1. Primitives (--bk-*) — the raw palette. Change these to rebrand.
+     2. Semantics  (--color-*) — role tokens that components consume.
+
+   Components use semantic tokens only (bg-surface, text-muted, …). No component
+   references a primitive or a raw hex value. The product should read calm and
+   financial, not decorated; the Islamic character comes from what it does (§50).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  :root {
+    /* ── Primitives ─────────────────────────────────────────────────────── */
+
+    /* Sand — warm neutral ground. */
+    --bk-sand-50: oklch(0.992 0.003 90);
+    --bk-sand-100: oklch(0.976 0.006 88);
+    --bk-sand-200: oklch(0.941 0.010 86);
+    --bk-sand-300: oklch(0.888 0.013 84);
+    --bk-sand-400: oklch(0.780 0.015 82);
+    --bk-sand-500: oklch(0.652 0.016 80);
+    --bk-sand-600: oklch(0.522 0.015 78);
+    --bk-sand-700: oklch(0.412 0.014 77);
+    --bk-sand-800: oklch(0.310 0.012 76);
+    --bk-sand-900: oklch(0.228 0.010 75);
+    --bk-sand-950: oklch(0.162 0.008 74);
+
+    /* Ink — cool charcoal for dark surfaces. */
+    --bk-ink-800: oklch(0.222 0.010 250);
+    --bk-ink-900: oklch(0.172 0.009 250);
+    --bk-ink-950: oklch(0.132 0.008 250);
+
+    /* Green — the brand. Deep and calm, not neon. */
+    --bk-green-50: oklch(0.970 0.020 165);
+    --bk-green-100: oklch(0.936 0.040 165);
+    --bk-green-200: oklch(0.872 0.066 165);
+    --bk-green-300: oklch(0.792 0.092 164);
+    --bk-green-400: oklch(0.696 0.110 163);
+    --bk-green-500: oklch(0.598 0.112 162);
+    --bk-green-600: oklch(0.498 0.100 162);
+    --bk-green-700: oklch(0.414 0.084 162);
+    --bk-green-800: oklch(0.338 0.066 162);
+    --bk-green-900: oklch(0.276 0.052 163);
+
+    /* Gold — accent only. One per view, never a background. */
+    --bk-gold-300: oklch(0.858 0.098 85);
+    --bk-gold-500: oklch(0.742 0.126 78);
+    --bk-gold-700: oklch(0.582 0.108 72);
+
+    /* Status */
+    --bk-red-500: oklch(0.604 0.196 25);
+    --bk-red-100: oklch(0.938 0.036 25);
+    --bk-amber-500: oklch(0.760 0.148 72);
+    --bk-amber-100: oklch(0.960 0.042 82);
+    --bk-blue-500: oklch(0.618 0.132 250);
+    --bk-blue-100: oklch(0.940 0.028 250);
+
+    /* ── Semantics (light) ──────────────────────────────────────────────── */
+    --color-background: var(--bk-sand-50);
+    --color-surface: oklch(1 0 0);
+    --color-surface-muted: var(--bk-sand-100);
+    --color-foreground: var(--bk-sand-950);
+    --color-muted: var(--bk-sand-600);
+    --color-border: var(--bk-sand-200);
+    --color-border-strong: var(--bk-sand-300);
+
+    --color-primary: var(--bk-green-700);
+    --color-primary-hover: var(--bk-green-800);
+    --color-primary-foreground: oklch(1 0 0);
+    --color-primary-subtle: var(--bk-green-50);
+
+    --color-accent: var(--bk-gold-700);
+    --color-accent-subtle: oklch(0.972 0.028 85);
+
+    --color-success: var(--bk-green-600);
+    --color-success-subtle: var(--bk-green-50);
+    --color-warning: var(--bk-amber-500);
+    --color-warning-subtle: var(--bk-amber-100);
+    --color-danger: var(--bk-red-500);
+    --color-danger-subtle: var(--bk-red-100);
+    --color-info: var(--bk-blue-500);
+    --color-info-subtle: var(--bk-blue-100);
+
+    --color-ring: var(--bk-green-500);
+
+    --radius-card: 0.875rem;
+  }
+
+  .dark {
+    --color-background: var(--bk-ink-950);
+    --color-surface: var(--bk-ink-900);
+    --color-surface-muted: var(--bk-ink-800);
+    --color-foreground: var(--bk-sand-100);
+    --color-muted: var(--bk-sand-400);
+    --color-border: oklch(0.278 0.010 250);
+    --color-border-strong: oklch(0.342 0.012 250);
+
+    --color-primary: var(--bk-green-400);
+    --color-primary-hover: var(--bk-green-300);
+    --color-primary-foreground: var(--bk-ink-950);
+    --color-primary-subtle: oklch(0.262 0.044 163);
+
+    --color-accent: var(--bk-gold-300);
+    --color-accent-subtle: oklch(0.288 0.048 82);
+
+    --color-success: var(--bk-green-400);
+    --color-success-subtle: oklch(0.262 0.044 163);
+    --color-warning-subtle: oklch(0.302 0.052 82);
+    --color-danger-subtle: oklch(0.288 0.062 25);
+    --color-info-subtle: oklch(0.268 0.046 250);
+  }
+}
+
+@theme inline {
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-surface-muted: var(--color-surface-muted);
+  --color-foreground: var(--color-foreground);
+  --color-muted: var(--color-muted);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-primary-subtle: var(--color-primary-subtle);
+
+  --color-accent: var(--color-accent);
+  --color-accent-subtle: var(--color-accent-subtle);
+
+  --color-success: var(--color-success);
+  --color-success-subtle: var(--color-success-subtle);
+  --color-warning: var(--color-warning);
+  --color-warning-subtle: var(--color-warning-subtle);
+  --color-danger: var(--color-danger);
+  --color-danger-subtle: var(--color-danger-subtle);
+  --color-info: var(--color-info);
+  --color-info-subtle: var(--color-info-subtle);
+
+  --color-ring: var(--color-ring);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: var(--radius-card);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  /* Financial figures must align in columns and never render as ligatures. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /*
+   * A single, very restrained geometric motif for the marketing hero. Subtle
+   * enough that the product interface never has to carry decoration (§50).
+   */
+  .pattern-geometric {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      color-mix(in oklch, var(--color-primary) 22%, transparent) 1px,
+      transparent 0
+    );
+    background-size: 22px 22px;
+  }
+}

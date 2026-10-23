@@ -1,0 +1,62 @@
+# Lokaal: alleen de database (`docker compose up -d`), en `npm run dev` op je machine.
+# Volledige stack zoals in productie: `docker compose --profile app up --build`
+# (vul eerst .env in; de app weigert te starten zonder productieconfiguratie).
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: barakah-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: barakah
+      POSTGRES_PASSWORD: barakah
+      POSTGRES_DB: barakah
+    # Alleen op deze machine bereikbaar, nooit op het netwerk.
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - barakah-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U barakah -d barakah']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    profiles: ['app']
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://barakah:barakah@db:5432/barakah?schema=public
+    # Migreert bij het opstarten; de worker nooit.
+    command: sh -c "npx prisma migrate deploy && npm run db:reference && npm start"
+    # Alleen voor de reverse proxy op deze machine (Caddy/Traefik met TLS).
+    # Wie de proxy omzeilt, zou anders zelf zijn IP kiezen voor de inloglimiet.
+    ports:
+      - '127.0.0.1:3000:3000'
+    volumes:
+      - barakah-files:/data
+
+  worker:
+    profiles: ['app']
+    build: .
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://barakah:barakah@db:5432/barakah?schema=public
+    command: npm run worker
+    # De image-healthcheck test de webserver; de worker heeft er geen.
+    healthcheck:
+      disable: true
+    volumes:
+      - barakah-files:/data
+
+volumes:
+  barakah-db:
+  barakah-files:

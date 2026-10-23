@@ -1,0 +1,36 @@
+{
+  "slug": "voorbeeld-vzw",
+  "name": "Voorbeeld vzw (fictief — vervang alles)",
+  "description": "Korte, feitelijke omschrijving van wat de organisatie doet.",
+  "country": "BE",
+  "operatingCountries": ["BE"],
+  "organizationType": "NONPROFIT",
+  "scope": "NATIONAL",
+  "website": "https://example.org",
+  "donationUrl": "https://example.org/doneren",
+  "causes": ["armoede", "voedsel"],
+  "sources": [
+    {
+      "key": "kbo",
+      "sourceType": "GOVERNMENT_REGISTER",
+      "sourceUrl": "https://example.org/kbo-uittreksel",
+      "title": "Uittreksel Kruispuntbank van Ondernemingen",
+      "publisher": "FOD Economie",
+      "retrievedAt": "2026-10-01"
+    },
+    {
+      "key": "beleid",
+      "sourceType": "ZAKAT_POLICY",
+      "sourceUrl": "https://example.org/zakat-beleid",
+      "title": "Zakat-beleid",
+      "publisher": "Voorbeeld vzw",
+      "retrievedAt": "2026-10-01"
+    }
+  ],
+  "claims": [
+    { "type": "REGISTERED_ENTITY", "value": "YES", "status": "VERIFIED", "valueText": "0123.456.789", "sourceKey": "kbo" },
+    { "type": "ZAKAT_POLICY_PUBLISHED", "value": "YES", "status": "SELF_REPORTED", "sourceKey": "beleid" },
+    { "type": "ACCEPTS_ZAKAT", "value": "YES", "status": "SELF_REPORTED", "sourceKey": "beleid" }
+  ],
+  "verified": true
+}

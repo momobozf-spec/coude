@@ -1,0 +1,43 @@
+# Planning voor de gratis Render-opstelling (render.free.yaml), die geen worker
+# heeft. Kopieer dit bestand naar .github/workflows/cron.yml.
+#
+# Nodig in GitHub → repository → Settings → Secrets and variables → Actions:
+#   APP_URL      bv. https://barakah-test.onrender.com (zonder / op het einde)
+#   CRON_SECRET  de waarde van CRON_SECRET bij barakah-test in Render
+#
+# Elk uur, niet elke minuut: een gratis service die nooit slaapt verbruikt alle
+# gratis uren van je Render-workspace (gedeeld met ImmoRadar).
+
+name: cron
+
+on:
+  schedule:
+    - cron: '37 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  reminders:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: App wakker maken
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+        run: |
+          for i in $(seq 1 12); do
+            if curl -fsS --max-time 20 "$APP_URL/api/ready"; then echo; exit 0; fi
+            sleep 15
+          done
+          echo "App niet bereikbaar"; exit 1
+
+      - name: Herinneringen verwerken
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -fsS --max-time 300 -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$APP_URL/api/internal/reminders/process"
+          echo

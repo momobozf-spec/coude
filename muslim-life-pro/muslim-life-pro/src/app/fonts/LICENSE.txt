@@ -1,0 +1,2 @@
+Inter, Fraunces and Noto Naskh Arabic are licensed under the SIL Open Font License 1.1
+(https://openfontlicense.org). Files from Fontsource (@fontsource-variable/*).

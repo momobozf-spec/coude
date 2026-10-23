@@ -1,0 +1,1595 @@
+// Barakah — Zakat & Charity platform
+//
+// Design rules that this schema encodes and that later phases must not break:
+//
+//  1. Every financially meaningful row is owned by exactly one User. `householdId`
+//     grants *visibility* to a household, it never transfers ownership (§40).
+//  2. A finalised ZakatCalculation is an immutable snapshot. It stores the metal
+//     price, the nisab value, the exchange rates and the rule-set version that were
+//     used, so a historical year can be reproduced byte-for-byte even after gold
+//     prices or rules change (§13, §16, §38).
+//  3. Religious rules live in data (ZakatRuleSet + its per-asset/per-liability
+//     rules), not in code branches, so they can be versioned and sourced (§37, §38).
+//  4. Money is stored as Decimal, never Float. See src/lib/money.ts for the
+//     minor-unit arithmetic used by the calculation engine.
+
+// Prisma 7: TypeScript-client zonder Rust-engine, verbonden via @prisma/adapter-pg
+// (src/server/db/prisma.ts). De URL voor de CLI staat in prisma.config.ts.
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Identity & access
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  name          String?
+  image         String?
+  role          UserRole  @default(USER)
+
+  locale      String    @default("nl")
+  timezone    String    @default("Europe/Brussels")
+  onboardedAt DateTime?
+
+  // NextAuth
+  accounts Account[]
+  sessions Session[]
+
+  // Domain
+  zakatProfile           ZakatProfile?
+  subscription           Subscription?
+  notificationPreference NotificationPreference?
+
+  assets            Asset[]
+  liabilities       Liability[]
+  calculations      ZakatCalculation[]
+  donations         Donation[]
+  documents         Document[]
+  favoriteCharities FavoriteCharity[]
+  sadaqahGoals      SadaqahGoal[]
+  reminders         Reminder[]
+  notifications     Notification[]
+  annualReports     AnnualReport[]
+  auditLogs         AuditLog[]
+
+  ownedHouseholds         Household[]          @relation("HouseholdOwner")
+  householdMemberships    HouseholdMember[]
+  organizationMemberships OrganizationMember[]
+
+  /// Zit in de JWT. Verhogen maakt alle lopende sessies van deze gebruiker
+  /// ongeldig: bij wachtwoordwijziging, wachtwoordherstel en "overal afmelden".
+  sessionVersion    Int       @default(0)
+  /// Mislukte inlogpogingen op rij; bij de drempel gaat het account tijdelijk op
+  /// slot. Zie src/server/auth/lockout.ts.
+  failedLoginCount  Int       @default(0)
+  lockedUntil       DateTime?
+  passwordChangedAt DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+  @@map("users")
+}
+
+/// NextAuth OAuth account link.
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+/// NextAuth database session. Unused while the JWT strategy is active, but the
+/// adapter requires the table and it lets us switch strategies without a migration.
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Households (§39–41) and organizations (§42, architecture only for MVP)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum HouseholdRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+model Household {
+  id          String @id @default(uuid())
+  name        String
+  ownerUserId String
+
+  defaultCurrency String @default("EUR")
+
+  owner   User              @relation("HouseholdOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  members HouseholdMember[]
+
+  assets       Asset[]
+  liabilities  Liability[]
+  calculations ZakatCalculation[]
+  donations    Donation[]
+  documents    Document[]
+  sadaqahGoals SadaqahGoal[]
+  reminders    Reminder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerUserId])
+  @@map("households")
+}
+
+model HouseholdMember {
+  id          String        @id @default(uuid())
+  householdId String
+  userId      String
+  role        HouseholdRole @default(MEMBER)
+
+  /// Members opt in before their personal assets roll up into the household view.
+  sharesFinancials Boolean @default(false)
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([householdId, userId])
+  @@index([userId])
+  @@map("household_members")
+}
+
+enum OrganizationType {
+  MOSQUE
+  FOUNDATION
+  NONPROFIT
+  COMPANY
+  OTHER
+}
+
+/// Placeholder for the organization tier (§42). Deliberately thin: it exists so
+/// later phases can attach donations, projects and teams without a rewrite.
+model Organization {
+  id      String           @id @default(uuid())
+  name    String
+  slug    String           @unique
+  type    OrganizationType @default(NONPROFIT)
+  country String?
+
+  members      OrganizationMember[]
+  subscription Subscription?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String        @id @default(uuid())
+  organizationId String
+  userId         String
+  role           HouseholdRole @default(MEMBER)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("organization_members")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Subscriptions & entitlements (§43, §44)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Plan {
+  FREE
+  PLUS
+  FAMILY
+  ORGANIZATION
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+/// Exactly one of userId / organizationId is set. Enforced in the service layer
+/// (`src/server/services/subscriptions.ts`) since Prisma cannot express the
+/// XOR check constraint.
+model Subscription {
+  id             String  @id @default(uuid())
+  userId         String? @unique
+  organizationId String? @unique
+
+  plan   Plan               @default(FREE)
+  status SubscriptionStatus @default(ACTIVE)
+
+  currentPeriodEnd DateTime?
+  trialEndsAt      DateTime?
+  canceledAt       DateTime?
+
+  /// Set once a payment provider is wired up (§43 — out of scope for MVP).
+  externalCustomerId     String?
+  externalSubscriptionId String?
+
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([plan, status])
+  @@map("subscriptions")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Zakat configuration (§5, §6)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum ZakatMethodology {
+  DEFAULT
+  HANAFI
+  SHAFII
+  MALIKI
+  HANBALI
+  CUSTOM
+}
+
+enum NisabBasis {
+  GOLD
+  SILVER
+  CUSTOM
+}
+
+enum CalendarSystem {
+  GREGORIAN
+  HIJRI
+}
+
+model ZakatProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+
+  methodology ZakatMethodology @default(DEFAULT)
+  nisabBasis  NisabBasis       @default(SILVER)
+
+  /// Only meaningful when nisabBasis = CUSTOM.
+  customNisabValue    Decimal? @db.Decimal(18, 2)
+  customNisabCurrency String?
+
+  defaultCurrency String @default("EUR")
+
+  /// Start of the current lunar year of possession (haul).
+  haulStartDate     DateTime?
+  /// The annual reckoning date, stored in both calendars where known (§31).
+  zakatDueDate      DateTime?
+  hijriDueDay       Int?
+  hijriDueMonth     Int?
+  preferredCalendar CalendarSystem @default(GREGORIAN)
+
+  deductShortTermDebts  Boolean @default(true)
+  businessAssetsEnabled Boolean @default(false)
+  advancedMode          Boolean @default(false)
+
+  reminderDaysBefore Int[] @default([30, 7, 0])
+
+  /// Chosen during onboarding purely to decide which wizard steps to show.
+  /// It never creates assets and never affects the calculation.
+  relevantAssetTypes AssetType[] @default([])
+
+  /// Resumable onboarding: 0 = not started, ONBOARDING_STEPS = finished.
+  onboardingStep Int @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("zakat_profiles")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Versioned rule sets (§38) — religious logic lives in data, not in if-statements
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum AssetType {
+  CASH
+  BANK_ACCOUNT
+  SAVINGS
+  GOLD
+  SILVER
+  INVESTMENTS
+  CRYPTO
+  BUSINESS_CASH
+  BUSINESS_INVENTORY
+  RECEIVABLES
+  PROPERTY_INVESTMENT
+  OTHER
+}
+
+enum LiabilityType {
+  SHORT_TERM_DEBT
+  INVOICE_DUE
+  CREDIT_CARD
+  TAX_DUE
+  BUSINESS_PAYABLE
+  OTHER
+}
+
+model ZakatRuleSet {
+  id      String @id @default(uuid())
+  version String @unique
+  name    String
+
+  methodology ZakatMethodology @default(DEFAULT)
+
+  /// 0.025 for the conventional 2.5%. Stored, never hardcoded in the engine.
+  zakatRate Decimal @db.Decimal(6, 5)
+
+  /// Classical nisab weights. 85g gold / 595g silver are the common figures.
+  goldNisabGrams   Decimal @db.Decimal(10, 3)
+  silverNisabGrams Decimal @db.Decimal(10, 3)
+
+  /// Whether debts are deductible at all under this ruleset; the per-liability
+  /// rules below refine it per category.
+  allowLiabilityDeduction Boolean @default(true)
+
+  summary    String?
+  validFrom  DateTime
+  validUntil DateTime?
+  active     Boolean   @default(false)
+
+  assetRules     ZakatAssetRule[]
+  liabilityRules ZakatLiabilityRule[]
+  sources        RuleSetSource[]
+  calculations   ZakatCalculation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, validFrom])
+  @@map("zakat_rule_sets")
+}
+
+model ZakatAssetRule {
+  id        String    @id @default(uuid())
+  ruleSetId String
+  assetType AssetType
+
+  zakatable                  Boolean @default(true)
+  /// 0–100. Investments are the common case for a partial percentage.
+  defaultZakatablePercentage Decimal @default(100) @db.Decimal(5, 2)
+  /// Shown verbatim in the calculation explanation (§12).
+  rationale                  String?
+
+  ruleSet ZakatRuleSet @relation(fields: [ruleSetId], references: [id], onDelete: Cascade)
+
+  @@unique([ruleSetId, assetType])
+  @@map("zakat_asset_rules")
+}
+
+model ZakatLiabilityRule {
+  id            String        @id @default(uuid())
+  ruleSetId     String
+  liabilityType LiabilityType
+
+  deductibleByDefault Boolean @default(false)
+  /// Only obligations falling due inside this window are deductible. Null = all.
+  maxMonthsAhead      Int?
+  rationale           String?
+
+  ruleSet ZakatRuleSet @relation(fields: [ruleSetId], references: [id], onDelete: Cascade)
+
+  @@unique([ruleSetId, liabilityType])
+  @@map("zakat_liability_rules")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wealth & obligations (§8, §10)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Asset {
+  id          String  @id @default(uuid())
+  userId      String
+  householdId String?
+
+  type AssetType
+  name String
+
+  value    Decimal @db.Decimal(18, 2)
+  currency String  @default("EUR")
+
+  /// User-level override of the ruleset default. Null means "follow the ruleset".
+  zakatablePercentage Decimal? @db.Decimal(5, 2)
+
+  /// Metal assets may be entered by weight instead of value.
+  weightGrams Decimal? @db.Decimal(12, 3)
+  purityKarat Int?
+
+  notes    String?
+  /// Type-specific extras (ticker, wallet label, …) that do not deserve columns.
+  metadata Json?
+
+  active Boolean @default(true)
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  household Household? @relation(fields: [householdId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, active])
+  @@index([householdId])
+  @@index([userId, type])
+  @@map("assets")
+}
+
+model Liability {
+  id          String  @id @default(uuid())
+  userId      String
+  householdId String?
+
+  type LiabilityType
+  name String
+
+  amount   Decimal @db.Decimal(18, 2)
+  currency String  @default("EUR")
+
+  dueDate DateTime?
+
+  /// User-level override. Null means "follow the ruleset".
+  deductibleForZakat Boolean?
+
+  notes  String?
+  active Boolean @default(true)
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  household Household? @relation(fields: [householdId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, active])
+  @@index([householdId])
+  @@map("liabilities")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Calculations (§11–13) — immutable once FINALIZED
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum CalculationStatus {
+  DRAFT
+  FINALIZED
+  ARCHIVED
+}
+
+enum CalculationItemType {
+  ASSET
+  LIABILITY
+  ADJUSTMENT
+}
+
+enum MetalPriceSourceType {
+  LIVE_PROVIDER
+  MANUAL
+  FIXTURE
+  /// Door de beheerder gepubliceerde dagprijs, met bron en datum.
+  PUBLISHED
+}
+
+/// Wat een gepubliceerde prijs uitdrukt.
+enum PublishedPriceKind {
+  /// Prijs van 1 gram goud (24 karaat) in `currency`.
+  GOLD_PER_GRAM
+  /// Prijs van 1 gram zilver (fijn) in `currency`.
+  SILVER_PER_GRAM
+  /// Aantal eenheden `currency` voor 1 EUR.
+  FX_PER_EUR
+}
+
+/// Marktprijzen zoals de beheerder ze publiceert (of de FX-sync ze ophaalt).
+///
+/// Eén rij per soort, valuta en dag. Een berekening gebruikt de recentste rij
+/// die niet ouder is dan MAX_PRICE_AGE_DAYS, en legt waarde, bron en datum vast
+/// in haar snapshot. Rijen worden nooit gewijzigd door een berekening; een
+/// correctie is een nieuwe publicatie voor dezelfde dag.
+model PublishedPrice {
+  id            String             @id @default(uuid())
+  kind          PublishedPriceKind
+  currency      String
+  value         Decimal            @db.Decimal(18, 8)
+  effectiveDate DateTime           @db.Date
+  /// Waar de waarde vandaan komt, leesbaar voor de gebruiker ("ECB referentiekoers").
+  source        String
+  publishedById String?
+  createdAt     DateTime           @default(now())
+
+  @@unique([kind, currency, effectiveDate])
+  @@map("published_prices")
+}
+
+model ZakatCalculation {
+  id          String  @id @default(uuid())
+  userId      String
+  householdId String?
+
+  calculationDate DateTime
+  zakatYearLabel  String?
+  hijriYear       Int?
+
+  currency String
+
+  grossAssets           Decimal @db.Decimal(18, 2)
+  deductibleLiabilities Decimal @db.Decimal(18, 2)
+  netWealth             Decimal @db.Decimal(18, 2)
+
+  // ── Nisab snapshot: frozen so gold price moves cannot rewrite history ──
+  nisabBasis         NisabBasis
+  nisabValue         Decimal               @db.Decimal(18, 2)
+  nisabMetalGrams    Decimal?              @db.Decimal(10, 3)
+  nisabPricePerGram  Decimal?              @db.Decimal(18, 6)
+  nisabPriceCurrency String?
+  nisabPriceSource   MetalPriceSourceType?
+  nisabPriceProvider String?
+  nisabPriceAsOf     DateTime?
+  aboveNisab         Boolean
+
+  zakatRate Decimal @db.Decimal(6, 5)
+  zakatDue  Decimal @db.Decimal(18, 2)
+
+  methodology  ZakatMethodology
+  ruleSetId    String
+  rulesVersion String
+
+  /// Which build of the calculation code produced these numbers (§17). Stored so
+  /// a historical result can be traced to the logic that made it, independently
+  /// of the ruleset it applied.
+  engineVersion String @default("zakat-engine@1")
+
+  status      CalculationStatus @default(DRAFT)
+  finalizedAt DateTime?
+
+  /// Wizard position while this row is a DRAFT; meaningless once FINALIZED.
+  /// Server-side so a half-finished calculation survives a device change and
+  /// never sits in localStorage.
+  wizardStep Int @default(1)
+
+  /// Free-text note the user attaches to the year.
+  notes String?
+
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  household Household?             @relation(fields: [householdId], references: [id], onDelete: SetNull)
+  ruleSet   ZakatRuleSet           @relation(fields: [ruleSetId], references: [id])
+  items     ZakatCalculationItem[]
+  rates     ZakatCalculationRate[]
+  donations Donation[]
+  reminders Reminder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, calculationDate])
+  @@index([userId, status])
+  @@index([householdId])
+  @@map("zakat_calculations")
+}
+
+/// One line of the explanation shown in §12. Written once, never updated.
+model ZakatCalculationItem {
+  id            String @id @default(uuid())
+  calculationId String
+
+  itemType       CalculationItemType
+  /// Id of the Asset/Liability this line came from. Intentionally not a foreign
+  /// key: deleting an asset must never mutate or cascade into a finalised year.
+  sourceEntityId String?
+
+  label  String
+  /// Contribution to the total, already converted to the calculation currency.
+  amount Decimal @db.Decimal(18, 2)
+
+  originalAmount   Decimal? @db.Decimal(18, 2)
+  originalCurrency String?
+  exchangeRate     Decimal? @db.Decimal(18, 8)
+
+  zakatablePercentage Decimal? @db.Decimal(5, 2)
+
+  included Boolean @default(true)
+  /// Why it was included or left out — surfaced verbatim in the UI.
+  reason   String?
+
+  sortOrder Int @default(0)
+
+  calculation ZakatCalculation @relation(fields: [calculationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([calculationId, sortOrder])
+  @@map("zakat_calculation_items")
+}
+
+/// Exchange rates as they stood when the calculation ran (§16).
+model ZakatCalculationRate {
+  id            String @id @default(uuid())
+  calculationId String
+
+  fromCurrency String
+  toCurrency   String
+  rate         Decimal  @db.Decimal(18, 8)
+  provider     String
+  asOf         DateTime
+
+  calculation ZakatCalculation @relation(fields: [calculationId], references: [id], onDelete: Cascade)
+
+  @@unique([calculationId, fromCurrency, toCurrency])
+  @@map("zakat_calculation_rates")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Charities (§20–27)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum CauseCategory {
+  POVERTY
+  FOOD
+  ORPHANS
+  EDUCATION
+  HEALTHCARE
+  WATER
+  EMERGENCY
+  REFUGEES
+  MOSQUE
+  DAWAH
+  WAQF
+  LOCAL_COMMUNITY
+  OTHER
+}
+
+enum CharityScope {
+  LOCAL
+  NATIONAL
+  INTERNATIONAL
+}
+
+enum VerificationStatus {
+  VERIFIED
+  PARTIALLY_VERIFIED
+  SELF_REPORTED
+  UNVERIFIED
+}
+
+/// Ordered loosely from most to least independent. The reliability *tier* itself
+/// lives in `src/config/charity-sources.ts` so it stays testable and cannot drift
+/// out of sync with the scoring rules (§5).
+enum CharitySourceType {
+  GOVERNMENT_REGISTER
+  AUDITED_REPORT
+  INDEPENDENT_REVIEW
+  FINANCIAL_REPORT
+  ANNUAL_REPORT
+  ZAKAT_POLICY
+  OFFICIAL_WEBSITE
+  OTHER
+}
+
+model Cause {
+  id       String        @id @default(uuid())
+  slug     String        @unique
+  category CauseCategory
+
+  name        String
+  description String?
+
+  charities CharityCause[]
+
+  createdAt DateTime @default(now())
+
+  @@map("causes")
+}
+
+model Charity {
+  id   String @id @default(uuid())
+  slug String @unique
+  name String
+
+  description String?
+
+  country            String
+  operatingCountries String[]
+  organizationType   OrganizationType @default(NONPROFIT)
+  scope              CharityScope     @default(INTERNATIONAL)
+
+  website     String
+  donationUrl String?
+  logoUrl     String?
+
+  /// Means exactly one thing: the organisation's identity was checked against an
+  /// official register. It does NOT mean the finances, activities or Zakat policy
+  /// were assessed, and the UI must say so wherever the badge appears (§13).
+  verified   Boolean   @default(false)
+  verifiedAt DateTime?
+
+  /// Denormalised copy of the transparency score, kept **only** so the directory
+  /// can sort and filter in the database. The claims are the source of truth: the
+  /// detail page always recomputes the breakdown, and `recalculateTransparency()`
+  /// refreshes this column (§6, §23).
+  transparencyScore        Int?
+  transparencyScoredAt     DateTime?
+  transparencyScoreVersion String?
+  /// Share of the factor set that is actually known — a score of 90 over two
+  /// known factors means something very different from 90 over nine (§9).
+  transparencyCoverage     Int?
+
+  /// Explicitly flagged rather than inferred from the name, so no demo record can
+  /// ever be mistaken for a real organisation (§2, §18).
+  isDemo Boolean @default(false)
+
+  active Boolean @default(true)
+
+  causes       CharityCause[]
+  transparency CharityTransparencyProfile?
+  sources      CharitySource[]
+  claims       CharityClaim[]
+  favorites    FavoriteCharity[]
+  donations    Donation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, verified])
+  @@index([country])
+  @@map("charities")
+}
+
+model CharityCause {
+  charityId String
+  causeId   String
+
+  charity Charity @relation(fields: [charityId], references: [id], onDelete: Cascade)
+  cause   Cause   @relation(fields: [causeId], references: [id], onDelete: Cascade)
+
+  @@id([charityId, causeId])
+  @@index([causeId])
+  @@map("charity_causes")
+}
+
+model CharityTransparencyProfile {
+  id        String @id @default(uuid())
+  charityId String @unique
+
+  registeredOrganization Boolean @default(false)
+  registrationNumber     String?
+  countryOfRegistration  String?
+
+  annualReportUrl    String?
+  financialReportUrl String?
+  zakatPolicyUrl     String?
+
+  acceptsZakat                     Boolean @default(false)
+  zakatEligibleProgramsDescription String?
+
+  adminCostPercentage Decimal? @db.Decimal(5, 2)
+
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  lastReviewedAt     DateTime?
+  reviewNotes        String?
+
+  charity Charity @relation(fields: [charityId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("charity_transparency_profiles")
+}
+
+/// Provenance for every transparency claim. Nothing is presented as verified
+/// without a row here (§25).
+/// Evidence for a claim about a charity.
+///
+/// A source proves *one specific statement*, never the organisation as a whole:
+/// a registry entry proves the entity exists, it says nothing about whether the
+/// charity accepts Zakat. `CharityClaim.sourceId` is what ties evidence to what
+/// it actually supports (§3, §4).
+model CharitySource {
+  id        String @id @default(uuid())
+  charityId String
+
+  sourceType CharitySourceType
+  sourceUrl  String
+  title      String
+
+  /// Who published it — a registry, the charity itself, an auditor.
+  publisher String?
+
+  /// When the document itself is dated, as opposed to when we read it.
+  publishedAt DateTime?
+  /// When the platform last fetched and read it. Drives freshness (§10).
+  retrievedAt DateTime?
+
+  /// Explicit validity window, where the document states one.
+  validFrom  DateTime?
+  validUntil DateTime?
+
+  /// Set when a human checked that the source says what the claim asserts.
+  verifiedAt DateTime?
+  verifiedBy String?
+
+  notes String?
+
+  charity Charity        @relation(fields: [charityId], references: [id], onDelete: Cascade)
+  claims  CharityClaim[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([charityId, sourceType])
+  @@map("charity_sources")
+}
+
+/// What a claim asserts. Each is objectively checkable against a document —
+/// nothing here is a judgement about impact, ethics or religious suitability (§8).
+enum CharityClaimType {
+  REGISTERED_ENTITY
+  CONTACT_DETAILS_PUBLISHED
+  GOVERNANCE_DISCLOSED
+  ANNUAL_REPORT_PUBLISHED
+  FINANCIAL_STATEMENTS_PUBLISHED
+  AUDITOR_DISCLOSED
+  ADMIN_COST_DISCLOSED
+  IMPACT_REPORT_PUBLISHED
+
+  // Zakat is treated more carefully than a generic tag (§11).
+  ACCEPTS_ZAKAT
+  ZAKAT_POLICY_PUBLISHED
+  ZAKAT_ALLOCATION_DESCRIBED
+  ZAKAT_ELIGIBILITY_INDEPENDENTLY_VERIFIED
+
+  OPERATES_IN_COUNTRY
+}
+
+/// UNKNOWN is a first-class answer, not a synonym for NO (§9).
+enum ClaimValue {
+  YES
+  NO
+  UNKNOWN
+}
+
+/// How well the claim is evidenced. A charity saying something about itself is
+/// recorded honestly as SELF_REPORTED; it never becomes VERIFIED on its own (§11).
+enum ClaimStatus {
+  UNVERIFIED
+  SELF_REPORTED
+  VERIFIED
+  DISPUTED
+}
+
+/// One evidenced statement about a charity.
+///
+/// Claims are versioned rather than edited: superseding writes a new row and
+/// stamps the old one, so the evidence trail behind a past score survives.
+/// The current claim for a type is the one with `supersededAt = NULL`; that
+/// single-current rule is enforced transactionally in the service, because
+/// Prisma cannot express a partial unique index.
+model CharityClaim {
+  id        String @id @default(uuid())
+  charityId String
+
+  type   CharityClaimType
+  value  ClaimValue       @default(UNKNOWN)
+  status ClaimStatus      @default(UNVERIFIED)
+
+  /// For claims that carry data rather than a yes/no, e.g. a country code.
+  valueText String?
+
+  /// The evidence. Null is legitimate: it is what makes the claim UNVERIFIED.
+  sourceId String?
+
+  verifiedAt DateTime?
+  verifiedBy String?
+
+  /// Free-text shown verbatim in the explanation UI.
+  note String?
+
+  supersededAt   DateTime?
+  supersededById String?   @unique
+
+  charity      Charity        @relation(fields: [charityId], references: [id], onDelete: Cascade)
+  source       CharitySource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  supersedes   CharityClaim?  @relation("ClaimVersion", fields: [supersededById], references: [id], onDelete: SetNull)
+  supersededBy CharityClaim?  @relation("ClaimVersion")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([charityId, type, supersededAt])
+  @@index([sourceId])
+  @@map("charity_claims")
+}
+
+model FavoriteCharity {
+  id        String @id @default(uuid())
+  userId    String
+  charityId String
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  charity Charity @relation(fields: [charityId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, charityId])
+  @@index([charityId])
+  @@map("favorite_charities")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Donations, receipts, Sadaqah (§17–19, §28, §29)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum DonationType {
+  ZAKAT
+  SADAQAH
+  SADAQAH_JARIYAH
+  FIDYA
+  KAFFARAH
+  WAQF
+  OTHER
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  CARD
+  CASH
+  DIRECT_DEBIT
+  IN_KIND
+  OTHER
+}
+
+/// A donation is never hard-deleted once registered: it is voided, so the audit
+/// trail survives while the amount stops counting towards any total (§7).
+enum DonationStatus {
+  ACTIVE
+  VOIDED
+}
+
+model Donation {
+  id          String  @id @default(uuid())
+  userId      String
+  householdId String?
+
+  charityId           String?
+  /// For recipients not in the directory (a neighbour, a local collection).
+  recipientName       String?
+  /// The charity's name as it stood when the donation was registered. History
+  /// must stay readable even after a charity is renamed or unlinked (§6).
+  charityNameSnapshot String?
+
+  type   DonationType
+  status DonationStatus @default(ACTIVE)
+
+  amount   Decimal @db.Decimal(18, 2)
+  currency String  @default("EUR")
+
+  donatedAt DateTime
+
+  paymentMethod PaymentMethod?
+  reference     String?
+  notes         String?
+
+  voidedAt   DateTime?
+  voidReason String?
+
+  receiptDocumentId  String?
+  /// Set when this payment settles part of a specific Zakat year (§18).
+  /// Only ever points at a FINALIZED calculation — enforced in the service.
+  zakatCalculationId String?
+
+  /// Set when this row is a correction that replaces a voided donation (§8).
+  replacesDonationId String? @unique
+
+  /// Deduplicates a retried submit. A flaky mobile connection must not turn one
+  /// payment into two (§37).
+  idempotencyKey String?
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  household   Household?        @relation(fields: [householdId], references: [id], onDelete: SetNull)
+  charity     Charity?          @relation(fields: [charityId], references: [id], onDelete: SetNull)
+  receipt     Document?         @relation(fields: [receiptDocumentId], references: [id], onDelete: SetNull)
+  calculation ZakatCalculation? @relation(fields: [zakatCalculationId], references: [id], onDelete: SetNull)
+
+  replaces   Donation? @relation("DonationCorrection", fields: [replacesDonationId], references: [id], onDelete: SetNull)
+  replacedBy Donation? @relation("DonationCorrection")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, donatedAt])
+  @@index([userId, type])
+  @@index([userId, status])
+  @@index([zakatCalculationId, status])
+  @@index([charityId])
+  @@index([householdId])
+  @@map("donations")
+}
+
+enum SadaqahPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+model SadaqahGoal {
+  id          String  @id @default(uuid())
+  userId      String
+  householdId String?
+
+  label    String?
+  amount   Decimal       @db.Decimal(18, 2)
+  currency String        @default("EUR")
+  period   SadaqahPeriod @default(MONTHLY)
+
+  startDate  DateTime
+  endDate    DateTime?
+  active     Boolean   @default(true)
+  archivedAt DateTime?
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  household Household? @relation(fields: [householdId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, active])
+  @@map("sadaqah_goals")
+}
+
+enum DocumentType {
+  DONATION_RECEIPT
+  BANK_STATEMENT
+  ZAKAT_REPORT
+  OTHER
+}
+
+enum StorageProvider {
+  LOCAL
+  S3
+}
+
+/// Uploaded files never live in a public bucket; access always goes through a
+/// signed, short-lived URL issued after an ownership check (§28, §46).
+model Document {
+  id          String  @id @default(uuid())
+  userId      String
+  householdId String?
+
+  type      DocumentType @default(DONATION_RECEIPT)
+  fileName  String
+  mimeType  String
+  sizeBytes Int
+
+  storageProvider StorageProvider @default(LOCAL)
+  storageKey      String          @unique
+  checksumSha256  String?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  household    Household?    @relation(fields: [householdId], references: [id], onDelete: SetNull)
+  donations    Donation[]
+  annualReport AnnualReport?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, type])
+  @@map("documents")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reminders & notifications (§33, §34)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum ReminderType {
+  ZAKAT_DUE
+  ZAKAT_PREPARATION
+  SADAQAH_GOAL
+  DOCUMENT
+  CUSTOM
+}
+
+/// Lifecycle of a reminder's *intent* (§11). Delivery lives on Notification.
+///
+/// Redefined in phase 5: the phase-1 values (SCHEDULED/SENT/DISMISSED) conflated
+/// intent with delivery, which is exactly the distinction §14 asks for. The table
+/// has never held rows, so the enum is replaced rather than extended.
+enum ReminderStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum Recurrence {
+  ONE_TIME
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+  /// Advances by a lunar year, so a Zakat anniversary tracks the Hijri calendar
+  /// rather than drifting through the Gregorian one.
+  HIJRI_YEARLY
+}
+
+/// Which calendar the user thinks in for this reminder (§3).
+enum CalendarMethod {
+  GREGORIAN
+  ISLAMIC_UMALQURA
+}
+
+/// A scheduling *intent* (§14). One reminder produces many Notifications over
+/// its life; it is never itself a record of delivery.
+model Reminder {
+  id     String @id @default(uuid())
+  userId String
+
+  type        ReminderType
+  title       String
+  description String?
+
+  /// The instant the next occurrence fires. Always absolute UTC — the scheduler
+  /// never reasons about wall-clock text (§6).
+  nextTriggerAt   DateTime?
+  lastTriggeredAt DateTime?
+
+  /// Wall-clock time in `timezone`, as "HH:mm". Re-resolved to a UTC instant on
+  /// every occurrence, so 09:00 local stays 09:00 local across DST (§7, §24).
+  localTime String @default("09:00")
+
+  /// IANA zone, never a fixed offset: an offset cannot survive DST (§7).
+  timezone String
+
+  /// First occurrence, as an absolute instant.
+  startAt DateTime
+  /// Optional end of the series.
+  endAt   DateTime?
+
+  recurrence Recurrence     @default(ONE_TIME)
+  status     ReminderStatus @default(ACTIVE)
+
+  // ── Calendar presentation (§3, §6) ────────────────────────────────────────
+  /// Which calendar the user chose. Scheduling is always driven by the absolute
+  /// instants above; these fields only describe how the date is shown and how a
+  /// HIJRI_YEARLY series advances.
+  calendarMethod       CalendarMethod @default(GREGORIAN)
+  /// The estimated Hijri date at creation, kept so the UI can show what the user
+  /// saw rather than recomputing and silently disagreeing later.
+  hijriDay             Int?
+  hijriMonth           Int?
+  hijriYear            Int?
+  /// User correction in whole days, applied on top of the calculated date.
+  /// Moon sighting differs by region and no algorithm settles that (§3).
+  manualAdjustmentDays Int            @default(0)
+
+  /// Links a reminder to one specific historical calculation (§10). Nullable and
+  /// SetNull: a deleted draft must not take the reminder with it, and the
+  /// reminder must never silently re-point at a newer calculation.
+  zakatCalculationId String?
+
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  calculation   ZakatCalculation? @relation(fields: [zakatCalculationId], references: [id], onDelete: SetNull)
+  notifications Notification[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  household   Household? @relation(fields: [householdId], references: [id])
+  householdId String?
+
+  @@index([status, nextTriggerAt])
+  @@index([userId, status])
+  @@index([zakatCalculationId])
+  @@map("reminders")
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  PUSH
+  TELEGRAM
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  READ
+  FAILED
+}
+
+/// Domain events, so the codebase never routes on free-text strings (§37).
+enum NotificationEvent {
+  ZAKAT_REMINDER_DUE
+  ZAKAT_PREPARATION_DUE
+  SADAQAH_REMINDER_DUE
+  ANNUAL_REPORT_READY
+  GENERAL
+}
+
+/// A concrete delivery instance (§14).
+model Notification {
+  id     String @id @default(uuid())
+  userId String
+
+  channel NotificationChannel @default(IN_APP)
+  event   NotificationEvent   @default(GENERAL)
+
+  title String
+  body  String?
+  /// In-app deep link, e.g. /zakat/calculations/<id>.
+  href  String?
+
+  status     NotificationStatus @default(PENDING)
+  sentAt     DateTime?
+  readAt     DateTime?
+  /// Archived rather than deleted, so the delivery history stays auditable (§18).
+  archivedAt DateTime?
+
+  reminderId   String?
+  /// Which scheduled occurrence produced this, for display and debugging.
+  occurrenceAt DateTime?
+
+  /// Idempotency key for at-least-once processing (§22). A retried or duplicated
+  /// worker run computes the same key and the unique index rejects the second
+  /// insert. NULL for ad-hoc notifications — Postgres allows many NULLs in a
+  /// unique index, so those are unconstrained.
+  dedupeKey String?
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminder Reminder? @relation(fields: [reminderId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([userId, archivedAt])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id     String @id @default(uuid())
+  userId String @unique
+
+  inAppEnabled    Boolean @default(true)
+  emailEnabled    Boolean @default(true)
+  pushEnabled     Boolean @default(false)
+  telegramEnabled Boolean @default(false)
+
+  telegramChatId String?
+
+  zakatReminders      Boolean @default(true)
+  sadaqahReminders    Boolean @default(true)
+  annualReportReady   Boolean @default(true)
+  systemNotifications Boolean @default(true)
+  productUpdates      Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_preferences")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Annual reports (phase 5, §27–§36)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Kept as its own enum so a future Hijri-year report cannot be confused with a
+/// Gregorian one: `year=1448` and `year=2026` must never share a namespace (§35).
+enum ReportPeriodType {
+  GREGORIAN_YEAR
+  HIJRI_YEAR
+}
+
+/// A frozen annual report.
+///
+/// The preview a user browses is always generated live from current donations.
+/// Generating a downloadable report writes one of these instead: a point-in-time
+/// copy, so a report downloaded in January still reads the same after a charity
+/// is renamed in March or a donation is voided in June (§31, §36).
+///
+/// `data` is JSON on purpose. It is a frozen document rather than queryable
+/// domain state, and relational modelling of a snapshot would just be a second,
+/// diverging copy of the live schema.
+model AnnualReport {
+  id     String @id @default(uuid())
+  userId String
+
+  periodType ReportPeriodType @default(GREGORIAN_YEAR)
+  year       Int
+
+  /// Increments per user/year, so regenerating keeps the earlier snapshot.
+  sequence Int
+
+  /// Shape version of `data`, so an old snapshot stays renderable after the
+  /// report structure changes.
+  reportVersion String
+
+  data Json
+
+  /// The rendered file, when one was produced. Private storage, same signing
+  /// path as donation receipts (§33).
+  documentId String? @unique
+
+  generatedAt DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, periodType, year, sequence])
+  @@index([userId, year])
+  @@map("annual_reports")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Knowledge base & sources (§36, §37)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum KnowledgeCategory {
+  ZAKAT_BASICS
+  NISAB
+  GOLD
+  SILVER
+  INVESTMENTS
+  BUSINESS
+  DEBT
+  CRYPTO
+  CHARITY
+  SADAQAH
+}
+
+enum ReviewStatus {
+  DRAFT
+  IN_REVIEW
+  REVIEWED
+  NEEDS_UPDATE
+}
+
+model KnowledgeArticle {
+  id   String @id @default(uuid())
+  slug String @unique
+
+  title    String
+  category KnowledgeCategory
+
+  summary String
+  content String @db.Text
+
+  country     String?
+  methodology ZakatMethodology?
+
+  reviewStatus   ReviewStatus @default(DRAFT)
+  reviewedBy     String?
+  lastReviewedAt DateTime?
+
+  sourceUrl String?
+  published Boolean @default(false)
+
+  sources ArticleSource[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category, published])
+  @@map("knowledge_articles")
+}
+
+enum SourceType {
+  SCHOLARLY_REFERENCE
+  CHARITY_OFFICIAL
+  GOVERNMENT_REGISTER
+  FINANCIAL_REPORT
+  MARKET_DATA
+  INTERNAL_RULE
+}
+
+model Source {
+  id String @id @default(uuid())
+
+  name         String
+  organization String?
+  url          String?
+
+  sourceType SourceType
+  country    String?
+
+  lastVerifiedAt DateTime?
+
+  articles ArticleSource[]
+  ruleSets RuleSetSource[]
+
+  createdAt DateTime @default(now())
+
+  @@index([sourceType])
+  @@map("sources")
+}
+
+model ArticleSource {
+  articleId String
+  sourceId  String
+
+  article KnowledgeArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  source  Source           @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, sourceId])
+  @@index([sourceId])
+  @@map("article_sources")
+}
+
+model RuleSetSource {
+  ruleSetId String
+  sourceId  String
+
+  /// Which part of the ruleset this source backs, e.g. "silverNisabGrams".
+  appliesTo String?
+
+  ruleSet ZakatRuleSet @relation(fields: [ruleSetId], references: [id], onDelete: Cascade)
+  source  Source       @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@id([ruleSetId, sourceId])
+  @@index([sourceId])
+  @@map("rule_set_sources")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Audit log (§45)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum AuditAction {
+  USER_REGISTERED
+  USER_DELETED
+  PROFILE_UPDATED
+  ONBOARDING_COMPLETED
+  ZAKAT_PROFILE_UPDATED
+
+  ASSET_CREATED
+  ASSET_UPDATED
+  ASSET_DELETED
+
+  LIABILITY_CREATED
+  LIABILITY_UPDATED
+  LIABILITY_DELETED
+
+  CALCULATION_CREATED
+  CALCULATION_RECALCULATED
+  CALCULATION_FINALIZED
+  CALCULATION_ARCHIVED
+
+  DONATION_CREATED
+  DONATION_UPDATED
+  DONATION_DELETED
+  DONATION_VOIDED
+  DONATION_CORRECTED
+
+  DOCUMENT_UPLOADED
+  DOCUMENT_DELETED
+  RECEIPT_UPLOADED
+  RECEIPT_DELETED
+
+  SADAQAH_GOAL_CREATED
+  SADAQAH_GOAL_UPDATED
+  SADAQAH_GOAL_ARCHIVED
+
+  HOUSEHOLD_CREATED
+  HOUSEHOLD_MEMBER_ADDED
+  HOUSEHOLD_MEMBER_REMOVED
+  HOUSEHOLD_MEMBER_ROLE_CHANGED
+
+  SUBSCRIPTION_CHANGED
+
+  CHARITY_CREATED
+  CHARITY_UPDATED
+  CHARITY_CLAIM_ADDED
+  CHARITY_CLAIM_UPDATED
+  CHARITY_CLAIM_EXPIRED
+  CHARITY_SOURCE_ADDED
+  CHARITY_VERIFICATION_CHANGED
+  TRANSPARENCY_SCORE_RECALCULATED
+  CHARITY_FAVORITED
+  CHARITY_UNFAVORITED
+
+  REMINDER_CREATED
+  REMINDER_UPDATED
+  REMINDER_PAUSED
+  REMINDER_RESUMED
+  REMINDER_CANCELLED
+  NOTIFICATION_CREATED
+  NOTIFICATION_READ
+  REPORT_GENERATED
+  REPORT_DOWNLOADED
+
+  PASSWORD_CHANGED
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET_COMPLETED
+  ACCOUNT_LOCKED
+  SESSIONS_REVOKED
+  DATA_EXPORTED
+  PRICE_PUBLISHED
+}
+
+/// Never store amounts or account details here — only what is needed to answer
+/// "who changed which record, when" (§45, §47).
+model AuditLog {
+  id     String  @id @default(uuid())
+  userId String?
+
+  action     AuditAction
+  entityType String
+  entityId   String?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}

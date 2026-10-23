@@ -1,0 +1,109 @@
+# Barakah — continue integratie.
+#
+# In de volgorde waarin een fout het goedkoopst te vinden is: schema, types,
+# lint en alle tests (ook de integratietests tegen een echte database), dan een
+# productiebuild die als server draait met productieconfiguratie, en tot slot
+# de end-to-endtests in een echte browser.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: barakah
+          POSTGRES_PASSWORD: barakah
+          POSTGRES_DB: barakah
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U barakah -d barakah"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DATABASE_URL: postgresql://barakah:barakah@localhost:5432/barakah?schema=public
+      TEST_DATABASE_URL: postgresql://barakah:barakah@localhost:5432/barakah_test?schema=public
+      AUTH_SECRET: ci-auth-secret-that-is-long-enough-for-production-use
+      AUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Afhankelijkheden (genereert ook de Prisma-client)
+        run: npm ci
+
+      - name: Databases en migraties
+        run: |
+          PGPASSWORD=barakah psql -h localhost -U barakah -d barakah -c "CREATE DATABASE barakah_test"
+          npx prisma migrate deploy
+          DATABASE_URL="$TEST_DATABASE_URL" npx prisma migrate deploy
+
+      - name: Schema, types, lint, unit- en integratietests
+        run: npm run verify
+
+      - name: Demodata en beheerder
+        run: |
+          npm run db:seed
+          ADMIN_EMAIL=dev@barakah.local npm run admin:grant
+
+      - name: Productiebuild
+        run: npm run build
+
+      - name: Server starten (met productieconfiguratie)
+        env:
+          NODE_ENV: production
+          METAL_PRICE_PROVIDER: published
+          FX_PROVIDER: published
+          EMAIL_PROVIDER: resend
+          RESEND_API_KEY: re_ci_not_used
+          EMAIL_FROM: Barakah <noreply@example.org>
+          # Geen proxy in CI: alle requests delen de emmer 'unknown'.
+          TRUSTED_PROXY_HOPS: '1'
+          # De e2e-suite logt tientallen keren in vanaf hetzelfde adres.
+          LOGIN_MAX_ATTEMPTS_PER_IP: '1000'
+        run: |
+          npm start > server.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            curl -sf http://localhost:3000/api/ready && break
+            sleep 1
+          done
+          curl -sf http://localhost:3000/api/ready
+
+      - name: Playwright-browser
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end
+        run: npm run test:e2e
+
+      - name: Serverlog bij een fout
+        if: failure()
+        run: cat server.log || true
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7

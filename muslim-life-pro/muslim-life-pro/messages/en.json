@@ -1,0 +1,529 @@
+{
+  "_meta": {
+    "locale": "en",
+    "name": "English",
+    "nativeName": "English",
+    "dir": "ltr",
+    "status": "source",
+    "reviewedBy": "",
+    "note": "The source catalogue. Every other locale is compared against this file key-for-key."
+  },
+  "common": {
+    "appName": "Muslim Life",
+    "tagline": "Live with intention.",
+    "save": "Save",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "seeAll": "See all",
+    "learnMore": "Learn more",
+    "getStarted": "Get started",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signUp": "Create account",
+    "upgrade": "Upgrade",
+    "premium": "Premium",
+    "free": "Free",
+    "demo": "Demo listing",
+    "optional": "optional",
+    "required": "required",
+    "of": "of",
+    "skip": "Skip for now"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "planner": "Planner",
+    "habits": "Habits",
+    "deals": "Deals",
+    "assistant": "Assistant",
+    "profile": "Profile",
+    "settings": "Settings",
+    "pricing": "Pricing",
+    "admin": "Admin",
+    "more": "More",
+    "overview": "Overview",
+    "users": "Users",
+    "businesses": "Businesses",
+    "subscriptions": "Subscriptions",
+    "aiUsage": "AI usage",
+    "categories": "Categories",
+    "today": "Today",
+    "review": "Weekly review",
+    "explore": "Explore",
+    "operations": "Operations"
+  },
+  "theme": {
+    "label": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "greeting": {
+    "salaam": "Assalamu Alaikum",
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "night": "Peaceful night"
+  },
+  "prayer": {
+    "fajr": "Fajr",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "maghrib": "Maghrib",
+    "isha": "Isha",
+    "next": "Next prayer",
+    "remaining": "{time} remaining",
+    "now": "It's time",
+    "tomorrow": "tomorrow",
+    "today": "Today's prayers",
+    "logged": "Logged",
+    "markPrayed": "Mark as prayed",
+    "status": {
+      "onTime": "On time",
+      "late": "Late",
+      "jamaah": "In congregation",
+      "missed": "Not prayed",
+      "excused": "Excused"
+    },
+    "setLocation": "Set your city to see prayer times",
+    "calculationMethod": "Calculation method",
+    "madhab": "Asr calculation",
+    "madhabShafi": "Standard (Shafi'i, Maliki, Hanbali)",
+    "madhabHanafi": "Hanafi"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "todaysProgress": "Today's progress",
+    "prayers": "Prayers",
+    "quranGoal": "Quran goal",
+    "quranPages": "{done} of {total} pages",
+    "habits": "Habits",
+    "habitsDone": "{done} of {total} completed",
+    "dailyReminder": "A reminder for today",
+    "todaysPlanner": "Today's planner",
+    "noTasks": "Nothing planned yet",
+    "noTasksHint": "Add your first task to shape the day.",
+    "addTask": "Add a task",
+    "nearbyDeal": "Halal deal nearby",
+    "noDeals": "No deals in your city yet",
+    "noDealsHint": "We're adding partners city by city.",
+    "weeklyProgress": "This week",
+    "weeklyScore": "{score}% of your week completed",
+    "startHabits": "Start tracking a habit",
+    "startHabitsHint": "Pick from Islamic and everyday presets, or create your own.",
+    "viewPlanner": "Open planner",
+    "viewHabits": "Open habits",
+    "viewDeals": "Browse deals"
+  },
+  "onboarding": {
+    "title": "Let's set up Muslim Life",
+    "subtitle": "Five quick steps. You can change all of this later.",
+    "stepOf": "Step {current} of {total}",
+    "name": {
+      "title": "What should we call you?",
+      "subtitle": "We'll use this to greet you each day.",
+      "label": "Your name",
+      "placeholder": "Mohamed"
+    },
+    "location": {
+      "title": "Where are you based?",
+      "subtitle": "This sets your prayer times. We only store your city, never your live location.",
+      "country": "Country",
+      "city": "City",
+      "selectCountry": "Select a country",
+      "selectCity": "Select a city"
+    },
+    "prayer": {
+      "title": "Prayer preferences",
+      "subtitle": "We've pre-selected what's most common for your region. Change it if you follow another method.",
+      "methodHint": "Different authorities calculate Fajr and Isha slightly differently."
+    },
+    "interests": {
+      "title": "What matters to you?",
+      "subtitle": "Pick a few. Your dashboard adapts to what you choose.",
+      "family": "Family",
+      "fitness": "Fitness",
+      "learning": "Islamic learning",
+      "business": "Business",
+      "travel": "Travel",
+      "modestFashion": "Modest fashion",
+      "food": "Food",
+      "finance": "Personal finance"
+    },
+    "goals": {
+      "title": "What would you like to work on?",
+      "subtitle": "We'll suggest habits and plans that fit.",
+      "prayConsistently": "Pray more consistently",
+      "readQuran": "Read Quran daily",
+      "productivity": "Improve productivity",
+      "saveMoney": "Save money",
+      "learn": "Learn more about my deen",
+      "buildHabits": "Build better habits",
+      "ramadanPrep": "Prepare for Ramadan",
+      "umrahHajj": "Plan Umrah or Hajj",
+      "familyOrg": "Organise family life"
+    },
+    "done": {
+      "title": "You're all set",
+      "subtitle": "Your dashboard is ready."
+    }
+  },
+  "auth": {
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Sign in to continue where you left off.",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "Start organising your days with intention.",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "emailPlaceholder": "you@example.com",
+    "passwordHint": "At least 10 characters.",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "continueWithGoogle": "Continue with Google",
+    "orEmail": "or continue with email",
+    "invalidCredentials": "That email and password combination didn't work.",
+    "emailTaken": "An account with this email already exists.",
+    "terms": "By creating an account you agree to our Terms and Privacy Policy.",
+    "privacyNote": "Your prayer and habit data is private by default and never shared.",
+    "forgotPassword": "Forgot password?",
+    "consent": "I accept the terms, and I explicitly consent to Muslim Life processing my prayer, worship and habit data — which can reveal my religion — to provide the service. I can withdraw this at any time by deleting my data or account.",
+    "forgotTitle": "Reset your password",
+    "forgotSubtitle": "Enter your email and we'll send you a link.",
+    "sendResetLink": "Send reset link",
+    "resetSent": "If an account exists for that address, a link is on its way. It is valid for one hour.",
+    "resetUnavailable": "Password reset by email is not available yet. Contact us and we will help you:",
+    "resetTitle": "Choose a new password",
+    "resetInvalid": "This reset link is invalid or has expired.",
+    "newPassword": "New password",
+    "currentPassword": "Current password",
+    "savePassword": "Save password",
+    "changePasswordNote": "At least 10 characters. You will be signed out everywhere and can sign in again with the new password.",
+    "passwordSection": "Password",
+    "changePasswordIntro": "Change the password you sign in with."
+  },
+  "landing": {
+    "hero": {
+      "badge": "Now in early access",
+      "title": "Your Muslim life, organized.",
+      "subtitle": "Prayer times, a planner built around your day, habits that actually stick, halal discovery near you, and an assistant that turns intentions into plans. One calm, private place.",
+      "cta": "Start free",
+      "ctaSecondary": "See how it works",
+      "noCard": "No card required"
+    },
+    "trust": {
+      "private": "Private by default",
+      "noAds": "No ads, ever",
+      "cancel": "Cancel anytime"
+    },
+    "features": {
+      "title": "Everything your day needs",
+      "subtitle": "Built for the way Muslim life actually works — around five daily anchors, not around a to-do list.",
+      "prayer": {
+        "title": "Prayer, always in view",
+        "body": "Accurate times calculated for your city, method and madhab. Track each prayer with one tap, privately."
+      },
+      "planner": {
+        "title": "A planner that knows your day",
+        "body": "Daily and weekly planning that sits alongside your prayers instead of ignoring them."
+      },
+      "habits": {
+        "title": "Habits that last",
+        "body": "Quran, adhkar, exercise, sleep — or anything you invent. Streaks that encourage without shaming."
+      },
+      "discovery": {
+        "title": "Halal life, nearby",
+        "body": "Restaurants, butchers, bookstores and modest fashion — with member-only deals."
+      },
+      "assistant": {
+        "title": "An assistant that plans with you",
+        "body": "Travelling to Istanbul? Preparing for Ramadan? Get a real checklist you can drop straight into your planner."
+      },
+      "privacy": {
+        "title": "Yours alone",
+        "body": "Your worship is never public, never social, never ranked against anyone. Export or delete it whenever you like."
+      }
+    },
+    "plannerSection": {
+      "eyebrow": "Planner",
+      "title": "Plan the week you meant to have",
+      "body": "Tasks, goals and habits in one view. Move things between days, see where the week actually went, and start again without guilt.",
+      "point1": "Inbox, today and upcoming views",
+      "point2": "Islamic and everyday habit presets",
+      "point3": "Gentle streaks and a weekly review"
+    },
+    "assistantSection": {
+      "eyebrow": "Assistant",
+      "title": "From intention to a real plan",
+      "body": "Describe what's coming up and get a structured plan you can edit and save — not a wall of text.",
+      "disclaimer": "Muslim Life Assistant helps you organise your life. It is not a scholar and does not issue religious rulings.",
+      "example1": "I'm travelling to Istanbul next week",
+      "example2": "Help me build a Ramadan schedule",
+      "example3": "I'm getting married in six months"
+    },
+    "discoverySection": {
+      "eyebrow": "Discovery",
+      "title": "Find halal life around you",
+      "body": "Discover halal places and deals near you. During early access the listings shown are demonstration data, clearly labelled; real partner listings are added city by city."
+    },
+    "premium": {
+      "eyebrow": "Membership",
+      "title": "Muslim Life Premium",
+      "body": "Unlimited habits and saved places, more assistant messages, the plan generators and member-only deals.",
+      "cta": "See pricing"
+    },
+    "faq": {
+      "title": "Questions, answered",
+      "q1": "Is Muslim Life free?",
+      "a1": "Yes. The free plan includes prayer times and tracking, the daily planner, five habits, ten saved places, ten assistant messages a month and standard deals. Premium adds unlimited habits and saved places, 500 assistant messages a month, the plan generators and member-only deals.",
+      "q2": "How accurate are the prayer times?",
+      "a2": "Times are calculated astronomically from your city's coordinates, using the calculation method and madhab you choose. Always check them against your local mosque.",
+      "q3": "Is my prayer and habit data private?",
+      "a3": "Yes, and structurally so. There is no public profile, no feed and no leaderboard anywhere in Muslim Life. You can export or delete your data at any time.",
+      "q4": "Is the assistant an imam?",
+      "a4": "No, and it never will be. It helps you plan trips, Ramadan, life events and your week. On anything involving religious interpretation it tells you that scholars differ and points you to qualified people.",
+      "q5": "Are the businesses shown real?",
+      "a5": "During early access most listings are clearly labelled demo data used to show how discovery works. Real partner listings are added city by city and are never labelled demo.",
+      "q6": "Can I cancel anytime?",
+      "a6": "Yes. Cancel from your settings in two clicks and keep Premium until the end of the period you've paid for."
+    },
+    "cta": {
+      "title": "Start with today.",
+      "subtitle": "One prayer, one habit, one honest plan. That's how it begins.",
+      "button": "Create your free account"
+    },
+    "footer": {
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal",
+      "about": "About",
+      "contact": "Contact",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "rights": "All rights reserved.",
+      "disclaimer": "Muslim Life is a lifestyle and productivity product. It does not provide religious rulings, medical, legal or financial advice."
+    }
+  },
+  "pricing": {
+    "title": "Simple, honest pricing",
+    "subtitle": "Start free. Upgrade when Muslim Life is part of your day.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "saveBadge": "Save {percent}%",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "freeName": "Muslim Life Free",
+    "freeDescription": "Everything you need for a consistent day.",
+    "premiumName": "Muslim Life Premium",
+    "premiumDescription": "Depth, automation and member-only value.",
+    "currentPlan": "Your current plan",
+    "startFree": "Start free",
+    "goPremium": "Go Premium",
+    "manage": "Manage subscription",
+    "trialNote": "{days}-day free trial on yearly plans for new members.",
+    "features": {
+      "prayerTimes": "Prayer times for your city",
+      "prayerTracking": "Private prayer tracking",
+      "dailyPlanner": "Daily planner",
+      "plannerViews": "Planner views",
+      "habits": "Habits",
+      "statistics": "Statistics history",
+      "deals": "Deals",
+      "favorites": "Saved places",
+      "aiMessages": "Assistant messages per month",
+      "aiGenerators": "Assistant plan generators",
+      "templates": "Templates",
+      "dataExport": "Data export",
+      "cloudSync": "Sync across devices"
+    },
+    "values": {
+      "week": "Week",
+      "weekMonth": "Week + month",
+      "unlimited": "Unlimited",
+      "7days": "7 days",
+      "full": "Full history",
+      "standard": "Standard",
+      "standardPremium": "Standard + member-only",
+      "all": "All",
+      "included": "Included",
+      "notIncluded": "Not included"
+    }
+  },
+  "upgrade": {
+    "title": "This is a Premium feature",
+    "body": "Muslim Life Premium unlocks unlimited habits and saved places, more assistant messages, the plan generators and member-only deals.",
+    "cta": "See Premium",
+    "habitsLimit": "You've reached the {limit} habits included in the free plan.",
+    "favoritesLimit": "You've reached the {limit} saved places included in the free plan."
+  },
+  "language": {
+    "label": "Language",
+    "description": "Changes the interface language. Prayer times, your timezone and your currency are unaffected.",
+    "unreviewedTitle": "This translation has not been reviewed",
+    "unreviewedBody": "This language was machine-translated and is waiting for a native speaker to check it. Wording may be wrong or unnatural. English remains the reference.",
+    "switchToEnglish": "Switch to English"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "emptyBody": "We'll only get in touch about things you asked for.",
+    "markAllRead": "Mark all as read",
+    "settingsTitle": "What we may send you",
+    "settingsBody": "Everything below is off unless you turn it on. We never send reminders to make you feel behind.",
+    "muteAll": "Pause all optional notifications",
+    "muteAllBody": "Messages about your payments, your data and your account still come through.",
+    "quietHours": "Quiet hours",
+    "quietHoursBody": "Optional notifications are held during this window, in your local time.",
+    "quietHoursFrom": "From",
+    "quietHoursTo": "Until",
+    "channelInApp": "In the app",
+    "channelPush": "Push",
+    "channelEmail": "Email",
+    "noExternalChannels": "Push and email delivery are not connected yet, so only in-app notifications actually arrive.",
+    "transactionalNote": "Always sent — this concerns your account or your payment.",
+    "prayerReminder": {
+      "label": "Prayer time approaching",
+      "description": "A quiet heads-up shortly before a prayer time. Off by default.",
+      "title": "{prayer} in {minutes} minutes",
+      "body": "A gentle reminder — no pressure either way."
+    },
+    "habitReminder": {
+      "label": "Habit reminder",
+      "description": "For habits you gave a specific time.",
+      "title": "A habit is due in {minutes} minutes",
+      "body": "Open Muslim Life when it suits you."
+    },
+    "plannerBlockStarting": {
+      "label": "Planner block starting",
+      "description": "Shortly before something you scheduled.",
+      "title": "Your next block starts in {minutes} minutes",
+      "body": "Open your planner to see what's next."
+    },
+    "weeklyReviewReady": {
+      "label": "Weekly review",
+      "description": "Once a week, when your review is ready.",
+      "title": "Your week is ready to look back on",
+      "body": "Week {weekNumber} is summarised in your review."
+    },
+    "billingPaymentFailed": {
+      "label": "Payment problem",
+      "title": "We couldn't take your payment",
+      "body": "Your Premium features stay on for {graceDays} more days. Updating your card in settings fixes it."
+    },
+    "billingSubscriptionEnded": {
+      "label": "Subscription ended",
+      "title": "Your Premium membership has ended",
+      "body": "Everything you created is still here, on the free plan."
+    },
+    "dataExportReady": {
+      "label": "Data export",
+      "title": "Your data export is ready",
+      "body": "Download it from your privacy settings."
+    },
+    "accountDeletionRequested": {
+      "label": "Account deletion",
+      "title": "We received your deletion request",
+      "body": "You have {graceDays} days to change your mind. Signing in and cancelling stops it."
+    },
+    "accountDeletionCompleted": {
+      "label": "Account deleted",
+      "title": "Your account has been deleted",
+      "body": "Your personal data has been removed. Records we're legally required to keep are described in our privacy policy."
+    }
+  },
+  "privacy": {
+    "title": "Your data",
+    "subtitle": "Take a copy, clear what you've tracked, or leave entirely. All three are yours to decide.",
+    "export": {
+      "title": "Download your data",
+      "body": "A single JSON file with everything you've created: prayers, habits, tasks, planner, reflections, saved places and your assistant conversations.",
+      "excluded": "It does not contain passwords, session tokens, security records or anyone else's data.",
+      "cta": "Download my data",
+      "preparing": "Preparing your file…",
+      "rateLimited": "You've already requested an export recently. You can request another in {hours} hours.",
+      "lastExport": "Last export: {date}"
+    },
+    "activity": {
+      "title": "Clear your activity",
+      "body": "Removes what you've tracked while keeping your account: prayer logs, habit history, tasks, planner blocks and reflections.",
+      "warning": "This cannot be undone, and it is not the same as deleting your account.",
+      "cta": "Clear my activity",
+      "confirmTitle": "Clear everything you've tracked?",
+      "confirmBody": "Your account, settings and subscription stay. Your logged history does not. Type CLEAR to confirm.",
+      "confirmWord": "CLEAR",
+      "done": "Your activity has been cleared."
+    },
+    "account": {
+      "title": "Delete your account",
+      "body": "Removes your account and personal data. Some records are kept because the law requires it — invoices, and a minimal security log.",
+      "warning": "This cannot be undone.",
+      "cta": "Delete my account",
+      "confirmTitle": "Delete your account?",
+      "confirmBody": "Type DELETE to confirm. You'll be signed out everywhere and have {graceDays} days to change your mind before anything is removed.",
+      "confirmWord": "DELETE",
+      "blockedBilling": "You have an active paid subscription. Cancel it first — we won't delete an account while a provider can still charge it.",
+      "manageBilling": "Go to billing",
+      "pendingTitle": "Deletion requested",
+      "pendingBody": "Your account is scheduled for deletion on {date}. Nothing has been removed yet.",
+      "cancel": "Keep my account",
+      "cancelled": "Your account will not be deleted."
+    },
+    "retention": {
+      "title": "What we keep, and why",
+      "deleted": "Deleted outright",
+      "anonymised": "Kept without your name",
+      "retained": "Kept as required"
+    }
+  },
+  "admin": {
+    "title": "Operations",
+    "subtitle": "Service health and billing reconciliation. Member content is not shown here.",
+    "noContentNotice": "This panel deliberately contains no habit content, reflections, assistant conversations or payment details. Those are the member's, not ours.",
+    "metrics": {
+      "title": "Service metrics",
+      "members": "Members",
+      "activeSubscriptions": "Active subscriptions",
+      "trialing": "In trial",
+      "pastDue": "Past due",
+      "webhooksLastDay": "Webhooks (24h)",
+      "webhookFailures": "Webhook failures (24h)",
+      "pendingDeletions": "Pending deletions",
+      "failedDeliveries": "Failed notification deliveries",
+      "asOf": "As of {time}"
+    },
+    "reconcile": {
+      "title": "Subscription reconciliation",
+      "body": "Subscriptions whose local state may have drifted from the provider. Reconciling re-reads the provider and applies its answer.",
+      "empty": "Nothing needs reconciling.",
+      "candidate": "Last synced {date}",
+      "cta": "Reconcile",
+      "running": "Reconciling…",
+      "done": "Reconciled.",
+      "failed": "Reconciliation failed. The provider's answer was not applied."
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "notFound": "We couldn't find that.",
+    "notFoundBody": "The page you're looking for doesn't exist or has moved.",
+    "unauthorized": "Please sign in to continue.",
+    "forbidden": "You don't have access to this page.",
+    "backHome": "Back to home",
+    "backToApp": "Back to dashboard",
+    "tryAgain": "Try again"
+  },
+  "empty": {
+    "title": "Nothing here yet",
+    "body": "Once you add something it will show up here."
+  }
+}

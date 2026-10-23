@@ -1,0 +1,64 @@
+# Layali op Render — GRATIS testopstelling.
+#
+# Gebruik: Dashboard → New → Blueprint → repository `layali` →
+# Blueprint Path: render.free.yaml. Draaiboek: docs/DEPLOY-RENDER-FREE.md.
+#
+# - Database: Neon (gratis, Frankfurt). Render staat maar één gratis database
+#   per workspace toe en die gebruikt ImmoRadar al.
+# - Betalingen: zet een Mollie-TESTsleutel (test_…). Met een live-sleutel wordt
+#   er echt betaald.
+# - SEED_DEMO=1 laadt bij elke start de demo-catalogus (voorbeeldproducten met
+#   placeholderfoto's). Alleen voor testen; zet op 0 voor een echte winkel.
+# - De webservice slaapt na 15 minuten zonder verkeer.
+
+services:
+  - type: web
+    name: layali-test
+    runtime: docker
+    region: frankfurt
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerCommand: npm run start:render
+    healthCheckPath: /api/ready
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUSTED_PROXY_HOPS
+        value: '1'
+      - key: DATABASE_POOL_MAX
+        value: '3'
+      - key: SEED_DEMO
+        value: '1'
+      # Marktplaats (verkopers/diensten) uit tot er echte verkopers zijn.
+      - key: MARKETPLACE_ENABLED
+        value: '0'
+      - key: LEGAL_ENTITY_NAME
+        value: Marhaba Cooperation BV
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: CRON_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: MOLLIE_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: SUPPORT_EMAIL
+        sync: false
+      - key: LEGAL_ENTITY_VAT
+        sync: false
+      - key: LEGAL_ENTITY_ADDRESS
+        sync: false
+      - key: LEGAL_CONTACT_EMAIL
+        sync: false
+      - key: BOOTSTRAP_ADMIN_EMAIL
+        sync: false

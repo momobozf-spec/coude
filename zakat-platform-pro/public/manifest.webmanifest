@@ -1,0 +1,14 @@
+{
+  "name": "Barakah — Zakat & Sadaqah",
+  "short_name": "Barakah",
+  "description": "Bereken je Zakat transparant, houd je Sadaqah bij en geef met meer inzicht.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbfaf7",
+  "theme_color": "#1f6f52",
+  "lang": "nl",
+  "dir": "ltr",
+  "icons": []
+}

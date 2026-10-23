@@ -1,0 +1,392 @@
+// Layali — PostgreSQL-schema.
+//
+// Geldbedragen zijn Decimal(10,2): exact tot op de cent. src/lib/prisma.ts zet
+// ze bij het lezen om naar een gewoon getal (euro), zodat de UI met numbers
+// blijft werken; servercode rekent in centen (src/lib/money.ts).
+// Rollen en statussen zijn strings; de geldige waarden staan in src/lib/status.ts.
+// Ordernummers komen uit de sequence "order_number_seq" (zie de eerste migratie).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// NextAuth Models
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Core Models
+
+model User {
+  id                  String    @id @default(cuid())
+  name                String?
+  email               String?   @unique
+  emailVerified       DateTime?
+  image               String?
+  password            String?
+  phone               String?
+  role                String    @default("USER")
+  /// Mislukte inlogpogingen op rij; bij de drempel gaat het account tijdelijk op slot.
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  /// Sessies van vóór dit tijdstip worden ongeldig (na een wachtwoordwijziging).
+  passwordChangedAt   DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  accounts            Account[]
+  sessions            Session[]
+  orders              Order[]
+  cartItems           CartItem[]
+  wishlist            WishlistItem[]
+  reviews             Review[]
+  addresses           Address[]
+  vendor              Vendor?
+  passwordResetTokens PasswordResetToken[]
+}
+
+/// Eenmalige link om een vergeten wachtwoord te herstellen. Alleen de
+/// SHA-256-hash van het token wordt bewaard.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Address {
+  id          String  @id @default(cuid())
+  userId      String
+  label       String  @default("Home")
+  firstName   String
+  lastName    String
+  street      String
+  houseNumber String
+  city        String
+  postalCode  String
+  country     String  @default("BE")
+  isDefault   Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  image       String?
+  parentId    String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@index([parentId])
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  sku            String?  @unique
+  shortDesc      String?
+  description    String
+  descriptionFr  String?
+  descriptionAr  String?
+  price          Decimal  @db.Decimal(10, 2)
+  comparePrice   Decimal? @db.Decimal(10, 2)
+  // JSON-arrays van strings; prisma.ts versmalt ze bij het lezen tot string[].
+  images         Json     @default("[]")
+  sizes          Json     @default("[]")
+  colors         Json     @default("[]")
+  scents         Json     @default("[]")
+  materials      Json     @default("[]")
+  tags           Json     @default("[]")
+  gender         String?
+  stock          Int      @default(0)
+  weight         Float?
+  shippingType   String?
+  status         String   @default("ACTIVE")
+  featured       Boolean  @default(false)
+  bestSeller     Boolean  @default(false)
+  newCollection  Boolean  @default(false)
+  badge          String?
+  seoTitle       String?
+  seoDescription String?
+  supplier       String?
+  categoryId     String
+  vendorId       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  category   Category       @relation(fields: [categoryId], references: [id])
+  vendor     Vendor?        @relation(fields: [vendorId], references: [id])
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+  wishlist   WishlistItem[]
+  reviews    Review[]
+
+  @@index([categoryId])
+  @@index([vendorId])
+  @@index([slug])
+  @@index([status])
+}
+
+// ── Marketplace: vendors, services, applications, newsletter ──────────────
+
+model Vendor {
+  id          String   @id @default(cuid())
+  userId      String?  @unique
+  name        String
+  slug        String   @unique
+  tagline     String?
+  description String?
+  contactName String?
+  email       String?
+  phone       String?
+  location    String?
+  /// PRODUCTS | SERVICES | BOTH
+  type        String   @default("PRODUCTS")
+  imageSeed   String?
+  verified    Boolean  @default(false)
+  featured    Boolean  @default(false)
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  products Product[]
+  services Service[]
+
+  @@index([slug])
+  @@index([status])
+}
+
+model ServiceCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  services Service[]
+
+  @@index([slug])
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  shortDesc   String?
+  description String
+  priceFrom   Decimal? @db.Decimal(10, 2)
+  /// FROM | FIXED | QUOTE
+  priceType   String   @default("FROM")
+  location    String?
+  online      Boolean  @default(false)
+  images      Json     @default("[]")
+  tags        Json     @default("[]")
+  featured    Boolean  @default(false)
+  popular     Boolean  @default(false)
+  status      String   @default("ACTIVE")
+  vendorId    String
+  categoryId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  vendor   Vendor          @relation(fields: [vendorId], references: [id])
+  category ServiceCategory @relation(fields: [categoryId], references: [id])
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([vendorId])
+  @@index([status])
+}
+
+model SellerApplication {
+  id           String   @id @default(cuid())
+  businessName String
+  contactName  String
+  email        String
+  phone        String?
+  /// PRODUCTS | SERVICES | BOTH
+  offerType    String   @default("PRODUCTS")
+  category     String?
+  description  String?
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now())
+
+  @@index([status])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  locale    String   @default("nl")
+  createdAt DateTime @default(now())
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  userId    String?
+  sessionId String?
+  productId String
+  quantity  Int     @default(1)
+  size      String?
+  color     String?
+
+  user    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId, size, color])
+  @@index([sessionId])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id              String    @id @default(cuid())
+  orderNumber     String    @unique
+  userId          String
+  customerEmail   String?
+  status          String    @default("PENDING")
+  paymentStatus   String    @default("PENDING")
+  paymentProvider String?
+  subtotal        Decimal   @db.Decimal(10, 2)
+  shipping        Decimal   @default(0) @db.Decimal(10, 2)
+  discount        Decimal   @default(0) @db.Decimal(10, 2)
+  total           Decimal   @db.Decimal(10, 2)
+  shippingAddress Json?
+  shippingMethod  String?
+  molliePaymentId String?   @unique
+  trackingNumber  String?
+  trackingUrl     String?
+  couponCode      String?
+  notes           String?
+  /// Wanneer Mollie de betaling bevestigde.
+  paidAt          DateTime?
+  /// De voorraad wordt bij het aanmaken van de order gereserveerd. Dit veld wordt
+  /// gezet zodra die weer vrijgegeven is (betaling mislukt of verlopen), zodat
+  /// hij nooit twee keer vrijgegeven wordt.
+  stockReleasedAt DateTime?
+  /// Reden waarom een order manuele opvolging nodig heeft (bv. betaald nadat
+  /// de betaling verlopen was en de voorraad intussen op is).
+  needsAttention  String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id])
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([paymentStatus, createdAt])
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String
+  /// Productnaam op het moment van bestellen.
+  productName String
+  quantity    Int
+  price       Decimal @db.Decimal(10, 2)
+  size        String?
+  color       String?
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  rating    Int
+  comment   String?
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId])
+}
+
+model CouponCode {
+  id            String    @id @default(cuid())
+  code          String    @unique
+  description   String?
+  discountType  String    @default("PERCENTAGE")
+  discountValue Decimal   @db.Decimal(10, 2)
+  minOrder      Decimal?  @db.Decimal(10, 2)
+  maxUses       Int?
+  usedCount     Int       @default(0)
+  active        Boolean   @default(true)
+  validFrom     DateTime?
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+}

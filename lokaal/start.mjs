@@ -83,7 +83,7 @@ function launch(app) {
 }
 
 // ---------------------------------------------------------------- startpagina + statische projecten
-const STATIC = { '/pompkompas/': 'pompkompas', '/kleine-qamar/': 'kleine-qamar', '/saas-overdracht/': 'saas-overdracht', '/platformideeen/': 'platformideeen' };
+const STATIC = { '/pompkompas/': 'pompkompas', '/kleine-qamar/': 'kleine-qamar', '/platformideeen/': 'platformideeen' };
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.md': 'text/plain; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml' };
 
 async function probe(app) {

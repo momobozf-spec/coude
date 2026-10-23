@@ -1,0 +1,66 @@
+# Barakah op Render — GRATIS testopstelling. Alleen testdata.
+#
+# Gebruik: Dashboard → Blueprints → New Blueprint Instance → repository
+# `barakah` → Blueprint Path: render.free.yaml.
+#
+# - Database: Neon (gratis, Frankfurt). Render staat maar één gratis database
+#   per workspace toe en die gebruikt ImmoRadar al.
+# - Geen worker. Herinneringen lopen via /api/internal/reminders/process,
+#   elk uur aangeroepen door GitHub Actions (deploy/github-cron.yml).
+#   ECB-koersen haal je met de knop op /admin/prijzen.
+# - Geen persistente schijf: geüploade bewijsstukken en jaarrapporten
+#   verdwijnen bij elke herstart of nieuwe deploy.
+# - Bij elke start: migraties, referentiedata (idempotent) en, als ADMIN_EMAIL
+#   gezet is en dat account bestaat, de beheerdersrol.
+# Draaiboek: docs/DEPLOY-RENDER-FREE.md.
+
+services:
+  - type: web
+    name: barakah-test
+    runtime: docker
+    region: frankfurt
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerCommand: npm run start:render
+    healthCheckPath: /api/ready
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUSTED_PROXY_HOPS
+        value: '1'
+      - key: DATABASE_POOL_MAX
+        value: '3'
+      - key: METAL_PRICE_PROVIDER
+        value: published
+      - key: FX_PROVIDER
+        value: published
+      - key: FX_SYNC
+        value: frankfurter
+      - key: EMAIL_PROVIDER
+        value: resend
+      - key: STORAGE_PROVIDER
+        value: local
+      - key: LEGAL_ENTITY_NAME
+        value: Marhaba Data & AI Agent BV
+      - key: LEGAL_ENTITY_VAT
+        value: BE1003552102
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: CRON_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
+      - key: AUTH_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: LEGAL_ENTITY_ADDRESS
+        sync: false
+      - key: LEGAL_CONTACT_EMAIL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false

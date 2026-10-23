@@ -1,0 +1,20 @@
+# Niet in de build-context. Vooral .env: Next kopieert .env-bestanden anders
+# mee in de build, en dan zitten je geheimen in de image.
+node_modules
+.next
+src/generated
+.storage
+test-results
+playwright-report
+e2e
+.git
+.env
+.env.*
+!.env.example
+*.log
+coverage
+tsconfig.tsbuildinfo
+Dockerfile
+docker-compose.yml
+docs
+tests

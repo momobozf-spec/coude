@@ -1,0 +1,23 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+
+.env
+.env.*
+!.env.example
+
+# Uploaded receipts when STORAGE_PROVIDER=local — never commit user documents.
+.storage/
+
+*.tsbuildinfo
+next-env.d.ts
+
+coverage/
+*.log
+.DS_Store
+Thumbs.db
+src/generated/
+test-results/
+playwright-report/

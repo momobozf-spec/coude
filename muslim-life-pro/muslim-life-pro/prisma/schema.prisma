@@ -1,0 +1,1361 @@
+// Muslim Life — database schema
+// See docs/database-design.md for the reasoning behind these models.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Identity
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  USER
+  BUSINESS_OWNER
+  ADMIN
+}
+
+/// Where an account is in the deletion pipeline.
+enum DeletionStatus {
+  NONE
+  /// Member asked; nothing removed yet.
+  REQUESTED
+  /// Cannot proceed — an active paid subscription must be settled first.
+  BLOCKED_BILLING
+  /// Billing settled; safe to run the deletion policy.
+  READY
+  /// Policy has run. Personal data gone or scrubbed.
+  COMPLETED
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  name          String?
+  image         String?
+  role          UserRole  @default(USER)
+
+  onboardedAt DateTime?
+  locale      String    @default("en")
+  timezone    String    @default("Europe/Brussels")
+
+  preference         UserPreference?
+  subscription       Subscription?
+  accounts           Account[]
+  sessions           Session[]
+  tasks              Task[]
+  habits             Habit[]
+  habitLogs          HabitLog[]
+  prayerLogs         PrayerLog[]
+  goals              Goal[]
+  summaries          DailySummary[]
+  plannerBlocks      PlannerBlock[]
+  reflections        DailyReflection[]
+  analytics          AnalyticsEvent[]
+  favoriteBusinesses FavoriteBusiness[]
+  favoriteDeals      FavoriteDeal[]
+  redemptions        DealRedemption[]
+  conversations      AIConversation[]
+  aiUsage            AIUsage[]
+  plans              GeneratedPlan[]
+  notifications      Notification[]
+  ownedBusinesses    Business[]         @relation("BusinessOwner")
+
+  /// Staged deletion. `deletedAt` alone is not enough: an account with live
+  /// billing must not vanish while the provider keeps charging, so the request
+  /// is recorded first and only completes once billing is settled.
+  deletionStatus      DeletionStatus @default(NONE)
+  deletionRequestedAt DateTime?
+  /// Set when personal fields have been scrubbed but the row is retained for
+  /// records that must survive (billing reconciliation, security audit).
+  anonymizedAt        DateTime?
+
+  /// Anchors the export rate limit. A column rather than a query over the audit
+  /// log, because the audit writer is deliberately non-throwing: a limit that
+  /// silently stops applying when logging fails is not a limit.
+  lastExportAt DateTime?
+
+  /// Sessions issued before this instant are rejected (password change/reset).
+  passwordChangedAt DateTime?
+
+  /// Explicit consent (GDPR art. 9(2)(a)): prayer and worship logs reveal
+  /// religious belief, a special category of personal data. Recorded at
+  /// registration together with the version of the privacy text agreed to.
+  consentedAt    DateTime?
+  consentVersion String?
+
+  deliveries     NotificationDelivery[]
+  passwordResets PasswordResetToken[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+  @@index([deletionStatus])
+  @@map("users")
+}
+
+enum CalculationMethod {
+  MUSLIM_WORLD_LEAGUE
+  EGYPTIAN
+  KARACHI
+  UMM_AL_QURA
+  DUBAI
+  MOON_SIGHTING_COMMITTEE
+  NORTH_AMERICA
+  KUWAIT
+  QATAR
+  SINGAPORE
+  TEHRAN
+  TURKEY
+}
+
+enum Madhab {
+  SHAFI
+  HANAFI
+}
+
+enum HighLatitudeRule {
+  MIDDLE_OF_THE_NIGHT
+  SEVENTH_OF_THE_NIGHT
+  TWILIGHT_ANGLE
+}
+
+enum ThemePreference {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum TimeFormat {
+  H24
+  H12
+}
+
+model UserPreference {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Prayer configuration
+  calculationMethod CalculationMethod @default(MUSLIM_WORLD_LEAGUE)
+  madhab            Madhab            @default(SHAFI)
+  highLatitudeRule  HighLatitudeRule?
+  /// Per-prayer manual offsets in minutes: { "fajr": -2, "isha": 3 }
+  prayerOffsets     Json              @default("{}")
+
+  // Coarse location — city centroid by default, never continuous GPS
+  countryId String?
+  country   Country? @relation(fields: [countryId], references: [id], onDelete: SetNull)
+  cityId    String?
+  city      City?    @relation(fields: [cityId], references: [id], onDelete: SetNull)
+  latitude  Float?
+  longitude Float?
+
+  // Personalisation (closed enums owned by the product — see docs/database-design.md §2)
+  interests String[] @default([])
+  goals     String[] @default([])
+
+  // Targets
+  dailyQuranPages  Int @default(5)
+  dailyDhikrTarget Int @default(100)
+  weekStartsOn     Int @default(1) // 0 = Sunday, 1 = Monday
+
+  // Display
+  theme      ThemePreference @default(SYSTEM)
+  timeFormat TimeFormat      @default(H24)
+
+  /// Per-channel notification flags
+  notificationPrefs Json @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_preferences")
+}
+
+// Auth.js adapter models — kept standard so adapter upgrades stay drop-in.
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+/// One-time password-reset link. Only the SHA-256 of the token is stored, so a
+/// database leak does not hand out working reset links.
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Subscription
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Plan {
+  FREE
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+/// A member's commercial state.
+///
+/// Fields are provider-neutral: the same row describes a Stripe subscription and
+/// a stub one, so nothing downstream knows which provider is behind it.
+///
+/// `cancelAtPeriodEnd` is a boolean rather than a status, deliberately. A
+/// cancelling subscription is still ACTIVE until the period ends — modelling
+/// that as a separate status would mean every entitlement check had to remember
+/// to treat it as access-granting, which is exactly the mistake that revokes
+/// features someone has already paid for.
+model Subscription {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  plan     Plan               @default(FREE)
+  status   SubscriptionStatus @default(ACTIVE)
+  interval BillingInterval?
+
+  /// "stripe" | "stub". Null while the member has never subscribed.
+  provider               String?
+  externalCustomerId     String? @unique
+  externalSubscriptionId String? @unique
+  externalPriceId        String?
+
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+  trialEndsAt        DateTime?
+
+  /// The provider's own last-modified timestamp. Used to reject webhook events
+  /// that arrive out of order, which Stripe does not guarantee against.
+  providerUpdatedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([plan, status])
+  @@index([externalCustomerId])
+  @@map("subscriptions")
+}
+
+/// Idempotency guard — providers redeliver webhooks, by design.
+///
+/// The unique constraint on (provider, externalEventId) is what makes processing
+/// exactly-once: a duplicate delivery collides at insert rather than relying on
+/// a read-then-check that two concurrent deliveries would both pass.
+model WebhookEvent {
+  id              String @id @default(uuid())
+  provider        String
+  externalEventId String
+
+  type           String
+  /// The provider's own event timestamp, for ordering.
+  eventCreatedAt DateTime?
+  payload        Json
+  processedAt    DateTime?
+  error          String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([provider, externalEventId])
+  @@index([provider, processedAt])
+  @@map("webhook_events")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Planner, habits & worship
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  HIGH
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskSource {
+  MANUAL
+  AI
+  TEMPLATE
+}
+
+enum TaskCategory {
+  PERSONAL
+  WORK
+  FAMILY
+  HEALTH
+  LEARNING
+  ERRAND
+  WORSHIP
+  OTHER
+}
+
+model Task {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+
+  /// The calendar day this task is planned for, in the user's timezone.
+  /// NULL means the task sits in the Inbox — deliberately nullable, because
+  /// "capture now, schedule later" is the behaviour that makes capture fast.
+  scheduledDate DateTime? @db.Date
+  /// Optional wall-clock time on `scheduledDate`, "HH:mm".
+  scheduledTime String?
+  /// A hard deadline, independent of when the user planned to do it.
+  dueDate       DateTime? @db.Date
+
+  estimatedMinutes Int?
+  category         TaskCategory?
+
+  priority TaskPriority @default(NORMAL)
+  status   TaskStatus   @default(TODO)
+
+  /// Daily priorities are a flag on Task, not a separate model: the same row is
+  /// the task and the priority, so completing one cannot desynchronise the other.
+  isDailyPriority Boolean @default(false)
+  /// 0-based position within the day's priorities. Meaningless when the flag is false.
+  priorityOrder   Int?
+
+  completedAt DateTime?
+  sortOrder   Int       @default(0)
+
+  source          TaskSource     @default(MANUAL)
+  generatedPlanId String?
+  generatedPlan   GeneratedPlan? @relation(fields: [generatedPlanId], references: [id], onDelete: SetNull)
+
+  blocks PlannerBlock[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // The three list views: Today, Upcoming and Inbox.
+  @@index([userId, scheduledDate, status])
+  @@index([userId, status, deletedAt])
+  @@index([userId, isDailyPriority, scheduledDate])
+  @@index([userId, dueDate])
+  @@map("tasks")
+}
+
+enum HabitCategory {
+  WORSHIP
+  HEALTH
+  LEARNING
+  FAMILY
+  WORK
+  CHARITY
+  PERSONAL
+  CUSTOM
+}
+
+enum HabitType {
+  BOOLEAN
+  COUNTER
+  DURATION
+}
+
+enum HabitFrequencyType {
+  /// Every day.
+  DAILY
+  /// Only on the weekdays listed in `daysOfWeek`.
+  SPECIFIC_DAYS
+  /// Any `targetPerPeriod` days within the week; the user chooses which.
+  TIMES_PER_WEEK
+}
+
+enum TimeOfDayPreference {
+  MORNING
+  AFTERNOON
+  EVENING
+  ANY
+}
+
+model Habit {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  icon        String        @default("circle")
+  color       String        @default("emerald")
+  category    HabitCategory @default(PERSONAL)
+
+  /// How a single day's completion is measured.
+  type        HabitType @default(BOOLEAN)
+  targetValue Int       @default(1)
+  unit        String? // "pages" | "minutes" | "times" | "glasses"
+
+  frequencyType   HabitFrequencyType @default(DAILY)
+  /// Only meaningful for TIMES_PER_WEEK. Days per week, 1–7.
+  targetPerPeriod Int                @default(1)
+  /// Only meaningful for SPECIFIC_DAYS. 0 = Sunday … 6 = Saturday,
+  /// interpreted against the user's LOCAL calendar day.
+  daysOfWeek      Int[]              @default([])
+
+  preferredTimeOfDay TimeOfDayPreference @default(ANY)
+
+  /// Soft on/off switch the user controls. Distinct from `deletedAt`, and it is
+  /// this flag (plus deletedAt) that the free-tier habit cap counts.
+  active Boolean @default(true)
+
+  isPreset  String? @map("preset_key")
+  sortOrder Int     @default(0)
+
+  logs HabitLog[]
+
+  archivedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  @@index([userId, active, deletedAt])
+  @@map("habits")
+}
+
+enum HabitLogStatus {
+  COMPLETED
+  PARTIAL
+  /// Explicitly set aside by the user. Never rendered as a failure.
+  SKIPPED
+}
+
+model HabitLog {
+  id      String @id @default(uuid())
+  habitId String
+  habit   Habit  @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  /// Denormalised so user-scoped queries and GDPR erasure need no join.
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// The user's LOCAL calendar day. Never an instant — see src/lib/dates.ts.
+  localDate DateTime       @db.Date
+  status    HabitLogStatus @default(COMPLETED)
+  /// Amount recorded for COUNTER/DURATION habits (pages, minutes, …).
+  quantity  Int?
+  note      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// One log per habit per local day — makes the toggle idempotent.
+  @@unique([habitId, localDate])
+  @@index([userId, localDate])
+  @@map("habit_logs")
+}
+
+enum Prayer {
+  FAJR
+  DHUHR
+  ASR
+  MAGHRIB
+  ISHA
+}
+
+enum PrayerStatus {
+  ON_TIME
+  LATE
+  JAMAAH
+  MISSED
+  /// Deliberate: travellers and menstruating users are never shown a "missed" state.
+  EXCUSED
+}
+
+model PrayerLog {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date   DateTime     @db.Date
+  prayer Prayer
+  status PrayerStatus @default(ON_TIME)
+
+  loggedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date, prayer])
+  @@index([userId, date])
+  @@map("prayer_logs")
+}
+
+enum GoalType {
+  HABIT
+  QURAN
+  CHARITY
+  SAVINGS
+  CUSTOM
+}
+
+enum GoalPeriod {
+  WEEKLY
+  MONTHLY
+  YEARLY
+  ONCE
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+model Goal {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title        String
+  type         GoalType   @default(CUSTOM)
+  targetValue  Int        @default(1)
+  currentValue Int        @default(0)
+  unit         String?
+  currency     String? // reserved for the Finance module (SAVINGS goals)
+  period       GoalPeriod @default(MONTHLY)
+  startDate    DateTime   @db.Date
+  endDate      DateTime?  @db.Date
+  status       GoalStatus @default(ACTIVE)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([userId, status])
+  @@map("goals")
+}
+
+/// Denormalised daily cache. Rebuildable from source tables — never the source of truth.
+///
+/// Deliberately stores per-domain counts and NO combined score. Collapsing prayer,
+/// habits and tasks into one number would be a "faith score", which this product
+/// does not do. Analytics are always presented per domain.
+model DailySummary {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date DateTime @db.Date
+
+  prayersLogged   Int     @default(0)
+  prayersExcused  Int     @default(0)
+  habitsCompleted Int     @default(0)
+  habitsDue       Int     @default(0)
+  tasksCompleted  Int     @default(0)
+  tasksPlanned    Int     @default(0)
+  hasReflection   Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@map("daily_summaries")
+}
+
+enum PlannerBlockType {
+  FOCUS
+  TASK
+  APPOINTMENT
+  PERSONAL
+  CUSTOM
+}
+
+/// A time block on a single local day.
+///
+/// Prayers are deliberately NOT stored as blocks — they are derived from the
+/// calculated prayer times and injected into the timeline at read time. Persisting
+/// them would create two sources of truth that drift whenever a user changes their
+/// calculation method.
+model PlannerBlock {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title String
+  note  String?
+
+  /// The user's LOCAL calendar day.
+  localDate DateTime @db.Date
+  /// Wall-clock "HH:mm" within `localDate`. Blocks may not cross midnight —
+  /// see PlannerBlock validation in planner-block.service.ts.
+  startTime String
+  endTime   String
+
+  type PlannerBlockType @default(FOCUS)
+
+  taskId String?
+  task   Task?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([userId, localDate])
+  @@index([taskId])
+  @@map("planner_blocks")
+}
+
+/// One short reflection per local day. Private, never analysed, never sent anywhere.
+model DailyReflection {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  localDate DateTime @db.Date
+
+  gratitude       String? @db.Text
+  wentWell        String? @db.Text
+  improveTomorrow String? @db.Text
+  notes           String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, localDate])
+  @@index([userId, localDate])
+  @@map("daily_reflections")
+}
+
+/// Product analytics.
+///
+/// Event NAMES only, plus a small allow-listed numeric/enum property bag. Never
+/// task titles, habit names, reflection text or prayer detail — see
+/// src/server/services/analytics.ts, which is the only writer.
+model AnalyticsEvent {
+  id     String  @id @default(uuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name       String
+  properties Json   @default("{}")
+
+  occurredAt DateTime @default(now())
+
+  @@index([name, occurredAt])
+  @@index([userId, occurredAt])
+  @@map("analytics_events")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Geography
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Country {
+  id   String @id @default(uuid())
+  code String @unique // ISO-3166 alpha-2
+  name String
+
+  currency      String @default("EUR")
+  defaultLocale String @default("en")
+
+  cities      City[]
+  preferences UserPreference[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("countries")
+}
+
+model City {
+  id        String  @id @default(uuid())
+  countryId String
+  country   Country @relation(fields: [countryId], references: [id], onDelete: Cascade)
+
+  name      String
+  slug      String
+  latitude  Float
+  longitude Float
+  timezone  String  @default("Europe/Brussels")
+  isActive  Boolean @default(true)
+
+  businesses  Business[]
+  preferences UserPreference[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([countryId, slug])
+  @@index([isActive])
+  @@map("cities")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Discovery
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum CategoryType {
+  FOOD
+  RETAIL
+  SERVICE
+  TRAVEL
+  EVENT
+}
+
+model BusinessCategory {
+  id   String       @id @default(uuid())
+  slug String       @unique
+  name String
+  icon String       @default("store")
+  type CategoryType @default(FOOD)
+
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  businesses Business[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("business_categories")
+}
+
+/// Listing placement level — what a business pays for.
+/// Deliberately NOT named "verified": trust lives in `BusinessVerification`,
+/// and a paid placement must never be able to render as a trust signal.
+enum BusinessTier {
+  BASIC
+  ENHANCED
+  FEATURED
+}
+
+enum BusinessStatus {
+  DRAFT
+  PUBLISHED
+  SUSPENDED
+}
+
+/// How much we actually know about a listing.
+///
+/// `VERIFIED` means a human confirmed this business exists and consented to the
+/// listing. Seed data can never carry it — see the seeder and the demo tests.
+enum BusinessVerification {
+  /// Illustrative data. Always badged in the UI.
+  DEMO
+  /// Exists in our data, nobody has checked it.
+  UNVERIFIED
+  /// The owner claimed and described it themselves.
+  SELF_REPORTED
+  /// Confirmed by us, with a date.
+  VERIFIED
+}
+
+/// Where a listing came from. Prepares the ground for real imports.
+enum BusinessSourceType {
+  SEED
+  MANUAL
+  COMMUNITY
+  PARTNER
+  OFFICIAL
+  IMPORT
+}
+
+model Business {
+  id          String @id @default(uuid())
+  name        String
+  slug        String @unique
+  description String @db.Text
+
+  categoryId String
+  category   BusinessCategory @relation(fields: [categoryId], references: [id])
+  cityId     String
+  city       City             @relation(fields: [cityId], references: [id])
+
+  address    String
+  postalCode String?
+  latitude   Float?
+  longitude  Float?
+
+  phone     String?
+  email     String?
+  website   String?
+  instagram String?
+
+  /// { "mon": [["09:00","18:00"]], "tue": [], ... }
+  openingHours Json     @default("{}")
+  images       String[] @default([])
+  coverImage   String?
+
+  rating      Float?
+  reviewCount Int    @default(0)
+  priceLevel  Int? // 1–4
+
+  tier BusinessTier @default(BASIC)
+
+  /// Honesty flag — rendered in the UI as a "Demo listing" badge.
+  /// Kept alongside `verification` because it is the coarse switch every query
+  /// can filter on cheaply; `verification` is the nuance shown to the user.
+  isDemo Boolean @default(false)
+
+  verification   BusinessVerification @default(UNVERIFIED)
+  sourceType     BusinessSourceType   @default(MANUAL)
+  sourceUrl      String?
+  /// Only ever set together with `verification = VERIFIED`.
+  lastVerifiedAt DateTime?
+
+  ownerId         String?
+  owner           User?   @relation("BusinessOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  stripeAccountId String? // reserved for the marketplace module
+
+  status      BusinessStatus @default(DRAFT)
+  publishedAt DateTime?
+
+  deals Deal[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  favoritedBy FavoriteBusiness[]
+
+  @@index([cityId, categoryId, status])
+  @@index([status, tier])
+  // Browse ordering: featured listings first within a city.
+  @@index([status, cityId, tier, name])
+  @@map("businesses")
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+  BOGO
+  FREEBIE
+}
+
+enum DealStatus {
+  DRAFT
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+}
+
+model Deal {
+  id         String   @id @default(uuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String  @db.Text
+  image       String?
+
+  discountType  DiscountType @default(PERCENTAGE)
+  discountValue Int          @default(0)
+  code          String?
+  terms         String?      @db.Text
+
+  startsAt DateTime
+  endsAt   DateTime
+
+  isPremiumOnly   Boolean @default(false)
+  maxRedemptions  Int?
+  redemptionCount Int     @default(0)
+  /// Higher first — the sponsored-listing hook.
+  priority        Int     @default(0)
+
+  status DealStatus @default(DRAFT)
+  isDemo Boolean    @default(false)
+
+  redemptions DealRedemption[]
+  favoritedBy FavoriteDeal[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status, endsAt, isPremiumOnly])
+  @@index([businessId, status])
+  // The "currently redeemable" window used by every deal query.
+  @@index([status, startsAt, endsAt])
+  @@map("deals")
+}
+
+enum RedemptionStatus {
+  /// Issued to the member; not yet used in store.
+  ISSUED
+  REDEEMED
+  EXPIRED
+  CANCELLED
+}
+
+/// A member's claim on a deal.
+///
+/// `@@unique([dealId, userId])` is the idempotency guarantee: one row per member
+/// per deal, ever. A double tap returns the existing row rather than minting a
+/// second code, and it is the database that enforces this, not the service.
+model DealRedemption {
+  id     String @id @default(uuid())
+  dealId String
+  deal   Deal   @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status RedemptionStatus @default(ISSUED)
+
+  /// Per-member code shown in store. Cryptographically random, never sequential.
+  ///
+  /// Stored in the clear deliberately: the member must be able to reopen the app
+  /// and show it again, so a hash could not be displayed back. Hashing here would
+  /// be security theatre. It is protected by being readable only through
+  /// user-scoped queries, and it is never included in any list response.
+  code String @unique
+
+  issuedAt   DateTime  @default(now())
+  redeemedAt DateTime?
+  expiresAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([dealId, userId])
+  @@index([userId, status])
+  @@map("deal_redemptions")
+}
+
+/// Favourites.
+///
+/// Phase 1 modelled these polymorphically (`targetType` + `targetId`). Replaced
+/// here, before any row existed, with two dedicated relations: it buys real
+/// foreign-key integrity and cascade deletes, so a removed business cannot leave
+/// orphaned favourites behind, and the favourites list loads with a single
+/// include instead of a manual second query.
+model FavoriteBusiness {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, businessId])
+  @@index([userId, createdAt])
+  @@map("favorite_businesses")
+}
+
+model FavoriteDeal {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  dealId String
+  deal   Deal   @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, dealId])
+  @@index([userId, createdAt])
+  @@map("favorite_deals")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Assistant
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum ConversationKind {
+  CHAT
+  GENERATOR
+}
+
+enum GeneratorType {
+  WEEKLY
+  RAMADAN
+  TRAVEL
+  LIFE_EVENT
+  CUSTOM
+}
+
+enum GeneratedPlanStatus {
+  /// Generated but not yet validated or shown.
+  DRAFT
+  /// Validated and awaiting the member's review.
+  READY
+  /// The member confirmed and items were written to the planner.
+  APPLIED
+  ARCHIVED
+}
+
+enum GeneratedPlanItemKind {
+  TASK
+  BLOCK
+  HABIT_SUGGESTION
+  NOTE
+}
+
+enum GeneratedPlanItemStatus {
+  /// Proposed, awaiting review.
+  PROPOSED
+  /// Applied and linked to a real planner row.
+  APPLIED
+  /// The member deselected it.
+  SKIPPED
+  /// Already present in the planner; deselected by default.
+  DUPLICATE
+}
+
+model AIConversation {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title         String           @default("New conversation")
+  kind          ConversationKind @default(CHAT)
+  generatorType GeneratorType?
+
+  messages AIMessage[]
+  plans    GeneratedPlan[]
+
+  archivedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([userId, updatedAt])
+  @@map("ai_conversations")
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+model AIMessage {
+  id             String         @id @default(uuid())
+  conversationId String
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role    MessageRole
+  content String      @db.Text
+
+  tokensIn  Int?
+  tokensOut Int?
+  /// Which provider and model produced this, for cost accounting and for the
+  /// "demo AI" badge. Never the prompt itself.
+  provider  String?
+  model     String?
+
+  flagged         Boolean @default(false)
+  flagReason      String?
+  /// Auditable proof the religious disclaimer was rendered to the user.
+  disclaimerShown Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("ai_messages")
+}
+
+model AIUsage {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// "YYYY-MM"
+  period         String
+  messageCount   Int    @default(0)
+  generatorCount Int    @default(0)
+  tokensIn       Int    @default(0)
+  tokensOut      Int    @default(0)
+  /// Reserved-but-not-yet-confirmed calls. Incremented before the provider is
+  /// invoked and released on infrastructure failure, so two concurrent requests
+  /// cannot both claim the last slot.
+  reserved       Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, period])
+  @@map("ai_usage")
+}
+
+/// A plan the assistant proposed.
+///
+/// Never applied automatically. A plan is generated as DRAFT, validated to READY,
+/// and only becomes APPLIED when the member confirms a specific selection.
+model GeneratedPlan {
+  id             String          @id @default(uuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversationId String?
+  conversation   AIConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  type   GeneratorType
+  title  String
+  status GeneratedPlanStatus @default(DRAFT)
+
+  /// The whole validated payload, kept for provenance and regeneration.
+  /// Individual proposals live in `items` — see the note there.
+  structuredContent Json
+  /// Schema version of the generator that produced this, so an old plan can
+  /// still be read after the schema moves on.
+  generatorVersion  Int  @default(1)
+
+  provider String?
+  model    String?
+
+  items GeneratedPlanItem[]
+  tasks Task[]
+
+  appliedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([userId, status, createdAt])
+  @@map("generated_plans")
+}
+
+/// One proposal within a plan.
+///
+/// Relational rather than buried in the plan's JSON, because we need to answer
+/// "which suggestion became which planner task" — for partial apply, for
+/// duplicate detection, and to undo a plan without guessing.
+model GeneratedPlanItem {
+  id     String        @id @default(uuid())
+  planId String
+  plan   GeneratedPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  /// Denormalised so item queries and GDPR erasure need no join.
+  userId String
+
+  kind   GeneratedPlanItemKind   @default(TASK)
+  status GeneratedPlanItemStatus @default(PROPOSED)
+
+  title            String
+  description      String?
+  /// The member's local calendar day, if the proposal is dated.
+  localDate        DateTime? @db.Date
+  startTime        String?
+  endTime          String?
+  estimatedMinutes Int?
+  category         String?
+
+  /// Stable identity within the plan: `${kind}:${normalisedTitle}:${localDate}`.
+  /// Unique per plan, which is what makes applying idempotent — a double click
+  /// cannot create the same task twice.
+  itemKey String
+
+  /// Set when this proposal collided with something already in the planner.
+  duplicateOfTaskId String?
+
+  /// Set once applied — the audit trail from suggestion to planner row.
+  taskId  String?
+  blockId String?
+
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([planId, itemKey])
+  @@index([userId, status])
+  @@map("generated_plan_items")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Content & system
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum ContentType {
+  VERSE
+  HADITH
+  DUA
+}
+
+model DailyContent {
+  id   String      @id @default(uuid())
+  type ContentType
+
+  arabic          String? @db.Text
+  transliteration String? @db.Text
+  translation     String  @db.Text
+  reference       String
+  source          String?
+
+  locale String   @default("en")
+  tags   String[] @default([])
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([locale, isActive])
+  @@map("daily_content")
+}
+
+enum NotificationChannel {
+  IN_APP
+  PUSH
+  EMAIL
+}
+
+/// A product-level message to a member.
+///
+/// Separate from `NotificationDelivery`, which is one attempt on one channel.
+/// The same notification may later go to in-app, email and push — modelling
+/// them as one row would make a partial failure unrepresentable.
+model Notification {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type  String
+  title String
+  body  String @db.Text
+  data  Json   @default("{}")
+
+  /// `type:userId:resourceId:occurrence`. Unique, so a retried job cannot
+  /// notify the same member twice about the same thing.
+  idempotencyKey String @unique
+
+  readAt DateTime?
+
+  deliveries NotificationDelivery[]
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+  /// Not attempted — the member has this channel switched off.
+  SUPPRESSED
+}
+
+/// One attempt to deliver a notification on one channel.
+model NotificationDelivery {
+  id             String       @id @default(uuid())
+  notificationId String
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  /// Denormalised for user-scoped queries and erasure.
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  channel  NotificationChannel
+  status   DeliveryStatus      @default(PENDING)
+  provider String?
+
+  attempts  Int       @default(0)
+  lastError String?
+  sentAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([notificationId, channel])
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("notification_deliveries")
+}
+
+model AuditLog {
+  id      String  @id @default(uuid())
+  actorId String?
+
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json    @default("{}")
+
+  ip        String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
+
+/// Postgres-backed sliding window. Swapped for Redis behind the same interface later.
+model RateLimitEntry {
+  id          String   @id @default(uuid())
+  key         String
+  windowStart DateTime
+  count       Int      @default(0)
+
+  @@unique([key, windowStart])
+  @@index([windowStart])
+  @@map("rate_limit_entries")
+}

@@ -1,0 +1,529 @@
+{
+  "_meta": {
+    "locale": "nl",
+    "name": "Dutch",
+    "nativeName": "Nederlands",
+    "dir": "ltr",
+    "status": "machine-unreviewed",
+    "reviewedBy": "",
+    "note": "Machine-translated from en.json. Not yet checked by a native speaker — the app shows an unreviewed-translation notice while this stays empty."
+  },
+  "common": {
+    "appName": "Muslim Life",
+    "tagline": "Leef met intentie.",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "continue": "Doorgaan",
+    "back": "Terug",
+    "next": "Volgende",
+    "finish": "Afronden",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "add": "Toevoegen",
+    "search": "Zoeken",
+    "loading": "Laden",
+    "today": "Vandaag",
+    "yesterday": "Gisteren",
+    "tomorrow": "Morgen",
+    "seeAll": "Alles bekijken",
+    "learnMore": "Meer weten",
+    "getStarted": "Beginnen",
+    "signIn": "Inloggen",
+    "signOut": "Uitloggen",
+    "signUp": "Account aanmaken",
+    "upgrade": "Upgraden",
+    "premium": "Premium",
+    "free": "Gratis",
+    "demo": "Demovermelding",
+    "optional": "optioneel",
+    "required": "verplicht",
+    "of": "van",
+    "skip": "Nu overslaan"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "planner": "Planner",
+    "habits": "Gewoontes",
+    "deals": "Aanbiedingen",
+    "assistant": "Assistent",
+    "profile": "Profiel",
+    "settings": "Instellingen",
+    "pricing": "Prijzen",
+    "admin": "Beheer",
+    "more": "Meer",
+    "overview": "Overzicht",
+    "users": "Gebruikers",
+    "businesses": "Zaken",
+    "subscriptions": "Abonnementen",
+    "aiUsage": "AI-gebruik",
+    "categories": "Categorieën",
+    "today": "Vandaag",
+    "review": "Weekoverzicht",
+    "explore": "Ontdekken",
+    "operations": "Operatie"
+  },
+  "theme": {
+    "label": "Weergave",
+    "light": "Licht",
+    "dark": "Donker",
+    "system": "Systeem"
+  },
+  "greeting": {
+    "salaam": "Assalamu Alaikum",
+    "morning": "Goedemorgen",
+    "afternoon": "Goedemiddag",
+    "evening": "Goedenavond",
+    "night": "Rustige nacht"
+  },
+  "prayer": {
+    "fajr": "Fajr",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "maghrib": "Maghrib",
+    "isha": "Isha",
+    "next": "Volgend gebed",
+    "remaining": "Nog {time}",
+    "now": "Het is tijd",
+    "tomorrow": "morgen",
+    "today": "Gebeden van vandaag",
+    "logged": "Geregistreerd",
+    "markPrayed": "Markeren als gebeden",
+    "status": {
+      "onTime": "Op tijd",
+      "late": "Laat",
+      "jamaah": "In gemeenschap",
+      "missed": "Niet gebeden",
+      "excused": "Vrijgesteld"
+    },
+    "setLocation": "Stel je stad in om gebedstijden te zien",
+    "calculationMethod": "Berekeningsmethode",
+    "madhab": "Asr-berekening",
+    "madhabShafi": "Standaard (Shafi'i, Maliki, Hanbali)",
+    "madhabHanafi": "Hanafi"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "todaysProgress": "Voortgang vandaag",
+    "prayers": "Gebeden",
+    "quranGoal": "Korandoel",
+    "quranPages": "{done} van {total} pagina's",
+    "habits": "Gewoontes",
+    "habitsDone": "{done} van {total} voltooid",
+    "dailyReminder": "Een herinnering voor vandaag",
+    "todaysPlanner": "Planner van vandaag",
+    "noTasks": "Nog niets gepland",
+    "noTasksHint": "Voeg je eerste taak toe om je dag vorm te geven.",
+    "addTask": "Taak toevoegen",
+    "nearbyDeal": "Halal aanbieding in de buurt",
+    "noDeals": "Nog geen aanbiedingen in jouw stad",
+    "noDealsHint": "We voegen partners stad voor stad toe.",
+    "weeklyProgress": "Deze week",
+    "weeklyScore": "{score}% van je week voltooid",
+    "startHabits": "Begin met een gewoonte",
+    "startHabitsHint": "Kies uit islamitische en alledaagse voorbeelden, of maak je eigen.",
+    "viewPlanner": "Planner openen",
+    "viewHabits": "Gewoontes openen",
+    "viewDeals": "Aanbiedingen bekijken"
+  },
+  "onboarding": {
+    "title": "Laten we Muslim Life instellen",
+    "subtitle": "Vijf korte stappen. Je kunt dit later allemaal wijzigen.",
+    "stepOf": "Stap {current} van {total}",
+    "name": {
+      "title": "Hoe mogen we je noemen?",
+      "subtitle": "Hiermee begroeten we je elke dag.",
+      "label": "Je naam",
+      "placeholder": "Mohamed"
+    },
+    "location": {
+      "title": "Waar woon je?",
+      "subtitle": "Dit bepaalt je gebedstijden. We bewaren alleen je stad, nooit je actuele locatie.",
+      "country": "Land",
+      "city": "Stad",
+      "selectCountry": "Kies een land",
+      "selectCity": "Kies een stad"
+    },
+    "prayer": {
+      "title": "Gebedsvoorkeuren",
+      "subtitle": "We hebben alvast gekozen wat in jouw regio het meest gebruikelijk is. Pas het aan als je een andere methode volgt.",
+      "methodHint": "Verschillende autoriteiten berekenen Fajr en Isha net iets anders."
+    },
+    "interests": {
+      "title": "Wat is belangrijk voor je?",
+      "subtitle": "Kies er een paar. Je dashboard past zich aan je keuze aan.",
+      "family": "Gezin",
+      "fitness": "Fitness",
+      "learning": "Islamitische kennis",
+      "business": "Ondernemen",
+      "travel": "Reizen",
+      "modestFashion": "Bedekkende mode",
+      "food": "Eten",
+      "finance": "Persoonlijke financiën"
+    },
+    "goals": {
+      "title": "Waar wil je aan werken?",
+      "subtitle": "We stellen gewoontes en plannen voor die daarbij passen.",
+      "prayConsistently": "Regelmatiger bidden",
+      "readQuran": "Dagelijks Koran lezen",
+      "productivity": "Productiever worden",
+      "saveMoney": "Geld sparen",
+      "learn": "Meer leren over mijn deen",
+      "buildHabits": "Betere gewoontes opbouwen",
+      "ramadanPrep": "Me voorbereiden op de Ramadan",
+      "umrahHajj": "Umrah of Hajj plannen",
+      "familyOrg": "Het gezinsleven organiseren"
+    },
+    "done": {
+      "title": "Je bent klaar",
+      "subtitle": "Je dashboard staat voor je klaar."
+    }
+  },
+  "auth": {
+    "loginTitle": "Welkom terug",
+    "loginSubtitle": "Log in om verder te gaan waar je gebleven was.",
+    "registerTitle": "Maak je account aan",
+    "registerSubtitle": "Begin je dagen met intentie in te richten.",
+    "email": "E-mailadres",
+    "password": "Wachtwoord",
+    "name": "Naam",
+    "emailPlaceholder": "jij@voorbeeld.nl",
+    "passwordHint": "Minstens 10 tekens.",
+    "noAccount": "Nog geen account?",
+    "hasAccount": "Heb je al een account?",
+    "continueWithGoogle": "Doorgaan met Google",
+    "orEmail": "of ga verder met e-mail",
+    "invalidCredentials": "Die combinatie van e-mailadres en wachtwoord klopte niet.",
+    "emailTaken": "Er bestaat al een account met dit e-mailadres.",
+    "terms": "Door een account aan te maken ga je akkoord met onze voorwaarden en ons privacybeleid.",
+    "privacyNote": "Je gebeds- en gewoontegegevens zijn standaard privé en worden nooit gedeeld.",
+    "forgotPassword": "Wachtwoord vergeten?",
+    "consent": "Ik aanvaard de voorwaarden en geef uitdrukkelijk toestemming dat Muslim Life mijn gebeds-, aanbiddings- en gewoontegegevens — die mijn geloof kunnen onthullen — verwerkt om de dienst te leveren. Ik kan dit altijd intrekken door mijn gegevens of account te verwijderen.",
+    "forgotTitle": "Wachtwoord opnieuw instellen",
+    "forgotSubtitle": "Vul je e-mailadres in, dan sturen we je een link.",
+    "sendResetLink": "Stuur link",
+    "resetSent": "Als er een account bestaat voor dat adres, is er een link onderweg. Die is één uur geldig.",
+    "resetUnavailable": "Wachtwoordherstel per e-mail is nog niet beschikbaar. Neem contact op, dan helpen we je:",
+    "resetTitle": "Kies een nieuw wachtwoord",
+    "resetInvalid": "Deze link is ongeldig of verlopen.",
+    "newPassword": "Nieuw wachtwoord",
+    "currentPassword": "Huidig wachtwoord",
+    "savePassword": "Wachtwoord opslaan",
+    "changePasswordNote": "Minstens 10 tekens. Je wordt overal afgemeld en meldt je opnieuw aan met het nieuwe wachtwoord.",
+    "passwordSection": "Wachtwoord",
+    "changePasswordIntro": "Wijzig het wachtwoord waarmee je je aanmeldt."
+  },
+  "landing": {
+    "hero": {
+      "badge": "Nu in early access",
+      "title": "Je moslimleven, georganiseerd.",
+      "subtitle": "Gebedstijden, een planner die om je dag heen is gebouwd, gewoontes die blijven hangen, halal ontdekken in de buurt en een assistent die intenties omzet in plannen. Op één rustige, privéplek.",
+      "cta": "Gratis beginnen",
+      "ctaSecondary": "Bekijk hoe het werkt",
+      "noCard": "Geen kaart nodig"
+    },
+    "trust": {
+      "private": "Standaard privé",
+      "noAds": "Nooit advertenties",
+      "cancel": "Altijd opzegbaar"
+    },
+    "features": {
+      "title": "Alles wat je dag nodig heeft",
+      "subtitle": "Gebouwd zoals het moslimleven echt werkt — rond vijf dagelijkse ankers, niet rond een takenlijst.",
+      "prayer": {
+        "title": "Het gebed altijd in beeld",
+        "body": "Nauwkeurige tijden, berekend voor jouw stad, methode en madhab. Registreer elk gebed met één tik, privé."
+      },
+      "planner": {
+        "title": "Een planner die je dag kent",
+        "body": "Dag- en weekplanning die naast je gebeden staat in plaats van ze te negeren."
+      },
+      "habits": {
+        "title": "Gewoontes die blijven",
+        "body": "Koran, adhkar, sport, slaap — of iets wat je zelf bedenkt. Reeksen die aanmoedigen zonder te beschamen."
+      },
+      "discovery": {
+        "title": "Halal leven, dichtbij",
+        "body": "Restaurants, slagers, boekhandels en bedekkende mode — met aanbiedingen alleen voor leden."
+      },
+      "assistant": {
+        "title": "Een assistent die met je meeplant",
+        "body": "Naar Istanbul? Ramadan voorbereiden? Krijg een echte checklist die je zo in je planner zet."
+      },
+      "privacy": {
+        "title": "Alleen van jou",
+        "body": "Je aanbidding is nooit openbaar, nooit sociaal, nooit gerangschikt tegenover iemand anders. Exporteer of verwijder wanneer je wilt."
+      }
+    },
+    "plannerSection": {
+      "eyebrow": "Planner",
+      "title": "Plan de week die je bedoeld had",
+      "body": "Taken, doelen en gewoontes in één beeld. Verplaats dingen tussen dagen, zie waar de week echt heen ging, en begin opnieuw zonder schuldgevoel.",
+      "point1": "Inbox, vandaag en binnenkort",
+      "point2": "Islamitische en alledaagse voorbeeldgewoontes",
+      "point3": "Vriendelijke reeksen en een weekoverzicht"
+    },
+    "assistantSection": {
+      "eyebrow": "Assistent",
+      "title": "Van intentie naar een echt plan",
+      "body": "Beschrijf wat eraan komt en krijg een gestructureerd plan dat je kunt bewerken en bewaren — geen muur van tekst.",
+      "disclaimer": "De Muslim Life Assistent helpt je je leven te organiseren. Hij is geen geleerde en geeft geen religieuze uitspraken.",
+      "example1": "Ik reis volgende week naar Istanbul",
+      "example2": "Help me een Ramadanschema te maken",
+      "example3": "Ik trouw over zes maanden"
+    },
+    "discoverySection": {
+      "eyebrow": "Ontdekken",
+      "title": "Vind halal leven om je heen",
+      "body": "Ontdek halal plekken en aanbiedingen in je buurt. Tijdens early access zijn de getoonde vermeldingen voorbeelddata, duidelijk gemarkeerd; echte partners worden stad per stad toegevoegd."
+    },
+    "premium": {
+      "eyebrow": "Lidmaatschap",
+      "title": "Muslim Life Premium",
+      "body": "Onbeperkt gewoontes en bewaarde plekken, meer berichten aan de assistent, de planmakers en aanbiedingen voor leden.",
+      "cta": "Bekijk de prijzen"
+    },
+    "faq": {
+      "title": "Vragen, beantwoord",
+      "q1": "Is Muslim Life gratis?",
+      "a1": "Ja. Het gratis plan bevat gebedstijden en -registratie, de dagplanner, vijf gewoontes, tien bewaarde plekken, tien berichten aan de assistent per maand en gewone aanbiedingen. Premium voegt onbeperkt gewoontes en bewaarde plekken toe, 500 berichten per maand, de planmakers en aanbiedingen voor leden.",
+      "q2": "Hoe nauwkeurig zijn de gebedstijden?",
+      "a2": "Tijden worden astronomisch berekend uit de coördinaten van je stad, met de berekeningsmethode en madhab die jij kiest. Vergelijk ze altijd met je eigen moskee.",
+      "q3": "Zijn mijn gebeds- en gewoontegegevens privé?",
+      "a3": "Ja, en dat zit in de opzet. Er is nergens in Muslim Life een openbaar profiel, een tijdlijn of een ranglijst. Je kunt je gegevens altijd exporteren of verwijderen.",
+      "q4": "Is de assistent een imam?",
+      "a4": "Nee, en dat wordt hij ook nooit. Hij helpt je met het plannen van reizen, de Ramadan, gebeurtenissen en je week. Bij alles wat religieuze interpretatie raakt zegt hij dat geleerden van mening verschillen en verwijst hij je naar bevoegde mensen.",
+      "q5": "Zijn de getoonde zaken echt?",
+      "a5": "Tijdens early access zijn de meeste vermeldingen duidelijk gemarkeerd als demodata die laten zien hoe ontdekken werkt. Echte partnervermeldingen worden stad voor stad toegevoegd en dragen nooit het label demo.",
+      "q6": "Kan ik altijd opzeggen?",
+      "a6": "Ja. Zeg op in je instellingen met twee klikken en behoud Premium tot het einde van de periode die je hebt betaald."
+    },
+    "cta": {
+      "title": "Begin met vandaag.",
+      "subtitle": "Eén gebed, één gewoonte, één eerlijk plan. Zo begint het.",
+      "button": "Maak je gratis account"
+    },
+    "footer": {
+      "product": "Product",
+      "company": "Bedrijf",
+      "legal": "Juridisch",
+      "about": "Over ons",
+      "contact": "Contact",
+      "privacy": "Privacy",
+      "terms": "Voorwaarden",
+      "rights": "Alle rechten voorbehouden.",
+      "disclaimer": "Muslim Life is een lifestyle- en productiviteitsproduct. Het geeft geen religieuze uitspraken en geen medisch, juridisch of financieel advies."
+    }
+  },
+  "pricing": {
+    "title": "Eenvoudige, eerlijke prijzen",
+    "subtitle": "Begin gratis. Upgrade wanneer Muslim Life bij je dag hoort.",
+    "monthly": "Maandelijks",
+    "yearly": "Jaarlijks",
+    "saveBadge": "Bespaar {percent}%",
+    "perMonth": "/maand",
+    "perYear": "/jaar",
+    "freeName": "Muslim Life Gratis",
+    "freeDescription": "Alles wat je nodig hebt voor een consistente dag.",
+    "premiumName": "Muslim Life Premium",
+    "premiumDescription": "Diepgang, automatisering en waarde alleen voor leden.",
+    "currentPlan": "Je huidige plan",
+    "startFree": "Gratis beginnen",
+    "goPremium": "Word Premium",
+    "manage": "Abonnement beheren",
+    "trialNote": "{days} dagen gratis proberen bij jaarplannen, voor nieuwe leden.",
+    "features": {
+      "prayerTimes": "Gebedstijden voor je stad",
+      "prayerTracking": "Privé gebedsregistratie",
+      "dailyPlanner": "Dagplanner",
+      "plannerViews": "Plannerweergaven",
+      "habits": "Gewoontes",
+      "statistics": "Statistiekgeschiedenis",
+      "deals": "Aanbiedingen",
+      "favorites": "Bewaarde plekken",
+      "aiMessages": "Assistentberichten per maand",
+      "aiGenerators": "Plangeneratoren van de assistent",
+      "templates": "Sjablonen",
+      "dataExport": "Gegevensexport",
+      "cloudSync": "Synchronisatie tussen toestellen"
+    },
+    "values": {
+      "week": "Week",
+      "weekMonth": "Week + maand",
+      "unlimited": "Onbeperkt",
+      "7days": "7 dagen",
+      "full": "Volledige geschiedenis",
+      "standard": "Standaard",
+      "standardPremium": "Standaard + alleen voor leden",
+      "all": "Alles",
+      "included": "Inbegrepen",
+      "notIncluded": "Niet inbegrepen"
+    }
+  },
+  "upgrade": {
+    "title": "Dit is een Premium-functie",
+    "body": "Muslim Life Premium ontgrendelt onbeperkt gewoontes en bewaarde plekken, meer berichten aan de assistent, de planmakers en aanbiedingen voor leden.",
+    "cta": "Bekijk Premium",
+    "habitsLimit": "Je hebt de {limit} gewoontes van het gratis plan bereikt.",
+    "favoritesLimit": "Je hebt de {limit} bewaarde plekken van het gratis plan bereikt."
+  },
+  "language": {
+    "label": "Taal",
+    "description": "Wijzigt de taal van de interface. Je gebedstijden, tijdzone en valuta blijven ongewijzigd.",
+    "unreviewedTitle": "Deze vertaling is nog niet nagekeken",
+    "unreviewedBody": "Deze taal is machinaal vertaald en wacht op controle door een moedertaalspreker. Formuleringen kunnen onjuist of onnatuurlijk zijn. Engels blijft de referentie.",
+    "switchToEnglish": "Overschakelen naar Engels"
+  },
+  "notifications": {
+    "title": "Meldingen",
+    "empty": "Geen meldingen",
+    "emptyBody": "We nemen alleen contact op over dingen waar je om hebt gevraagd.",
+    "markAllRead": "Alles als gelezen markeren",
+    "settingsTitle": "Wat we je mogen sturen",
+    "settingsBody": "Alles hieronder staat uit tenzij je het aanzet. We sturen nooit herinneringen om je een achterstand aan te praten.",
+    "muteAll": "Alle optionele meldingen pauzeren",
+    "muteAllBody": "Berichten over je betalingen, je gegevens en je account komen nog steeds door.",
+    "quietHours": "Stille uren",
+    "quietHoursBody": "Optionele meldingen worden binnen dit venster vastgehouden, in jouw lokale tijd.",
+    "quietHoursFrom": "Van",
+    "quietHoursTo": "Tot",
+    "channelInApp": "In de app",
+    "channelPush": "Push",
+    "channelEmail": "E-mail",
+    "noExternalChannels": "Push en e-mail zijn nog niet aangesloten, dus alleen meldingen in de app komen echt aan.",
+    "transactionalNote": "Wordt altijd verstuurd — dit gaat over je account of je betaling.",
+    "prayerReminder": {
+      "label": "Gebedstijd komt eraan",
+      "description": "Een rustige tip kort voor een gebedstijd. Staat standaard uit.",
+      "title": "{prayer} over {minutes} minuten",
+      "body": "Een vriendelijke herinnering — zonder druk."
+    },
+    "habitReminder": {
+      "label": "Gewoonteherinnering",
+      "description": "Voor gewoontes waaraan je een vast tijdstip hebt gegeven.",
+      "title": "Een gewoonte staat over {minutes} minuten gepland",
+      "body": "Open Muslim Life wanneer het jou uitkomt."
+    },
+    "plannerBlockStarting": {
+      "label": "Plannerblok begint",
+      "description": "Kort voor iets wat je hebt ingepland.",
+      "title": "Je volgende blok begint over {minutes} minuten",
+      "body": "Open je planner om te zien wat er aankomt."
+    },
+    "weeklyReviewReady": {
+      "label": "Weekoverzicht",
+      "description": "Eén keer per week, zodra je overzicht klaarstaat.",
+      "title": "Je week staat klaar om op terug te kijken",
+      "body": "Week {weekNumber} is samengevat in je overzicht."
+    },
+    "billingPaymentFailed": {
+      "label": "Betalingsprobleem",
+      "title": "We konden je betaling niet innen",
+      "body": "Je Premium-functies blijven nog {graceDays} dagen actief. Je kaart bijwerken in de instellingen lost het op."
+    },
+    "billingSubscriptionEnded": {
+      "label": "Abonnement beëindigd",
+      "title": "Je Premium-lidmaatschap is beëindigd",
+      "body": "Alles wat je hebt gemaakt staat er nog, op het gratis plan."
+    },
+    "dataExportReady": {
+      "label": "Gegevensexport",
+      "title": "Je gegevensexport staat klaar",
+      "body": "Download het bestand bij je privacy-instellingen."
+    },
+    "accountDeletionRequested": {
+      "label": "Account verwijderen",
+      "title": "We hebben je verwijderverzoek ontvangen",
+      "body": "Je hebt {graceDays} dagen om je te bedenken. Inloggen en annuleren stopt het."
+    },
+    "accountDeletionCompleted": {
+      "label": "Account verwijderd",
+      "title": "Je account is verwijderd",
+      "body": "Je persoonsgegevens zijn verwijderd. Wat we wettelijk moeten bewaren staat beschreven in ons privacybeleid."
+    }
+  },
+  "privacy": {
+    "title": "Jouw gegevens",
+    "subtitle": "Neem een kopie mee, wis wat je hebt bijgehouden, of vertrek helemaal. Alle drie beslis jij.",
+    "export": {
+      "title": "Download je gegevens",
+      "body": "Eén JSON-bestand met alles wat je hebt gemaakt: gebeden, gewoontes, taken, planner, reflecties, bewaarde plekken en je gesprekken met de assistent.",
+      "excluded": "Het bevat geen wachtwoorden, sessietokens, beveiligingsgegevens of gegevens van anderen.",
+      "cta": "Mijn gegevens downloaden",
+      "preparing": "Je bestand wordt klaargemaakt…",
+      "rateLimited": "Je hebt recent al een export aangevraagd. Over {hours} uur kun je een nieuwe aanvragen.",
+      "lastExport": "Laatste export: {date}"
+    },
+    "activity": {
+      "title": "Je activiteit wissen",
+      "body": "Verwijdert wat je hebt bijgehouden en houdt je account intact: gebedsregistraties, gewoontegeschiedenis, taken, plannerblokken en reflecties.",
+      "warning": "Dit kan niet ongedaan worden gemaakt en is niet hetzelfde als je account verwijderen.",
+      "cta": "Mijn activiteit wissen",
+      "confirmTitle": "Alles wissen wat je hebt bijgehouden?",
+      "confirmBody": "Je account, instellingen en abonnement blijven. Je geregistreerde geschiedenis niet. Typ CLEAR om te bevestigen.",
+      "confirmWord": "CLEAR",
+      "done": "Je activiteit is gewist."
+    },
+    "account": {
+      "title": "Je account verwijderen",
+      "body": "Verwijdert je account en je persoonsgegevens. Sommige gegevens blijven bewaard omdat de wet dat vereist — facturen en een minimaal beveiligingslogboek.",
+      "warning": "Dit kan niet ongedaan worden gemaakt.",
+      "cta": "Mijn account verwijderen",
+      "confirmTitle": "Je account verwijderen?",
+      "confirmBody": "Typ DELETE om te bevestigen. Je wordt overal uitgelogd en hebt {graceDays} dagen om je te bedenken voordat er iets wordt verwijderd.",
+      "confirmWord": "DELETE",
+      "blockedBilling": "Je hebt een lopend betaald abonnement. Zeg dat eerst op — we verwijderen geen account zolang een aanbieder er nog op kan afschrijven.",
+      "manageBilling": "Naar facturatie",
+      "pendingTitle": "Verwijdering aangevraagd",
+      "pendingBody": "Je account staat gepland voor verwijdering op {date}. Er is nog niets verwijderd.",
+      "cancel": "Mijn account behouden",
+      "cancelled": "Je account wordt niet verwijderd."
+    },
+    "retention": {
+      "title": "Wat we bewaren, en waarom",
+      "deleted": "Volledig verwijderd",
+      "anonymised": "Bewaard zonder je naam",
+      "retained": "Bewaard omdat het moet"
+    }
+  },
+  "admin": {
+    "title": "Operatie",
+    "subtitle": "Servicegezondheid en afstemming van abonnementen. Inhoud van leden wordt hier niet getoond.",
+    "noContentNotice": "Dit paneel bevat bewust geen gewoonte-inhoud, reflecties, assistentgesprekken of betaalgegevens. Die zijn van het lid, niet van ons.",
+    "metrics": {
+      "title": "Servicecijfers",
+      "members": "Leden",
+      "activeSubscriptions": "Actieve abonnementen",
+      "trialing": "In proefperiode",
+      "pastDue": "Achterstallig",
+      "webhooksLastDay": "Webhooks (24u)",
+      "webhookFailures": "Mislukte webhooks (24u)",
+      "pendingDeletions": "Openstaande verwijderingen",
+      "failedDeliveries": "Mislukte meldingsleveringen",
+      "asOf": "Peildatum {time}"
+    },
+    "reconcile": {
+      "title": "Abonnementen afstemmen",
+      "body": "Abonnementen waarvan de lokale status kan zijn afgeweken van de aanbieder. Afstemmen leest de aanbieder opnieuw en past diens antwoord toe.",
+      "empty": "Er hoeft niets afgestemd te worden.",
+      "candidate": "Laatst gesynchroniseerd op {date}",
+      "cta": "Afstemmen",
+      "running": "Bezig met afstemmen…",
+      "done": "Afgestemd.",
+      "failed": "Afstemmen is mislukt. Het antwoord van de aanbieder is niet toegepast."
+    }
+  },
+  "errors": {
+    "generic": "Er ging iets mis. Probeer het opnieuw.",
+    "notFound": "We konden dat niet vinden.",
+    "notFoundBody": "De pagina die je zoekt bestaat niet of is verplaatst.",
+    "unauthorized": "Log in om verder te gaan.",
+    "forbidden": "Je hebt geen toegang tot deze pagina.",
+    "backHome": "Terug naar de startpagina",
+    "backToApp": "Terug naar het dashboard",
+    "tryAgain": "Opnieuw proberen"
+  },
+  "empty": {
+    "title": "Hier is nog niets",
+    "body": "Zodra je iets toevoegt verschijnt het hier."
+  }
+}
