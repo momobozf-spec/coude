@@ -42,3 +42,4 @@ lokaal/bron/
 # lokale dev-databases en sessiebestanden
 **/.devdb/
 **/cookies.txt
+lokaal/verify-resultaat.json
