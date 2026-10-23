@@ -105,7 +105,10 @@ export async function createInspectionAction(
 
   if (type === 'CHECK_IN') {
     // Toekennen vóór de controle: dit is precies het gratis instapmoment.
-    await grantFreeCheckIn(supabase, user.id, propertyId);
+    // Met de service role: `entitlements` heeft (terecht) geen insert-policy
+    // voor gebruikers, dus met de gebruikersclient faalde dit stil. Het
+    // eigendom van de woning is hierboven al via RLS gecontroleerd.
+    await grantFreeCheckIn(createSupabaseAdminClient(), user.id, propertyId);
   }
 
   const feature = type === 'CHECK_IN' ? 'CHECK_IN_REPORT' : 'CHECK_OUT_ANALYSIS';

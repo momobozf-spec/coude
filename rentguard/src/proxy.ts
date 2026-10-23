@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
-import { DEFAULT_LOCALE, LOCALES, isLocale, localeFromAcceptLanguage } from '@/i18n/config';
+import { isLocale, localeFromAcceptLanguage } from '@/i18n/config';
 
 /**
  * Doet twee dingen:
@@ -11,14 +11,19 @@ import { DEFAULT_LOCALE, LOCALES, isLocale, localeFromAcceptLanguage } from '@/i
  *     taal gaat als header mee naar de root layout, zodat `<html lang>` klopt.
  *  2. **Sessie.** De Supabase-sessie wordt ververst zodat server components een
  *     geldige sessie zien. Dit is de enige plek waar dat mag gebeuren.
+ *
+ * (Next 16: `middleware.ts` heet nu `proxy.ts`.)
  */
 
 const PUBLIC_FILE = /\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|webmanifest)$/;
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // /auth/* (callback, confirm) zijn route handlers zonder taalsegment; een
+  // taal-redirect zou de e-maillinks (bevestiging, wachtwoordherstel) breken.
   if (
+    pathname.startsWith('/auth/') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     PUBLIC_FILE.test(pathname)
@@ -78,5 +83,3 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
-
-export { LOCALES, DEFAULT_LOCALE };

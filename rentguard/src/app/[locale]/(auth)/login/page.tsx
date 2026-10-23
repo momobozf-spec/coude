@@ -5,6 +5,7 @@ import { getMessages } from '@/i18n';
 import { isLocale } from '@/i18n/config';
 import { AuthForm } from '@/components/auth/auth-form';
 import { Card } from '@/components/ui/surface';
+import { SiteFooter } from '@/components/legal/site-footer';
 import { loginAction } from '@/app/[locale]/(auth)/actions';
 
 export default async function LoginPage({
@@ -39,6 +40,15 @@ export default async function LoginPage({
         />
       </Card>
 
+      <p className="mt-4 text-sm">
+        <Link
+          href={`/${locale}/forgot-password`}
+          className="text-slate-700 underline underline-offset-2"
+        >
+          {t.auth.forgotPassword}
+        </Link>
+      </p>
+
       <p className="mt-5 text-sm text-slate-700">
         {t.auth.noAccountYet}{' '}
         <Link
@@ -48,6 +58,7 @@ export default async function LoginPage({
           {t.auth.signUp}
         </Link>
       </p>
+      <SiteFooter locale={locale} />
     </main>
   );
 }

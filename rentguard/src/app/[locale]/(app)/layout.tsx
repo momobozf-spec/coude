@@ -6,6 +6,7 @@ import { isLocale } from '@/i18n/config';
 import { requireProfile } from '@/lib/auth/require-user';
 import { signOutAction } from '@/app/[locale]/(auth)/actions';
 import { Button } from '@/components/ui/button';
+import { SiteFooter } from '@/components/legal/site-footer';
 
 export default async function AppLayout({
   children,
@@ -23,6 +24,7 @@ export default async function AppLayout({
   const nav = [
     { href: `/${locale}/dashboard`, label: t.nav.dashboard },
     { href: `/${locale}/properties`, label: t.nav.properties },
+    { href: `/${locale}/billing`, label: t.billing.plans },
   ];
 
   const otherLocale = locale === 'nl' ? 'fr' : 'nl';
@@ -72,6 +74,7 @@ export default async function AppLayout({
       <main className="mx-auto max-w-4xl px-5 py-6">
         <span className="sr-only">{profile.email}</span>
         {children}
+        <SiteFooter locale={locale} />
       </main>
     </div>
   );

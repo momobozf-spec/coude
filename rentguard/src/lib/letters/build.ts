@@ -3,6 +3,7 @@ import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type { Locale } from '@/i18n/config';
+import { isFeatureEnabled } from '@/lib/features';
 import { DISCLAIMER } from '@/lib/legal/disclaimer';
 import { assertNoForbiddenTerms, findForbiddenTerms } from '@/lib/legal/forbidden-terms';
 import {
@@ -43,6 +44,7 @@ export const TEMPLATE_KEY_BY_TYPE: Record<NoticeType, string> = {
 };
 
 export type LetterBlockReason =
+  | { kind: 'FEATURE_DISABLED' }
   | { kind: 'TEMPLATE_NOT_FOUND' }
   | { kind: 'RULES_NOT_VERIFIED'; ruleKeys: string[] }
   | { kind: 'MISSING_FIELDS'; fields: string[] }
@@ -87,6 +89,12 @@ export async function buildLetter({
   locale: Locale;
   fields: MergeFields;
 }): Promise<BuiltLetter | { blockers: LetterBlockReason[] }> {
+  // Feature-flag: brieven (ingebrekestelling waarborg e.a.) blijven uit tot
+  // een jurist de templates heeft nagekeken. Zie README §Juridische review.
+  if (!isFeatureEnabled('depositLetters')) {
+    return { blockers: [{ kind: 'FEATURE_DISABLED' }] };
+  }
+
   const template = await loadActiveTemplate(supabase, type, locale);
   if (!template) return { blockers: [{ kind: 'TEMPLATE_NOT_FOUND' }] };
 
