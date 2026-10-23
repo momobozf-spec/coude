@@ -94,8 +94,8 @@ De rekensom laat zien wanneer €80 de moeite is. Als de partner zijn eigen wink
 >
 > Met vriendelijke groeten,
 > Mohamed Bouzouf
-> KetelCheck, een dienst van Marhaba Data & AI Agent BV · BTW BE1003552102
-> +32 484 94 77 77
+> KetelCheck, een dienst van Marhaba Data & AI Agent BV · ondernemingsnummer BE 1003.552.102 · Zaventem
+> +32 484 94 77 77 · momobozf@gmail.com
 
 ## 6. Mail de suivi FR
 
@@ -117,8 +117,8 @@ De rekensom laat zien wanneer €80 de moeite is. Als de partner zijn eigen wink
 >
 > Bien à vous,
 > Mohamed Bouzouf
-> KetelCheck, un service de Marhaba Data & AI Agent BV · TVA BE1003552102
-> +32 484 94 77 77
+> KetelCheck, un service de Marhaba Data & AI Agent BV · n° d'entreprise BE 1003.552.102 · Zaventem
+> +32 484 94 77 77 · momobozf@gmail.com
 
 ## 7. Vóór het eerste gesprek
 

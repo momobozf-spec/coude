@@ -53,10 +53,16 @@ var ACCEPTED_STATES = ["geaccepteerd", "credit_gevraagd", "gecrediteerd", "gefac
 
 var START_SERVICE = "vervanging_gas";
 
+/** Uitbatergegevens (WER boek XII): onderaan elke mail. Adres: tab Config → ADRES_ZETEL. */
+var LEGAL_ENTITY = "Marhaba Data & AI Agent BV";
+var LEGAL_ENTERPRISE_NO = "BE 1003.552.102";
+var LEGAL_CITY = "Zaventem";
+
 var CONFIG_DEFAULTS = [
   ["BRAND", "KetelCheck", "Merknaam in e-mails"],
   ["ADMIN_EMAIL", "", "Jouw e-mail voor meldingen (bevatten GEEN contactgegevens van aanvragers)"],
   ["REPLY_TO", "", "Reply-to adres in mails naar aanvragers/partners"],
+  ["ADRES_ZETEL", "", "TODO: straat + nr + postcode van de zetel (Zaventem) — komt onderaan elke mail"],
   ["WEB_APP_URL", "", "URL van deze web app (eindigt op /exec) — nodig voor de partnerlinks"],
   ["ACCEPT_HOURS", "24", "Uren dat een partnerlink geldig is om te aanvaarden/weigeren"],
   ["CREDIT_HOURS", "72", "Uren na aanvaarden waarin een partner credit kan vragen"],
@@ -658,6 +664,7 @@ function safeSend_(msg, context) {
     if (!msg.to) throw new Error("geen ontvanger");
     if (MailApp.getRemainingDailyQuota() < 1) throw new Error("dagelijkse mailquota op");
     msg.name = cfg_("BRAND") || "KetelCheck";
+    msg.body = String(msg.body || "") + "\n\n--\n" + legalFooter_();
     if (cfg_("REPLY_TO")) msg.replyTo = cfg_("REPLY_TO");
     MailApp.sendEmail(msg);
     return true;
@@ -665,6 +672,11 @@ function safeSend_(msg, context) {
     logError_(context, ex);
     return false;
   }
+}
+
+function legalFooter_() {
+  return (cfg_("BRAND") || "KetelCheck") + " is een dienst van " + LEGAL_ENTITY + " · ondernemingsnummer " + LEGAL_ENTERPRISE_NO +
+    " · " + (cfg_("ADRES_ZETEL") || LEGAL_CITY) + (cfg_("REPLY_TO") ? " · " + cfg_("REPLY_TO") : "");
 }
 
 function notifyAdmin_(subject, body) {

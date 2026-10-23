@@ -6,7 +6,13 @@ Eén partner tegelijk, max. 2 na elkaar. Elke aanvraag wordt maximaal één keer
 
 ```
 web/                 statische site (NL /, FR /fr/, privacy, partners)
-  assets/app.js      formulier + validatie + UTM + bot-timing; CONFIG.endpoint invullen
+  assets/config.js   ENIGE configuratieplek: Apps Script-endpoint, privacy-/contactmail, uitbatergegevens (adres = TODO)
+  assets/app.js      formulier + validatie + UTM + bot-timing
+  assets/legal.js    vult uitbatergegevens/mailadressen in vanuit config.js
+  _headers           CSP/HSTS e.d. voor Cloudflare Pages
+render.yaml          Render Static Site (zelfde headers) — Blueprint path: ketelcheck/render.yaml
+tools/check-deploy.cjs  build-controle: faalt zolang er placeholders staan
+lokaal/server.cjs    lokale nabootsing van Apps Script + Sheet (npm run dev)
 apps-script/
   Code.gs            backend (Sheet als database)
   appsscript.json    manifest
@@ -28,8 +34,11 @@ sales/
 2. Nieuwe Google Sheet → Extensies → Apps Script → plak `Code.gs`. Toon het manifest en plak `appsscript.json`.
 3. Run `setup` vanuit de editor of het menu. Dat maakt de tabs, statuslijsten, waarschuwingsbeveiliging en triggers aan.
 4. Tab Config: vul `ADMIN_EMAIL` en `REPLY_TO` in.
-5. Deploy → Web-app (uitvoeren als: ik · toegang: iedereen). Zet de `/exec`-URL in `Config!WEB_APP_URL` en in `web/assets/app.js` (`CONFIG.endpoint`).
-6. Host `web/` (Render Static Site of Cloudflare Pages) en koppel een domein. Vul `privacy@JOUWDOMEIN.be` in.
+5. Deploy → Web-app (uitvoeren als: ik · toegang: iedereen). Zet de `/exec`-URL in `Config!WEB_APP_URL` en in `web/assets/config.js` (`endpoint`). Vul in tab Config ook `ADRES_ZETEL` in (komt onderaan elke mail, samen met BV-naam en ondernemingsnummer).
+6. Vul in `web/assets/config.js` `legal.address` in (en `privacyEmail` zodra het domein er is; tot dan toont de site `momobozf@gmail.com`). Controle: `npm run check:deploy` (faalt zolang het endpoint een placeholder is).
+   - **Cloudflare Pages**: Create → Pages → koppel de GitHub-repo · Root directory `ketelcheck` · Build command `node tools/check-deploy.cjs` · Output directory `web`. `web/_headers` zet de security-headers.
+   - **of Render Static Site**: New → Blueprint → repo → Blueprint path `ketelcheck/render.yaml` (zet dezelfde headers en dezelfde build-controle).
+   - Koppel het domein en controleer met de browser-devtools dat het formulier zonder CSP-fouten naar `script.google.com` post.
 7. **Voer de echte testlijst uit** (zie hieronder) met fictieve gegevens en je eigen mailadressen, vóór de eerste echte aanvraag.
 
 ## Partners
@@ -61,6 +70,14 @@ Gebruik fictieve aanvragers en je eigen 2–3 mailadressen als "partners".
 11. Ongeldig partneradres → rij in Fouten, lead blijft `gecontroleerd`.
 12. `applyRetention` met een oude testdatum → contactgegevens gewist.
 13. Gmail "Verzonden" controleren: kopieën van partnermails bevatten contactgegevens. Zie de blokkade over bewaartermijnen.
+
+## Tests
+
+```powershell
+npm.cmd install      # alleen jsdom (dev)
+npm.cmd test         # 26 mock-tests backend + frontend NL/FR + privacypagina
+npm.cmd run dev      # lokale server op http://localhost:4300 (beheer: /beheer)
+```
 
 ## Bekende beperkingen
 

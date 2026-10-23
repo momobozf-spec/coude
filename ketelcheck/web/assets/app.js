@@ -3,11 +3,13 @@
   "use strict";
 
   // ===== CONFIG: vul na deploy van de Apps Script web app in =====
+  // De waarden staan in /assets/config.js (window.KETELCHECK_CONFIG).
+  var SITE = window.KETELCHECK_CONFIG || {};
   var CONFIG = {
     // Lokaal (localhost) praat het formulier met lokaal/server.cjs; online met Apps Script.
     endpoint: /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)
       ? "/exec"
-      : "https://script.google.com/macros/s/VUL_HIER_JE_DEPLOYMENT_ID_IN/exec",
+      : SITE.endpoint,
     // Startregio: Brussel (1000-1299) + Vlaamse Rand / Halle-Vilvoorde (1500-1999)
     regions: [[1000, 1299], [1500, 1999]]
   };

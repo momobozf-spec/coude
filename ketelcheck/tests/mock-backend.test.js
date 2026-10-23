@@ -248,5 +248,12 @@ t("huurder en ongeldige termijn geweigerd (server)", () => {
   assert.strictEqual(post({ ...base(), eigenaar: "huurder" }).ok, false);
   assert.strictEqual(post({ ...base(), termijn: "orienterend" }).ok, false);
 });
+t("elke mail eindigt met uitbatergegevens (BV, ondernemingsnummer, zetel)", () => {
+  assert.ok(mails.length > 0);
+  for (const m of mails) assert.ok(/Marhaba Data & AI Agent BV · ondernemingsnummer BE 1003\.552\.102 · Zaventem/.test(m.body), m.subject);
+  setCfg("ADRES_ZETEL", "Teststraat 1, 1930 Zaventem");
+  assert.ok(vm.runInContext("legalFooter_()", ctx).includes("Teststraat 1, 1930 Zaventem"));
+  setCfg("ADRES_ZETEL", "");
+});
 console.log(results.join("\n"));
 console.log("\n" + results.length + " mock-tests geslaagd");
