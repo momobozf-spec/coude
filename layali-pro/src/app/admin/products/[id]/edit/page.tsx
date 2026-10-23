@@ -8,7 +8,7 @@ async function getProduct(id: string) {
 
 async function getCategories() {
   return prisma.category.findMany({
-    select: { id: true, name: true },
+    select: { id: true, name: true, slug: true },
     orderBy: { name: "asc" },
   });
 }
@@ -51,6 +51,12 @@ export default async function EditProductPage({
             featured: product.featured,
             badge: product.badge ?? "",
             status: product.status,
+            scents: product.scents,
+            safetyInfo: product.safetyInfo ?? "",
+            safetyInfoFr: product.safetyInfoFr ?? "",
+            hazardPictograms: product.hazardPictograms,
+            manufacturerInfo: product.manufacturerInfo ?? "",
+            euResponsiblePerson: product.euResponsiblePerson ?? "",
           }}
           categories={categories}
         />

@@ -1,10 +1,11 @@
 import Link from "next/link";
+import { fontVariables } from "@/lib/fonts";
 
 // Global 404. The root layout intentionally renders no <html>/<body> (the
 // [locale] layout does), so this page provides its own document shell.
 export default function NotFound() {
   return (
-    <html lang="nl" className="h-full antialiased">
+    <html lang="nl" className={`h-full antialiased ${fontVariables}`}>
       <body className="min-h-full flex items-center justify-center bg-[#faf6ef] text-[#2c2218]">
         <div className="text-center px-6 py-32">
           <p className="text-6xl font-bold" style={{ fontFamily: "'Playfair Display', serif", color: "#b9633e" }}>

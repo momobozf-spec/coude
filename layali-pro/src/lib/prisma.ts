@@ -48,6 +48,7 @@ function createExtendedClient() {
         scents: { needs: { scents: true }, compute: (p) => toStringArray(p.scents) },
         materials: { needs: { materials: true }, compute: (p) => toStringArray(p.materials) },
         tags: { needs: { tags: true }, compute: (p) => toStringArray(p.tags) },
+        hazardPictograms: { needs: { hazardPictograms: true }, compute: (p) => toStringArray(p.hazardPictograms) },
       },
       service: {
         priceFrom: { needs: { priceFrom: true }, compute: (s) => num(s.priceFrom) },

@@ -27,13 +27,23 @@ services:
         value: '1'
       - key: DATABASE_POOL_MAX
         value: '3'
+      # Testomgeving: Mollie-testsleutel en demo-catalogus toegestaan. Voor de
+      # echte winkel: STAGING weglaten, SEED_DEMO=0 en een live_-sleutel.
+      - key: STAGING
+        value: '1'
       - key: SEED_DEMO
         value: '1'
       # Marktplaats (verkopers/diensten) uit tot er echte verkopers zijn.
       - key: MARKETPLACE_ENABLED
         value: '0'
+      # Uitbater. Naam, ondernemingsnummer en e-mail staan ook als standaard in
+      # src/lib/legal.ts; het adres van de zetel vul je zelf in (LEGAL_ENTITY_ADDRESS).
       - key: LEGAL_ENTITY_NAME
-        value: Marhaba Cooperation BV
+        value: Marhaba Data & AI Agent BV
+      - key: LEGAL_ENTITY_VAT
+        value: BE 1003.552.102
+      - key: LEGAL_CONTACT_EMAIL
+        value: momobozf@gmail.com
       - key: NEXTAUTH_SECRET
         generateValue: true
       - key: CRON_SECRET
@@ -54,11 +64,7 @@ services:
         sync: false
       - key: SUPPORT_EMAIL
         sync: false
-      - key: LEGAL_ENTITY_VAT
-        sync: false
       - key: LEGAL_ENTITY_ADDRESS
-        sync: false
-      - key: LEGAL_CONTACT_EMAIL
         sync: false
       - key: BOOTSTRAP_ADMIN_EMAIL
         sync: false

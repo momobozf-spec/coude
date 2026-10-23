@@ -72,7 +72,28 @@ describe("checkProductionEnv", () => {
     expect(checkProductionEnv({ ...good, RESEND_API_KEY: "re_x", RESEND_FROM: "Layali <info@layali.be>" }).warnings.join(" ")).not.toMatch(/eigen domein/);
   });
 
-  it("waarschuwt bij een Mollie-testsleutel", () => {
-    expect(checkProductionEnv({ ...good, MOLLIE_API_KEY: "test_abc" }).warnings.join(" ")).toMatch(/testsleutel/);
+  it("weigert een Mollie-testsleutel in productie, tenzij STAGING=1", () => {
+    expect(checkProductionEnv({ ...good, MOLLIE_API_KEY: "test_abc" }).errors.join(" ")).toMatch(/testsleutel/);
+    const staging = checkProductionEnv({ ...good, MOLLIE_API_KEY: "test_abc", STAGING: "1" });
+    expect(staging.errors).toEqual([]);
+    expect(staging.warnings.join(" ")).toMatch(/testsleutel/);
+    expect(checkProductionEnv({ ...good, MOLLIE_API_KEY: "live_abc" }).errors).toEqual([]);
+    expect(checkProductionEnv({ ...good, MOLLIE_API_KEY: "sk_onzin" }).errors).toHaveLength(1);
+  });
+
+  it("weigert de demo-catalogus, een lokale Mollie-server en voorbeeldgeheimen in productie", () => {
+    expect(checkProductionEnv({ ...good, SEED_DEMO: "1" }).errors.join(" ")).toMatch(/SEED_DEMO/);
+    expect(checkProductionEnv({ ...good, SEED_DEMO: "1", STAGING: "1" }).errors).toEqual([]);
+    expect(checkProductionEnv({ ...good, MOLLIE_API_URL: "http://localhost:9999" }).errors.join(" ")).toMatch(/MOLLIE_API_URL/);
+    expect(
+      checkProductionEnv({ ...good, NEXTAUTH_SECRET: "dummysecretdummysecretdummysecret12" }).errors.join(" "),
+    ).toMatch(/voorbeeldwaarde/);
+  });
+
+  it("waarschuwt als het adres van de zetel ontbreekt", () => {
+    expect(checkProductionEnv(good).warnings.join(" ")).toMatch(/LEGAL_ENTITY_ADDRESS/);
+    expect(checkProductionEnv({ ...good, LEGAL_ENTITY_ADDRESS: "Straat 1, 1930 Zaventem" }).warnings.join(" ")).not.toMatch(
+      /LEGAL_ENTITY_ADDRESS/,
+    );
   });
 });

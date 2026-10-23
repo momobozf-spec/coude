@@ -52,14 +52,15 @@ Render → **New** → **Blueprint** → `layali` → **Blueprint Path:**
 | `RESEND_API_KEY` | je Resend-sleutel |
 | `RESEND_FROM` | `Layali <onboarding@resend.dev>` |
 | `ADMIN_EMAIL`, `SUPPORT_EMAIL` | het e-mailadres van je Resend-account |
-| `LEGAL_ENTITY_*` | naam, btw-nummer, volledig adres en contactmail van de verkoper |
+| `LEGAL_ENTITY_ADDRESS` | straat, huisnummer en postcode van de zetel van Marhaba Data & AI Agent BV (naam, btw-nummer en e-mail staan al in de blueprint) |
 | `BOOTSTRAP_ADMIN_EMAIL` | het e-mailadres waarmee je beheert |
 
 Zonder geverifieerd domein mailt Resend alleen naar het adres van je eigen
 Resend-account.
 
 Controleer **$0**, dan **Apply**. De app weigert te starten met een te kort
-geheim of zonder https-adres; de reden staat bovenaan in **Logs**.
+geheim, zonder https-adres, of met een Mollie-testsleutel/demo-catalogus
+zonder `STAGING=1` (staat in deze blueprint); de reden staat bovenaan in **Logs**.
 
 ## 5. Inloggen
 

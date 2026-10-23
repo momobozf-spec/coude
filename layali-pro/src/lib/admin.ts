@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { PRODUCT_STATUSES } from "@/lib/status";
+import { CLP_PICTOGRAMS } from "@/lib/productSafety";
 
 /** Geeft de sessie terug als de gebruiker beheerder is, anders een kant-en-klaar foutantwoord. */
 export async function requireAdmin(): Promise<
@@ -56,6 +57,12 @@ export const adminProductSchema = z.object({
   featured: z.boolean().default(false),
   badge: nullableText(40),
   supplier: nullableText(200),
+  // Productveiligheid (GPSR/CLP); verplicht voor actieve kaarsen en geurproducten, zie productSafety.ts.
+  safetyInfo: nullableText(5000),
+  safetyInfoFr: nullableText(5000),
+  hazardPictograms: z.array(z.enum(CLP_PICTOGRAMS)).max(9).default([]),
+  manufacturerInfo: nullableText(1000),
+  euResponsiblePerson: nullableText(1000),
   categoryId: z.string().trim().min(1).max(64),
 });
 

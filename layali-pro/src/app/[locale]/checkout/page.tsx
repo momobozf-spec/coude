@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useHydrated } from "@/lib/clientState";
 import { useTranslations, useLocale } from "next-intl";
 import { useSession } from "next-auth/react";
 import { Link } from "@/i18n/navigation";
@@ -23,19 +24,18 @@ export default function CheckoutPage() {
   const { data: session } = useSession();
   const locale = useLocale();
   const { items, totalPrice } = useCartStore();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHydrated();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shippingMethod, setShippingMethod] = useState("standard");
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState<{ code: string; discount: number } | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", street: "", houseNumber: "", postalCode: "", city: "", country: "BE" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", phone: "", street: "", houseNumber: "", postalCode: "", city: "", country: "BE" });
 
-  useEffect(() => {
-    setMounted(true);
-    if (session?.user) setForm((p) => ({ ...p, email: session.user?.email || "" }));
-  }, [session]);
+  // null = nog niet aangepast: dan het e-mailadres van de sessie voorstellen.
+  const [emailInput, setEmailInput] = useState<string | null>(null);
+  const email = emailInput ?? session?.user?.email ?? "";
 
   if (!mounted) return null;
   if (items.length === 0) return (
@@ -92,7 +92,7 @@ export default function CheckoutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: items.map((i) => ({ productId: i.productId, quantity: i.quantity, size: i.size, color: i.color, giftWrap: i.giftWrap ?? false })),
-          shippingAddress: form,
+          shippingAddress: { ...form, email },
           shippingMethod,
           couponCode: couponApplied?.code,
           locale,
@@ -119,7 +119,7 @@ export default function CheckoutPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input label={t("firstName")} required value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
               <Input label={t("lastName")} required value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
-              <div className="sm:col-span-2"><Input label={t("email")} type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+              <div className="sm:col-span-2"><Input label={t("email")} type="email" required value={email} onChange={(e) => setEmailInput(e.target.value)} /></div>
               <div className="sm:col-span-2"><Input label={t("phone")} type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
               <Input label={t("street")} required value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
               <Input label={t("houseNumber")} required value={form.houseNumber} onChange={(e) => setForm({ ...form, houseNumber: e.target.value })} />
@@ -204,6 +204,13 @@ export default function CheckoutPage() {
               ))}
             </div>
             <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground"><Lock className="h-3 w-3" />{t("securePayment")}</p>
+            <p className="text-center text-xs leading-relaxed text-muted-foreground">
+              {t.rich("legalNotice", {
+                terms: (chunks) => <Link href="/terms" className="underline" target="_blank">{chunks}</Link>,
+                returns: (chunks) => <Link href="/shipping-returns" className="underline" target="_blank">{chunks}</Link>,
+                privacy: (chunks) => <Link href="/privacy" className="underline" target="_blank">{chunks}</Link>,
+              })}
+            </p>
           </div>
         </div>
       </form>

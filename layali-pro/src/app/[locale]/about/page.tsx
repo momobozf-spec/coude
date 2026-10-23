@@ -37,9 +37,10 @@ export default async function AboutPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
         {[
-          { value: "5000+", label: "Tevreden klanten" },
-          { value: "Handmade", label: "Met zorg gemaakt" },
-          { value: "BE & NL", label: "Snelle verzending" },
+          // Alleen feiten over de winkel zelf; geen verzonnen klantenaantallen of keurmerken.
+          { value: "BE & NL", label: "Levering in België en Nederland" },
+          { value: "14 dagen", label: "Bedenktijd vanaf ontvangst" },
+          { value: "Mollie", label: "Bancontact, iDEAL & kaart" },
         ].map((stat) => (
           <div key={stat.label} className="rounded-2xl border border-border p-8 bg-white">
             <p className="text-3xl font-bold text-emerald font-[family-name:var(--font-heading)]">{stat.value}</p>

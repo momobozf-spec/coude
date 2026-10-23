@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { slugify } from "@/lib/utils";
+import { CLP_PICTOGRAMS, CLP_PICTOGRAM_LABELS, requiresSafetyInfo } from "@/lib/productSafety";
 
 interface Category {
   id: string;
   name: string;
+  slug: string;
 }
 
 interface ProductFormData {
@@ -24,6 +26,12 @@ interface ProductFormData {
   featured: boolean;
   badge: string;
   status: string;
+  scents?: string[];
+  safetyInfo: string;
+  safetyInfoFr: string;
+  hazardPictograms: string[];
+  manufacturerInfo: string;
+  euResponsiblePerson: string;
 }
 
 const defaultProduct: ProductFormData = {
@@ -40,6 +48,11 @@ const defaultProduct: ProductFormData = {
   featured: false,
   badge: "",
   status: "ACTIVE",
+  safetyInfo: "",
+  safetyInfoFr: "",
+  hazardPictograms: [],
+  manufacturerInfo: "",
+  euResponsiblePerson: "",
 };
 
 export default function ProductForm({
@@ -65,20 +78,28 @@ export default function ProductForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Auto-generate slug from name
-  useEffect(() => {
-    if (!isEdit) {
-      setForm((prev) => ({ ...prev, slug: slugify(prev.name) }));
-    }
-  }, [form.name, isEdit]);
+  const categorySlug = categories.find((c) => c.id === form.categoryId)?.slug;
+  const safetyRequired = requiresSafetyInfo(categorySlug, form.scents);
+
+  function togglePictogram(code: string) {
+    setForm((prev) => ({
+      ...prev,
+      hazardPictograms: prev.hazardPictograms.includes(code)
+        ? prev.hazardPictograms.filter((c) => c !== code)
+        : [...prev.hazardPictograms, code],
+    }));
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    // scents zit niet in het formulier; niet meesturen zodat het niet overschreven wordt.
+    const { scents: _scents, ...rest } = form;
+    void _scents;
     const payload = {
-      ...form,
+      ...rest,
       images: imagesText
         .split("\n")
         .map((s) => s.trim())
@@ -136,7 +157,10 @@ export default function ProductForm({
           type="text"
           required
           value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          onChange={(e) =>
+            // Bij een nieuw product volgt de slug de naam.
+            setForm({ ...form, name: e.target.value, ...(isEdit ? {} : { slug: slugify(e.target.value) }) })
+          }
           className="flex h-11 w-full rounded-lg border border-border bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           placeholder="Bijv. Marokkaanse Theeglazen — Set van 6"
         />
@@ -282,6 +306,70 @@ export default function ProductForm({
           ))}
         </select>
       </div>
+
+      {/* Productveiligheid (GPSR/CLP) */}
+      <fieldset className="space-y-4 rounded-2xl border border-border p-4">
+        <legend className="px-1 text-sm font-semibold text-foreground">Veiligheid &amp; productinformatie (GPSR/CLP)</legend>
+        <p className="text-xs text-muted-foreground">
+          {safetyRequired
+            ? "Verplicht voor kaarsen en geurproducten zodra het product actief staat: veiligheidsinformatie in het Nederlands en het Frans, en de fabrikant. Neem de gegevens over van het CLP-etiket en de documentatie van je leverancier; verzin niets."
+            : "Optioneel voor deze categorie. Vul in als het product waarschuwingen of een CLP-etiket heeft."}
+        </p>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-foreground">Veiligheidsinformatie (NL){safetyRequired ? " *" : ""}</label>
+          <textarea
+            rows={4}
+            value={form.safetyInfo}
+            onChange={(e) => setForm({ ...form, safetyInfo: e.target.value })}
+            className="flex w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            placeholder="Gevarenaanduidingen (H-zinnen), voorzorgsmaatregelen (P-zinnen), allergenen, gebruiksinstructies…"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-foreground">Informations de sécurité (FR){safetyRequired ? " *" : ""}</label>
+          <textarea
+            rows={4}
+            value={form.safetyInfoFr}
+            onChange={(e) => setForm({ ...form, safetyInfoFr: e.target.value })}
+            className="flex w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            placeholder="Mentions de danger (H), conseils de prudence (P), allergènes, mode d'emploi…"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-sm font-medium text-foreground">CLP-gevarenpictogrammen</p>
+          <div className="flex flex-wrap gap-3">
+            {CLP_PICTOGRAMS.map((code) => (
+              <label key={code} className="flex items-center gap-1.5 text-xs text-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.hazardPictograms.includes(code)}
+                  onChange={() => togglePictogram(code)}
+                  className="h-4 w-4 cursor-pointer"
+                />
+                {code} — {CLP_PICTOGRAM_LABELS[code].nl}
+              </label>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-foreground">Fabrikant (naam, postadres, e-mail of website){safetyRequired ? " *" : ""}</label>
+          <textarea
+            rows={2}
+            value={form.manufacturerInfo}
+            onChange={(e) => setForm({ ...form, manufacturerInfo: e.target.value })}
+            className="flex w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-foreground">Verantwoordelijke marktdeelnemer in de EU (als de fabrikant buiten de EU zit)</label>
+          <textarea
+            rows={2}
+            value={form.euResponsiblePerson}
+            onChange={(e) => setForm({ ...form, euResponsiblePerson: e.target.value })}
+            className="flex w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </div>
+      </fieldset>
 
       {/* Featured */}
       <div className="flex items-center gap-3">

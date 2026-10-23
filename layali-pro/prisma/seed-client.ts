@@ -2,13 +2,14 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 /**
- * PrismaClient voor de seedscripts. De demo-seeds weigeren in productie, tenzij
- * je expliciet ALLOW_DEMO_SEED=1 zet (bv. voor een testomgeving die met
- * NODE_ENV=production draait).
+ * PrismaClient voor de seedscripts. De demo-seeds (verzonnen producten) weigeren
+ * in productie, tenzij de omgeving uitdrukkelijk een testomgeving is
+ * (STAGING=1, bv. de gratis Render-opstelling). Dezelfde vlag bepaalt of de
+ * app zelf mag starten met SEED_DEMO=1 (zie src/lib/env.ts).
  */
 export function demoSeedClient(): PrismaClient {
-  if (process.env.NODE_ENV === "production" && process.env.ALLOW_DEMO_SEED !== "1") {
-    console.error("Demo-seed geweigerd in productie. Zet ALLOW_DEMO_SEED=1 als dit een testomgeving is.");
+  if (process.env.NODE_ENV === "production" && process.env.STAGING !== "1") {
+    console.error("Demo-seed geweigerd in productie. Zet STAGING=1 als dit een testomgeving is.");
     process.exit(1);
   }
   return seedClient();

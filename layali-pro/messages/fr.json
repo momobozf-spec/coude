@@ -28,7 +28,7 @@
   },
   "topbar": {
     "shipping": "Livraison gratuite dès €75",
-    "payment": "Paiement sécurisé avec Bancontact, iDEAL & Klarna",
+    "payment": "Paiement sécurisé avec Bancontact, iDEAL & carte",
     "delivery": "Livraison rapide en Belgique & aux Pays-Bas"
   },
   "nav": {
@@ -105,7 +105,7 @@
     "storyCta": "Lire notre histoire",
     "valueCurated": "Soigneusement sélectionné",
     "valueGift": "Emballage cadeau soigné",
-    "valueReturns": "Retour sous 30 jours",
+    "valueReturns": "14 jours de rétractation",
     "newsletterTitle": "Restez informé",
     "newsletterSubtitle": "Inscrivez-vous pour des offres exclusives, les nouvelles collections et de l'inspiration.",
     "newsletterPlaceholder": "Votre adresse e-mail",
@@ -187,20 +187,24 @@
     "shippingInfo": "Livraison",
     "shippingInfoBody": "Livraison gratuite dès €75 en Belgique et aux Pays-Bas. Livraison standard sous 3-5 jours ouvrables, express sous 1-2 jours. Chaque colis est emballé avec soin.",
     "returnsInfo": "Retour & garantie",
-    "returnsInfoBody": "Pas entièrement satisfait ? Vous disposez de 30 jours de réflexion. Renvoyez votre commande dans son état d'origine et nous vous remboursons.",
+    "returnsInfoBody": "Vous disposez de 14 jours de rétractation à compter de la réception. Signalez votre rétractation et renvoyez le produit dans son état d'origine ; nous vous remboursons selon nos conditions. Les produits parfumés ou de soin scellés et ouverts ne peuvent pas être retournés pour des raisons d'hygiène.",
     "giftWrapTitle": "Ajouter un emballage cadeau",
     "giftWrapDesc": "Joliment emballé avec ruban et carte",
     "giftWrapFree": "Gratuit",
     "giftWrapNote": "Emballage cadeau",
     "trustShip": "Livraison gratuite dès €75",
-    "trustReturn": "Retour sous 30 jours",
+    "trustReturn": "14 jours de rétractation",
     "trustSecure": "Paiement sécurisé",
     "reviews": "Avis",
     "relatedProducts": "Produits similaires",
     "sizeGuide": "Guide des tailles",
     "addToWishlist": "Sauvegarder",
     "removeFromWishlist": "Retirer des favoris",
-    "shareProduct": "Partager ce produit"
+    "shareProduct": "Partager ce produit",
+    "safetyTitle": "Sécurité & informations produit",
+    "safetyManufacturer": "Fabricant",
+    "safetyResponsible": "Personne responsable dans l'UE",
+    "safetyPictograms": "Pictogrammes de danger (CLP)"
   },
   "cart": {
     "title": "Panier",
@@ -239,9 +243,10 @@
     "standard": "Standard (3-5 jours ouvrables)",
     "express": "Express (1-2 jours ouvrables)",
     "payment": "Paiement",
-    "payButton": "Payer en toute sécurité",
+    "payButton": "Commander avec obligation de paiement",
     "orderSummary": "Résumé de la commande",
-    "securePayment": "Paiement sécurisé via Mollie — Bancontact, iDEAL, carte & plus"
+    "securePayment": "Paiement sécurisé via Mollie — Bancontact, iDEAL, carte & plus",
+    "legalNotice": "En commandant, vous acceptez les <terms>conditions générales</terms>. Vous disposez d'un droit de rétractation de 14 jours (<returns>livraison & retour</returns>). Lisez notre <privacy>politique de confidentialité</privacy>."
   },
   "checkoutSuccess": {
     "title": "Merci pour votre commande !",
@@ -322,17 +327,19 @@
     "linkNew": "Nouveautés",
     "linkBest": "Bestsellers",
     "linkSale": "Soldes",
-    "returnsTitle": "Retour sous 30 jours",
-    "returnsDesc": "Retour simple & gratuit",
+    "returnsTitle": "14 jours de rétractation",
+    "returnsDesc": "Rétractation sans motif",
     "rights": "Tous droits réservés.",
     "madeWith": "Conçu avec soin au Benelux",
     "privacyPolicy": "Politique de confidentialité",
     "terms": "Conditions générales",
     "cookiePolicy": "Politique de cookies",
-    "newsletter": "Newsletter"
+    "newsletter": "Newsletter",
+    "withdrawal": "Se rétracter du contrat",
+    "vat": "N° d'entreprise"
   },
   "cookie": {
-    "message": "Nous utilisons des cookies pour améliorer votre expérience. En continuant, vous acceptez notre politique de cookies.",
+    "message": "Nous utilisons des cookies nécessaires au fonctionnement de la boutique. Avec votre consentement, nous utilisons aussi des cookies de statistiques et de marketing. Vous pouvez refuser sans conséquence pour votre achat.",
     "accept": "Accepter",
     "decline": "Refuser"
   },

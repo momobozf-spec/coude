@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 import { adminProductSchema, firstIssue, requireAdmin } from "@/lib/admin";
+import { missingSafetyFields, safetyErrorMessage } from "@/lib/productSafety";
 
 export async function POST(request: Request) {
   const auth = await requireAdmin();
@@ -14,6 +15,11 @@ export async function POST(request: Request) {
   const { slug: wantedSlug, ...data } = parsed.data;
 
   try {
+    const category = await prisma.category.findUnique({ where: { id: data.categoryId }, select: { slug: true } });
+    if (!category) return NextResponse.json({ error: "Categorie bestaat niet" }, { status: 400 });
+    const missing = missingSafetyFields(category.slug, data);
+    if (missing.length > 0) return NextResponse.json({ error: safetyErrorMessage(missing) }, { status: 400 });
+
     let slug = wantedSlug || slugify(data.name) || "product";
     if (await prisma.product.findUnique({ where: { slug }, select: { id: true } })) {
       slug = `${slug}-${Date.now().toString(36)}`;

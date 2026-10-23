@@ -163,6 +163,17 @@ model Product {
   seoTitle       String?
   seoDescription String?
   supplier       String?
+  // Productveiligheid (GPSR, Verordening (EU) 2023/988) en CLP-etikettering
+  // (Verordening (EG) 1272/2008) voor o.a. kaarsen, wierook en huisparfum.
+  // safetyInfo/safetyInfoFr: waarschuwingen, H-/P-zinnen, allergenen, gebruik.
+  safetyInfo          String?
+  safetyInfoFr        String?
+  // CLP-gevarenpictogrammen als codes, bv. ["GHS07", "GHS09"].
+  hazardPictograms    Json     @default("[]")
+  // Fabrikant: naam, postadres en e-mail/website (GPSR art. 19).
+  manufacturerInfo    String?
+  // Verantwoordelijke marktdeelnemer in de EU als de fabrikant buiten de EU zit (GPSR art. 16).
+  euResponsiblePerson String?
   categoryId     String
   vendorId       String?
   createdAt      DateTime @default(now())

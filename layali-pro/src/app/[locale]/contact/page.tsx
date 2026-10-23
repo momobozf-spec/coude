@@ -8,10 +8,10 @@ export const dynamic = "force-dynamic";
 export default async function ContactPage() {
   const t = await getTranslations("common");
   const legal = legalEntity();
-  // Alleen echte gegevens uit de configuratie; ontbreekt iets, dan tonen we het niet.
+  // Gegevens van de verkoper uit src/lib/legal.ts (adres via LEGAL_ENTITY_ADDRESS).
   const items = [
     legal.email ? { icon: Mail, label: "E-mail", value: legal.email } : null,
-    legal.address ? { icon: MapPin, label: "Adres", value: legal.address } : null,
+    { icon: MapPin, label: "Adres", value: legal.displayAddress },
   ].filter((i): i is { icon: typeof Mail; label: string; value: string } => i !== null);
 
   return (
@@ -34,7 +34,7 @@ export default async function ContactPage() {
               </div>
             </div>
           ))}
-          {legal.name && <p className="px-2 text-xs text-muted-foreground">{legal.name}{legal.vat ? ` · ${legal.vat}` : ""}</p>}
+          <p className="px-2 text-xs text-muted-foreground">{legal.name} · {legal.vat}</p>
         </div>
         <div className="lg:col-span-2">
           <ContactForm />

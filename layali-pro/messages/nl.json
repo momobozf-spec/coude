@@ -28,7 +28,7 @@
   },
   "topbar": {
     "shipping": "Gratis verzending vanaf €75",
-    "payment": "Veilig betalen met Bancontact, iDEAL & Klarna",
+    "payment": "Veilig betalen met Bancontact, iDEAL & kaart",
     "delivery": "Snelle levering in België & Nederland"
   },
   "nav": {
@@ -105,7 +105,7 @@
     "storyCta": "Lees ons verhaal",
     "valueCurated": "Zorgvuldig geselecteerd",
     "valueGift": "Cadeauwaardig verpakt",
-    "valueReturns": "30 dagen retour",
+    "valueReturns": "14 dagen bedenktijd",
     "newsletterTitle": "Blijf op de hoogte",
     "newsletterSubtitle": "Schrijf je in voor exclusieve aanbiedingen, nieuwe collecties en sfeerinspiratie.",
     "newsletterPlaceholder": "Je e-mailadres",
@@ -187,20 +187,24 @@
     "shippingInfo": "Verzending",
     "shippingInfoBody": "Gratis verzending vanaf €75 in België en Nederland. Standaard levering binnen 3-5 werkdagen, express binnen 1-2 werkdagen. Elk pakket wordt met zorg en sfeervol verpakt.",
     "returnsInfo": "Retour & garantie",
-    "returnsInfoBody": "Niet helemaal tevreden? Je hebt 30 dagen bedenktijd. Stuur je bestelling eenvoudig retour in de originele staat en wij betalen je terug.",
+    "returnsInfoBody": "Je hebt 14 dagen bedenktijd vanaf ontvangst. Meld je herroeping en stuur het product terug in de originele staat; we betalen je terug volgens onze voorwaarden. Geopende verzegelde geur- en verzorgingsproducten kunnen om hygiënische redenen niet retour.",
     "giftWrapTitle": "Cadeauverpakking toevoegen",
     "giftWrapDesc": "Sfeervol ingepakt met lint en kaartje",
     "giftWrapFree": "Gratis",
     "giftWrapNote": "Cadeauverpakking",
     "trustShip": "Gratis verzending vanaf €75",
-    "trustReturn": "30 dagen retour",
+    "trustReturn": "14 dagen bedenktijd",
     "trustSecure": "Veilig betalen",
     "reviews": "Beoordelingen",
     "relatedProducts": "Gerelateerde producten",
     "sizeGuide": "Maattabel",
     "addToWishlist": "Bewaar",
     "removeFromWishlist": "Verwijder uit favorieten",
-    "shareProduct": "Deel dit product"
+    "shareProduct": "Deel dit product",
+    "safetyTitle": "Veiligheid & productinformatie",
+    "safetyManufacturer": "Fabrikant",
+    "safetyResponsible": "Verantwoordelijke in de EU",
+    "safetyPictograms": "Gevarenpictogrammen (CLP)"
   },
   "cart": {
     "title": "Winkelmandje",
@@ -239,9 +243,10 @@
     "standard": "Standaard (3-5 werkdagen)",
     "express": "Express (1-2 werkdagen)",
     "payment": "Betaling",
-    "payButton": "Veilig betalen",
+    "payButton": "Bestellen met betalingsverplichting",
     "orderSummary": "Besteloverzicht",
-    "securePayment": "Veilig betalen via Mollie — Bancontact, iDEAL, kaart & meer"
+    "securePayment": "Veilig betalen via Mollie — Bancontact, iDEAL, kaart & meer",
+    "legalNotice": "Door te bestellen aanvaard je de <terms>algemene voorwaarden</terms>. Je hebt 14 dagen herroepingsrecht (<returns>verzending & retour</returns>). Lees ons <privacy>privacybeleid</privacy>."
   },
   "checkoutSuccess": {
     "title": "Bedankt voor je bestelling!",
@@ -322,17 +327,19 @@
     "linkNew": "New In",
     "linkBest": "Bestsellers",
     "linkSale": "Sale",
-    "returnsTitle": "30 dagen retour",
-    "returnsDesc": "Eenvoudig & gratis terugsturen",
+    "returnsTitle": "14 dagen bedenktijd",
+    "returnsDesc": "Herroepen zonder opgave van reden",
     "rights": "Alle rechten voorbehouden.",
     "madeWith": "Met zorg gemaakt in de Lage Landen",
     "privacyPolicy": "Privacybeleid",
     "terms": "Algemene voorwaarden",
     "cookiePolicy": "Cookiebeleid",
-    "newsletter": "Nieuwsbrief"
+    "newsletter": "Nieuwsbrief",
+    "withdrawal": "Overeenkomst herroepen",
+    "vat": "Ondernemingsnr."
   },
   "cookie": {
-    "message": "Wij gebruiken cookies om je ervaring te verbeteren. Door verder te gaan, ga je akkoord met ons cookiebeleid.",
+    "message": "We gebruiken noodzakelijke cookies om de webshop te laten werken. Met jouw toestemming gebruiken we ook cookies voor statistieken en marketing. Je kunt weigeren zonder gevolgen voor je aankoop.",
     "accept": "Accepteren",
     "decline": "Weigeren"
   },

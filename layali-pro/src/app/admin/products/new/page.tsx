@@ -3,7 +3,7 @@ import ProductForm from "@/components/admin/ProductForm";
 
 async function getCategories() {
   return prisma.category.findMany({
-    select: { id: true, name: true },
+    select: { id: true, name: true, slug: true },
     orderBy: { name: "asc" },
   });
 }

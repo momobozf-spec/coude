@@ -12,11 +12,15 @@ export default function Footer({
   marketplace = false,
   contactEmail = null,
   legalName = null,
+  legalVat = null,
+  legalAddress = null,
 }: {
   marketplace?: boolean;
-  /** Uit de serverconfiguratie; geen adres = niet tonen. */
+  /** Uit de serverconfiguratie (src/lib/legal.ts). */
   contactEmail?: string | null;
   legalName?: string | null;
+  legalVat?: string | null;
+  legalAddress?: string | null;
 }) {
   const t = useTranslations("footer");
   const tHome = useTranslations("home");
@@ -146,10 +150,11 @@ export default function Footer({
               <li><Link href="/privacy" className="text-white/65 transition-colors hover:text-cream">{t("privacyPolicy")}</Link></li>
               <li><Link href="/terms" className="text-white/65 transition-colors hover:text-cream">{t("terms")}</Link></li>
               <li><Link href="/cookies" className="text-white/65 transition-colors hover:text-cream">{t("cookiePolicy")}</Link></li>
+              <li><Link href="/withdrawal" className="text-white/65 transition-colors hover:text-cream">{t("withdrawal")}</Link></li>
             </ul>
             <div className="mt-4 space-y-2 text-sm text-white/65">
               {contactEmail && <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-gold-light" />{contactEmail}</p>}
-              <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-gold-light" />België & Nederland</p>
+              {legalAddress && <p className="flex items-center gap-2"><MapPin className="h-4 w-4 shrink-0 text-gold-light" />{legalAddress}</p>}
             </div>
           </div>
         </div>
@@ -162,7 +167,10 @@ export default function Footer({
         </div>
 
         <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 sm:flex-row">
-          <p className="text-xs text-white/50">&copy; {new Date().getFullYear()} {legalName ?? brand.name}. {t("rights")}</p>
+          <p className="text-xs text-white/50">
+            &copy; {new Date().getFullYear()} {legalName ?? brand.name}
+            {legalVat ? ` · ${t("vat")} ${legalVat}` : ""}. {t("rights")}
+          </p>
           <p className="text-xs text-white/50">{t("madeWith")}</p>
         </div>
       </div>

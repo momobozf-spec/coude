@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { fontVariables } from "@/lib/fonts";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import AdminSidebar from "@/components/admin/AdminSidebar";
@@ -20,7 +21,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <html lang="nl" className="h-full antialiased">
+    <html lang="nl" className={`h-full antialiased ${fontVariables}`}>
       <body className="min-h-full bg-cream">
         <Providers>
           <div className="flex min-h-screen">

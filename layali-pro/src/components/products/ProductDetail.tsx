@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
 import {
@@ -11,6 +11,7 @@ import {
 import { useCartStore } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
 import { colorSwatch } from "@/lib/colors";
+import { CLP_PICTOGRAM_LABELS, type ClpPictogram } from "@/lib/productSafety";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import AtmosphereTile from "@/components/ui/AtmosphereTile";
@@ -40,10 +41,16 @@ interface Product {
   stock: number;
   badge?: string | null;
   category: { id: string; name: string; slug: string };
+  safetyInfo?: string | null;
+  safetyInfoFr?: string | null;
+  hazardPictograms?: string[];
+  manufacturerInfo?: string | null;
+  euResponsiblePerson?: string | null;
 }
 
 export default function ProductDetail({ product, reviews, avgRating }: { product: Product; reviews: Review[]; avgRating: number }) {
   const t = useTranslations("products");
+  const locale = useLocale();
   const [activeImg, setActiveImg] = useState(0);
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] || "");
   const [selectedColor, setSelectedColor] = useState(product.colors[0] || "");
@@ -88,6 +95,33 @@ export default function ProductDetail({ product, reviews, avgRating }: { product
     { key: "shipping", title: t("shippingInfo"), body: <p className="text-sm leading-relaxed text-muted-foreground">{t("shippingInfoBody")}</p> },
     { key: "returns", title: t("returnsInfo"), body: <p className="text-sm leading-relaxed text-muted-foreground">{t("returnsInfoBody")}</p> },
   ];
+
+  // Productveiligheid (GPSR/CLP): waarschuwingen, pictogrammen en fabrikant.
+  const safetyText = (locale === "fr" ? product.safetyInfoFr : product.safetyInfo) || product.safetyInfo || product.safetyInfoFr;
+  const pictograms = (product.hazardPictograms ?? []).filter((c): c is ClpPictogram => c in CLP_PICTOGRAM_LABELS);
+  if (safetyText || pictograms.length > 0 || product.manufacturerInfo || product.euResponsiblePerson) {
+    sections.push({
+      key: "safety",
+      title: t("safetyTitle"),
+      body: (
+        <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
+          {pictograms.length > 0 && (
+            <p>
+              <strong className="text-foreground">{t("safetyPictograms")}:</strong>{" "}
+              {pictograms.map((c) => `${c} (${CLP_PICTOGRAM_LABELS[c][locale === "fr" ? "fr" : "nl"]})`).join(", ")}
+            </p>
+          )}
+          {safetyText && <p className="whitespace-pre-line">{safetyText}</p>}
+          {product.manufacturerInfo && (
+            <p className="whitespace-pre-line"><strong className="text-foreground">{t("safetyManufacturer")}:</strong> {product.manufacturerInfo}</p>
+          )}
+          {product.euResponsiblePerson && (
+            <p className="whitespace-pre-line"><strong className="text-foreground">{t("safetyResponsible")}:</strong> {product.euResponsiblePerson}</p>
+          )}
+        </div>
+      ),
+    });
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12">

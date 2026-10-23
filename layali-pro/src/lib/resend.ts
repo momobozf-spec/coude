@@ -227,3 +227,69 @@ export async function sendSellerApplication(data: {
     html: shell("Nieuwe verkoper-aanvraag", body),
   });
 }
+
+// ---- Herroeping (online herroepingsfunctie) --------------------------------
+
+export interface WithdrawalStatement {
+  name: string;
+  email: string;
+  orderNumber: string;
+  items: string | null;
+  receivedAt: Date;
+  /** Of de bestelling met dit nummer en e-mailadres gevonden werd. */
+  matchedOrder: boolean;
+}
+
+function withdrawalRows(s: WithdrawalStatement): string {
+  const when = s.receivedAt.toLocaleString("nl-BE", { timeZone: "Europe/Brussels" });
+  return `
+    <table style="width:100%;border-collapse:collapse;line-height:1.6;">
+      <tr><td style="padding:4px 0;color:${COLORS.soft};width:40%;">Naam</td><td>${esc(s.name)}</td></tr>
+      <tr><td style="padding:4px 0;color:${COLORS.soft};">E-mail</td><td>${esc(s.email)}</td></tr>
+      <tr><td style="padding:4px 0;color:${COLORS.soft};">Bestelnummer</td><td>${esc(s.orderNumber)}</td></tr>
+      <tr><td style="padding:4px 0;color:${COLORS.soft};">Producten</td><td>${esc(s.items ?? "volledige bestelling")}</td></tr>
+      <tr><td style="padding:4px 0;color:${COLORS.soft};">Ontvangen op</td><td>${esc(when)} (${esc(s.receivedAt.toISOString())})</td></tr>
+    </table>`;
+}
+
+/**
+ * Ontvangstbevestiging van een herroeping aan de consument, op een duurzame
+ * drager (e-mail), met de verklaring en datum en tijd van ontvangst.
+ */
+export async function sendWithdrawalAcknowledgement(s: WithdrawalStatement): Promise<void> {
+  const resend = getResend();
+  if (!resend) throw new Error("RESEND_API_KEY ontbreekt");
+  const body = `
+    <p style="line-height:1.6;">We hebben je herroeping goed ontvangen. Hieronder staat je verklaring zoals je ze verstuurde.</p>
+    ${withdrawalRows(s)}
+    <p style="line-height:1.6;margin-top:16px;">Stuur de producten uiterlijk 14 dagen na vandaag terug. We sturen je de retourinstructies en betalen je terug volgens onze voorwaarden.</p>
+    <p style="line-height:1.6;color:${COLORS.soft};">Nous avons bien reçu votre rétractation (voir ci-dessus). Renvoyez les produits au plus tard 14 jours après aujourd'hui.</p>
+  `;
+  const { error } = await resend.emails.send({
+    from: FROM(),
+    to: s.email,
+    subject: `Ontvangstbevestiging herroeping ${s.orderNumber.replace(/[\r\n]/g, " ").slice(0, 60)}`,
+    html: shell("Herroeping ontvangen", body),
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** Melding van een herroeping aan de beheerder. */
+export async function sendAdminWithdrawal(s: WithdrawalStatement): Promise<void> {
+  const resend = getResend();
+  if (!resend) throw new Error("RESEND_API_KEY ontbreekt");
+  const body = `
+    <p style="line-height:1.6;">Een klant heeft via de site een herroeping ingediend.${
+      s.matchedOrder ? "" : " <strong>Geen bestelling gevonden met dit nummer en e-mailadres: controleer handmatig.</strong>"
+    }</p>
+    ${withdrawalRows(s)}
+  `;
+  const { error } = await resend.emails.send({
+    from: FROM(),
+    to: ADMIN(),
+    replyTo: s.email,
+    subject: `Herroeping: ${s.orderNumber.replace(/[\r\n]/g, " ").slice(0, 60)}`,
+    html: shell("Herroeping ontvangen", body),
+  });
+  if (error) throw new Error(error.message);
+}

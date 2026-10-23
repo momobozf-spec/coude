@@ -1,7 +1,6 @@
-/* Google Fonts moet als allereerste @import staan: @import-regels moeten alle
-   andere regels voorafgaan. Tailwind ('@import "tailwindcss"') inlined regels,
-   dus de font-import moet erboven om de CSS-parsefout te vermijden. */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+/* Lettertypes komen uit next/font/google (src/app/[locale]/layout.tsx): ze worden
+   bij de build gedownload en vanaf het eigen domein geserveerd. Zo maakt de
+   bezoeker geen verbinding met Google (GDPR) en is er geen @import nodig. */
 @import "tailwindcss";
 
 /*
@@ -74,9 +73,9 @@
   --color-cream: var(--cream);
   --color-espresso: var(--espresso);
   --color-ink: var(--ink);
-  --font-heading: 'Playfair Display', serif;
-  --font-serif: 'Cormorant Garamond', serif;
-  --font-body: 'Inter', sans-serif;
+  --font-heading: var(--font-playfair), 'Playfair Display', serif;
+  --font-serif: var(--font-cormorant), 'Cormorant Garamond', serif;
+  --font-body: var(--font-inter), 'Inter', sans-serif;
 }
 
 * {

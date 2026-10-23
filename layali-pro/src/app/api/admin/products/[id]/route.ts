@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { adminProductSchema, firstIssue, parseAdminProductPatch, requireAdmin } from "@/lib/admin";
+import { missingSafetyFields, safetyErrorMessage } from "@/lib/productSafety";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -10,13 +11,32 @@ export async function PUT(request: Request, { params }: Params) {
   if (!auth.ok) return auth.response;
   const { id } = await params;
 
-  const parsed = adminProductSchema.safeParse(await request.json().catch(() => null));
+  const raw = await request.json().catch(() => null);
+  const parsed = adminProductSchema.safeParse(raw);
   if (!parsed.success) {
     return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
   }
-  const { slug, ...data } = parsed.data;
+  // Velden die het formulier niet meestuurt (bv. descriptionFr, materials)
+  // niet met schema-standaardwaarden overschrijven.
+  const sent = new Set(raw && typeof raw === "object" ? Object.keys(raw) : []);
+  const { slug, ...all } = parsed.data;
+  const data = Object.fromEntries(
+    Object.entries(all).filter(([key]) => sent.has(key)),
+  ) as typeof all;
 
   try {
+    const [category, existing] = await Promise.all([
+      prisma.category.findUnique({ where: { id: all.categoryId }, select: { slug: true } }),
+      prisma.product.findUnique({
+        where: { id },
+        select: { status: true, scents: true, safetyInfo: true, safetyInfoFr: true, manufacturerInfo: true },
+      }),
+    ]);
+    if (!existing) return NextResponse.json({ error: "Product niet gevonden" }, { status: 404 });
+    if (!category) return NextResponse.json({ error: "Categorie bestaat niet" }, { status: 400 });
+    const missing = missingSafetyFields(category.slug, { ...existing, ...data });
+    if (missing.length > 0) return NextResponse.json({ error: safetyErrorMessage(missing) }, { status: 400 });
+
     const product = await prisma.product.update({
       where: { id },
       data: { ...data, ...(slug ? { slug } : {}) },
@@ -45,6 +65,20 @@ export async function PATCH(request: Request, { params }: Params) {
   const data = parsed.data;
 
   try {
+    // De veiligheidsregel geldt voor het product zoals het ná deze wijziging is.
+    const existing = await prisma.product.findUnique({
+      where: { id },
+      select: {
+        status: true, scents: true, safetyInfo: true, safetyInfoFr: true, manufacturerInfo: true, categoryId: true,
+      },
+    });
+    if (!existing) return NextResponse.json({ error: "Product niet gevonden" }, { status: 404 });
+    const merged = { ...existing, ...data };
+    const category = await prisma.category.findUnique({ where: { id: merged.categoryId }, select: { slug: true } });
+    if (!category) return NextResponse.json({ error: "Categorie bestaat niet" }, { status: 400 });
+    const missing = missingSafetyFields(category.slug, merged);
+    if (missing.length > 0) return NextResponse.json({ error: safetyErrorMessage(missing) }, { status: 400 });
+
     const product = await prisma.product.update({ where: { id }, data, include: { category: true } });
     return NextResponse.json(product);
   } catch (error) {
