@@ -13,6 +13,18 @@ import { randomInt } from 'node:crypto'
  */
 
 export const PASSWORD_MIN_LENGTH = 12
+
+/**
+ * Het publieke wachtwoord van de demo-seed (staat in de README en op de
+ * loginpagina in ontwikkeling). In productie wordt een login daarmee altijd
+ * geweigerd, ook als een demo-database per ongeluk in productie belandt.
+ */
+export const DEMO_SEED_PASSWORD = 'immoradar'
+
+/** Mag dit wachtwoord in deze omgeving gebruikt worden om in te loggen? */
+export function isLoginPasswordRefused(password: string, nodeEnv: string | undefined): boolean {
+  return nodeEnv === 'production' && password === DEMO_SEED_PASSWORD
+}
 export const PASSWORD_MAX_LENGTH = 200
 
 /**

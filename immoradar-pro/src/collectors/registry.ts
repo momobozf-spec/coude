@@ -1,4 +1,4 @@
-import { getEnv } from '@/lib/env'
+import { getEnv, isMarketRadarEnabled } from '@/lib/env'
 
 import { demoMarketCollector } from './demo/demoMarketCollector'
 import { fixtureCollector } from './fixture/fixtureCollector'
@@ -36,12 +36,17 @@ export function findCollector(key: string): CollectorDefinition | null {
 /**
  * Staat deze bron in de env-allowlist?
  *
- * Een lege allowlist betekent "geen enkele bron", niet "alle bronnen". Dat is de
+ * Een lege allowlist betekent "geen enkele bron", niet "alle bronnen". En met
+ * `FEATURE_MARKET_RADAR` uit (standaard in productie) is het altijd "geen". Dat is de
  * veilige kant op: een vergeten variabele levert dan een stille worker op in
  * plaats van onbedoeld verkeer naar externe sites.
  */
 export function isSourceAllowedByEnv(key: string): boolean {
-  return getEnv().COLLECTOR_ENABLED_SOURCES.includes(key)
+  const env = getEnv()
+  // Derde slot: zonder marktradar (standaard uit in productie) draait geen
+  // enkele marktbron, wat er ook in COLLECTOR_ENABLED_SOURCES staat.
+  if (!isMarketRadarEnabled(env)) return false
+  return env.COLLECTOR_ENABLED_SOURCES.includes(key)
 }
 
 /** De collectors die op deze omgeving überhaupt mogen draaien. */

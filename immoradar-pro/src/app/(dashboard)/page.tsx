@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import { opportunityFilterSchema } from '@/domain/schemas'
 import { OPPORTUNITY_TYPE_LABELS, type OpportunityTypeValue } from '@/events/opportunityRules'
+import { isMarketRadarEnabled } from '@/lib/env'
 import { requireAgencyScope } from '@/lib/session'
 import * as agencyRepository from '@/repositories/agencyRepository'
 import * as opportunityRepository from '@/repositories/opportunityRepository'
@@ -65,6 +66,7 @@ export default async function TodayPage({
   ])
 
   const firstName = (user?.name ?? '').split(' ')[0] ?? ''
+  const marketRadar = isMarketRadarEnabled()
 
   // De samenstelling van de lijst, zodat de makelaar in één blik ziet wát er
   // ligt in plaats van alleen hoevéél.
@@ -91,12 +93,16 @@ export default async function TodayPage({
 
       <dl className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile label="Open kansen" value={total} href="/pipeline" />
-        <StatTile
-          label="Met bekende relatie"
-          value={crossCount}
-          hint="Marktsignaal bij een eigen contact"
-          href="/?origin=CROSS"
-        />
+        {marketRadar ? (
+          <StatTile
+            label="Met bekende relatie"
+            value={crossCount}
+            hint="Marktsignaal bij een eigen contact"
+            href="/?origin=CROSS"
+          />
+        ) : (
+          <StatTile label="Imports" value="CSV" hint="Klantenbestand inladen" href="/imports" />
+        )}
         <StatTile
           label="Uit LeadRevive"
           value={leadReviveCount}
@@ -122,14 +128,23 @@ export default async function TodayPage({
         <EmptyState
           title="Geen openstaande kansen"
           description={
-            'Dat kan drie dingen betekenen: alles is opgevolgd, er zijn nog geen gebieden ' +
-            'ingesteld, of de collector heeft nog niet gedraaid. Controleer je gebieden als ' +
-            'dit langer dan een dag duurt.'
+            marketRadar
+              ? 'Dat kan drie dingen betekenen: alles is opgevolgd, er zijn nog geen gebieden ' +
+                'ingesteld, of de collector heeft nog niet gedraaid. Controleer je gebieden als ' +
+                'dit langer dan een dag duurt.'
+              : 'Dat kan betekenen dat alles is opgevolgd, of dat er nog geen klantenbestand ' +
+                'is ingeladen. Importeer een CSV-export uit je CRM om slapende relaties te vinden.'
           }
           action={
-            <Link href="/territories" className={buttonStyles.secondary}>
-              Gebieden bekijken
-            </Link>
+            marketRadar ? (
+              <Link href="/territories" className={buttonStyles.secondary}>
+                Gebieden bekijken
+              </Link>
+            ) : (
+              <Link href="/imports" className={buttonStyles.secondary}>
+                Klantenbestand importeren
+              </Link>
+            )
           }
         />
       ) : (

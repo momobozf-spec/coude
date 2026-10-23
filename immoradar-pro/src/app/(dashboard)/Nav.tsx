@@ -20,13 +20,15 @@ interface NavItem {
   label: string
   /** Alleen zichtbaar voor kantoorbeheerders. */
   manageOnly?: boolean
+  /** Alleen zichtbaar als de marktradar aan staat (`FEATURE_MARKET_RADAR`). */
+  marketOnly?: boolean
 }
 
 const PRIMARY: readonly NavItem[] = [
   { href: '/', label: 'Vandaag' },
   { href: '/leadrevive', label: 'LeadRevive' },
-  { href: '/market', label: 'Marktradar' },
-  { href: '/properties', label: 'Panden' },
+  { href: '/market', label: 'Marktradar', marketOnly: true },
+  { href: '/properties', label: 'Panden', marketOnly: true },
   { href: '/pipeline', label: 'Opvolging' },
   { href: '/analytics', label: 'Analyse' },
 ]
@@ -49,23 +51,27 @@ export function Nav({
   userName,
   roleLabel,
   canManage,
+  marketRadar,
   logoutAction,
 }: {
   readonly agencyName: string
   readonly userName: string
   readonly roleLabel: string
   readonly canManage: boolean
+  readonly marketRadar: boolean
   readonly logoutAction: () => Promise<void>
 }) {
   const pathname = usePathname()
 
-  const items = [...PRIMARY, ...SECONDARY.filter((item) => canManage || !item.manageOnly)]
+  const items = [...PRIMARY, ...SECONDARY]
+    .filter((item) => canManage || !item.manageOnly)
+    .filter((item) => marketRadar || !item.marketOnly)
 
   return (
     <header className="border-b border-ink-200 bg-white">
       <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" className="shrink-0 text-base font-semibold tracking-tight text-ink-950">
-          Immo<span className="text-brand-600">Radar</span>
+          Lead<span className="text-brand-600">Revive</span>
         </Link>
 
         <nav aria-label="Hoofdnavigatie" className="min-w-0 flex-1 overflow-x-auto">

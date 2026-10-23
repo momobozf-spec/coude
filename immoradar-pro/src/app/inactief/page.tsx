@@ -27,7 +27,7 @@ export default async function InactivePage() {
       <div className="w-full max-w-md rounded-xl border border-ink-200 bg-white p-6 text-sm">
         <p className="text-base font-semibold text-ink-950">Het abonnement van {session.agencyName} is niet actief</p>
         <p className="mt-2 text-ink-700">
-          De toegang tot ImmoRadar is gepauzeerd. Er gaan geen meldingen meer uit en er worden geen
+          De toegang tot LeadRevive is gepauzeerd. Er gaan geen meldingen meer uit en er worden geen
           nieuwe kansen aangemaakt. Je gegevens blijven bewaard.
         </p>
         <p className="mt-2 text-ink-700">

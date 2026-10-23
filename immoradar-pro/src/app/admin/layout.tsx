@@ -42,7 +42,7 @@ export default async function AdminLayout({
       <header className="border-b border-ink-200 bg-ink-950">
         <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 sm:px-6 lg:px-8">
           <Link href="/admin/sources" className="text-base font-semibold tracking-tight text-white">
-            Immo<span className="text-brand-500">Radar</span>{' '}
+            Lead<span className="text-brand-500">Revive</span>{' '}
             <span className="text-sm font-normal text-ink-400">beheer</span>
           </Link>
 

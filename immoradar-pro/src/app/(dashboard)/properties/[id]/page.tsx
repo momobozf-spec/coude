@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { isMarketRadarEnabled } from '@/lib/env'
 
 import { daysBetween, formatDate } from '@/lib/dates'
 import { requireAgencyScope } from '@/lib/session'
@@ -30,6 +31,9 @@ export default async function PropertyDetailPage({
 }: {
   readonly params: Promise<{ id: string }>
 }) {
+  // Marktradar staat standaard uit in productie (LeadRevive-lancering).
+  if (!isMarketRadarEnabled()) notFound()
+
   // De sessie is hier een toegangscontrole, geen filter: panden zijn marktdata
   // en horen niet bij één kantoor. Zie propertyRepository.listProperties.
   await requireAgencyScope()

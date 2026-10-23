@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { isMarketRadarEnabled } from '@/lib/env'
 
 import { requireAgencyScope } from '@/lib/session'
 import * as propertyRepository from '@/repositories/propertyRepository'
@@ -25,6 +27,9 @@ export default async function PropertiesPage({
 }: {
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
+  // Marktradar staat standaard uit in productie (LeadRevive-lancering).
+  if (!isMarketRadarEnabled()) notFound()
+
   const scope = await requireAgencyScope()
   const params = await searchParams
 

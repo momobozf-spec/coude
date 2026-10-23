@@ -24,6 +24,13 @@ const csv = z
       .filter((part) => part.length > 0),
   )
 
+/** Tekst met standaardwaarde; een lege string (bv. `${X:-}` in compose) telt als ontbrekend. */
+const textWithFallback = (fallback: string): z.ZodType<string> =>
+  z
+    .string()
+    .optional()
+    .transform((value) => (value && value.trim() !== '' ? value.trim() : fallback))
+
 const numeric = (fallback: number): z.ZodType<number> =>
   z
     .string()
@@ -167,13 +174,33 @@ const envSchema = z.object({
   /** Basis-URL in alertberichten, zodat een link naar het juiste dashboard wijst. */
   APP_BASE_URL: z.string().default('http://localhost:3000'),
 
-  // ── Juridische identiteit (privacyverklaring en voorwaarden) ──────────────
-  /** De rechtspersoon achter het platform: verwerkingsverantwoordelijke en contractpartij. */
-  LEGAL_ENTITY_NAME: z.string().default(''),
-  LEGAL_ENTITY_VAT: z.string().default(''),
+  // ── Juridische identiteit (privacyverklaring, voorwaarden, DPA) ──────────
+  /** De rechtspersoon achter het platform: verwerker voor de klantenbestanden. */
+  LEGAL_ENTITY_NAME: textWithFallback('Marhaba Data & AI Agent BV'),
+  LEGAL_ENTITY_VAT: textWithFallback('BE 1003.552.102'),
+  /** Gemeente van de zetel; staat er altijd, ook zonder volledig adres. */
+  LEGAL_ENTITY_MUNICIPALITY: textWithFallback('Zaventem'),
+  /**
+   * Straat + huisnummer + postcode van de zetel. Nog onbekend: TODO(Mohamed)
+   * invullen vóór de lancering. Op een publieke productie-URL weigert de app
+   * te starten zonder deze waarde (zie `assertProductionSecrets`).
+   */
   LEGAL_ENTITY_ADDRESS: z.string().default(''),
   /** Adres voor privacyverzoeken (inzage, verwijdering, bezwaar). */
-  LEGAL_CONTACT_EMAIL: z.string().default(''),
+  LEGAL_CONTACT_EMAIL: textWithFallback('momobozf@gmail.com'),
+
+  // ── Feature-flags ─────────────────────────────────────────────────────────
+  /**
+   * Marktradar (externe advertentiebronnen, particuliere verkopers, panden).
+   * Leeg = aan in ontwikkeling, UIT in productie. Zolang er geen legale bron
+   * is, wordt alleen LeadRevive (CSV-import van het eigen bestand) gelanceerd.
+   */
+  FEATURE_MARKET_RADAR: z.enum(['', 'true', 'false']).default(''),
+  /**
+   * De demo- en fixturebron (synthetische markt) in productie toelaten. Alleen
+   * voor een lokale demo met `docker compose --profile full`.
+   */
+  ALLOW_DEMO_SOURCES: z.enum(['', 'true', 'false']).default(''),
 })
 
 export type Env = z.infer<typeof envSchema>
@@ -220,8 +247,44 @@ export function assertProductionSecrets(env: Env = getEnv()): void {
     missing.push('APP_BASE_URL met https:// (sessiecookies zijn in productie Secure)')
   }
 
+  // Wettelijke vermeldingen (WER art. XII.6): op een publiek adres moet het
+  // volledige adres van de uitbater er staan. Een lokale demo mag zonder.
+  if (!isLocalBaseUrl(env.APP_BASE_URL) && env.LEGAL_ENTITY_ADDRESS.trim() === '') {
+    missing.push('LEGAL_ENTITY_ADDRESS (straat, nr. en postcode van de zetel)')
+  }
+
+  // Synthetische bronnen horen niet in productie, tenzij expliciet voor een demo.
+  const fakeSources = env.COLLECTOR_ENABLED_SOURCES.filter((key) => DEMO_SOURCE_KEYS.includes(key))
+  if (fakeSources.length > 0 && env.ALLOW_DEMO_SOURCES !== 'true') {
+    missing.push(
+      `COLLECTOR_ENABLED_SOURCES zonder demo-/fixturebronnen (${fakeSources.join(', ')}), of ALLOW_DEMO_SOURCES=true voor een demo`,
+    )
+  }
+
   if (missing.length > 0) {
     throw new Error(`Productie vereist: ${missing.join(', ')}`)
+  }
+}
+
+/** Collectors die synthetische of lokale testdata leveren. */
+export const DEMO_SOURCE_KEYS: readonly string[] = ['demo-be', 'fixture-be']
+
+/**
+ * Staat de marktradar aan? Expliciet `true`/`false` wint; leeg betekent aan
+ * buiten productie (demo, tests) en uit in productie.
+ */
+export function isMarketRadarEnabled(env: Env = getEnv()): boolean {
+  if (env.FEATURE_MARKET_RADAR === 'true') return true
+  if (env.FEATURE_MARKET_RADAR === 'false') return false
+  return env.NODE_ENV !== 'production'
+}
+
+/** Alleen lokale adressen (laptopdemo), geen publieke URL. */
+export function isLocalBaseUrl(value: string): boolean {
+  try {
+    return ['localhost', '127.0.0.1', '[::1]'].includes(new URL(value).hostname)
+  } catch {
+    return false
   }
 }
 

@@ -46,6 +46,7 @@ import { buildMatchKey } from '../src/domain/geo/address'
 import { cityForPostalCode, provinceForPostalCode } from '../src/domain/geo/provinces'
 import { stableHash } from '../src/lib/hash'
 import { hashPassword } from '../src/lib/password'
+import { DEMO_SEED_PASSWORD } from '../src/domain/accountPolicy'
 import { normalizeBelgianPhone } from '../src/lib/phone'
 import { normalizeText } from '../src/lib/text'
 import { createOpportunitiesForEvents } from '../src/services/opportunityService'
@@ -310,7 +311,7 @@ const AGENCY_DEFINITIONS = [
 ] as const
 
 async function seedAgencies(): Promise<SeededAgency[]> {
-  const password = await hashPassword('immoradar')
+  const password = await hashPassword(DEMO_SEED_PASSWORD)
   const seeded: SeededAgency[] = []
 
   // Platformbeheerder: hoort bij geen enkel kantoor, precies zoals session.ts eist.

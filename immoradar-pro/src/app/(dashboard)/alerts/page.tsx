@@ -42,7 +42,7 @@ export default async function AlertsPage() {
     <>
       <PageHeader
         title="Meldingen"
-        description="Wanneer stuurt ImmoRadar een bericht, en waarover."
+        description="Wanneer stuurt LeadRevive een bericht, en waarover."
       />
 
       {!telegramConfigured && (

@@ -1,4 +1,4 @@
-# ImmoRadar op Render — Blueprint (Dashboard → Blueprints → New Blueprint Instance).
+# LeadRevive (codebase ImmoRadar) op Render — Blueprint (Dashboard → Blueprints → New Blueprint Instance).
 #
 # Alles in Frankfurt. Eén webservice, één worker, één database; web en worker
 # delen dezelfde Dockerfile en dezelfde omgevingsgroep. De web-service migreert
@@ -32,7 +32,12 @@ envVarGroups:
       - key: LEGAL_ENTITY_NAME
         value: Marhaba Data & AI Agent BV
       - key: LEGAL_ENTITY_VAT
-        value: BE1003552102
+        value: BE 1003.552.102
+      - key: LEGAL_ENTITY_MUNICIPALITY
+        value: Zaventem
+      # LeadRevive only: marktradar uit tot er een legale bron is.
+      - key: FEATURE_MARKET_RADAR
+        value: 'false'
 
 services:
   - type: web

@@ -1,5 +1,6 @@
 import { allCollectors, isSourceAllowedByEnv } from '@/collectors/registry'
 import { formatDateTime, formatRelative } from '@/lib/dates'
+import { isMarketRadarEnabled } from '@/lib/env'
 import { requirePlatformAdmin } from '@/lib/session'
 import * as sourceRepository from '@/repositories/sourceRepository'
 
@@ -59,6 +60,15 @@ export default async function SourcesPage() {
         title="Bronnen"
         description="Waar de marktdata vandaan komt, en of het nog werkt."
       />
+
+      {!isMarketRadarEnabled() && (
+        <p className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          De marktradar staat uit (<code>FEATURE_MARKET_RADAR</code>). Er draait geen enkele
+          marktbron, ongeacht de instellingen hieronder. Alleen LeadRevive (CSV-import van het
+          eigen klantenbestand) is actief. Zet de radar pas aan met een bron waarvan het gebruik
+          contractueel en juridisch vaststaat.
+        </p>
+      )}
 
       <dl className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile label="Bronnen" value={sources.length} />

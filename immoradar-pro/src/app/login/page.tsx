@@ -28,10 +28,10 @@ export default async function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <p className="text-xl font-semibold tracking-tight text-ink-950">
-            Immo<span className="text-brand-600">Radar</span>
+            Lead<span className="text-brand-600">Revive</span>
           </p>
           <p className="mt-1 text-sm text-ink-600">
-            Acquisitie-intelligentie voor vastgoedkantoren
+            Slapende klantrelaties terug in beeld voor vastgoedkantoren
           </p>
         </div>
 
@@ -66,6 +66,10 @@ export default async function LoginPage() {
           <span className="mx-2">·</span>
           <Link href="/voorwaarden" className="hover:text-ink-900 hover:underline">
             Voorwaarden
+          </Link>
+          <span className="mx-2">·</span>
+          <Link href="/verwerkersovereenkomst" className="hover:text-ink-900 hover:underline">
+            Verwerkersovereenkomst
           </Link>
         </p>
       </div>

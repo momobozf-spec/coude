@@ -33,7 +33,7 @@ export default async function TerritoriesPage() {
           {territories.length === 0 ? (
             <EmptyState
               title="Nog geen gebieden ingesteld"
-              description="Zolang hier niets staat, ontvangt dit kantoor geen enkele marktkans. Voeg minstens één postcodegebied toe."
+              description="Zolang hier niets staat, ontvangt dit kantoor geen kansen. Voeg minstens één postcodegebied toe."
             />
           ) : (
             <Card>

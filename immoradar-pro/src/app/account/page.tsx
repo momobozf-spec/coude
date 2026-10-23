@@ -26,7 +26,7 @@ export default async function AccountPage() {
     <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
       <div className="mb-6 flex items-center justify-between">
         <Link href={home} className="text-base font-semibold tracking-tight text-ink-950">
-          Immo<span className="text-brand-600">Radar</span>
+          Lead<span className="text-brand-600">Revive</span>
         </Link>
         <form action={logout}>
           <button type="submit" className="text-sm text-ink-600 hover:text-ink-900">

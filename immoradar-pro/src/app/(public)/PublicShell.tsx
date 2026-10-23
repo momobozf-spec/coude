@@ -11,10 +11,14 @@ export function PublicShell({
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <Link href="/" className="text-base font-semibold tracking-tight text-ink-950">
-        Immo<span className="text-brand-600">Radar</span>
+        Lead<span className="text-brand-600">Revive</span>
       </Link>
 
-      <article className="legal mt-8 rounded-xl border border-ink-200 bg-white p-6 text-sm leading-relaxed text-ink-800 sm:p-8">
+      <p className="mt-8 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm font-semibold text-amber-900">
+        Concept — laten nalezen door een jurist.
+      </p>
+
+      <article className="legal mt-4 rounded-xl border border-ink-200 bg-white p-6 text-sm leading-relaxed text-ink-800 sm:p-8">
         <h1 className="mb-6 text-2xl font-semibold text-ink-950">{title}</h1>
         {children}
       </article>
@@ -26,6 +30,10 @@ export function PublicShell({
         <span className="mx-2">·</span>
         <Link href="/voorwaarden" className="hover:underline">
           Voorwaarden
+        </Link>
+        <span className="mx-2">·</span>
+        <Link href="/verwerkersovereenkomst" className="hover:underline">
+          Verwerkersovereenkomst
         </Link>
         <span className="mx-2">·</span>
         <Link href="/login" className="hover:underline">
@@ -51,23 +59,29 @@ export function Section({
   )
 }
 
-/** Naam, ondernemingsnummer en adres van de uitbater, voor zover ingevuld. */
+/**
+ * Naam, ondernemingsnummer en adres van de uitbater. Zolang straat en nummer
+ * niet ingevuld zijn (`LEGAL_ENTITY_ADDRESS`), staat enkel de gemeente er.
+ */
 export function LegalIdentity({
   name,
   vat,
   address,
+  municipality,
   email,
 }: {
   readonly name: string
   readonly vat: string
   readonly address: string
+  readonly municipality?: string
   readonly email: string
 }) {
+  const location = address || municipality
   return (
     <p>
-      {name || 'De uitbater van ImmoRadar'}
+      {name || 'De uitbater van LeadRevive'}
       {vat && <>, ondernemingsnummer {vat}</>}
-      {address && <>, {address}</>}
+      {location && <>, gevestigd te {location}</>}
       {email && (
         <>
           {' '}

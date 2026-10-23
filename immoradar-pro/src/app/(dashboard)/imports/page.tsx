@@ -32,7 +32,7 @@ export default async function ImportsPage() {
     <>
       <PageHeader
         title="CRM importeren"
-        description="Laad het klantenbestand van je kantoor in. LeadRevive gebruikt het om slapende relaties te vinden en om marktsignalen aan bestaande klanten te koppelen."
+        description="Laad het klantenbestand van je kantoor in (CSV-export uit je CRM). LeadRevive gebruikt het om slapende relaties te vinden die vandaag een reden hebben om gebeld te worden."
       />
 
       <div className="grid gap-6 lg:grid-cols-3">

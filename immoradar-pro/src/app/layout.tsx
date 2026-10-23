@@ -4,11 +4,11 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'ImmoRadar',
-    template: '%s — ImmoRadar',
+    default: 'LeadRevive',
+    template: '%s — LeadRevive',
   },
   description:
-    'Acquisitie-intelligentie voor Belgische vastgoedkantoren: marktsignalen en bestaande klantrelaties in één lijst.',
+    'Heractiveer slapende relaties uit het eigen klantenbestand van je vastgoedkantoor: wie bel je vandaag?',
   // Een B2B-dashboard met klantgegevens hoort niet in een zoekindex.
   robots: { index: false, follow: false },
 }

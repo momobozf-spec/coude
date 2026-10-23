@@ -150,7 +150,7 @@ export default async function AnalyticsPage({
       )}
 
       <p className="mt-8 border-t border-ink-200 pt-4 text-xs text-ink-600">
-        Deze cijfers tellen wat in de opvolging is geregistreerd. Ze zeggen niet dat ImmoRadar
+        Deze cijfers tellen wat in de opvolging is geregistreerd. Ze zeggen niet dat LeadRevive
         deze mandaten heeft opgeleverd — dat verband is met deze gegevens niet vast te stellen.
       </p>
     </>

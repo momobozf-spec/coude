@@ -14,7 +14,7 @@ export default function GlobalError({
   return (
     <html lang="nl-BE">
       <body style={{ fontFamily: 'system-ui, sans-serif', padding: '3rem 1rem', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '1.125rem' }}>ImmoRadar is tijdelijk niet beschikbaar</h1>
+        <h1 style={{ fontSize: '1.125rem' }}>LeadRevive is tijdelijk niet beschikbaar</h1>
         <p style={{ color: '#555' }}>Probeer het over enkele ogenblikken opnieuw.</p>
         {error.digest && (
           <p>

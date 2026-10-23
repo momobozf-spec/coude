@@ -63,6 +63,9 @@ services:
       CRON_SECRET: ${CRON_SECRET:-}
       APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
       COLLECTOR_ENABLED_SOURCES: ${COLLECTOR_ENABLED_SOURCES:-fixture-be,demo-be}
+      # Lokale demo in productiemodus: marktradar en demobronnen expliciet aan.
+      FEATURE_MARKET_RADAR: ${FEATURE_MARKET_RADAR:-true}
+      ALLOW_DEMO_SOURCES: ${ALLOW_DEMO_SOURCES:-true}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       LEGAL_ENTITY_NAME: ${LEGAL_ENTITY_NAME:-}
       LEGAL_ENTITY_VAT: ${LEGAL_ENTITY_VAT:-}
@@ -88,6 +91,9 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:?zet SESSION_SECRET in .env}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       COLLECTOR_ENABLED_SOURCES: ${COLLECTOR_ENABLED_SOURCES:-fixture-be,demo-be}
+      # Lokale demo in productiemodus: marktradar en demobronnen expliciet aan.
+      FEATURE_MARKET_RADAR: ${FEATURE_MARKET_RADAR:-true}
+      ALLOW_DEMO_SOURCES: ${ALLOW_DEMO_SOURCES:-true}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     # De worker migreert niet: dat doet de app. Twee processen die tegelijk
     # migreren is de kortste weg naar een halve schemawijziging.

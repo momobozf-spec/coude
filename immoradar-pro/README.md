@@ -1,6 +1,14 @@
-# ImmoRadar
+# LeadRevive (codebase: ImmoRadar)
 
-**Acquisitie-intelligentie voor Belgische vastgoedkantoren.**
+**Slapende klantrelaties terug in beeld voor Belgische vastgoedkantoren.**
+
+> **Lancering als LeadRevive (oktober 2026).** In productie werkt alleen de
+> CSV-import van het eigen klantenbestand van een kantoor. De marktradar
+> (externe/gescrapete bronnen, particuliere verkopers, panden) staat achter de
+> feature-flag `FEATURE_MARKET_RADAR`, die in productie standaard **uit** staat,
+> tot er een bron is waarvan het gebruik contractueel en juridisch vaststaat.
+> Uitbater: Marhaba Data & AI Agent BV (BE 1003.552.102, Zaventem). Zie
+> §Live zetten.
 
 ImmoRadar beantwoordt elke ochtend één vraag voor een makelaar:
 
@@ -214,6 +222,34 @@ niets vertrekt.
 
 ---
 
+## Live zetten (LeadRevive, Render + Postgres + worker, EU)
+
+1. **Render**: zet deze map in een eigen privé-GitHub-repository
+   (docs/DEPLOY-RENDER.md §2; `render.yaml` verwacht de `Dockerfile` in de root),
+   dan Dashboard → Blueprints → New Blueprint Instance → `render.yaml` (regio
+   **Frankfurt**: web, worker, Postgres 17). Accepteer de verwerkersovereenkomst
+   van Render (docs/DEPLOY-RENDER.md §1).
+2. Render vraagt om:
+   - `APP_BASE_URL` — `https://<jouw domein>` (web én worker dezelfde waarde);
+   - `LEGAL_ENTITY_ADDRESS` — straat, nr. en postcode van de zetel (**verplicht**,
+     de app start anders niet);
+   - `LEGAL_CONTACT_EMAIL` — mag leeg (standaard momobozf@gmail.com).
+   `FEATURE_MARKET_RADAR=false` en een lege `COLLECTOR_ENABLED_SOURCES` staan al
+   in de blueprint.
+3. Na de eerste deploy, in de Shell van `immoradar-web`:
+   `BOOTSTRAP_ADMIN_EMAIL=jij@domein.be npm run bootstrap:admin` → tijdelijk
+   wachtwoord, bij eerste login wijzigen.
+4. `TRUSTED_PROXY_HOPS` controleren (Beheer → Systeem → Proxy-diagnose).
+5. Eigen domein koppelen in Render, `APP_BASE_URL` erop zetten.
+6. Back-ups (betaald plan: PITR) en monitoring op `/api/ready`.
+7. Per kantoor: kantoor aanmaken in `/admin/agencies`, abonnement (status, plan,
+   max. kansen/dag, einddatum) **handmatig** instellen — er is bewust geen
+   betaalprovider; facturatie via de eigen boekhouding. Verwerkersovereenkomst
+   (`/verwerkersovereenkomst`, concept) laten ondertekenen vóór de eerste import.
+
+Gratis testopstelling (alleen testdata): `render.free.yaml`, zie
+docs/DEPLOY-RENDER-FREE.md. Eigen VPS: `deploy/` (Caddy + Docker).
+
 ## Productie
 
 Het volledige draaiboek staat in [docs/DEPLOY.md](docs/DEPLOY.md). Kort:
@@ -227,7 +263,10 @@ npm run worker                # achtergrondwerk, aparte service
 
 Web en worker weigeren te starten zonder `SESSION_SECRET` van minstens 32
 tekens of met een `APP_BASE_URL` zonder https — een vervalsbaar sessiecookie
-maakt de tenantscheiding een suggestie in plaats van een grens.
+maakt de tenantscheiding een suggestie in plaats van een grens. Ook zonder
+`LEGAL_ENTITY_ADDRESS` op een publieke URL, en met demo-/fixturebronnen
+(behalve met `ALLOW_DEMO_SOURCES=true`). Het demo-seedwachtwoord wordt in
+productie nooit aanvaard bij het inloggen.
 
 ### Accounts
 

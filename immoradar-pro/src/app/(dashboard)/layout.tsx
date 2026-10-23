@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+import { isMarketRadarEnabled } from '@/lib/env'
 import { getSession, ROLE_LABELS } from '@/lib/session'
 
 import { Nav } from './Nav'
@@ -41,6 +42,7 @@ export default async function DashboardLayout({
         userName={session.name ?? session.email}
         roleLabel={ROLE_LABELS[session.role]}
         canManage={session.role !== 'AGENT'}
+        marketRadar={isMarketRadarEnabled()}
         logoutAction={logout}
       />
 
@@ -53,6 +55,10 @@ export default async function DashboardLayout({
         <span className="mx-2">·</span>
         <Link href="/voorwaarden" className="hover:text-ink-900 hover:underline">
           Voorwaarden
+        </Link>
+        <span className="mx-2">·</span>
+        <Link href="/verwerkersovereenkomst" className="hover:text-ink-900 hover:underline">
+          Verwerkersovereenkomst
         </Link>
       </footer>
     </div>

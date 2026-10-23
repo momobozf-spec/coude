@@ -175,3 +175,12 @@ describe('bezoekers-IP achter proxies', () => {
     expect(pickClientIp(null, 0)).toBe('direct')
   })
 })
+
+describe('demo-seedwachtwoord', () => {
+  it('wordt in productie altijd geweigerd bij het inloggen', async () => {
+    const { DEMO_SEED_PASSWORD, isLoginPasswordRefused } = await import('@/domain/accountPolicy')
+    expect(isLoginPasswordRefused(DEMO_SEED_PASSWORD, 'production')).toBe(true)
+    expect(isLoginPasswordRefused(DEMO_SEED_PASSWORD, 'development')).toBe(false)
+    expect(isLoginPasswordRefused('een-ander-lang-wachtwoord', 'production')).toBe(false)
+  })
+})

@@ -2,6 +2,7 @@ import {
   checkPassword,
   generateTemporaryPassword,
   isLocked,
+  isLoginPasswordRefused,
   lockMinutesForCount,
   LOCKOUT_DECAY_MS,
   PASSWORD_PROBLEM_MESSAGES,
@@ -130,6 +131,12 @@ export async function authenticate(
   }
 
   const valid = await verifyPassword(password, user?.passwordHash ?? DUMMY_HASH)
+
+  if (valid && user && isLoginPasswordRefused(password, process.env.NODE_ENV)) {
+    // Demo-account met het publieke seedwachtwoord in productie: nooit binnen.
+    logger.error('Login met demo-seedwachtwoord geweigerd in productie', { userId: user.id, ip })
+    return { ok: false, error: GENERIC_LOGIN_ERROR }
+  }
 
   if (!user || !valid || !user.active) {
     if (user && !valid) await countFailure(user, now)

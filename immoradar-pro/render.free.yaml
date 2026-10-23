@@ -1,4 +1,4 @@
-# ImmoRadar op Render — GRATIS testopstelling. Alleen testdata, geen klantdata.
+# LeadRevive (codebase ImmoRadar) op Render — GRATIS testopstelling. Alleen testdata, geen klantdata.
 #
 # Gebruik: Dashboard → Blueprints → New Blueprint Instance → repository
 # `immoradar` → Blueprint Path: render.free.yaml.
@@ -35,7 +35,12 @@ envVarGroups:
       - key: LEGAL_ENTITY_NAME
         value: Marhaba Data & AI Agent BV
       - key: LEGAL_ENTITY_VAT
-        value: BE1003552102
+        value: BE 1003.552.102
+      - key: LEGAL_ENTITY_MUNICIPALITY
+        value: Zaventem
+      # LeadRevive only: marktradar uit tot er een legale bron is.
+      - key: FEATURE_MARKET_RADAR
+        value: 'false'
 
 services:
   - type: web

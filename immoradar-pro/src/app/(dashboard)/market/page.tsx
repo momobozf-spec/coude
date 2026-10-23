@@ -3,6 +3,8 @@ import { provinceLabel } from '@/domain/geo/provinces'
 import { requireAgencyScope } from '@/lib/session'
 import * as agencyRepository from '@/repositories/agencyRepository'
 import { marketOverview } from '@/services/marketService'
+import { notFound } from 'next/navigation'
+import { isMarketRadarEnabled } from '@/lib/env'
 
 import {
   Card,
@@ -32,6 +34,9 @@ export default async function MarketPage({
 }: {
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
+  // Marktradar staat standaard uit in productie (LeadRevive-lancering).
+  if (!isMarketRadarEnabled()) notFound()
+
   const scope = await requireAgencyScope()
   const params = await searchParams
 
@@ -54,7 +59,7 @@ export default async function MarketPage({
       {postalCodes.length === 0 ? (
         <EmptyState
           title="Geen gebieden ingesteld"
-          description="Zonder werkgebied weet ImmoRadar niet welke markt voor jou relevant is."
+          description="Zonder werkgebied weet LeadRevive niet welke markt voor jou relevant is."
         />
       ) : (
         <>

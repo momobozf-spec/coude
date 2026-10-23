@@ -21,21 +21,26 @@ andere site**. Zonder bron draait de marktradar alleen op demodata; LeadRevive
       (zie [adding-a-data-source.md](adding-a-data-source.md)) en zet hem aan in
       de database én in `COLLECTOR_ENABLED_SOURCES`.
 
-Tot dit rond is, kun je ImmoRadar verkopen als **LeadRevive**: slapende
+Tot dit rond is, wordt het product verkocht als **LeadRevive**: slapende
 relaties uit het eigen bestand van het kantoor. Dat heeft geen externe bron
-nodig.
+nodig. In code: `FEATURE_MARKET_RADAR` staat in productie standaard uit; pas
+op `true` zetten als bovenstaande punten afgevinkt zijn.
 
 ## 2. Juridisch — blokkerend
 
-- [ ] `/privacy` en `/voorwaarden` laten nalezen. De teksten beschrijven feitelijk
-      wat de software doet, maar zijn geen juridisch advies.
-- [ ] Verwerkersovereenkomst (art. 28 AVG) voor elk kantoor: voor het
-      klantenbestand ben jij verwerker, het kantoor verwerkingsverantwoordelijke.
+- [ ] `/privacy`, `/voorwaarden` en `/verwerkersovereenkomst` (concepten, met
+      banner "Concept — laten nalezen door een jurist") laten nalezen.
+- [ ] Verwerkersovereenkomst (art. 28 AVG) per kantoor laten ondertekenen: het
+      kantoor is verwerkingsverantwoordelijke, Marhaba Data & AI Agent BV
+      verwerker. Concepttekst: `/verwerkersovereenkomst`
+      (`src/app/(public)/verwerkersovereenkomst/page.tsx`).
 - [ ] Register van verwerkingsactiviteiten bijhouden.
 - [ ] Nagaan of een DPIA nodig is (grootschalige verwerking van contactgegevens
       van particulieren voor prospectie).
 - [ ] Commerciële overeenkomst met prijs, looptijd en opzegging.
-- [ ] `LEGAL_ENTITY_ADDRESS` en `LEGAL_CONTACT_EMAIL` invullen.
+- [ ] `LEGAL_ENTITY_ADDRESS` invullen (verplicht; de app start anders niet op
+      een publieke URL). `LEGAL_CONTACT_EMAIL` staat standaard op
+      momobozf@gmail.com.
 
 ## 3. Infrastructuur
 
