@@ -1,67 +1,40 @@
 # Noor Growth Funnel
 
-Een losse webapp om snel vraag te meten, leads te verzamelen en betaalbereidheid te testen voor je Noor-ecosysteem.
+Statische landingspagina + aanmeldformulier ("vroege toegang") om vraag en betaalbereidheid voor het Noor-ecosysteem te meten. Uitbater: Marhaba Data & AI Agent BV.
 
-## Wat deze app doet
+## Hoe het werkt
 
-- toont een conversion-focused landing page
-- verzamelt lead data via een intakeformulier
-- meet interesse per aanbod
-- meet koopbereidheid en prijsgevoel
-- toont een lokaal dashboard met leads
-- laat leads exporteren als JSON of CSV
+- Het formulier stuurt de aanmelding als JSON (POST) naar **één configureerbaar endpoint**: `LEAD_ENDPOINT` in `config.js`.
+- **Standaard is `LEAD_ENDPOINT` leeg**: de pagina toont dan "aanmelden is nog niet actief" en verstuurt of bewaart niets.
+- Er wordt **niets in de browser van de bezoeker bewaard** (geen localStorage, geen cookies). Leads die de vroegere versie in localStorage zette, worden bij bezoek automatisch gewist.
+- Het vroegere publieke dashboard en de JSON/CSV-export zijn **verwijderd**. Leads bekijk/exporteer je in de dienst achter het endpoint (bv. Formspree-inbox, Google Sheet via Make/Zapier, CRM).
+- Over kinderen gaat alleen een optionele leeftijdsgroep uit een vaste lijst mee (`childrenAgeGroup`); vrije invoer wordt geweigerd.
+- `privacy.html` = privacyverklaring (concept), gelinkt vanuit de toestemmingstekst en de footer.
 
-## Voor wie deze funnel is
+## Velden die naar het endpoint gaan
 
-Gebaseerd op je bestaande projecten richt deze funnel zich op:
+`submittedAt, name, email, phone, country, persona, childrenAgeGroup, interests[], biggestProblem, topOffer, budget, urgency, willingToPay, consent, consentText, source`
 
-- moslimouders
-- homeschool ouders
-- islamitische educators
-- moslimvrouwen en modest lifestyle shoppers
+## Testen
 
-## Hoe je hem opent
+```powershell
+npm.cmd run check   # syntaxcontrole
+npm.cmd test        # 8 tests (endpoint leeg/ok/fout, dataminimalisatie, geen opslag, geen dashboard, privacy)
+```
 
-Open `index.html` in je browser.
+Lokaal bekijken: open `index.html` in je browser (of `npx serve .`).
 
-## Waar de data staat
+## Live zetten
 
-De leads worden in deze MVP opgeslagen in `localStorage` onder:
+1. Kies een formulierdienst met EU-opslag waar mogelijk (bv. Formspree, Basin, of een Make/Zapier-webhook naar een Google Sheet/Brevo). Sluit de verwerkersovereenkomst (DPA) af.
+2. Zet de endpoint-URL in `config.js` → `LEAD_ENDPOINT`.
+3. Voeg de origin toe aan `connect-src` in `_headers` (bv. `connect-src 'self' https://formspree.io`).
+4. Vul in `privacy.html` sectie 5 de naam en het land van die dienst in (TODO-commentaar staat er).
+5. Vul `config.js` → `legal.address` (straat + nr + postcode van de zetel) in.
+6. Cloudflare Pages: Create → Pages → Upload assets: `index.html`, `privacy.html`, `styles.css`, `config.js`, `funnel.js`, `app.js`, `legal.js`, `_headers`. Custom domain koppelen.
+7. Test: één aanmelding versturen en controleren dat ze in de dienst aankomt. Marketingmails alleen via een mailtool met afmeldlink.
 
-`noor-growth-funnel-leads`
+## Volgende stappen (optioneel)
 
-Dat betekent:
-
-- snel testen zonder backend
-- data blijft lokaal in dezelfde browser
-- export naar CSV of JSON is ingebouwd
-
-## Welke data je verzamelt
-
-- naam
-- e-mail
-- telefoon / WhatsApp optioneel
-- land
-- persona
-- leeftijd van kinderen
-- interesses
-- grootste probleem
-- top aanbod
-- budgetindicatie
-- urgentie
-- bereidheid om te betalen
-
-## Slimme volgende stappen
-
-1. Koppel het formulier aan Supabase, Firebase of een simpele API.
-2. Stuur leads automatisch door naar Mailchimp, ConvertKit of Resend.
-3. Voeg Stripe links toe voor een founding member aanbod of betaalde pilot.
-4. Zet Meta Pixel, GA4 of PostHog erop om conversie te meten.
-5. Maak aparte landingspagina's per aanbod als je ziet welke categorie het best converteert.
-
-## Idee voor snelle monetisatie
-
-- verkoop direct een printable starter bundle
-- bied een founding member deal aan voor Noor membership
-- verkoop school packs aan weekendscholen
-- gebruik WhatsApp follow-up voor warme leads die "Ja, direct" invullen
+- Founding-member-aanbod via Stripe Payment Links pas als de aanmeldingen dat rechtvaardigen.
+- Analytics alleen cookieloos/EU of met toestemmingsbanner (staat nu bewust niet op de site).

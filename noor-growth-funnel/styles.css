@@ -484,3 +484,19 @@ th {
     border-radius: 22px;
   }
 }
+
+/* Aanmeldstatus, honeypot, footer en privacypagina */
+.form-status[data-kind="ok"] { color: var(--accent); }
+.form-status[data-kind="error"] { color: var(--danger); }
+.form-status[data-kind="inactive"] { color: var(--accent-2); font-weight: 600; }
+.hp { position: absolute !important; left: -10000px !important; width: 1px; height: 1px; overflow: hidden; }
+.field-hint { display: block; margin-top: 6px; color: var(--muted); font-size: 0.85rem; }
+.consent-copy a, .site-footer a, .legal-page a { text-decoration: underline; }
+.site-footer { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 40px; color: var(--muted); font-size: 0.85rem; line-height: 1.7; }
+.legal-page { width: min(760px, calc(100% - 32px)); margin: 0 auto; padding: 10px 0 40px; line-height: 1.65; }
+.legal-page h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.15; }
+.legal-page h2 { font-size: 1.2rem; margin-top: 28px; }
+.legal-page .concept { background: #fff4d6; border: 1px solid #e8cf86; border-radius: 10px; padding: 10px 14px; }
+.legal-page dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; }
+.legal-page dt { font-weight: 600; }
+.legal-page dd { margin: 0; }
