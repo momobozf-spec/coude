@@ -87,7 +87,7 @@ export async function expressInterest(prev: FormState, form: FormData): Promise<
 }
 
 /* ---------------------------------------------------------------- account */
-const idSchema = z.string().uuid();
+const idSchema = z.uuid();
 
 export async function withdrawListing(form: FormData): Promise<void> {
   const { supabase, user } = await getViewer();
@@ -109,7 +109,7 @@ async function requireAdmin() {
 }
 
 const statusSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   status: z.enum(["pending", "published", "rejected", "under_offer", "sold", "withdrawn"]),
   note: z.string().trim().max(500).optional().default(""),
 });
@@ -149,7 +149,7 @@ export async function adminDeleteListing(form: FormData): Promise<void> {
 export async function adminSetInterestStatus(form: FormData): Promise<void> {
   const { supabase } = await requireAdmin();
   const parsed = z
-    .object({ id: z.string().uuid(), status: z.enum(["new", "forwarded", "closed"]) })
+    .object({ id: z.uuid(), status: z.enum(["new", "forwarded", "closed"]) })
     .safeParse({ id: form.get("id"), status: form.get("status") });
   if (!parsed.success) redirect("/beheer?fout=1");
   const { error } = await supabase.from("interests").update({ status: parsed.data.status }).eq("id", parsed.data.id);

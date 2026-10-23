@@ -2,7 +2,7 @@
 
 Marktplaats waar eigenaars van online bedrijven (SaaS, websites, apps, webshops, online diensten) in België en Nederland hun bedrijf aanbieden en kopers interesse tonen. Jij controleert elke aanbieding vóór publicatie en legt zelf het contact tussen koper en verkoper.
 
-**Stack:** Next.js 16 (App Router, server actions) · React 19 · Supabase (Postgres, aanmelden via e-maillink, Row Level Security) · Vercel.
+**Stack:** Next.js 16.4.3 (App Router, server actions) · zod 4 · React 19 · Supabase (Postgres, aanmelden via e-maillink, Row Level Security) · Vercel.
 Kost bij de start: €0 op de gratis plannen van Supabase en Vercel, plus je domeinnaam.
 
 ## Wat erin zit
@@ -50,11 +50,13 @@ Kost bij de start: €0 op de gratis plannen van Supabase en Vercel, plus je dom
 
 1. Zet deze map in een (privé) GitHub-repository.
 2. Op [vercel.com](https://vercel.com): **Add New → Project**, kies de repository.
-3. Vul de omgevingsvariabelen in uit `.env.example`:
-   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - Staat de app in een submap van de repo (zoals in `coude/`): zet **Root Directory** op `overnamemarkt`. Framework: Next.js (automatisch). `vercel.json` zet de serverfuncties in **fra1 (Frankfurt)**, naast Supabase.
+3. Vul de omgevingsvariabelen in uit `.env.example` (Production én Preview):
+   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (nooit de service-role-key)
    - `NEXT_PUBLIC_SITE_URL` = `https://jouwdomein.be` (zonder slash op het einde)
-   - `NEXT_PUBLIC_SITE_NAME`, `NEXT_PUBLIC_COMPANY_NAME`, `NEXT_PUBLIC_COMPANY_VAT`, `NEXT_PUBLIC_COMPANY_ADDRESS`, `NEXT_PUBLIC_CONTACT_EMAIL`
+   - `NEXT_PUBLIC_SITE_NAME`, `NEXT_PUBLIC_COMPANY_NAME` (Marhaba Data & AI Agent BV), `NEXT_PUBLIC_COMPANY_VAT` (BE 1003.552.102), `NEXT_PUBLIC_COMPANY_ADDRESS` (straat + nr + postcode zetel), `NEXT_PUBLIC_CONTACT_EMAIL` (momobozf@gmail.com of je domeinadres)
 4. Klik **Deploy**. Koppel daarna je domein onder **Settings → Domains**.
+   - **Productie-guard:** een productiebuild op Vercel faalt bewust zolang er placeholders staan (`jouw-project`, `jouw-anon-key`, `jouwdomein`, `localhost`, `example.com`) of een `NEXT_PUBLIC_*SERVICE_ROLE*`-variabele bestaat; zelf gehost weigert `next start` dan te starten (`lib/production-guard.mjs`, `instrumentation.ts`). Zonder straatadres krijg je enkel een waarschuwing.
 5. Wijzig je later een omgevingsvariabele, deploy dan opnieuw: de CSP-header en de links worden bij de build vastgelegd.
 
 ### 3. Jezelf admin maken
@@ -75,7 +77,7 @@ where id = (select id from auth.users where email = 'jouw@email.be');
 cp .env.example .env.local   # vul je Supabase-gegevens in, NEXT_PUBLIC_SITE_URL=http://localhost:3000
 npm install
 npm run dev                  # http://localhost:3000
-npm test                     # validatie + toegangsregels (draait een Postgres in het geheugen, geen Supabase nodig)
+npm test                     # 32 tests: validatie, toegangsregels (Postgres in het geheugen, geen Supabase nodig), productie-guard
 npm run typecheck
 npm run build
 ```
@@ -92,7 +94,7 @@ Node.js 20.9 of nieuwer.
 ## Vóór je publiek gaat
 
 - **Juridisch:** laat `/voorwaarden` en `/privacy` nakijken door een jurist, ook de vraag of het in contact brengen van kopers en verkopers van (aandelen van) bedrijven onder FSMA-regels valt. Dat is nog niet bevestigd.
-- **Adres:** vul je volledige maatschappelijke zetel in via `NEXT_PUBLIC_COMPANY_ADDRESS`.
+- **Adres:** vul je volledige maatschappelijke zetel in via `NEXT_PUBLIC_COMPANY_ADDRESS` (uitbater: Marhaba Data & AI Agent BV, BE 1003.552.102, Zaventem).
 - **SMTP:** zonder eigen mailserver komen aanmeldlinks traag of niet aan zodra meer mensen zich aanmelden.
 - **Back-ups:** controleer welke back-ups je Supabase-plan biedt. Exporteer anders zelf regelmatig de database.
 

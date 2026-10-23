@@ -8,10 +8,10 @@ export default function TermsPage() {
     <article className="longform">
       <p className="eyebrow">Gebruiksvoorwaarden · versie 1</p>
       <h1 style={{ fontSize: "clamp(26px,4vw,36px)" }}>Voorwaarden voor het gebruik van {site.name}</h1>
-      <p className="msg info">Ontwerptekst. Laat deze voorwaarden nakijken door een jurist vóór de site publiek gaat, ook voor de vraag of de dienst onder financiële regelgeving valt.</p>
+      <p className="msg info"><strong>Concept — laten nalezen door een jurist.</strong> Ook de vraag of de dienst onder financiële regelgeving (FSMA) valt, moet nog bevestigd worden.</p>
 
       <h2>1. Wat de dienst is</h2>
-      <p>{site.name} is een online prikbord waar eigenaars van online bedrijven hun bedrijf aanbieden en kopers interesse kunnen tonen. De dienst wordt aangeboden door {site.company} (BTW {site.vat}).</p>
+      <p>{site.name} is een online prikbord waar eigenaars van online bedrijven hun bedrijf aanbieden en kopers interesse kunnen tonen. De dienst wordt aangeboden door {site.company}, {site.legalForm}, ondernemingsnummer/btw {site.vat}, met zetel te {site.address}, e-mail {site.email}.</p>
 
       <h2>2. Wat de dienst niet is</h2>
       <p>We treden niet op als makelaar, adviseur of vertegenwoordiger van koper of verkoper. We geven geen waardering, prijs-, beleggings-, juridisch of fiscaal advies, onderhandelen niet en beheren geen betalingen. Een overeenkomst tussen koper en verkoper komt rechtstreeks tussen hen tot stand.</p>

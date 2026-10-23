@@ -46,7 +46,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <footer className="foot">
           <div className="wrap">
             <span>
-              {site.company} · BTW {site.vat} · {site.address} · {site.email}
+              {site.name} is een dienst van {site.company} · ondernemingsnummer {site.vat} · {site.address} · <a href={`mailto:${site.email}`}>{site.email}</a>
             </span>
             <nav aria-label="Juridisch">
               <Link href="/hoe-het-werkt">Hoe het werkt</Link>

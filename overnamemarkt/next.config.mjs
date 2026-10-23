@@ -1,3 +1,12 @@
+import { checkProductionEnv, guardApplies } from "./lib/production-guard.mjs";
+
+// Productie-guard bij de Vercel-productiebuild: placeholders => build faalt => geen deploy.
+if (guardApplies(process.env, "build")) {
+  const { errors, warnings } = checkProductionEnv(process.env);
+  for (const w of warnings) console.warn(`[productie-guard] LET OP: ${w}`);
+  if (errors.length) throw new Error(`[productie-guard] Build geweigerd:\n- ${errors.join("\n- ")}`);
+}
+
 const isDev = process.env.NODE_ENV !== "production";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseOrigin = supabaseUrl ? new URL(supabaseUrl).origin : "";

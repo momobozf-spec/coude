@@ -15,7 +15,7 @@ const amount = (label: string, opts: { min?: number; allowNegative?: boolean } =
   z.preprocess(
     parseAmount,
     z
-      .number({ required_error: `${label} is verplicht.`, invalid_type_error: `${label} moet een bedrag zijn.` })
+      .number({ error: (iss) => (iss.input === undefined ? `${label} is verplicht.` : `${label} moet een bedrag zijn.`) })
       .refine((n) => !Number.isNaN(n), `${label} moet een bedrag zijn.`)
       .refine((n) => opts.allowNegative || n >= (opts.min ?? 0), `${label} mag niet negatief zijn.`)
       .refine((n) => Math.abs(n) < 1e10, `${label} is te groot.`),
@@ -25,7 +25,7 @@ const optionalInt = (label: string, min: number, max: number) =>
   z.preprocess(
     (v) => (v === null || v === undefined || String(v).trim() === "" ? undefined : Number(String(v).trim())),
     z
-      .number({ invalid_type_error: `${label} moet een getal zijn.` })
+      .number({ error: `${label} moet een getal zijn.` })
       .int(`${label} moet een geheel getal zijn.`)
       .min(min, `${label} moet minstens ${min} zijn.`)
       .max(max, `${label} mag hoogstens ${max} zijn.`)
@@ -33,10 +33,10 @@ const optionalInt = (label: string, min: number, max: number) =>
   );
 
 const checkbox = (message: string) =>
-  z.preprocess((v) => v === "on" || v === "true" || v === true, z.literal(true, { errorMap: () => ({ message }) }));
+  z.preprocess((v) => v === "on" || v === "true" || v === true, z.literal(true, { error: message }));
 
 const email = z
-  .string({ required_error: "E-mailadres is verplicht." })
+  .string({ error: (iss) => (iss.input === undefined ? "E-mailadres is verplicht." : "Vul een geldig e-mailadres in.") })
   .trim()
   .max(254, "E-mailadres is te lang.")
   .email("Vul een geldig e-mailadres in.");
@@ -47,8 +47,8 @@ const optionalText = (max: number) =>
 export const listingSchema = z
   .object({
     title: z.string().trim().min(5, "Omschrijving: minstens 5 tekens.").max(120, "Omschrijving: maximaal 120 tekens."),
-    type: z.enum(LISTING_TYPES, { errorMap: () => ({ message: "Kies een type." }) }),
-    country: z.enum(COUNTRIES, { errorMap: () => ({ message: "Kies een land." }) }),
+    type: z.enum(LISTING_TYPES, { error: "Kies een type." }),
+    country: z.enum(COUNTRIES, { error: "Kies een land." }),
     founded_year: optionalInt("Startjaar", 1990, new Date().getFullYear()),
     asking_price: amount("Vraagprijs", { min: 1 }).refine((n) => n > 0, "Vraagprijs moet groter dan 0 zijn."),
     revenue_12m: amount("Omzet"),
@@ -67,7 +67,7 @@ export type ListingInput = z.infer<typeof listingSchema>;
 
 export const interestSchema = z
   .object({
-    listing_id: z.string().uuid("Onbekende aanbieding."),
+    listing_id: z.uuid("Onbekende aanbieding."),
     message: z.string().trim().min(10, "Schrijf minstens één zin (10 tekens).").max(2000, "Maximaal 2000 tekens."),
     contact_email: email,
     budget: z.preprocess((v) => (v === "" || v === null || v === undefined ? undefined : v), z.enum(BUDGETS).optional()),

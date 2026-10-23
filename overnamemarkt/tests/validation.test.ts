@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formatMultiple, multiple, safeNext } from "@/lib/format";
-import { interestSchema, listingSchema, parseAmount } from "@/lib/validation";
+import { flattenErrors, interestSchema, listingSchema, loginSchema, parseAmount } from "@/lib/validation";
 
 const validListing = {
   title: "Planningstool voor schoonmaakbedrijven",
@@ -89,3 +89,33 @@ describe("format", () => {
     expect(safeNext("/\\evil.com")).toBe("/");
   });
 });
+
+describe("Nederlandstalige foutmeldingen (zod 4)", () => {
+  const errs = (input: Record<string, unknown>) => {
+    const r = listingSchema.safeParse(input);
+    expect(r.success).toBe(false);
+    return r.success ? {} : flattenErrors(r.error);
+  };
+  it("verplicht vs. ongeldig bedrag", () => {
+    expect(errs({ ...validListing, asking_price: "" }).asking_price).toBe("Vraagprijs is verplicht.");
+    expect(errs({ ...validListing, asking_price: "abc" }).asking_price).toBe("Vraagprijs moet een bedrag zijn.");
+    expect(errs({ ...validListing, revenue_12m: "-1" }).revenue_12m).toBe("Omzet mag niet negatief zijn.");
+  });
+  it("type, land, getallen en toestemmingen", () => {
+    expect(errs({ ...validListing, type: "Crypto" }).type).toBe("Kies een type.");
+    expect(errs({ ...validListing, country: "FR" }).country).toBe("Kies een land.");
+    expect(errs({ ...validListing, customers: "x" }).customers).toBe("Aantal klanten moet een getal zijn.");
+    expect(errs({ ...validListing, consent_publish: undefined }).consent_publish).toBe("Geef toestemming om de aanbieding na controle te publiceren.");
+  });
+  it("e-mail verplicht vs. ongeldig, onbekende aanbieding", () => {
+    const login = (email: unknown) => {
+      const r = loginSchema.safeParse({ email });
+      return r.success ? {} : flattenErrors(r.error);
+    };
+    expect(login(undefined).email).toBe("E-mailadres is verplicht.");
+    expect(login("geen-mail").email).toBe("Vul een geldig e-mailadres in.");
+    const r = interestSchema.safeParse({ listing_id: "x", message: "Een geldige zin hier.", contact_email: "a@b.be", consent_confidential: "on", consent_share: "on" });
+    expect(r.success ? {} : flattenErrors(r.error)).toEqual({ listing_id: "Onbekende aanbieding." });
+  });
+});
+

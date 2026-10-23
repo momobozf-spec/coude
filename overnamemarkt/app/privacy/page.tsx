@@ -8,10 +8,10 @@ export default function PrivacyPage() {
     <article className="longform">
       <p className="eyebrow">Privacyverklaring · versie 1</p>
       <h1 style={{ fontSize: "clamp(26px,4vw,36px)" }}>Hoe we met je gegevens omgaan</h1>
-      <p className="msg info">Ontwerptekst. Laat deze verklaring nakijken door een jurist vóór de site publiek gaat.</p>
+      <p className="msg info"><strong>Concept — laten nalezen door een jurist.</strong></p>
 
       <h2>Wie is verantwoordelijk</h2>
-      <p>{site.company}, BTW {site.vat}, {site.address}. Contact: {site.email}.</p>
+      <p>{site.company}, {site.legalForm}, ondernemingsnummer/btw {site.vat}, zetel: {site.address}. Contact: {site.email}.</p>
 
       <h2>Welke gegevens en waarom</h2>
       <ul>
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
       <h2>Met wie we gegevens delen</h2>
       <ul>
         <li>De verkoper van een aanbieding, alleen het bericht en e-mailadres van een koper die daarvoor toestemming gaf.</li>
-        <li>Verwerkers die de site laten draaien: Supabase (database en aanmelding) en Vercel (hosting). Kies bij Supabase een EU-regio.</li>
+        <li>Verwerkers die de site laten draaien: Supabase (database en aanmelding, regio Frankfurt in de EU), Vercel (hosting, serverfuncties in de regio Frankfurt) en onze e-maildienst voor aanmeldlinks. Supabase en Vercel zijn Amerikaanse bedrijven; doorgifte buiten de EER gebeurt op basis van het EU-VS Data Privacy Framework en/of de standaardcontractbepalingen van de Europese Commissie.</li>
       </ul>
       <p>We verkopen geen gegevens en gebruiken ze niet voor reclame.</p>
 
@@ -35,7 +35,7 @@ export default function PrivacyPage() {
       <p>We bewaren gegevens zolang je account bestaat en maximaal 24 maanden na je laatste activiteit. Daarna verwijderen we ze.</p>
 
       <h2>Je rechten</h2>
-      <p>Je kunt je gegevens inkijken, laten verbeteren of verwijderen, je toestemming intrekken en bezwaar maken. Mail naar {site.email}. Je kunt ook klacht indienen bij de Gegevensbeschermingsautoriteit (gegevensbeschermingsautoriteit.be).</p>
+      <p>Je kunt je gegevens inkijken, laten verbeteren of verwijderen, je toestemming intrekken en bezwaar maken. Mail naar {site.email}; we antwoorden binnen één maand. Je kunt ook klacht indienen bij de Gegevensbeschermingsautoriteit, Drukpersstraat 35, 1000 Brussel (gegevensbeschermingsautoriteit.be).</p>
     </article>
   );
 }
