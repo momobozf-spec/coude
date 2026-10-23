@@ -4,6 +4,7 @@ import { source } from "@/db/schema";
 import { Badge, btn, Notice } from "@/components/ui";
 import { createLeadAction } from "./actions";
 import { formatBrussels } from "@/lib/time";
+import { LegalFooter } from "@/components/legal-footer";
 
 export const dynamic = "force-dynamic";
 
@@ -190,7 +191,13 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
             </div>
             <label className="flex items-start gap-2 text-sm font-normal">
               <input type="checkbox" name="consent" required className="mt-1" />
-              <span>Ik ga akkoord dat TenderKompas IT deze gegevens gebruikt om contact op te nemen over de pilot.</span>
+              <span>
+                Ik ga akkoord dat Marhaba Data &amp; AI Agent BV (TenderKompas IT) deze gegevens gebruikt om contact op te nemen over de pilot. Zie de{" "}
+                <Link href="/privacy" className="underline">
+                  privacyverklaring
+                </Link>
+                .
+              </span>
             </label>
             {/* Honeypot tegen spam */}
             <input type="text" name="bedrijf_url" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
@@ -198,9 +205,7 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
           </form>
         </section>
       </main>
-      <footer className="border-t border-line bg-white py-6 text-center text-xs text-muted">
-        TenderKompas IT — pilotversie. Geen garantie op volledigheid, toelating of gunning.
-      </footer>
+      <LegalFooter note="TenderKompas IT — pilotversie. Geen garantie op volledigheid, toelating of gunning." />
     </div>
   );
 }

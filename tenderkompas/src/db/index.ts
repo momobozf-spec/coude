@@ -14,7 +14,27 @@ function createDb(): DB {
   return drizzle(pool, { schema });
 }
 
-export const db: DB = globalForDb.__tkDb ?? (globalForDb.__tkDb = createDb());
+function getDb(): DB {
+  return globalForDb.__tkDb ?? (globalForDb.__tkDb = createDb());
+}
+
+/**
+ * Lui aangemaakt bij het eerste gebruik: `next build` (en een Docker-build) heeft zo geen DATABASE_URL nodig.
+ * Zonder DATABASE_URL faalt pas het eerste databaseverzoek, met dezelfde duidelijke foutmelding.
+ */
+export const db: DB = new Proxy({} as DB, {
+  get(_target, prop) {
+    const real = getDb();
+    const value = Reflect.get(real, prop, real);
+    return typeof value === "function" ? value.bind(real) : value;
+  },
+  has(_target, prop) {
+    return Reflect.has(getDb(), prop);
+  },
+  getPrototypeOf() {
+    return Reflect.getPrototypeOf(getDb());
+  },
+});
 export { schema };
 
 export async function closeDb() {

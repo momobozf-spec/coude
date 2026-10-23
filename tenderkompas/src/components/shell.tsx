@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signOutAction } from "@/app/login/actions";
+import { LegalFooter } from "@/components/legal-footer";
 
 export function AppShell({
   area,
@@ -43,6 +44,7 @@ export function AppShell({
         </nav>
       </header>
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">{children}</main>
+      <LegalFooter />
     </div>
   );
 }
