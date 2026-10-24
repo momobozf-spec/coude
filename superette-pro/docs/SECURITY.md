@@ -73,6 +73,7 @@ een vreemd id geeft 404 (geen 403, geen bestaan lekken). Rooktest
 | `POST /compare/alerts` | 20 · preview 30 |
 | `POST /compare/lists/:id/compare` | 20 |
 | `POST /compare/internal/sync` | 5 · status 30 |
+| `POST /compare/internal/feeds/:chain` | 20 · lijst 30 (grote body alleen met geldige jobsleutel) |
 | `GET /health/status` | 30 |
 | boetiek: `/access/token` 30, `/gate/*` 60, checkout 300 | ongewijzigd |
 
@@ -158,3 +159,12 @@ breaking changes. CI blokkeert op `critical` en rapporteert `high`.
 4. Geen geautomatiseerde pentest; alleen de eigen rooktests.
 5. Boetiek-PWA bewaart haar Bearer-token nog in `localStorage` (bestaand,
    buiten scope; de API ondersteunt nu cookies voor een latere migratie).
+
+## Boetiek uit in productie
+
+`BOUTIQUE_ENABLED` (standaard `false`, ook in productie) bepaalt of de
+boetiekmodules (toegang, deur/MQTT, catalogus, mandje, kassa, kasbonnen,
+betalingen, winkels) en `POST /auth/register` geladen worden. Uit = 404 en geen
+uitgaande MQTT-verbinding; bewezen in `src/app.module.test.ts` over HTTP.
+Minder geladen code is minder aanvalsoppervlak.
+

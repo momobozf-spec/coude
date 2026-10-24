@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { resolve } from 'node:path';
+import { legalFooterLine } from '../config/legal-entity';
 
 /** Getypte toegang tot de instellingen van de vergelijker. Eén plek, geen losse `config.get`-strings. */
 @Injectable()
@@ -25,6 +26,11 @@ export class CompareConfig {
   /** Huidige en (tijdens rotatie) vorige jobsleutel. Leeg = interne endpoints bestaan niet. */
   get jobKeys(): readonly string[] {
     return [this.config.get<string>('COMPARE_JOB_KEY'), this.config.get<string>('COMPARE_JOB_KEY_PREVIOUS')].filter((key): key is string => !!key);
+  }
+
+  /** Grens voor één aangeleverde feed (`POST /compare/internal/feeds/:chain`), in bytes. */
+  get feedPushMaxBytes(): number {
+    return (this.config.get<number>('COMPARE_FEED_PUSH_MAX_MB') ?? 15) * 1024 * 1024;
   }
 
   get freshHours(): number {
@@ -70,6 +76,11 @@ export class CompareConfig {
 
   get appUrl(): string {
     return this.config.get<string>('APP_URL') ?? 'http://localhost:3000';
+  }
+
+  /** Afzenderregel onderaan e-mails: uitbater, ondernemingsnummer, adres (`LEGAL_ENTITY_ADDRESS`). */
+  get legalFooter(): string {
+    return legalFooterLine(this.config.get<string>('LEGAL_ENTITY_ADDRESS'));
   }
 
   /** Origin van de Superette-app, voor links in meldingen. */

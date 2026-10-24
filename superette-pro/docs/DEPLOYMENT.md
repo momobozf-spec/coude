@@ -4,6 +4,19 @@ Hoe Superette (API, werker, app) naar staging en productie gaat. Dit document
 beschrijft de **procedure**; niets hierin deployt vanzelf. Een productie-
 deployment gebeurt pas na expliciete goedkeuring (zie `PRODUCTION-READINESS.md`).
 
+## Render (aanbevolen route, oktober 2026)
+
+`render.yaml` in de root van `superette-pro` beschrijft de productie-opstelling
+op Render, regio Frankfurt: `superette-api` (Node, pre-deploy `prisma migrate
+deploy`, health `/api/v1/health/ready`), `superette-web` (Next standalone),
+`superette-db` (Postgres 16, alleen intern bereikbaar) en `superette-sync`
+(cron, dagelijks `sync.cli.js`: aangeleverde feeds importeren, vervallen
+aanbiedingen, alerts, meldingen, sessies). De boetiek staat uit
+(`BOUTIQUE_ENABLED=false`). Stappen en env-vars: README, "Live zetten
+(Superette)". Feeds komen van de laptop via `npm run feeds:push` (geen
+gedeelde schijf nodig). De rest van dit document (Docker, compose, eigen
+reverse proxy) blijft geldig als alternatief.
+
 ## Onderdelen
 
 | Onderdeel | Image / commando | Poort | Schaalbaar |
@@ -39,13 +52,16 @@ zijn `SameSite=Lax/Strict` en host-only tenzij `COOKIE_DOMAIN` is gezet.
 Zie `.env.example` voor de volledige lijst met uitleg. De API valideert bij het
 starten en weigert in productie te starten wanneer:
 
-- `APP_URL` of `SUPERETTE_WEB_URL` niet `https://` is;
+- `SUPERETTE_WEB_URL` (en met boetiek `APP_URL`), `EMAIL_HTTP_URL`, `MOLLIE_WEBHOOK_URL` of `ERROR_REPORTING_DSN` niet `https://` is;
+- `LEGAL_ENTITY_ADDRESS` ontbreekt of een plaatshouder is;
+- `JWT_SECRET` of de jobsleutels een plaatshouder/zwak zijn (jobsleutel < 32 tekens), of `DATABASE_URL` de docker-compose-standaardgebruiker gebruikt;
+- `NEXT_PUBLIC_ENABLE_DEV_SCANNER=true` of `NEXT_PUBLIC_DEV_DEVICE_KEY` gezet is;
+- met `BOUTIQUE_ENABLED=true`: gate-sleutels ontbreken, `MOLLIE_API_KEY` ontbreekt of `test_…` is, MQTT niet `mqtts://` is, of een winkel nog de publieke dev-scannersleutel uit `prisma/seed.ts` gebruikt (controle bij het opstarten);
 - `COOKIE_SECURE=false` of `TRUST_PROXY=false`;
 - `JWT_TTL_SECONDS` > 3600;
 - `COMPARE_ALLOW_DEMO=true`;
 - `NOTIFY_EMAIL_ENABLED=true` zonder `EMAIL_PROVIDER`;
 - `EMAIL_PROVIDER=http` zonder `EMAIL_HTTP_URL`, `EMAIL_API_KEY` en `EMAIL_FROM`;
-- `MOLLIE_API_KEY` ontbreekt (boetiek);
 - `JWT_SECRET` korter dan 32 tekens of de Ed25519-sleutels ontbreken.
 
 De app bakt `NEXT_PUBLIC_API_URL` in bij de **build** (build-arg) en faalt
@@ -111,7 +127,9 @@ Minimaal:
 - `X-Forwarded-For` en `X-Forwarded-Proto` doorgeven en **`TRUST_PROXY`** op
   het aantal hops zetten (meestal `1`). Zonder dit ziet de rate limiter één IP.
 - Bodylimiet ≥ 64 kB voor `/api`, maar niet veel meer (de API weigert boven
-  64 kB zelf met 413).
+  64 kB zelf met 413). Uitzondering: `POST /api/v1/compare/internal/feeds/*`
+  (feed-push met jobsleutel) tot `COMPARE_FEED_PUSH_MAX_MB` (standaard 15 MB
+  uitgepakt; `npm run feeds:push` stuurt gzip).
 - Timeouts: 30 s voor `/api`, 10 s voor de app.
 - Interne endpoints (`/api/v1/compare/internal/*`, `/api/v1/health/status`)
   mogen door de proxy extra afgeschermd worden (IP-allowlist); ze zijn ook
@@ -125,13 +143,21 @@ superette.be {
   reverse_proxy web:3001
 }
 api.superette.be {
-  request_body { max_size 128KB }
-  reverse_proxy api:4000
+  handle /api/v1/compare/internal/feeds/* {
+    request_body { max_size 16MB }
+    reverse_proxy api:4000
+  }
+  handle {
+    request_body { max_size 128KB }
+    reverse_proxy api:4000
+  }
 }
 ```
 
 ## Importbestanden en werker
 
+- Zonder gedeelde schijf (Render): `npm run feeds:push` vanaf de laptop; de
+  feed landt in de tabel `CompareFeed` en elke synchronisatie leest hem.
 - De werker leest `COMPARE_FEED_DIR` (volume `feeds`): `<adapterkey>.json` of
   `.csv` per keten, formaat in `apps/api/data/feeds/README.md`.
 - Zonder bestand en zonder demo-toestemming levert een adapter niets: de keten

@@ -1,9 +1,11 @@
 /**
  * Fabriek voor ketenadapters.
  *
- * Elke keten doorloopt dezelfde drie bronnen, in deze volgorde:
+ * Elke keten doorloopt dezelfde bronnen, in deze volgorde:
  *
- *  1. `COMPARE_FEED_DIR/<key>.json` — gevalideerd importbestand
+ *  1. aangeleverde feed in de database (`npm run feeds:push`) of
+ *     `COMPARE_FEED_DIR/<key>.json` — gevalideerd; zijn beide er, dan wint
+ *     de feed met de jongste `observedAt`
  *  2. `COMPARE_FEED_DIR/<key>.csv`  — idem, platte vorm
  *  3. demogegevens                   — alleen als `allowDemo` aanstaat
  *
@@ -71,6 +73,19 @@ export function feedToSnapshot(feed: FeedFile, fallbackChain: AdapterChainInfo):
   };
 }
 
+/** Valideert ruwe feed-JSON; een ongeldige feed is een fout, nooit een stille terugval. */
+export function parseFeed(raw: unknown, label: string): FeedFile {
+  const parsed = feedFileSchema.safeParse(raw);
+  if (!parsed.success) {
+    const details = parsed.error.issues
+      .slice(0, 5)
+      .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+      .join('; ');
+    throw new Error(`${label} is ongeldig: ${details}`);
+  }
+  return parsed.data;
+}
+
 export function createChainAdapter(config: ChainAdapterConfig): SupermarketAdapter {
   const source: AdapterSourceInfo = {
     kind: config.source?.kind ?? 'IMPORT_FILE',
@@ -91,19 +106,24 @@ export function createChainAdapter(config: ChainAdapterConfig): SupermarketAdapt
         context.logger.warn(`[${config.key}] live bron leverde niets; terugvallen op importbestanden`);
       }
 
+      const candidates: Array<{ feed: FeedFile; origin: string }> = [];
+
+      const stored = context.loadStoredFeed ? await context.loadStoredFeed(config.key) : null;
+      if (stored !== null && stored !== undefined) {
+        candidates.push({ feed: parseFeed(stored, `[${config.key}] aangeleverde feed`), origin: 'aangeleverde feed (database)' });
+      }
+
       const jsonPath = join(context.feedDir, `${config.key}.json`);
       if (await exists(jsonPath)) {
         const raw = await readFile(jsonPath, 'utf8');
-        const parsed = feedFileSchema.safeParse(JSON.parse(raw));
-        if (!parsed.success) {
-          const details = parsed.error.issues
-            .slice(0, 5)
-            .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
-            .join('; ');
-          throw new Error(`[${config.key}] ${jsonPath} is ongeldig: ${details}`);
-        }
-        context.logger.log(`[${config.key}] importbestand ${jsonPath} gelezen (${parsed.data.offers.length} aanbiedingen)`);
-        return feedToSnapshot(parsed.data, config.chain);
+        candidates.push({ feed: parseFeed(JSON.parse(raw), `[${config.key}] ${jsonPath}`), origin: `importbestand ${jsonPath}` });
+      }
+
+      if (candidates.length > 0) {
+        // Jongste meting wint; bij gelijke stand de aangeleverde feed (eerst in de lijst).
+        const chosen = candidates.reduce((best, next) => (Date.parse(next.feed.observedAt) > Date.parse(best.feed.observedAt) ? next : best));
+        context.logger.log(`[${config.key}] ${chosen.origin} gelezen (${chosen.feed.offers.length} aanbiedingen, gemeten ${chosen.feed.observedAt})`);
+        return feedToSnapshot(chosen.feed, config.chain);
       }
 
       const csvPath = join(context.feedDir, `${config.key}.csv`);
@@ -113,7 +133,11 @@ export function createChainAdapter(config: ChainAdapterConfig): SupermarketAdapt
           chain: config.chain,
           label: `Importbestand ${config.key}.csv`,
           observedAt: context.now,
-          termsReviewed: true,
+          // Een CSV-bestand kan zelf niets verklaren: het erft wat de adapter
+          // declareert (standaard `false` → UNVERIFIED). Nagekeken voorwaarden
+          // zijn een menselijke beslissing in de adapter, nooit een bijwerking
+          // van het bestandsformaat.
+          termsReviewed: source.termsReviewed,
         });
         context.logger.log(`[${config.key}] importbestand ${csvPath} gelezen (${feed.offers.length} aanbiedingen)`);
         return feedToSnapshot(feed, config.chain);

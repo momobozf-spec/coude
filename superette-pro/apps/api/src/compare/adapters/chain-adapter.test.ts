@@ -82,6 +82,48 @@ describe('createChainAdapter', () => {
     const snapshot = await adapter.fetchSnapshot(context(dir, false));
     expect(snapshot?.source.kind).toBe('IMPORT_FILE');
     expect(snapshot?.offers).toHaveLength(1);
+    // Een CSV kan niets verklaren: hij erft de adapterdeclaratie (standaard niet nagekeken → UNVERIFIED).
+    expect(snapshot?.source.termsReviewed).toBe(false);
+  });
+
+  describe('aangeleverde feed uit de database (feeds:push)', () => {
+    const feedJson = (observedAt: string, label: string, termsReviewed = false) => ({
+      version: 1,
+      chain: { slug: 'test', name: 'Test' },
+      source: { kind: 'IMPORT_FILE', label, termsReviewed },
+      observedAt,
+      products: [{ externalId: 'p1', name: 'Melk 1 l', packageQuantity: 1, packageUnit: 'L' }],
+      offers: [{ productExternalId: 'p1', sourceReference: 'p1:regular', priceCents: 99 }],
+    });
+    const withStored = (feedDir: string, stored: unknown): AdapterContext => ({ ...context(feedDir, false), loadStoredFeed: async () => stored });
+
+    it('gebruikt de opgeslagen feed als er geen bestand is (server zonder schijf)', async () => {
+      const adapter = createChainAdapter({ key: 'test', chain: { slug: 'test', name: 'Test' } });
+      const snapshot = await adapter.fetchSnapshot(withStored(dir, feedJson('2026-10-20T08:00:00+02:00', 'gepusht')));
+      expect(snapshot?.source.label).toBe('gepusht');
+      expect(snapshot?.source.termsReviewed).toBe(false);
+      expect(snapshot?.offers).toHaveLength(1);
+    });
+
+    it('kiest tussen bestand en opgeslagen feed de jongste meting', async () => {
+      const adapter = createChainAdapter({ key: 'test', chain: { slug: 'test', name: 'Test' } });
+      await writeFile(join(dir, 'test.json'), JSON.stringify(feedJson('2026-10-22T08:00:00+02:00', 'bestand')));
+
+      const older = await adapter.fetchSnapshot(withStored(dir, feedJson('2026-10-20T08:00:00+02:00', 'gepusht')));
+      expect(older?.source.label).toBe('bestand');
+      const newer = await adapter.fetchSnapshot(withStored(dir, feedJson('2026-10-23T08:00:00+02:00', 'gepusht')));
+      expect(newer?.source.label).toBe('gepusht');
+    });
+
+    it('valideert de opgeslagen feed opnieuw en faalt luid als hij ongeldig is', async () => {
+      const adapter = createChainAdapter({ key: 'test', chain: { slug: 'test', name: 'Test' } });
+      await expect(adapter.fetchSnapshot(withStored(dir, { version: 1 }))).rejects.toThrow(/aangeleverde feed is ongeldig/);
+    });
+
+    it('zonder opgeslagen feed: gewoon het bestaande gedrag', async () => {
+      const adapter = createChainAdapter({ key: 'test', chain: { slug: 'test', name: 'Test' } });
+      expect(await adapter.fetchSnapshot(withStored(dir, null))).toBeNull();
+    });
   });
 
   it('valt alleen terug op demo als dat is toegestaan', async () => {

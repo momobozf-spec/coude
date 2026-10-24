@@ -20,6 +20,12 @@ function assertApiUrlForProductionBuild(): void {
   if (parsed.protocol !== 'https:' && !isLocal) {
     throw new Error(`NEXT_PUBLIC_API_URL moet https zijn in productie (nu ${parsed.protocol})`);
   }
+  // Een echte deploy (niet-lokale API) zonder adres van de uitbater zou juridische
+  // pagina's met een plaatshouder publiceren. Het adres wordt per request gelezen
+  // (server-side, niet in de bundel); deze controle vangt een vergeten variabele.
+  if (!isLocal && !process.env['LEGAL_ENTITY_ADDRESS']?.trim()) {
+    throw new Error('LEGAL_ENTITY_ADDRESS ontbreekt: straat, nummer, postcode en gemeente van Marhaba Data & AI Agent BV (zie README "Live zetten (Superette)")');
+  }
 }
 
 const config: NextConfig = {

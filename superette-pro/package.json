@@ -2,7 +2,7 @@
   "name": "superette",
   "version": "0.1.0",
   "private": true,
-  "description": "Jamal & Jamila — autonoom onbemand winkelplatform (toegangscontrole, self-scanning, Belgische BTW)",
+  "description": "Superette — Belgische supermarktvergelijker (productie). Bevat ook de onbemande boetiek Jamal & Jamila, standaard uitgeschakeld (BOUTIQUE_ENABLED=false).",
   "workspaces": [
     "packages/*",
     "apps/*",
@@ -20,6 +20,7 @@
     "db:seed": "npm run db:seed -w @superette/api",
     "db:seed:compare": "npm run db:seed:compare -w @superette/api",
     "compare:sync": "npm run compare:sync -w @superette/api --",
+    "feeds:push": "npm exec --workspace @superette/api -- tsx scripts/feeds-push.ts",
     "dev:api": "npm run dev -w @superette/api",
     "dev:pwa": "npm run dev -w @superette/pwa",
     "dev:web": "npm run dev -w @superette/web",
@@ -61,11 +62,13 @@
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   },
-  "overridesReason": "next@15.5 pint postcss@8.4.31 vast; die versie heeft GHSA-qx2v-qp2m-jg93. postcss 8.5 is API-compatibel binnen 8.x en de Next-build is ermee geverifieerd.",
+  "overridesReason": "next@15.5 pint postcss@8.4.31 (GHSA-qx2v-qp2m-jg93) → 8.5. @nestjs/platform-express 11.2 pint multer 2.4.0 (GHSA-q7qp-rjg7-q26m) → 2.5 (patch, zelfde API). prisma 6 (CLI/@prisma/config) gebruikt deepmerge-ts 7 (stack exhaustion) → 8 (alleen `deepmerge` gebruikt, API ongewijzigd). Weghalen zodra upstream bijwerkt.",
   "overrides": {
     "next": {
       "postcss": "^8.5.16"
-    }
+    },
+    "multer": "^2.5.0",
+    "deepmerge-ts": "^8.0.2"
   },
   "engines": {
     "node": ">=20"

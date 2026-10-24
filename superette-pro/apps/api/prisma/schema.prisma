@@ -1086,3 +1086,22 @@ model JobLease {
   expiresAt DateTime
   updatedAt DateTime @updatedAt
 }
+
+/// Laatst aangeleverde feed per keten via `POST /compare/internal/feeds/:chain`
+/// (`npm run feeds:push` vanaf de laptop). De productieserver heeft geen
+/// blijvende schijf; de adapters lezen deze rij zoals een importbestand. Eén rij
+/// per adapter: een nieuwe push vervangt de vorige. Inhoud = de gevalideerde
+/// feed (`feedFileSchema`), ongewijzigd — ook `termsReviewed` blijft wat de feed zegt.
+model CompareFeed {
+  adapterKey    String   @id
+  payload       Json
+  /// SHA-256 (hex) van de geaccepteerde JSON; een identieke push is herkenbaar.
+  sha256        String
+  sizeBytes     Int
+  observedAt    DateTime
+  productCount  Int
+  offerCount    Int
+  termsReviewed Boolean
+  receivedAt    DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

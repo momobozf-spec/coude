@@ -129,6 +129,12 @@ export interface AdapterContext {
   /** Mogen adapters demogegevens leveren als er geen echte bron is? Nooit in productie. */
   readonly allowDemo: boolean;
   readonly now: Date;
+  /**
+   * Laatst aangeleverde feed voor deze adapter uit de database
+   * (`POST /compare/internal/feeds/:chain`), als ruwe JSON. Optioneel: scripts
+   * en tests zonder database laten hem weg.
+   */
+  readonly loadStoredFeed?: (adapterKey: string) => Promise<unknown | null>;
 }
 
 export interface SupermarketAdapter {

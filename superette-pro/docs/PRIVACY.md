@@ -4,11 +4,22 @@ Verwerkingsregister en ontwerpkeuzes voor Superette (supermarktvergelijker).
 De boetiek Jamal & Jamila deelt dezelfde gebruikerstabel; haar verwerkingen
 staan hier alleen waar ze een Superette-gebruiker raken.
 
-> **Juridische controle vereist.** De privacyverklaring in de app
-> (`/privacy`) en dit register zijn een voorstel op basis van wat de software
-> doet. Een jurist moet rechtsgronden, bewaartermijnen, de identiteit van de
-> verwerkingsverantwoordelijke en de tekst goedkeuren vóór publicatie. De
-> Franse en Engelse vertaling van de verklaring ontbreken nog.
+> **Juridische controle vereist.** De privacyverklaring (`/privacy`), de
+> gebruiksvoorwaarden (`/voorwaarden`) en de cookieverklaring (`/cookies`) in de
+> app staan sinds 24 oktober 2026 in het Nederlands, Frans en Engels
+> (`apps/superette-web/src/lib/legal-content.ts`), met als
+> verwerkingsverantwoordelijke **Marhaba Data & AI Agent BV**
+> (BE 1003.552.102, Zaventem, momobozf@gmail.com; adres via
+> `LEGAL_ENTITY_ADDRESS`). Het blijven **concepten**: een jurist moet
+> rechtsgronden, bewaartermijnen, de doorgifte (Render, VS-moederbedrijf) en de
+> tekst goedkeuren vóór publicatie.
+>
+> Correcties t.o.v. het eerdere voorstel: (1) bij registratie bewaart
+> `Consent` tijdstip, **IP-adres en user-agent** als bewijs van het akkoord —
+> dat staat nu in de verklaring; (2) het marketingvinkje is uit de registratie
+> gehaald: er bestaat geen nieuwsbrief, dus er wordt geen toestemming voor
+> gevraagd; (3) de boetiekverwerking staat niet meer in de verklaring van de
+> vergelijker (de boetiek draait niet in productie).
 
 ## Verwerkingsregister
 
@@ -86,13 +97,18 @@ Verwerkersovereenkomsten afsluiten vóór productie.
 
 ## Open punten voor de jurist
 
-1. Identiteit en contact van de verwerkingsverantwoordelijke (placeholder in
-   `/privacy`).
-2. Rechtsgrond per verwerking bevestigen (met name 2 en 8).
+1. Identiteit staat erin; het adres komt uit `LEGAL_ENTITY_ADDRESS` (Mohamed
+   vult in). Een zakelijk contactadres i.p.v. een gmail-adres overwegen.
+2. Rechtsgrond per verwerking bevestigen (met name 2, 8 en het bewaren van IP
+   en user-agent bij het akkoord).
 3. Bewaartermijnen voor logs en e-mailafleverstatus vastleggen.
 4. Of een DPIA nodig is (geen bijzondere categorieën, geen profilering met
    rechtsgevolg; vermoedelijk niet).
-5. Franse en Engelse versie van de verklaring.
-6. Cookie-informatie: alleen strikt noodzakelijke cookies (sessie) en
-   `localStorage` voor taal/thema; geen banner vereist, wel vermelden.
-7. Gebruiksvoorwaarden (de registratie verwijst ernaar; tekst ontbreekt).
+5. Franse en Engelse versie nalezen (concept staat in de app).
+6. Cookieverklaring (`/cookies`): alleen strikt noodzakelijke cookies en
+   `localStorage` voor taal, thema en gastvoorkeuren; geen banner — bevestigen.
+7. Gebruiksvoorwaarden (`/voorwaarden`, concept): aansprakelijkheid,
+   rangschikkingstransparantie (WER boek VI), merkgebruik en het gebruik van
+   prijsgegevens van de ketens (databankrecht) beoordelen.
+8. Doorgifte: Render Services, Inc. (VS) met servers in Frankfurt — DPA en
+   SCC/DPF controleren.

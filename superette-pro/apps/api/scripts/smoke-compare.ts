@@ -9,7 +9,7 @@
  * andermans alert lezen/wijzigen/verwijderen, ongeldige payloads, dubbele
  * alerts, en het interne sync-endpoint zonder sleutel.
  *
- * Let op: `/auth/register` staat op 5 per minuut per IP. Deze test maakt twee
+ * Let op: `/auth/register-superette` staat op 5 per minuut per IP. Deze test maakt twee
  * accounts; draai hem niet vlak na de andere rooktests.
  */
 const API = process.env['API_URL'] ?? 'http://localhost:4000/api/v1';
@@ -58,12 +58,13 @@ async function call(method: string, path: string, body?: unknown, token?: string
 
 async function register(suffix: string): Promise<string> {
   const email = `smoke-compare-${Date.now()}-${suffix}@example.com`;
-  const result = await call('POST', '/auth/register', {
+  // Registratie van de vergelijker (zonder clientheader → Bearer-token in de JSON).
+  // `/auth/register` is de boetiekregistratie en bestaat alleen met BOUTIQUE_ENABLED=true.
+  const result = await call('POST', '/auth/register-superette', {
     email,
     password: 'een-lang-genoeg-wachtwoord',
     fullName: `Smoke ${suffix}`,
-    acceptsAccessLogging: true,
-    acceptsCameraSurveillance: true,
+    acceptsTerms: true,
   });
   if (result.status !== 201) throw new Error(`Registratie mislukt (${result.status}): ${JSON.stringify(result.body)}`);
   return result.body.accessToken as string;

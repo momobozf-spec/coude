@@ -12,6 +12,7 @@ import {
 } from '@superette/contracts';
 import type { Request, Response } from 'express';
 import { readCookie } from '../common/cookies';
+import { BoutiqueEnabledGuard } from '../config/boutique';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { ACCESS_COOKIE, clearAuthCookies, REFRESH_COOKIE, setAuthCookies, type CookieSettings } from './auth-cookies';
 import { AuthService, type WebSessionTokens } from './auth.service';
@@ -56,7 +57,9 @@ export class AuthController {
     return tokens.response;
   }
 
+  /** Registratie voor de boetiek (met winkeltoestemmingen). Bestaat alleen met `BOUTIQUE_ENABLED=true`. */
   @Post('register')
+  @UseGuards(BoutiqueEnabledGuard)
   @Throttle(AUTH_LIMIT)
   register(
     @Body(new ZodValidationPipe(registerSchema)) input: ReturnType<typeof registerSchema.parse>,

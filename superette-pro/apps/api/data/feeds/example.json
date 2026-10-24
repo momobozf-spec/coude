@@ -9,8 +9,8 @@
   "source": {
     "kind": "IMPORT_FILE",
     "label": "Handmatig importbestand voorbeeld.json",
-    "termsReviewed": true,
-    "notes": "Prijzen handmatig overgenomen uit de wekelijkse folder van een deelnemende handelaar."
+    "termsReviewed": false,
+    "notes": "Voorbeeld. termsReviewed blijft false tot een mens de voorwaarden van de bron heeft nagekeken (status UNVERIFIED)."
   },
   "observedAt": "2026-10-04T08:00:00+02:00",
   "locations": [
@@ -59,7 +59,11 @@
       "priceCents": 199,
       "promotionType": "MULTIBUY",
       "promotionText": "2 voor €3",
-      "promotionRule": { "kind": "MULTIBUY", "quantity": 2, "totalCents": 300 },
+      "promotionRule": {
+        "kind": "MULTIBUY",
+        "quantity": 2,
+        "totalCents": 300
+      },
       "minimumQuantity": 2,
       "startsAt": "2026-10-01T00:00:00+02:00",
       "endsAt": "2026-10-07T23:59:59+02:00"

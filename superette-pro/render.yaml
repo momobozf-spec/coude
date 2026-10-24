@@ -1,0 +1,177 @@
+# Render-blueprint voor Superette (supermarktvergelijker) — regio Frankfurt (EU).
+#
+# Alleen de vergelijker gaat live: de boetiek "Jamal & Jamila" staat uit
+# (BOUTIQUE_ENABLED=false; geen MQTT, geen Mollie, geen boetiekroutes).
+#
+# Gebruik: Render-dashboard → New → Blueprint → deze repository, met
+# "Blueprint Path" = superette-pro/render.yaml. Waarden met `sync: false`
+# vraagt Render bij het aanmaken; ze staan nooit in deze file.
+# Zie README.md, sectie "Live zetten (Superette)".
+#
+# Belangrijk: app en API moeten op één *site* staan (sessiecookies met
+# SameSite). `*.onrender.com` staat op de Public Suffix List, dus
+# superette-web.onrender.com en superette-api.onrender.com zijn twee sites en
+# inloggen werkt daar niet. Koppel een eigen domein (bv. superette.be en
+# api.superette.be) vóór de lancering.
+
+envVarGroups:
+  # Gedeeld door API en dagelijkse sync (cron). Eén plek voor geheimen.
+  - name: superette-api-shared
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: BOUTIQUE_ENABLED
+        value: "false"
+      - key: MQTT_ENABLED
+        value: "false"
+      - key: LOG_FORMAT
+        value: json
+      # Render zet één proxy voor de service; nodig voor rate limiting per IP.
+      - key: TRUST_PROXY
+        value: "1"
+      - key: JWT_SECRET
+        generateValue: true
+      # Ook de sleutel voor `npm run feeds:push` (PUSH_JOB_KEY op de laptop).
+      - key: COMPARE_JOB_KEY
+        generateValue: true
+      - key: COMPARE_ALLOW_DEMO
+        value: "false"
+      - key: COMPARE_SYNC_INTERVAL_MINUTES
+        value: "0"
+      # https-origin van de app, bv. https://superette.be
+      - key: SUPERETTE_WEB_URL
+        sync: false
+      # E-mail voor prijsalerts: none tot er een provider is (zie README).
+      - key: EMAIL_PROVIDER
+        value: none
+      - key: NOTIFY_EMAIL_ENABLED
+        value: "false"
+
+  # Straat, nummer, postcode en gemeente van Marhaba Data & AI Agent BV.
+  # Eén keer invullen; API, cron (e-mailvoet, productie-guard) en app
+  # (juridische pagina's) lezen dezelfde waarde. Nooit verzinnen.
+  - name: superette-legal
+    envVars:
+      - key: LEGAL_ENTITY_ADDRESS
+        sync: false
+
+databases:
+  - name: superette-db
+    region: frankfurt
+    plan: basic-256mb
+    postgresMajorVersion: "16"
+    databaseName: superette
+    user: superette_app
+    ipAllowList: [] # alleen bereikbaar vanuit Render-services (intern netwerk)
+
+services:
+  # ── API (NestJS) ──────────────────────────────────────────────────────────
+  - type: web
+    name: superette-api
+    runtime: node
+    region: frankfurt
+    plan: starter
+    rootDir: superette-pro
+    buildCommand: >-
+      npm ci --include=dev &&
+      (cd apps/api && npx prisma generate) &&
+      npm run build -w @superette/vat &&
+      npm run build -w @superette/pricing &&
+      npm run build -w @superette/contracts &&
+      npm run build -w @superette/api
+    # Migraties vóór elke release; faalt de migratie, dan gaat de release niet live.
+    preDeployCommand: cd apps/api && npx prisma migrate deploy
+    startCommand: cd apps/api && node dist/main.js
+    healthCheckPath: /api/v1/health/ready
+    autoDeploy: false
+    envVars:
+      - fromGroup: superette-api-shared
+      - fromGroup: superette-legal
+      - key: DATABASE_URL
+        fromDatabase:
+          name: superette-db
+          property: connectionString
+      - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
+        value: "1"
+      # Optioneel: e-mailprovider (EMAIL_PROVIDER=http) en foutmonitoring.
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_HTTP_URL
+        sync: false
+      - key: EMAIL_API_KEY
+        sync: false
+      - key: ERROR_REPORTING_DSN
+        sync: false
+
+  # ── App (Next.js, standalone) ─────────────────────────────────────────────
+  - type: web
+    name: superette-web
+    runtime: node
+    region: frankfurt
+    plan: starter
+    rootDir: superette-pro
+    buildCommand: >-
+      npm ci --include=dev &&
+      npm run build -w @superette/vat &&
+      npm run build -w @superette/pricing &&
+      npm run build -w @superette/contracts &&
+      npm run build -w @superette/web &&
+      cp -r apps/superette-web/.next/static apps/superette-web/.next/standalone/apps/superette-web/.next/static &&
+      cp -r apps/superette-web/public apps/superette-web/.next/standalone/apps/superette-web/public
+    startCommand: node apps/superette-web/.next/standalone/apps/superette-web/server.js
+    healthCheckPath: /
+    autoDeploy: false
+    envVars:
+      - fromGroup: superette-legal
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
+        value: "1"
+      - key: HOSTNAME
+        value: 0.0.0.0
+      # Ingebakken bij de build; https verplicht, bv. https://api.superette.be/api/v1
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+
+  # ── Dagelijkse synchronisatie ─────────────────────────────────────────────
+  # Importeert de aangeleverde feeds (database), deactiveert vervallen
+  # aanbiedingen, controleert alerts, verstuurt meldingen, ruimt sessies op.
+  # 04:17 UTC = 05:17/06:17 in Brussel (winter/zomer).
+  - type: cron
+    name: superette-sync
+    runtime: node
+    region: frankfurt
+    plan: starter
+    schedule: "17 4 * * *"
+    rootDir: superette-pro
+    buildCommand: >-
+      npm ci --include=dev &&
+      (cd apps/api && npx prisma generate) &&
+      npm run build -w @superette/vat &&
+      npm run build -w @superette/pricing &&
+      npm run build -w @superette/contracts &&
+      npm run build -w @superette/api
+    startCommand: cd apps/api && node dist/compare/cli/sync.cli.js
+    envVars:
+      - fromGroup: superette-api-shared
+      - fromGroup: superette-legal
+      - key: DATABASE_URL
+        fromDatabase:
+          name: superette-db
+          property: connectionString
+      - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
+        value: "1"
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_HTTP_URL
+        sync: false
+      - key: EMAIL_API_KEY
+        sync: false
+      - key: ERROR_REPORTING_DSN
+        sync: false

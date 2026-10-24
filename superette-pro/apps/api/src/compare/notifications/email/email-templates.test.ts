@@ -53,3 +53,15 @@ describe('e-mailoverzicht', () => {
     expect(email.subject).toContain('<script>'); // onderwerp is platte tekst; mailclients renderen geen HTML in onderwerpen
   });
 });
+
+describe('afzender in de e-mail', () => {
+  it('vermeldt uitbater, ondernemingsnummer en adres (geëscapet) als die is meegegeven', async () => {
+    const { legalFooterLine } = await import('../../../config/legal-entity');
+    const line = legalFooterLine('Straat 1 <b>, 1930 Zaventem');
+    const email = buildDigestEmail([notification()], 'https://superette.example', line);
+    expect(email.text).toContain('Marhaba Data & AI Agent BV · BE 1003.552.102 · Straat 1 <b>, 1930 Zaventem');
+    expect(email.html).toContain('Marhaba Data &amp; AI Agent BV');
+    expect(email.html).not.toContain('<b>,');
+    expect(legalFooterLine(undefined)).toContain('Zaventem');
+  });
+});

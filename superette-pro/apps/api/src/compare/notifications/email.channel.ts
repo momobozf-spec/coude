@@ -44,7 +44,7 @@ export class EmailChannel implements NotificationChannelAdapter {
       return { status: 'SKIPPED', reason: 'EMAIL_DISABLED_BY_USER: geen opt-in voor e-mailmeldingen' };
     }
 
-    const email = buildDigestEmail(digest.notifications, this.config.webUrl);
+    const email = buildDigestEmail(digest.notifications, this.config.webUrl, this.config.legalFooter);
     const result = await this.transport.send({
       to: user.email,
       subject: email.subject,

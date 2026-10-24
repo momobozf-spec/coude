@@ -142,6 +142,10 @@ export class ImportService {
         feedDir: this.config.feedDir,
         allowDemo: this.config.allowDemo,
         now,
+        loadStoredFeed: async (adapterKey) => {
+          const row = await this.prisma.compareFeed.findUnique({ where: { adapterKey }, select: { payload: true } });
+          return row?.payload ?? null;
+        },
       };
 
       const snapshot = await this.fetchSnapshotWithRetry(adapter, context);

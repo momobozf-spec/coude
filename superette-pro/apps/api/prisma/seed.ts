@@ -7,15 +7,20 @@
  * alleen de SHA-256 gaat de database in.
  */
 import { PrismaClient } from '@prisma/client';
-import { createHash } from 'node:crypto';
 import { isValidEan } from '../src/catalog/ean';
+
+import { DEV_DEVICE_KEY, hashDeviceKey } from '../src/gate/dev-device-key';
+
+// Demo-winkel met een publieke sleutel: nooit in productie. De API weigert ook
+// te starten zolang een winkel deze sleutel gebruikt (`DevDeviceKeyCheck`).
+if (process.env['NODE_ENV'] === 'production') {
+  console.error('db:seed is een demo-seed (boetiek, publieke dev-scannersleutel) en draait niet met NODE_ENV=production.');
+  process.exit(1);
+}
 
 const prisma = new PrismaClient();
 
-/** Zelfde functie als `hashDeviceKey` in de guard; hier los om de seed zonder Nest te draaien. */
-const hashDeviceKey = (key: string) => createHash('sha256').update(key, 'utf8').digest('hex');
-
-const DEVICE_KEY = 'dev-scanner-antwerpen-zuid-vervang-in-productie';
+const DEVICE_KEY = DEV_DEVICE_KEY;
 
 async function main(): Promise<void> {
   const store = await prisma.store.upsert({

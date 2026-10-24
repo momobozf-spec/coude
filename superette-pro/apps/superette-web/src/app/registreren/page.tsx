@@ -28,7 +28,6 @@ function RegisterInner() {
 
   const [form, setForm] = useState({ fullName: '', email: '', password: '' });
   const [terms, setTerms] = useState(false);
-  const [marketing, setMarketing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -51,7 +50,8 @@ function RegisterInner() {
         // De API kent nl en fr; Engelstalige gebruikers krijgen nl als voorkeurstaal in hun profiel.
         locale: locale === 'fr' ? 'fr' : 'nl',
         acceptsTerms: true,
-        acceptsMarketing: marketing,
+        // Er is (nog) geen nieuwsbrief: geen toestemming vragen voor iets wat niet bestaat.
+        acceptsMarketing: false,
       });
       router.replace(returnTo);
     } catch (cause) {
@@ -84,7 +84,16 @@ function RegisterInner() {
             error={fieldErrors['password']}
           />
           <Checkbox label={t('auth.terms')} checked={terms} onChange={(e) => setTerms(e.target.checked)} required name="acceptsTerms" />
-          <Checkbox label={t('auth.marketing')} checked={marketing} onChange={(e) => setMarketing(e.target.checked)} name="acceptsMarketing" />
+          <p className="-mt-2 text-xs text-ink-muted">
+            {t('auth.termsRead')}{' '}
+            <Link href="/voorwaarden" className="font-semibold text-brand underline-offset-2 hover:underline">
+              {t('nav.terms')}
+            </Link>
+            {' · '}
+            <Link href="/privacy" className="font-semibold text-brand underline-offset-2 hover:underline">
+              {t('nav.privacy')}
+            </Link>
+          </p>
           <Button type="submit" size="lg" full disabled={busy || !terms}>
             {busy ? t('common.loading') : t('auth.register.submit')}
           </Button>

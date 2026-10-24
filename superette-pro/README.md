@@ -1,15 +1,18 @@
-# Jamal & Jamila — onbemand winkelplatform
+# Superette — Belgische supermarktvergelijker
 
-Toegangscontrole, self-scanning en Belgisch-conforme kasbonnen voor een
-high-end, onbemande boetiek.
+Prijzen van Belgische supermarkten naast elkaar: productzoeken, eenheidsprijzen
+per kg/l/stuk, productmatching, boodschappenlijsten, mandje-vergelijking en
+prijsalerts. App in `apps/superette-web` (nl/fr/en), API in `apps/api`
+(`src/compare/*`). Uitbater: **Marhaba Data & AI Agent BV** (BE 1003.552.102,
+Zaventem). Zie **[docs/COMPARE.md](docs/COMPARE.md)** en hieronder
+**[Live zetten (Superette)](#live-zetten-superette)**.
 
-> **Superette — supermarktvergelijker.** Dezelfde monorepo bevat sinds oktober
-> 2026 een tweede domein: een Belgische supermarktvergelijker (Delhaize, Lidl,
-> Colruyt, SPAR, Albert Heijn, Jumbo, Carrefour) met productzoeken,
-> prijsnormalisatie per kg/l/stuk, productmatching, boodschappenlijsten,
-> mandje-vergelijking en prijsalerts, met een eigen app in `apps/superette-web`
-> (poort 3001). **Alle supermarktgegevens zijn op dit moment demogegevens**,
-> overal zo gelabeld. Zie **[docs/COMPARE.md](docs/COMPARE.md)**.
+> **Productie = alleen de vergelijker.** Dezelfde monorepo bevat ook de
+> onbemande boetiek **Jamal & Jamila** (toegangscontrole, self-scanning,
+> Belgische kasbonnen; `apps/pwa`, `sim/gate`, MQTT). Die staat standaard
+> **uit** (`BOUTIQUE_ENABLED=false`, ook in productie): de modules en routes
+> worden niet geladen (404) en MQTT start niet. De code blijft; de
+> boetiekdocumentatie staat verderop in dit bestand.
 
 ```
 superette/
@@ -33,18 +36,20 @@ Zonder Docker, op Windows/macOS/Linux:
 
 ```bash
 npm install
-npm run keys:gen          # plak de uitvoer in .env
+cp .env.example .env      # en vul JWT_SECRET in (npm run keys:gen)
 npm run build
 
+# Vergelijker (wat in productie draait)
 npm run dev:db            # terminal 1 — embedded PostgreSQL op :5432
 npm run db:migrate:deploy # schema aanmaken via migraties (zie docs/COMPARE.md § Migraties)
-npm run db:seed           # winkel + 8 producten + device-sleutel
-npm run db:seed:compare   # supermarktvergelijker: 7 ketens op demogegevens
-npm run dev:web           # terminal 5 — Superette-app op :3001
+npm run db:seed:compare   # supermarktvergelijker: ketens op demogegevens (of je data/feeds)
+npm run dev:api           # terminal 2 — API op :4000
+npm run dev:web           # terminal 3 — Superette-app op :3001
 
-npm run dev:gate          # terminal 2 — MQTT-broker + deurcontroller
-npm run dev:api           # terminal 3 — API op :4000
-npm run dev:pwa           # terminal 4 — app op :3000
+# Boetiek (alleen lokaal, BOUTIQUE_ENABLED=true + gate-sleutels uit keys:gen in .env)
+npm run db:seed           # demo-winkel + 8 producten + dev-device-sleutel (weigert in productie)
+npm run dev:gate          # MQTT-broker + deurcontroller
+npm run dev:pwa           # boetiek-app op :3000
 ```
 
 Met Docker (de productieweg):
@@ -56,9 +61,9 @@ docker compose up -d      # Postgres + Mosquitto
 Verifiëren dat alles klopt:
 
 ```bash
-npm test              # 244 unit-tests (btw, ean, token-crypto, openingsuren, bedragen, prijsnormalisatie, matching, mandje, alerts, cookies, logredactie, foutfilter, bronstatus, e-mail, importgrens)
-npm run smoke:gate    # 29 checks tegen de live API — replay, rotatie, vervalsing
-npm run smoke:shop    # 35 checks — scannen, btw, webhook-idempotentie, factuurnummers
+npm test              # 428 tests (vat 13 · pricing 61 · api 328 · web 26), incl. HTTP-integratietests (boetiekvlag, feed-push)
+npm run smoke:gate    # 29 checks tegen de live API — replay, rotatie, vervalsing (BOUTIQUE_ENABLED=true)
+npm run smoke:shop    # 35 checks — scannen, btw, webhook-idempotentie, factuurnummers (BOUTIQUE_ENABLED=true)
 npm run smoke:compare # vergelijker — zoeken, lijsten, mandje, alerts, autorisatie (IDOR), validatie
 npm run smoke:auth    # productiehardening — cookies, CSRF, CORS, sessies, export/verwijdering, jobs, rate limits
 npm run walkthrough   # 31 checks in een echte browser + schermafbeeldingen
@@ -84,6 +89,123 @@ beide thema's in `docs/screenshots/`. Hij vond drie bugs die geen enkele unit-te
 kon vinden: de aftelring stond náást de QR in plaats van eromheen, hij liep nooit
 leeg (gedeeld door de verkeerde levensduur), en het bijschrift toonde de vervaltijd
 onder het label "vernieuwt over".
+
+## Live zetten (Superette)
+
+Doel: API + app + Postgres + dagelijkse sync op **Render, regio Frankfurt (EU)**,
+met de blueprint [`render.yaml`](render.yaml). De boetiek blijft uit. Niets
+hiervan gebeurt vanzelf; jij beslist wanneer.
+
+### 0. Vooraf (eenmalig, buiten de code)
+
+1. **Domein** kopen en DNS kunnen beheren (bv. `superette.be`). Nodig: app en
+   API moeten op één *site* staan voor de sessiecookies. Op twee
+   `*.onrender.com`-adressen werkt inloggen niet (Public Suffix List).
+2. **Adres van de BV**: straat, nummer, postcode, gemeente → `LEGAL_ENTITY_ADDRESS`.
+   Zonder adres weigert de API te starten en faalt de web-build.
+3. **Juridische teksten** (`/privacy`, `/voorwaarden`, `/cookies`, `/over-de-gegevens`)
+   zijn een **concept**: laat ze nalezen door een jurist vóór de lancering.
+4. **Databronnen**: alle feeds staan op `termsReviewed: false` → in de app
+   "Niet geverifieerd". Of en wanneer een bron op `true` mag, is jouw
+   juridische beslissing per keten (gebruiksvoorwaarden, databankrecht).
+   Zet het nooit "om te testen" op `true`.
+
+### 1. Blueprint aanmaken
+
+Render-dashboard → **New → Blueprint** → repository `momobozf-spec/coude`,
+branch `main`, **Blueprint Path** `superette-pro/render.yaml`.
+(Ondersteunt je account geen ander pad: kopieer het bestand naar de root van de
+repository; `rootDir: superette-pro` in de services blijft kloppen.)
+
+Render maakt: `superette-db` (Postgres 16), `superette-api` (web, Node),
+`superette-web` (web, Node), `superette-sync` (cron, dagelijks 04:17 UTC) en
+twee env-groepen. Plannen in de blueprint: `starter` voor de services en
+`basic-256mb` voor de database (betaald; kies zelf op de Render-prijspagina).
+
+### 2. Env-vars die jij invult (`sync: false`)
+
+| Waar | Variabele | Waarde |
+|---|---|---|
+| groep `superette-legal` | `LEGAL_ENTITY_ADDRESS` | bv. `Straat 1, 1930 Zaventem` (het echte adres) |
+| groep `superette-api-shared` | `SUPERETTE_WEB_URL` | `https://superette.be` (exact de origin van de app) |
+| `superette-web` | `NEXT_PUBLIC_API_URL` | `https://api.superette.be/api/v1` |
+| `superette-api` en `superette-sync` (optioneel) | `EMAIL_FROM`, `EMAIL_HTTP_URL`, `EMAIL_API_KEY` | pas als je een e-mailprovider kiest, zie stap 6 |
+| `superette-api` en `superette-sync` (optioneel) | `ERROR_REPORTING_DSN` | DSN van Sentry/GlitchTip (https) |
+
+Door Render gegenereerd (niet zelf verzinnen): `JWT_SECRET`, `COMPARE_JOB_KEY`
+(groep `superette-api-shared`), `DATABASE_URL` (uit de database).
+Vast in de blueprint: `NODE_ENV=production`, `BOUTIQUE_ENABLED=false`,
+`MQTT_ENABLED=false`, `TRUST_PROXY=1`, `COMPARE_ALLOW_DEMO=false`,
+`EMAIL_PROVIDER=none`, `NOTIFY_EMAIL_ENABLED=false`.
+
+De API weigert te starten in productie bij: demo aan, standaard-/zwakke
+geheimen (plaatshouders, < 32 tekens jobsleutel, docker-compose-databasewachtwoord),
+ontbrekend adres, http-URL's (app, e-mail, foutmonitoring), de dev-deurscanner
+(`NEXT_PUBLIC_DEV_*`) of — met boetiek aan — de publieke dev-scannersleutel uit
+`prisma/seed.ts`, een Mollie-testsleutel of MQTT zonder TLS.
+
+### 3. Eerste deploy
+
+`autoDeploy` staat uit. Klik per service **Manual Deploy**, in deze volgorde:
+`superette-api` (voert eerst `prisma migrate deploy` uit als pre-deploy),
+dan `superette-web`, dan `superette-sync` (één keer **Trigger Run** om te testen).
+
+Controle:
+
+```bash
+curl https://api.superette.be/api/v1/health/live    # {"status":"ok"}
+curl https://api.superette.be/api/v1/health/ready   # {"status":"ok","checks":{"database":"ok"}}
+curl -H "x-job-key: <COMPARE_JOB_KEY>" https://api.superette.be/api/v1/health/status
+curl -i -X POST https://api.superette.be/api/v1/gate/unlock   # 404: boetiek staat uit
+```
+
+### 4. Domeinen
+
+`superette-web` → Settings → Custom Domains → `superette.be` (en eventueel
+`www`); `superette-api` → `api.superette.be`. Zet de DNS-records die Render
+toont; TLS regelt Render. Pas daarna `SUPERETTE_WEB_URL` en
+`NEXT_PUBLIC_API_URL` definitief aan en deploy `superette-web` opnieuw
+(de API-URL wordt bij de build ingebakken).
+
+### 5. Prijzen aanleveren vanaf je laptop
+
+De scrapers draaien lokaal (Playwright/Scrapling); de server heeft geen blijvende
+schijf. Na `npm run weekly` of een losse scrape/import:
+
+```bash
+# in de root-.env op je laptop (wordt nooit gelogd):
+#   PUSH_API_URL=https://api.superette.be/api/v1
+#   PUSH_JOB_KEY=<COMPARE_JOB_KEY uit Render → superette-api-shared>
+npm run feeds:push -- --dry-run   # alleen valideren
+npm run feeds:push                # alle data/feeds/<keten>.json
+npm run feeds:push -- delhaize    # één keten
+```
+
+Elke feed wordt lokaal gevalideerd (zelfde schema als de server), gzip-verstuurd
+naar `POST /api/v1/compare/internal/feeds/:chain` (header `x-job-key`), in de
+database bewaard en meteen gesynchroniseerd; de dagelijkse cron neemt hem ook
+mee. `termsReviewed` blijft wat de feed zegt.
+
+### 6. E-mail voor prijsalerts (optioneel)
+
+Kies een EU-provider met een JSON-API en Bearer-sleutel, verifieer het
+afzenderdomein (SPF/DKIM), sluit een verwerkersovereenkomst. Zet daarna in
+`superette-api` én `superette-sync`: `EMAIL_PROVIDER=http`,
+`EMAIL_HTTP_URL=https://…`, `EMAIL_API_KEY=…`,
+`EMAIL_FROM="Superette <alerts@superette.be>"`, `NOTIFY_EMAIL_ENABLED=true`.
+Elke mail vermeldt onderaan de BV, het ondernemingsnummer en het adres.
+
+### 7. Sleutelrotatie
+
+`COMPARE_JOB_KEY`: zet de oude waarde in `COMPARE_JOB_KEY_PREVIOUS`, een nieuwe
+in `COMPARE_JOB_KEY`, deploy, werk `PUSH_JOB_KEY` op je laptop bij, maak
+`_PREVIOUS` leeg en deploy opnieuw.
+
+---
+
+# Boetiek Jamal & Jamila (standaard uit)
+
+Alles hieronder gaat over de onbemande boetiek. Lokaal aanzetten: `BOUTIQUE_ENABLED=true` in `.env` (plus `npm run keys:gen`).
 
 ## Het beveiligingsmodel in vier zinnen
 

@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { isBoutiqueEnabled } from './config/boutique';
+import { configureBodyParsers } from './common/body-parsers';
 import { createCsrfMiddleware } from './auth/csrf.middleware';
 import { ErrorReporter } from './common/error-reporter';
 import { HttpExceptionFilter } from './common/http-exception.filter';
@@ -30,9 +32,8 @@ async function bootstrap(): Promise<void> {
     logger.log('foutmonitoring gekoppeld via ERROR_REPORTING_DSN', 'Bootstrap');
   }
 
-  // Body's parsen we zelf, met expliciete limieten: niemand hoeft ons megabytes
-  // JSON te sturen. De Mollie-webhook praat urlencoded, vandaar de tweede parser.
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { logger, bodyParser: false });
+  // Body's parsen we zelf, met expliciete limieten (zie `configureBodyParsers`).
+  const app = await NestFactory.create<NestExpressApplication>(await AppModule.forRoot(), { logger, bodyParser: false });
 
   const config = app.get(ConfigService);
   const isProduction = config.get<string>('NODE_ENV') === 'production';
@@ -47,8 +48,8 @@ async function bootstrap(): Promise<void> {
   app.use(createSecurityHeaders({ hsts: config.get<boolean>('HSTS_ENABLED') ?? isProduction }));
   app.use(createRequestLogger(logger));
 
-  app.useBodyParser('json', { limit: '64kb' });
-  app.useBodyParser('urlencoded', { extended: false, limit: '16kb' });
+  const jobKeys = [config.get<string>('COMPARE_JOB_KEY'), config.get<string>('COMPARE_JOB_KEY_PREVIOUS')].filter((key): key is string => !!key);
+  configureBodyParsers(app, { jobKeys: () => jobKeys, feedPushMaxBytes: (config.get<number>('COMPARE_FEED_PUSH_MAX_MB') ?? 15) * 1024 * 1024 });
 
   // Alle routes onder /api/v1 — het versienummer zit in het pad zodat een
   // deurscanner die je niet kunt updaten, op v1 kan blijven hangen terwijl de
@@ -57,8 +58,9 @@ async function bootstrap(): Promise<void> {
 
   // Twee apps op twee origins delen deze API: de boetiek-PWA (APP_URL) en de
   // supermarktvergelijker (SUPERETTE_WEB_URL). Alleen expliciet genoemde origins.
+  // Zonder boetiek (productie) bestaat de boetiek-PWA niet en is APP_URL geen toegestane origin.
   const origins = [
-    config.get<string>('APP_URL'),
+    isBoutiqueEnabled() ? config.get<string>('APP_URL') : undefined,
     config.get<string>('SUPERETTE_WEB_URL'),
     ...(config.get<string>('CORS_ORIGINS') ?? '').split(','),
   ]
@@ -79,7 +81,8 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.enableShutdownHooks();
 
-  const port = Number(process.env['API_PORT'] ?? 4000);
+  // API_PORT (lokaal, Docker) of PORT (Render en andere PaaS zetten die zelf).
+  const port = Number(process.env['API_PORT'] ?? process.env['PORT'] ?? 4000);
   await app.listen(port);
 
   new Logger('Bootstrap').log(`Superette API luistert op http://localhost:${port}/api/v1 (${environment})`);

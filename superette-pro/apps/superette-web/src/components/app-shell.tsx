@@ -9,6 +9,7 @@ import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useI18n } from '@/lib/i18n';
+import { LEGAL_ENTITY } from '@/lib/legal';
 import type { MessageKey } from '@/lib/messages';
 import { useNotifications } from '@/lib/notifications';
 import { Wordmark } from './ui';
@@ -82,21 +83,31 @@ export function AppShell({ children, wide = false }: { children?: ReactNode; wid
         </div>
       </header>
 
-      <main id="main" tabIndex={-1} className={`mx-auto w-full flex-1 px-4 pb-24 pt-5 md:pb-10 ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
+      <main id="main" tabIndex={-1} className={`mx-auto w-full flex-1 px-4 pb-8 pt-5 md:pb-10 ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
         {children}
       </main>
 
-      <footer className="hidden border-t border-hairline px-4 py-6 text-xs text-ink-muted md:block">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
-          <span>© 2026 Superette · {t('app.tagline')}</span>
-          <div className="flex gap-4">
+      <footer className="border-t border-hairline px-4 pb-24 pt-6 text-xs text-ink-muted md:pb-6">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="space-y-1">
+            <p>© 2026 Superette · {t('app.tagline')}</p>
+            <p>{t('footer.operator', { name: LEGAL_ENTITY.name, kbo: LEGAL_ENTITY.enterpriseNumber, city: LEGAL_ENTITY.city })}</p>
+            <p>{t('footer.independent')}</p>
+          </div>
+          <nav aria-label={t('legal.related')} className="flex flex-wrap gap-x-4 gap-y-2">
             <Link href="/over-de-gegevens" className="hover:text-ink">
               {t('nav.data')}
             </Link>
-            <Link href="/promoties" className="hover:text-ink">
-              {t('nav.promotions')}
+            <Link href="/privacy" className="hover:text-ink">
+              {t('nav.privacy')}
             </Link>
-          </div>
+            <Link href="/voorwaarden" className="hover:text-ink">
+              {t('nav.terms')}
+            </Link>
+            <Link href="/cookies" className="hover:text-ink">
+              {t('nav.cookies')}
+            </Link>
+          </nav>
         </div>
       </footer>
 

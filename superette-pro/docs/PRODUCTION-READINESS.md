@@ -8,6 +8,19 @@ Statussen: **PASS** (gedaan en aangetoond) · **PARTIAL** (gedaan, met een
 bekende beperking) · **BLOCKED** (kan hier niet, vereist mens/omgeving) ·
 **NOT APPLICABLE**.
 
+## Update 24 oktober 2026 (productieklaar maken, vergelijker)
+
+| Punt | Status | Bewijs |
+|---|---|---|
+| `npm test` volledig groen, `data/**` en backups uitgesloten | PASS | `apps/api/vitest.config.ts`; zie verslag voor aantallen |
+| `npm audit --omit=dev` | PASS | 0 kwetsbaarheden: next 15.5.28, zod 4.6.7, overrides multer 2.5 / deepmerge-ts 8 |
+| Boetiek uit in productie (`BOUTIQUE_ENABLED=false`) | PASS | `src/app.module.test.ts`: boetiekroutes 404, geen MQTT |
+| Feeds naar productie zonder schijf | PASS (unit/HTTP) | `POST /compare/internal/feeds/:chain`, `npm run feeds:push`, 17 HTTP-tests; tegen een echte DB nog te draaien op de laptop |
+| Productie-guard (demo, zwakke geheimen, adres, http, dev-scanner) | PASS | `src/config/env.test.ts`, `src/gate/dev-device-key.check.test.ts` |
+| Juridische teksten nl/fr/en | PARTIAL | concept; jurist moet nalezen |
+| Render-blueprint | PARTIAL | `render.yaml`; nog nooit uitgerold |
+| Databronnen | BLOCKED | alle feeds `termsReviewed: false` (UNVERIFIED); juridische beslissing van de uitbater |
+
 ## Samenvatting
 
 | Gebied | Status | Kern |
@@ -22,7 +35,7 @@ bekende beperking) · **BLOCKED** (kan hier niet, vereist mens/omgeving) ·
 | E-mail | PARTIAL | transportlaag klaar en getest met bestandsoutbox; geen provider gekoppeld |
 | Toegankelijkheid | PASS | axe-core (WCAG 2.1 A/AA + best practices) op alle routes zonder serious/critical; structuur en toetsenbord in de doorloop |
 | Prestaties | PASS (lokaal) | zie meting; productiemeting op staging nodig |
-| Demo/live-scheiding | PASS | bronstatus per keten, live-criteria, demo onmogelijk in productie, geen scraping |
+| Demo/live-scheiding | PASS | bronstatus per keten, live-criteria, demo onmogelijk in productie; de API scrapet niet zelf (feeds komen van scrapers op de laptop, zie COMPARE.md) |
 | Deployment | PARTIAL | Dockerfiles, compose, env-validatie, graceful shutdown, proxy-docs; containerbuild niet lokaal uitgevoerd (geen Docker), `.next/standalone` niet lokaal te bouwen (OneDrive) |
 | CI/CD | PARTIAL | workflow geschreven met alle poorten; nog nooit gedraaid (niets gepusht) |
 | Documentatie | PASS | DEPLOYMENT, DATABASE, SECURITY, MONITORING, RUNBOOK, PRIVACY, COMPARE, dit document |

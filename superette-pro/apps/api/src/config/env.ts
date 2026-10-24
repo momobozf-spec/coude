@@ -19,10 +19,33 @@ const jwkStringSchema = z
     }
   }, 'Moet een geldige Ed25519 JWK zijn (kty=OKP, crv=Ed25519)');
 
+/** Lege string uit een `.env` (`KEY=""`) telt als "niet gezet". */
+function blankAsUndefined<T extends z.ZodTypeAny>(schema: T) {
+  return z.preprocess((value) => (typeof value === 'string' && value.trim() === '' ? undefined : value), schema.optional());
+}
+
+/** Waarden uit `.env.example` en typische plaatshouders: nooit een geheim in productie. */
+const PLACEHOLDER_PATTERN = /(vervang|changeme|change-me|placeholder|voorbeeld|example|dummy|xxxxx|^dev-|^test)/i;
+
+/** Zwak = een bekende plaatshouder of te weinig verschillende tekens (bv. "aaaa…" of "123123…"). */
+export function isWeakSecret(value: string): boolean {
+  return PLACEHOLDER_PATTERN.test(value) || new Set(value).size < 10;
+}
+
+/** De standaardgegevens uit `docker-compose.yml`/`.env.example`; nooit in productie. */
+const DEFAULT_DATABASE_CREDENTIALS = '//superette:superette@';
+
+const booleanFlag = (fallback: 'true' | 'false') =>
+  z
+    .enum(['true', 'false'])
+    .default(fallback)
+    .transform((v) => v === 'true');
+
 export const envSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-    API_PORT: z.coerce.number().int().positive().default(4000),
+    /** Poort; zonder waarde valt main.ts terug op PORT (PaaS) en daarna 4000. Geen default hier: ConfigModule zou die in process.env zetten. */
+    API_PORT: blankAsUndefined(z.coerce.number().int().positive()),
     /** Origin van de boetiek-PWA. */
     APP_URL: z.string().url().default('http://localhost:3000'),
     /** Origin van de supermarktvergelijker (`apps/superette-web`). */
@@ -35,8 +58,16 @@ export const envSchema = z
     JWT_SECRET: z.string().min(32, 'JWT_SECRET moet minstens 32 tekens zijn'),
     JWT_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
 
-    GATE_SIGNING_PRIVATE_JWK: jwkStringSchema,
-    GATE_SIGNING_PUBLIC_JWK: jwkStringSchema,
+    /**
+     * Onbemande boetiek "Jamal & Jamila" (toegang, mandje, kassa, kasbonnen,
+     * betalingen, winkels, MQTT). Standaard UIT, ook in productie: productie is
+     * alleen de vergelijker. Uit = de modules en routes worden niet geladen.
+     */
+    BOUTIQUE_ENABLED: booleanFlag('false'),
+
+    /** Alleen nodig als de boetiek aan staat (QR-sleutels voor de deur). */
+    GATE_SIGNING_PRIVATE_JWK: blankAsUndefined(jwkStringSchema),
+    GATE_SIGNING_PUBLIC_JWK: blankAsUndefined(jwkStringSchema),
 
     ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().min(15).max(300).default(60),
     ACCESS_TOKEN_ROTATE_SECONDS: z.coerce.number().int().min(5).default(30),
@@ -49,8 +80,19 @@ export const envSchema = z
       .default('true')
       .transform((v) => v === 'true'),
 
-    MOLLIE_API_KEY: z.string().optional(),
-    MOLLIE_WEBHOOK_URL: z.string().url().optional(),
+    MOLLIE_API_KEY: blankAsUndefined(z.string()),
+    MOLLIE_WEBHOOK_URL: blankAsUndefined(z.string().url()),
+
+    /**
+     * Straat, huisnummer, postcode en gemeente van de uitbater (Marhaba Data & AI
+     * Agent BV, Zaventem). Verplicht in productie (WER boek XII, AVG art. 13);
+     * wordt nooit verzonnen — Mohamed vult het in.
+     */
+    LEGAL_ENTITY_ADDRESS: blankAsUndefined(z.string().trim().max(200)),
+
+    /** Dev-only deurscanner van de boetiek-PWA; mag nooit in een productie-omgeving staan. */
+    NEXT_PUBLIC_ENABLE_DEV_SCANNER: blankAsUndefined(z.string()),
+    NEXT_PUBLIC_DEV_DEVICE_KEY: blankAsUndefined(z.string()),
 
     /** Versie van het privacybeleid dat nu getoond wordt. Landt in elke Consent-rij. */
     PRIVACY_POLICY_VERSION: z.string().default('2026-07-01'),
@@ -64,7 +106,9 @@ export const envSchema = z
       .optional()
       .transform((v) => (v === undefined ? undefined : v === 'true')),
     /** Sleutel voor het interne sync-endpoint. Zonder sleutel bestaat het endpoint niet. */
-    COMPARE_JOB_KEY: z.string().min(16, 'COMPARE_JOB_KEY moet minstens 16 tekens zijn').optional(),
+    COMPARE_JOB_KEY: blankAsUndefined(z.string().min(16, 'COMPARE_JOB_KEY moet minstens 16 tekens zijn')),
+    /** Maximale grootte van één feed via `POST /compare/internal/feeds/:chain`, in MB. */
+    COMPARE_FEED_PUSH_MAX_MB: z.coerce.number().int().min(1).max(50).default(15),
     /** Na zoveel uur zonder controle wordt een prijs als "mogelijk verouderd" getoond. */
     COMPARE_PRICE_FRESH_HOURS: z.coerce.number().int().min(1).default(48),
     /** Interne planner: elke N minuten een synchronisatie. 0 = uit (gebruik een externe cron). */
@@ -105,7 +149,7 @@ export const envSchema = z
     /** Release- of buildversie, zichtbaar in logs en de interne status. */
     APP_VERSION: z.string().max(64).default('dev'),
     /** Vorige jobsleutel tijdens een rotatie; beide zijn dan tijdelijk geldig. */
-    COMPARE_JOB_KEY_PREVIOUS: z.string().min(16).optional(),
+    COMPARE_JOB_KEY_PREVIOUS: blankAsUndefined(z.string().min(16)),
     /** Maximale tijd per adapter om een snapshot te leveren. */
     COMPARE_ADAPTER_TIMEOUT_MS: z.coerce.number().int().min(1000).max(600_000).default(60_000),
     /** Hoe lang een synchronisatie de lease houdt; een gecrashte run verliest hem daarna. */
@@ -113,9 +157,9 @@ export const envSchema = z
     /** E-mailtransport: `none` (eerlijk overslaan), `file` (lokale outbox), `http` (JSON-API van een provider). */
     EMAIL_PROVIDER: z.enum(['none', 'file', 'http']).default('none'),
     /** Geverifieerde afzender, bv. "Superette <alerts@superette.be>". */
-    EMAIL_FROM: z.string().max(200).optional(),
-    EMAIL_HTTP_URL: z.string().url().optional(),
-    EMAIL_API_KEY: z.string().optional(),
+    EMAIL_FROM: blankAsUndefined(z.string().max(200)),
+    EMAIL_HTTP_URL: blankAsUndefined(z.string().url()),
+    EMAIL_API_KEY: blankAsUndefined(z.string()),
     EMAIL_OUTBOX_DIR: z.string().default('data/outbox'),
     /**
      * DSN van een foutmonitoringprovider (Sentry-envelopeprotocol):
@@ -130,9 +174,39 @@ export const envSchema = z
       }),
   })
   .superRefine((env, ctx) => {
+    const issue = (path: string, message: string) => ctx.addIssue({ code: 'custom', path: [path], message });
+
     if (env.NODE_ENV === 'production') {
-      if (!env.APP_URL.startsWith('https://')) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['APP_URL'], message: 'Moet https zijn in productie' });
+      // APP_URL is de origin van de boetiek-PWA; zonder boetiek wordt hij niet gebruikt.
+      if (env.BOUTIQUE_ENABLED && !env.APP_URL.startsWith('https://')) {
+        issue('APP_URL', 'Moet https zijn in productie');
+      }
+      if (env.EMAIL_HTTP_URL && !env.EMAIL_HTTP_URL.startsWith('https://')) {
+        issue('EMAIL_HTTP_URL', 'Moet https zijn in productie');
+      }
+      if (env.MOLLIE_WEBHOOK_URL && !env.MOLLIE_WEBHOOK_URL.startsWith('https://')) {
+        issue('MOLLIE_WEBHOOK_URL', 'Moet https zijn in productie');
+      }
+      if (env.ERROR_REPORTING_DSN && !env.ERROR_REPORTING_DSN.startsWith('https://')) {
+        issue('ERROR_REPORTING_DSN', 'Moet https zijn in productie');
+      }
+      if (isWeakSecret(env.JWT_SECRET)) {
+        issue('JWT_SECRET', 'Standaard- of zwak geheim; genereer er een met `npm run keys:gen`');
+      }
+      for (const name of ['COMPARE_JOB_KEY', 'COMPARE_JOB_KEY_PREVIOUS'] as const) {
+        const value = env[name];
+        if (value !== undefined && (value.length < 32 || isWeakSecret(value))) {
+          issue(name, 'Minstens 32 willekeurige tekens in productie (node -e "console.log(require(\'crypto\').randomBytes(24).toString(\'base64url\'))")');
+        }
+      }
+      if (env.DATABASE_URL.includes(DEFAULT_DATABASE_CREDENTIALS)) {
+        issue('DATABASE_URL', 'Standaardgebruiker/-wachtwoord uit docker-compose; gebruik de connection string van de beheerde database');
+      }
+      if (!env.LEGAL_ENTITY_ADDRESS || env.LEGAL_ENTITY_ADDRESS.length < 8 || /todo|\[/i.test(env.LEGAL_ENTITY_ADDRESS)) {
+        issue('LEGAL_ENTITY_ADDRESS', 'Verplicht in productie: straat, nummer, postcode en gemeente van Marhaba Data & AI Agent BV');
+      }
+      if (env.NEXT_PUBLIC_ENABLE_DEV_SCANNER === 'true' || env.NEXT_PUBLIC_DEV_DEVICE_KEY) {
+        issue('NEXT_PUBLIC_DEV_DEVICE_KEY', 'De dev-deurscanner (en zijn sleutel) mag niet in een productie-omgeving staan');
       }
       if (!env.SUPERETTE_WEB_URL.startsWith('https://')) {
         ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['SUPERETTE_WEB_URL'], message: 'Moet https zijn in productie' });
@@ -174,8 +248,15 @@ export const envSchema = z
       });
     }
 
-    if (env.NODE_ENV === 'production' && !env.MOLLIE_API_KEY) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['MOLLIE_API_KEY'], message: 'Verplicht in productie' });
+    if (env.BOUTIQUE_ENABLED) {
+      // De boetiek ondertekent QR-sleutels voor de deur: zonder sleutelpaar geen toegang.
+      if (!env.GATE_SIGNING_PRIVATE_JWK) issue('GATE_SIGNING_PRIVATE_JWK', 'JWK ontbreekt — draai `npm run keys:gen` (vereist met BOUTIQUE_ENABLED=true)');
+      if (!env.GATE_SIGNING_PUBLIC_JWK) issue('GATE_SIGNING_PUBLIC_JWK', 'JWK ontbreekt — draai `npm run keys:gen` (vereist met BOUTIQUE_ENABLED=true)');
+      if (env.NODE_ENV === 'production') {
+        if (!env.MOLLIE_API_KEY) issue('MOLLIE_API_KEY', 'Verplicht in productie');
+        else if (env.MOLLIE_API_KEY.startsWith('test_')) issue('MOLLIE_API_KEY', 'Een Mollie-testsleutel is niet toegestaan in productie');
+        if (env.MQTT_ENABLED && !env.MQTT_URL.startsWith('mqtts://')) issue('MQTT_URL', 'Moet mqtts:// (TLS) zijn in productie');
+      }
     }
   });
 

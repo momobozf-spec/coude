@@ -19,7 +19,7 @@ export interface DigestEmail {
 }
 
 /** Eén overzicht per gebruiker per dag, met een eerlijke demovermelding waar van toepassing. */
-export function buildDigestEmail(notifications: readonly AlertNotification[], webUrl: string): DigestEmail {
+export function buildDigestEmail(notifications: readonly AlertNotification[], webUrl: string, senderLine: string | null = null): DigestEmail {
   const count = notifications.length;
   const subject = count === 1 ? `Superette: ${notifications[0]!.productName} heeft je doelprijs bereikt` : `Superette: ${count} prijsalerts bereikt`;
   const preferencesUrl = `${webUrl}/profiel/voorkeuren`;
@@ -41,6 +41,7 @@ export function buildDigestEmail(notifications: readonly AlertNotification[], we
     anyDemo ? 'Let op: deze prijzen zijn demogegevens, geen actuele winkelprijzen.' : 'Prijzen zijn gecontroleerd op het vermelde moment; controleer ze in de winkel.',
     '',
     `E-mailmeldingen uitzetten of aanpassen: ${preferencesUrl}`,
+    ...(senderLine ? ['', senderLine] : []),
   ].join('\n');
 
   const items = notifications
@@ -59,7 +60,7 @@ export function buildDigestEmail(notifications: readonly AlertNotification[], we
 <ul style="padding-left:18px">${items}</ul>
 <p style="font-size:13px;color:#7a4f0b">${anyDemo ? 'Let op: deze prijzen zijn demogegevens, geen actuele winkelprijzen.' : 'Prijzen zijn gecontroleerd op het vermelde moment; controleer ze in de winkel.'}</p>
 <p style="font-size:12px;color:#6b625a">E-mailmeldingen uitzetten of aanpassen: <a href="${escapeHtml(preferencesUrl)}">${escapeHtml(preferencesUrl)}</a></p>
-</body></html>`;
+${senderLine ? `<p style="font-size:11px;color:#6b625a">${escapeHtml(senderLine)}</p>\n` : ''}</body></html>`;
 
   return { subject, text, html };
 }

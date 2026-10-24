@@ -137,12 +137,20 @@ apps/api/src/compare/
 | Jumbo | `jumbo` | — | importbestand / demo | overeenkomst |
 | Carrefour | `carrefour` | Bonus Card | importbestand / demo | overeenkomst; formules verschillen |
 
-**Er wordt niet gescrapet.** Toegestane bronnen zijn officiële API's,
-gelicentieerde feeds, gegevens van deelnemende handelaars, overeengekomen
-integraties en handmatig beheerde importbestanden. Elke adapter declareert
-`source.termsReviewed`; zolang dat `false` is, levert hij alleen importbestanden
-en (buiten productie) demogegevens. **Juridische verificatie per keten is nog
-niet gebeurd** — dat is mensenwerk vóór een live koppeling.
+**Herkomst van de prijzen (eerlijk).** De adapters in de API scrapen zelf
+niet: ze lezen importbestanden of aangeleverde feeds. Die feeds worden vandaag
+op de laptop van de uitbater gemaakt door beleefde scrapers van publieke
+webpagina's (Delhaize, Aldi, Lidl, AH, Carrefour; robots.txt, crawl-delay,
+stoppen bij 401/403/429/503, geen captcha- of bot-detectie-omzeiling) en door
+handmatige opnames en folders (SPAR, Jumbo) — zie "Scrapers en motoren"
+hieronder — en via `npm run feeds:push` naar productie gestuurd. Robots.txt
+naleven is geen toestemming: gebruiksvoorwaarden en databankrecht (WER boek XI)
+blijven gelden. Elke feed draagt `source.termsReviewed`; zolang dat `false` is,
+staat de keten op UNVERIFIED ("Niet geverifieerd") en kan ze nooit LIVE worden.
+**Juridische verificatie per keten is nog niet gebeurd** — dat is een
+menselijke beslissing van de uitbater, niet iets wat code of een agent omzet.
+Officiële API's, gelicentieerde feeds of overeenkomsten met ketens blijven de
+voorkeursroute.
 
 ### Bronstatus en live-criteria
 
@@ -164,7 +172,7 @@ nagekeken en de adapter `termsReviewed: true` declareert; (2) de bronconfigurati
 `SUCCEEDED` is; (4) een steekproef van prijzen handmatig is gevalideerd; (5) de
 laatste import jonger is dan de versheidsgrens. In productie staat
 `COMPARE_ALLOW_DEMO` af en kan het niet aan; de adapters genereren daar geen
-demogegevens. Een adapter die scrapet bestaat niet en wordt niet toegevoegd.
+demogegevens. Een adapter in de API scrapet nooit zelf; scrapers zijn losse scripts op de laptop die importbestanden maken.
 
 **Alerts en DEMO.** In productie-modus negeert de alert-evaluator DEMO-prijzen
 (`allowDemo = false`): een prijsalert kan nooit afgaan op een verzonnen prijs,
@@ -364,8 +372,23 @@ fouten als `{ message, issues[] }`; rate limits per route.
 | GET | `/notifications`, POST `/notifications/:id/read` | JWT | meldingen |
 | POST | `/internal/sync` | `x-job-key` | volledige synchronisatie |
 | GET | `/internal/status` | `x-job-key` | laatste importrun per adapter |
+| POST | `/internal/feeds/:chain` | `x-job-key` | feed aanleveren (`npm run feeds:push`): `feedFileSchema`, ≤ `COMPARE_FEED_PUSH_MAX_MB` (gzip toegestaan), opslaan in `CompareFeed`, sync van die keten op de achtergrond; `202` |
+| GET | `/internal/feeds` | `x-job-key` | metadata van de opgeslagen feeds (zonder inhoud) |
 
 Zonder `COMPARE_JOB_KEY` bestaan de interne endpoints niet (`404`).
+
+**Feeds aanleveren.** De productieserver heeft geen blijvende schijf. `POST
+/internal/feeds/:chain` aanvaardt een grote body alleen als het verzoek al een
+geldige jobsleutel (of tijdens een rotatie `COMPARE_JOB_KEY_PREVIOUS`) draagt
+en geen browser-signaal heeft; anders geldt de gewone grens van 64 kB, zodat
+niemand zonder sleutel de server megabytes laat inlezen. Daarna controleert
+`JobKeyGuard` alles opnieuw (constante tijd, `Origin` → 403). De feed moet bij
+de adapter horen (`chain.slug`, anders `400 CHAIN_MISMATCH`); `DEMO` wordt
+geweigerd waar demo uit staat. Een identieke feed (zelfde SHA-256) wordt niet
+opnieuw opgeslagen of gesynchroniseerd. De import is de bestaande: de adapter
+leest de opgeslagen feed via `AdapterContext.loadStoredFeed` als bron, naast
+`<key>.json`; de jongste `observedAt` wint. `termsReviewed` wordt nooit
+aangepast. Tests: `src/compare/feeds/feed-push.controller.test.ts` (HTTP).
 
 ## Lokale installatie
 
@@ -395,6 +418,8 @@ voor snel lokaal experimenteren. `apps/api/prisma/migrations/` bevat:
 |---|---|
 | `0_init_jamal_jamila` | baseline van de boetiek: 14 tabellen, exact de toestand vóór de vergelijker |
 | `20261004180000_supermarktvergelijker` | 18 nieuwe tabellen en 15 enums; **geen** `DROP`, geen wijziging aan bestaande tabellen |
+| `20261004210000_sessies_privacy_jobs` | sessies, jobleases, e-mailvoorkeur, `termsReviewed` op importruns |
+| `20261024120000_compare_feed_push` | tabel `CompareFeed` (aangeleverde feeds); additief. Met de hand geschreven; toegepast en teruggedraaid op PostgreSQL 16 in de sandbox, **nog te testen met `prisma migrate deploy` + `migrate diff`** op de laptop |
 
 - **Nieuwe omgeving:** `npm run db:migrate:deploy` (past beide toe).
 - **Bestaande database die met `db push` is gevuld** (zoals de lokale
@@ -421,7 +446,11 @@ en is herhaalbaar met de stappen hierboven.
 
 | Variabele | Standaard | Betekenis |
 |---|---|---|
+| `BOUTIQUE_ENABLED` | `false` | boetiek Jamal & Jamila laden; uit = boetiekroutes 404, geen MQTT/Mollie/gate-sleutels nodig |
+| `LEGAL_ENTITY_ADDRESS` | leeg | adres van Marhaba Data & AI Agent BV; verplicht in productie (API én web-build), getoond op de juridische pagina's en in e-mails |
 | `COMPARE_FEED_DIR` | `data/feeds` | map met `<key>.json` / `<key>.csv`, relatief aan `apps/api` |
+| `COMPARE_FEED_PUSH_MAX_MB` | `15` | maximale (uitgepakte) grootte van één aangeleverde feed |
+| `PUSH_API_URL`, `PUSH_JOB_KEY` (laptop) | leeg | doel en sleutel voor `npm run feeds:push`; https verplicht |
 | `COMPARE_ALLOW_DEMO` | aan buiten productie | demogegevens als er geen bestand is; in productie afgedwongen uit |
 | `COMPARE_JOB_KEY` | leeg | sleutel (≥ 16 tekens) voor `/internal/*` en `/health/status`; leeg = endpoints bestaan niet |
 | `COMPARE_JOB_KEY_PREVIOUS` | leeg | vorige sleutel tijdens een rotatie |

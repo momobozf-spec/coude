@@ -7,6 +7,7 @@ import { Badge, Notice, PageTitle } from '@/components/ui';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import { useI18n } from '@/lib/i18n';
+import { LEGAL_ENTITY } from '@/lib/legal';
 import { useAsync } from '@/lib/use-async';
 
 const STATUSES = ['CURRENT', 'STALE', 'EXPIRED', 'DEMO', 'UNVERIFIED'] as const;
@@ -73,6 +74,13 @@ export default function DataPage() {
             {t('data.sourcesTitle')}
           </h2>
           <p className="mt-2">{t('data.sourcesText')}</p>
+        </section>
+
+        <section aria-labelledby="independence-title">
+          <h2 id="independence-title" className="text-lg font-bold">
+            {t('data.independenceTitle')}
+          </h2>
+          <p className="mt-2">{t('data.independenceText', { email: LEGAL_ENTITY.email })}</p>
         </section>
 
         <section aria-labelledby="status-title">

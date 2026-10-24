@@ -1,8 +1,8 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
 import {
   CanActivate,
   type ExecutionContext,
   ForbiddenException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -11,8 +11,7 @@ import {
 import type { Request } from 'express';
 import { requestIdOf } from '../../common/request-id.middleware';
 import { CompareConfig } from '../compare-config';
-
-const JOB_KEY_HEADER = 'x-job-key';
+import { hasBrowserSignal, JOB_KEY_HEADER, matchesJobKey } from './job-key';
 
 /**
  * Beschermt interne endpoints (synchronisatie, status) met een gedeelde sleutel.
@@ -30,7 +29,7 @@ const JOB_KEY_HEADER = 'x-job-key';
 export class JobKeyGuard implements CanActivate {
   private readonly logger = new Logger(JobKeyGuard.name);
 
-  constructor(private readonly config: CompareConfig) {}
+  constructor(@Inject(CompareConfig) private readonly config: CompareConfig) {}
 
   canActivate(context: ExecutionContext): boolean {
     const keys = this.config.jobKeys;
@@ -39,7 +38,7 @@ export class JobKeyGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>();
     const requestId = requestIdOf(request);
 
-    if (request.header('origin') || request.header('sec-fetch-site')) {
+    if (hasBrowserSignal((name) => request.header(name))) {
       this.logger.warn(`intern endpoint geweigerd: browser-signaal requestId=${requestId} path=${request.path}`);
       throw new ForbiddenException({ message: 'Dit endpoint is alleen server-side bereikbaar', code: 'INTERNAL_ONLY' });
     }
@@ -50,9 +49,7 @@ export class JobKeyGuard implements CanActivate {
       throw new UnauthorizedException({ message: 'Ongeldige jobsleutel', code: 'JOB_KEY_INVALID' });
     }
 
-    const presentedDigest = createHash('sha256').update(presented, 'utf8').digest();
-    const valid = keys.some((key) => timingSafeEqual(presentedDigest, createHash('sha256').update(key, 'utf8').digest()));
-    if (!valid) {
+    if (!matchesJobKey(keys, presented)) {
       this.logger.warn(`intern endpoint geweigerd: sleutel onjuist requestId=${requestId} path=${request.path}`);
       throw new UnauthorizedException({ message: 'Ongeldige jobsleutel', code: 'JOB_KEY_INVALID' });
     }

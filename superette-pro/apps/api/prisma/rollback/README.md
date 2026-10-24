@@ -7,6 +7,7 @@ Gebruik ze alleen na een backup en alleen als een deployment echt terug moet.
 
 | Script | Draait terug | Verliest |
 |---|---|---|
+| `20261024120000_compare_feed_push.down.sql` | tabel `CompareFeed` (aangeleverde feeds) | de laatst gepushte feed per keten; geïmporteerde prijzen blijven |
 | `20261004210000_sessies_privacy_jobs.down.sql` | sessies, jobleases, `emailNotifications`, `termsReviewed`, enumwaarde `PARTNER_FEED`* | alle ingelogde sessies (gebruikers loggen opnieuw in), e-mailvoorkeur |
 | `20261004180000_supermarktvergelijker.down.sql` | de hele vergelijker | lijsten, alerts, meldingen, prijzen, geschiedenis, matches |
 

@@ -13,6 +13,8 @@ import { AlertsService } from './alerts/alerts.service';
 import { ChainsController } from './catalog/chains.controller';
 import { CompareCatalogService } from './catalog/compare-catalog.service';
 import { CompareConfig } from './compare-config';
+import { FeedPushController } from './feeds/feed-push.controller';
+import { FeedPushService } from './feeds/feed-push.service';
 import { ImportService } from './import/import.service';
 import { JobKeyGuard } from './jobs/job-key.guard';
 import { JobLeaseService } from './jobs/job-lease.service';
@@ -34,7 +36,7 @@ assertUniqueAdapterKeys(supermarketAdapters);
 
 @Module({
   imports: [AuthModule],
-  controllers: [ChainsController, SearchController, ListsController, PreferencesController, AlertsController, SyncController],
+  controllers: [ChainsController, SearchController, ListsController, PreferencesController, AlertsController, SyncController, FeedPushController],
   providers: [
     CompareConfig,
     CompareCatalogService,
@@ -55,6 +57,7 @@ assertUniqueAdapterKeys(supermarketAdapters);
     NotificationDispatcherService,
     JobLeaseService,
     SyncService,
+    FeedPushService,
     JobKeyGuard,
   ],
   exports: [SyncService, ImportService, AlertsService, ListsService, PreferencesService, JobKeyGuard, JobLeaseService, CompareConfig],

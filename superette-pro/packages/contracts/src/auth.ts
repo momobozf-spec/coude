@@ -31,10 +31,10 @@ export const registerSchema = z.object({
    * vragen we het hier — niet pas voor een dichte deur.
    */
   acceptsAccessLogging: z.literal(true, {
-    errorMap: () => ({ message: 'Toestemming voor het loggen van winkelbezoeken is verplicht' }),
+    error: 'Toestemming voor het loggen van winkelbezoeken is verplicht',
   }),
   acceptsCameraSurveillance: z.literal(true, {
-    errorMap: () => ({ message: 'Toestemming voor camerabewaking is verplicht' }),
+    error: 'Toestemming voor camerabewaking is verplicht',
   }),
   /** Marketing is optioneel en mag nooit een voorwaarde voor toegang zijn (AVG art. 7.4). */
   acceptsMarketing: z.boolean().default(false),
@@ -57,7 +57,7 @@ export const registerSuperetteSchema = z.object({
   locale: localeSchema.default('nl'),
   /** Gebruiksvoorwaarden en privacybeleid; zonder akkoord geen account. */
   acceptsTerms: z.literal(true, {
-    errorMap: () => ({ message: 'Je moet de gebruiksvoorwaarden en het privacybeleid aanvaarden' }),
+    error: 'Je moet de gebruiksvoorwaarden en het privacybeleid aanvaarden',
   }),
   /** Nieuwsbrief en tips. Optioneel en nooit een voorwaarde. */
   acceptsMarketing: z.boolean().default(false),
@@ -120,7 +120,7 @@ export const DELETE_ACCOUNT_CONFIRMATION = 'VERWIJDER MIJN ACCOUNT';
 export const deleteAccountSchema = z.object({
   password: z.string().min(1),
   confirmation: z.literal(DELETE_ACCOUNT_CONFIRMATION, {
-    errorMap: () => ({ message: `Typ exact "${DELETE_ACCOUNT_CONFIRMATION}" om te bevestigen` }),
+    error: `Typ exact "${DELETE_ACCOUNT_CONFIRMATION}" om te bevestigen`,
   }),
 });
 export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
