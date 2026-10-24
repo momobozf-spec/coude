@@ -1,0 +1,6 @@
+{
+  "sitemapIndexUrl": "https://www.carrefour.be/sitemap_index.xml",
+  "maxProducts": 300,
+  "minDelayMs": 5000,
+  "minProductsToWrite": 10
+}

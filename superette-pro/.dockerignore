@@ -1,0 +1,24 @@
+# Niets wat lokaal, geheim of gegenereerd is gaat de build-context in.
+.git
+.github
+node_modules
+**/node_modules
+**/dist
+**/.next
+**/coverage
+**/*.tsbuildinfo
+.pgdata
+docs
+*.zip
+*.md
+!apps/api/data/feeds/README.md
+!packages/**/*.md
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+apps/api/data/outbox
+apps/api/data/feeds/*.json
+apps/api/data/feeds/*.csv

@@ -1,0 +1,36 @@
+# Lokale infrastructuur: Postgres + MQTT-broker.
+#   docker compose up -d
+#
+# De MQTT-broker staat hier bewust in anonymous mode voor lokale ontwikkeling.
+# In productie: TLS (mqtts://), client-certificaten per deurcontroller, en een
+# ACL die de controller ENKEL laat subscriben op zijn eigen store/{id}/# topic.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: superette-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: superette
+      POSTGRES_PASSWORD: superette
+      POSTGRES_DB: superette
+    ports:
+      - "5432:5432"
+    volumes:
+      - superette-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U superette"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: superette-mqtt
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./infra/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+volumes:
+  superette-pgdata:

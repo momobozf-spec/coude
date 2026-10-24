@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Jamal &amp; Jamila">
+  <rect width="512" height="512" fill="#0B3D2E"/>
+  <!-- Achtpuntige ster (khatim), het meest herkenbare motief uit de islamitische
+       geometrie: twee vierkanten, 45° verdraaid. -->
+  <g fill="none" stroke="#C98A4B" stroke-width="14" stroke-linejoin="round">
+    <rect x="146" y="146" width="220" height="220"/>
+    <rect x="146" y="146" width="220" height="220" transform="rotate(45 256 256)"/>
+  </g>
+  <circle cx="256" cy="256" r="42" fill="#C98A4B"/>
+</svg>

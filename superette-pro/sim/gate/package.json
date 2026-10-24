@@ -1,0 +1,14 @@
+{
+  "name": "@superette/gate-sim",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Simulator van de fysieke deurcontroller: MQTT-broker + relaissturing",
+  "scripts": {
+    "dev": "node src/index.mjs"
+  },
+  "dependencies": {
+    "aedes": "^1.1.1",
+    "mqtt": "^5.14.1"
+  }
+}

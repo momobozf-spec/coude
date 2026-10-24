@@ -1,0 +1,106 @@
+@import 'tailwindcss';
+
+/*
+ * ── Design tokens ───────────────────────────────────────────────────────────
+ *
+ * Twee paletten, één set namen. De componenten weten niets van "smaragd" of
+ * "koningsblauw" — ze vragen om `bg-canvas` en `text-accent`. Het thema wisselen
+ * is dan één attribuut op <html>, geen zoek-en-vervang door de codebase.
+ *
+ * Beide paletten zijn gecontroleerd op contrast: `ink` op `canvas` haalt ruim
+ * WCAG AA (7:1+), `accent` op `canvas` haalt AA voor grote tekst en UI-componenten.
+ */
+
+:root,
+[data-palette='emerald'] {
+  /* Diep smaragdgroen + koper. Warmer, minder voor de hand liggend. */
+  --canvas: #0b3d2e;
+  --canvas-raised: #10513c;
+  --canvas-sunken: #072b20;
+  --ink: #f5f0e6;
+  --ink-muted: #a9bdb2;
+  --accent: #c98a4b;
+  --accent-strong: #e0a566;
+  --accent-ink: #1a1410;
+  --hairline: #1c5c46;
+  --danger: #e88a7d;
+  --success: #7fc9a3;
+}
+
+[data-palette='royal'] {
+  /* Koningsblauw + goud. Klassieker, directer herkenbaar. */
+  --canvas: #0a1f44;
+  --canvas-raised: #102a58;
+  --canvas-sunken: #06152f;
+  --ink: #f7f5f0;
+  --ink-muted: #a6b3ca;
+  --accent: #c9a227;
+  --accent-strong: #e0bb45;
+  --accent-ink: #14110a;
+  --hairline: #1d3a6b;
+  --danger: #e88a7d;
+  --success: #7fc9a3;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-canvas-raised: var(--canvas-raised);
+  --color-canvas-sunken: var(--canvas-sunken);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-ink: var(--accent-ink);
+  --color-hairline: var(--hairline);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+
+  --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+html,
+body {
+  background-color: var(--canvas);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-sans);
+  /* Voorkomt dat de adresbalk van mobiele browsers de layout laat springen. */
+  min-height: 100dvh;
+}
+
+/*
+ * Een subtiel geometrisch patroon in plaats van een fotografische achtergrond:
+ * scherp op elk scherm, kost geen kilobyte, en blijft leesbaar onder tekst.
+ */
+.arabesque {
+  background-image:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 7%, transparent) 0 2px, transparent 2px),
+    radial-gradient(circle at 0% 50%, color-mix(in srgb, var(--accent) 5%, transparent) 0 2px, transparent 2px),
+    radial-gradient(circle at 100% 50%, color-mix(in srgb, var(--accent) 5%, transparent) 0 2px, transparent 2px);
+  background-size: 44px 44px;
+  background-position: center;
+}
+
+/* De aftelring rond de QR-code. */
+@keyframes drain {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: var(--circumference);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

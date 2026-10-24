@@ -1,0 +1,6 @@
+{
+  "sitemapUrl": "https://www.aldi.be/sitemaps/.aldi-nord-sitemap-products.xml",
+  "maxProducts": 600,
+  "minDelayMs": 5000,
+  "minProductsToWrite": 10
+}

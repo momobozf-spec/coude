@@ -1,0 +1,19 @@
+{
+  "startUrls": [
+    "https://www.delhaize.be/nl/shop",
+    "https://www.delhaize.be/nl/shop/Zuivel-kaas-en-plantaardige-alternatieven/c/v2DAI",
+    "https://www.delhaize.be/nl/shop/Vlees-vis-en-vegetarische-producten/c/v2MEA",
+    "https://www.delhaize.be/nl/shop/Bakkerij-en-banket/c/v2BAK",
+    "https://www.delhaize.be/nl/shop/Zoete-kruidenierswaren/c/v2SWE",
+    "https://www.delhaize.be/nl/shop/Zoute-kruidenierswaren/c/v2SAL",
+    "https://www.delhaize.be/nl/shop/Diepvries/c/v2FRO",
+    "https://www.delhaize.be/nl/shop/Apero-en-voorgerechten/c/v2APE",
+    "https://www.delhaize.be/nl/shop/Koude-en-warme-dranken/c/v2DRI"
+  ],
+  "discoverCategories": true,
+  "maxCategories": 50,
+  "maxProductsPerCategory": 16,
+  "maxProducts": 600,
+  "minDelayMs": 4000,
+  "minProductsToWrite": 10
+}

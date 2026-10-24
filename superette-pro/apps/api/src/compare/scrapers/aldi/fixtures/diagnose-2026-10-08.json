@@ -1,0 +1,126 @@
+[
+  {
+    "url": "https://www.aldi.be/product/kropsla-6229.html",
+    "jsonLd": [
+      "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"item\":{\"@id\":\"https://www.aldi.be\",\"name\":\"ALDI België\"}},{\"@type\":\"ListItem\",\"position\":2,\"item\":{\"@id\":\"https://www.aldi.be/producten.html\",\"name\":\"Producten\"}},{\"@type\":\"ListItem\",\"position\":3,\"item\":{\"@id\":\"https://www.aldi.be/producten/aardappelen-groenten-fruit.html\",\"name\":\"Aardappelen, groenten en fruit\"}},{\"@type\":\"ListItem\",\"position\":4,\"item\":{\"@id\":\"https://www.aldi.be/producten/aardappelen-groenten-fruit/groenten.html\",\"name\":\"Verse groenten\"}},{\"@type\":\"ListItem\",\"position\":5,\"item\":{\"@id\":\"https://www.aldi.be\",\"name\":\"Kropsla\"}}]}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6229_kropsla_verpakking_24-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6229_kropsla_verpakking_24-1.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6229_kropsla_per_stuk_uv-2\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6229_kropsla_per_stuk_uv-2.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6229_kropsla_sfr-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6229_kropsla_sfr-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6229_kropsla_verpakking_24-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6229_kropsla_verpakking_24-1.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6229_kropsla_per_stuk_uv-2\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6229_kropsla_per_stuk_uv-2.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6229_kropsla_sfr-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6229_kropsla_sfr-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/95698-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"Belgische oorsprong\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/102942-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"aaaa Koeling frigo\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"Product\",\"name\":\"Kropsla\",\"image\":[\"https://s7g10.scene7.com/is/image/aldinord/6229_kropsla_verpakking_24-1\",\"https://s7g10.scene7.com/is/image/aldinord/6229_kropsla_per_stuk_uv-2\",\"https://s7g10.scene7.com/is/image/aldinord/6229_kropsla_sfr-vp\",\"https://s7g10.scene7.com/is/image/aldinord/95698-1\",\"https://s7g10.scene7.com/is/image/aldinord/102942-1\"],\"description\":\"verpakt, oorsprong: België\",\"sku\":\"6229\",\"brand\":{\"@type\":\"Brand\"},\"offers\":{\"@type\":\"Offer\",\"url\":\"https://www.aldi.be/product/kropsla-6229-6229\",\"priceCurrency\":\"EUR\",\"availability\":\"https://schema.org/InStock\"}}"
+    ],
+    "salesUnit": "per stuk",
+    "observedAt": "2026-10-08T11:32:50.607Z",
+    "originalResult": {
+      "ok": false,
+      "kind": "unreadable",
+      "reason": "Product zonder prijs"
+    }
+  },
+  {
+    "url": "https://www.aldi.be/product/chinese-kool-6202.html",
+    "jsonLd": [
+      "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"item\":{\"@id\":\"https://www.aldi.be\",\"name\":\"ALDI België\"}},{\"@type\":\"ListItem\",\"position\":2,\"item\":{\"@id\":\"https://www.aldi.be/producten.html\",\"name\":\"Producten\"}},{\"@type\":\"ListItem\",\"position\":3,\"item\":{\"@id\":\"https://www.aldi.be/producten/aardappelen-groenten-fruit.html\",\"name\":\"Aardappelen, groenten en fruit\"}},{\"@type\":\"ListItem\",\"position\":4,\"item\":{\"@id\":\"https://www.aldi.be/producten/aardappelen-groenten-fruit/groenten.html\",\"name\":\"Verse groenten\"}},{\"@type\":\"ListItem\",\"position\":5,\"item\":{\"@id\":\"https://www.aldi.be\",\"name\":\"Chinese kool\"}}]}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_23-2\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6202_chinese_kool_23-2.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_23-3\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6202_chinese_kool_23-3.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_23-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6202_chinese_kool_23-1.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_sfr-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6202_chinese_kool_sfr-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_amb-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6202_chinese_kool_amb-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_23-2\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6202_chinese_kool_23-2.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_23-3\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6202_chinese_kool_23-3.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_23-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6202_chinese_kool_23-1.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_sfr-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6202_chinese_kool_sfr-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_amb-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6202_chinese_kool_amb-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"Product\",\"name\":\"Chinese kool\",\"image\":[\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_23-2\",\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_23-3\",\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_23-1\",\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_sfr-vp\",\"https://s7g10.scene7.com/is/image/aldinord/6202_chinese_kool_amb-vp\"],\"description\":\"verpakt, oorsprong: Spanje\",\"sku\":\"6202\",\"brand\":{\"@type\":\"Brand\"},\"offers\":{\"@type\":\"Offer\",\"url\":\"https://www.aldi.be/product/chinese-kool-6202-6202\",\"priceCurrency\":\"EUR\",\"availability\":\"https://schema.org/InStock\"}}"
+    ],
+    "salesUnit": "per stuk",
+    "observedAt": "2026-10-08T11:32:53.545Z",
+    "originalResult": {
+      "ok": false,
+      "kind": "unreadable",
+      "reason": "Product zonder prijs"
+    }
+  },
+  {
+    "url": "https://www.aldi.be/product/sjalotten-6158.html",
+    "jsonLd": [
+      "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"item\":{\"@id\":\"https://www.aldi.be\",\"name\":\"ALDI België\"}},{\"@type\":\"ListItem\",\"position\":2,\"item\":{\"@id\":\"https://www.aldi.be/producten.html\",\"name\":\"Producten\"}},{\"@type\":\"ListItem\",\"position\":3,\"item\":{\"@id\":\"https://www.aldi.be/producten/aardappelen-groenten-fruit.html\",\"name\":\"Aardappelen, groenten en fruit\"}},{\"@type\":\"ListItem\",\"position\":4,\"item\":{\"@id\":\"https://www.aldi.be/producten/aardappelen-groenten-fruit/groenten.html\",\"name\":\"Verse groenten\"}},{\"@type\":\"ListItem\",\"position\":5,\"item\":{\"@id\":\"https://www.aldi.be\",\"name\":\"Sjalotten\"}}]}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6158_sjalot_verpakking_24-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6158_sjalot_verpakking_24-1.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6158_PRIMARY_0_nl-fr-de_Sjalotten_AGF\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6158_PRIMARY_0_nl-fr-de_Sjalotten_AGF.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6158_sjalotten_sfr-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6158_sjalotten_sfr-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6158-sjalotten_amb-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6158-sjalotten_amb-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6158_sjalot_verpakking_24-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6158_sjalot_verpakking_24-1.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6158_PRIMARY_0_nl-fr-de_Sjalotten_AGF\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6158_PRIMARY_0_nl-fr-de_Sjalotten_AGF.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6158_sjalotten_sfr-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6158_sjalotten_sfr-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6158-sjalotten_amb-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6158-sjalotten_amb-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/95698-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"Belgische oorsprong\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"Product\",\"name\":\"Sjalotten\",\"image\":[\"https://s7g10.scene7.com/is/image/aldinord/6158_sjalot_verpakking_24-1\",\"https://s7g10.scene7.com/is/image/aldinord/6158_PRIMARY_0_nl-fr-de_Sjalotten_AGF\",\"https://s7g10.scene7.com/is/image/aldinord/6158_sjalotten_sfr-vp\",\"https://s7g10.scene7.com/is/image/aldinord/6158-sjalotten_amb-vp\",\"https://s7g10.scene7.com/is/image/aldinord/95698-1\"],\"description\":\"verpakt, oorsprong: België\",\"sku\":\"6158\",\"brand\":{\"@type\":\"Brand\"},\"offers\":{\"@type\":\"Offer\",\"url\":\"https://www.aldi.be/product/sjalotten-6158-6158\",\"priceCurrency\":\"EUR\",\"availability\":\"https://schema.org/InStock\"}}"
+    ],
+    "salesUnit": "500 g",
+    "observedAt": "2026-10-08T11:33:01.459Z",
+    "originalResult": {
+      "ok": false,
+      "kind": "unreadable",
+      "reason": "Product zonder prijs"
+    }
+  },
+  {
+    "url": "https://www.aldi.be/product/pitloze-blauwe-druiven-6128.html",
+    "jsonLd": [
+      "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"item\":{\"@id\":\"https://www.aldi.be\",\"name\":\"ALDI België\"}},{\"@type\":\"ListItem\",\"position\":2,\"item\":{\"@id\":\"https://www.aldi.be/producten.html\",\"name\":\"Producten\"}},{\"@type\":\"ListItem\",\"position\":3,\"item\":{\"@id\":\"https://www.aldi.be/producten/aardappelen-groenten-fruit.html\",\"name\":\"Aardappelen, groenten en fruit\"}},{\"@type\":\"ListItem\",\"position\":4,\"item\":{\"@id\":\"https://www.aldi.be/producten/aardappelen-groenten-fruit/fruit.html\",\"name\":\"Vers fruit\"}},{\"@type\":\"ListItem\",\"position\":5,\"item\":{\"@id\":\"https://www.aldi.be\",\"name\":\"Pitloze blauwe druiven\"}}]}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6128_blauwe_druiven_verpakking_24-2\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6128_blauwe_druiven_verpakking_24-2.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6128_pitloze_blauwe_druiven\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6128_pitloze_blauwe_druiven.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6128_pitloze_blauwe_druiven_sfr-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6128_pitloze_blauwe_druiven_sfr-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6128_blauwe_druiven_verpakking_24-2\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6128_blauwe_druiven_verpakking_24-2.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6128_pitloze_blauwe_druiven\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6128_pitloze_blauwe_druiven.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6128_pitloze_blauwe_druiven_sfr-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6128_pitloze_blauwe_druiven_sfr-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"Product\",\"name\":\"Pitloze blauwe druiven\",\"image\":[\"https://s7g10.scene7.com/is/image/aldinord/6128_blauwe_druiven_verpakking_24-2\",\"https://s7g10.scene7.com/is/image/aldinord/6128_pitloze_blauwe_druiven\",\"https://s7g10.scene7.com/is/image/aldinord/6128_pitloze_blauwe_druiven_sfr-vp\"],\"description\":\"verpakt, oorsprong: Italië\",\"sku\":\"6128\",\"brand\":{\"@type\":\"Brand\"},\"offers\":{\"@type\":\"Offer\",\"url\":\"https://www.aldi.be/product/pitloze-blauwe-druiven-6128-6128\",\"priceCurrency\":\"EUR\",\"price\":1.5,\"availability\":\"https://schema.org/InStock\"}}"
+    ],
+    "salesUnit": "500 g",
+    "observedAt": "2026-10-08T11:33:05.821Z",
+    "originalResult": {
+      "ok": true,
+      "product": {
+        "externalId": "6128",
+        "name": "Pitloze blauwe druiven",
+        "brand": null,
+        "categoryPath": "Aardappelen, groenten en fruit/Vers fruit",
+        "productUrl": "https://www.aldi.be/product/pitloze-blauwe-druiven-6128.html",
+        "packageQuantity": 500,
+        "packageUnit": "G",
+        "packCount": 1,
+        "priceCents": 150,
+        "availability": "IN_STOCK"
+      }
+    }
+  },
+  {
+    "url": "https://www.aldi.be/product/ijsbergsla-6105.html",
+    "jsonLd": [
+      "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"item\":{\"@id\":\"https://www.aldi.be\",\"name\":\"ALDI België\"}},{\"@type\":\"ListItem\",\"position\":2,\"item\":{\"@id\":\"https://www.aldi.be/producten.html\",\"name\":\"Producten\"}},{\"@type\":\"ListItem\",\"position\":3,\"item\":{\"@id\":\"https://www.aldi.be/producten/aardappelen-groenten-fruit.html\",\"name\":\"Aardappelen, groenten en fruit\"}},{\"@type\":\"ListItem\",\"position\":4,\"item\":{\"@id\":\"https://www.aldi.be/producten/aardappelen-groenten-fruit/groenten.html\",\"name\":\"Verse groenten\"}},{\"@type\":\"ListItem\",\"position\":5,\"item\":{\"@id\":\"https://www.aldi.be\",\"name\":\"IJsbergsla\"}}]}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6105_ijsbergsla_verpakking_24-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6105_ijsbergsla_verpakking_24-1.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6105_ijsbergsalade_uv-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6105_ijsbergsalade_uv-1.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6105_ijsbergsla-6\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6105_ijsbergsla-6.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6105_ijsbergsla_sfr-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6105_ijsbergsla_sfr-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6105_arttile-amb_1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6105_arttile-amb_1.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6105_ijsbergsla_verpakking_24-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6105_ijsbergsla_verpakking_24-1.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6105_ijsbergsalade_uv-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6105_ijsbergsalade_uv-1.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6105_ijsbergsla-6\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6105_ijsbergsla-6.png\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6105_ijsbergsla_sfr-vp\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6105_ijsbergsla_sfr-vp.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/6105_arttile-amb_1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"6105_arttile-amb_1.jpg\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"ImageObject\",\"author\":\"\",\"contentLocation\":\"\",\"contentUrl\":\"https://s7g10.scene7.com/is/image/aldinord/102942-1\",\"datePublished\":\"\",\"description\":\"\",\"name\":\"aaaa Koeling frigo\"}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"Product\",\"name\":\"IJsbergsla\",\"image\":[\"https://s7g10.scene7.com/is/image/aldinord/6105_ijsbergsla_verpakking_24-1\",\"https://s7g10.scene7.com/is/image/aldinord/6105_ijsbergsalade_uv-1\",\"https://s7g10.scene7.com/is/image/aldinord/6105_ijsbergsla-6\",\"https://s7g10.scene7.com/is/image/aldinord/6105_ijsbergsla_sfr-vp\",\"https://s7g10.scene7.com/is/image/aldinord/6105_arttile-amb_1\",\"https://s7g10.scene7.com/is/image/aldinord/102942-1\"],\"description\":\"verpakt, oorsprong: Nederland\",\"sku\":\"6105\",\"brand\":{\"@type\":\"Brand\"},\"offers\":{\"@type\":\"Offer\",\"url\":\"https://www.aldi.be/product/ijsbergsla-6105-6105\",\"priceCurrency\":\"EUR\",\"availability\":\"https://schema.org/InStock\"}}"
+    ],
+    "salesUnit": "per stuk",
+    "observedAt": "2026-10-08T11:33:11.398Z",
+    "originalResult": {
+      "ok": false,
+      "kind": "unreadable",
+      "reason": "Product zonder prijs"
+    }
+  }
+]

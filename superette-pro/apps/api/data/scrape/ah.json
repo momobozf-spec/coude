@@ -1,0 +1,16 @@
+{
+  "startUrls": [
+    "https://www.ah.be/producten/22495/fruit-verse-sappen",
+    "https://www.ah.be/producten/22304/maaltijden-salades",
+    "https://www.ah.be/producten/23997/vlees",
+    "https://www.ah.be/producten/21507/bakkerij",
+    "https://www.ah.be/producten/21622/zuivel-eieren",
+    "https://www.ah.be/producten/23373/kaas",
+    "https://www.ah.be/producten/23425/ontbijtgranen-beleg"
+  ],
+  "maxProductsPerCategory": 40,
+  "maxProducts": 280,
+  "scrollRounds": 6,
+  "minDelayMs": 5000,
+  "minProductsToWrite": 10
+}

@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.env
+.env.local
+*.tsbuildinfo
+coverage/
+.next/
+# Datadirectory van de lokale embedded Postgres (scripts/dev-db.mjs)
+.pgdata/
+
+# Lokale scrape- en importdata: nooit in git (gescrapete prijzen, opgeslagen pagina's,
+# logs met lokale paden/contactadres, backups). Alleen configuratie en voorbeelden blijven.
+apps/api/data/*
+!apps/api/data/scrape/
+!apps/api/data/feeds/
+apps/api/data/feeds/*
+!apps/api/data/feeds/README.md
+!apps/api/data/feeds/example.json
+.superette-backups/
+*.log
+*.backup*

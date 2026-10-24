@@ -1,0 +1,73 @@
+{
+  "name": "superette",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Jamal & Jamila — autonoom onbemand winkelplatform (toegangscontrole, self-scanning, Belgische BTW)",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "sim/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @superette/vat && npm run build -w @superette/pricing && npm run build -w @superette/contracts && npm run build -w @superette/api && npm run build -w @superette/pwa && npm run build -w @superette/web",
+    "test": "npm run test -w @superette/vat && npm run test -w @superette/pricing && npm run test -w @superette/api && npm run test -w @superette/web",
+    "typecheck": "npm run typecheck -w @superette/web && tsc -p apps/api/tsconfig.json --noEmit && tsc -p packages/contracts/tsconfig.json --noEmit && tsc -p packages/pricing/tsconfig.json --noEmit && tsc -p apps/api/tsconfig.scrape.json",
+    "keys:gen": "node scripts/gen-keys.mjs",
+    "db:generate": "npm run db:generate -w @superette/api",
+    "db:push": "npm run db:push -w @superette/api",
+    "db:migrate:deploy": "npm run db:migrate:deploy -w @superette/api",
+    "db:migrate:status": "npm run db:migrate:status -w @superette/api",
+    "db:seed": "npm run db:seed -w @superette/api",
+    "db:seed:compare": "npm run db:seed:compare -w @superette/api",
+    "compare:sync": "npm run compare:sync -w @superette/api --",
+    "dev:api": "npm run dev -w @superette/api",
+    "dev:pwa": "npm run dev -w @superette/pwa",
+    "dev:web": "npm run dev -w @superette/web",
+    "walkthrough:superette": "node scripts/walkthrough-superette.mjs",
+    "dev:gate": "npm run dev -w @superette/gate-sim",
+    "smoke:gate": "npm exec --workspace @superette/api -- tsx scripts/smoke-gate.ts",
+    "smoke:shop": "npm exec --workspace @superette/api -- tsx scripts/smoke-shop.ts",
+    "smoke:compare": "npm exec --workspace @superette/api -- tsx scripts/smoke-compare.ts",
+    "walkthrough": "node scripts/walkthrough.mjs",
+    "smoke:auth": "npm exec --workspace @superette/api -- tsx scripts/smoke-auth.ts",
+    "loadtest": "node scripts/loadtest.mjs",
+    "check:bundle": "node scripts/check-bundle-secrets.mjs",
+    "db:migrate:test": "bash apps/api/scripts/migration-test.sh",
+    "worker": "node apps/api/dist/compare/cli/worker.cli.js",
+    "smoke:lease": "npm exec --workspace @superette/api -- tsx scripts/smoke-lease.ts",
+    "ci:local": "node scripts/ci-local.mjs",
+    "db:backup:drill": "bash apps/api/scripts/backup-drill.sh",
+    "staging:feeds": "npm exec --workspace @superette/api -- tsx scripts/make-staging-feeds.ts",
+    "staging:proxy": "node scripts/staging-proxy.mjs",
+    "scrape:delhaize": "npm exec --workspace @superette/api -- tsx scripts/scrape/scrape-delhaize.ts",
+    "scrape:lidl": "npm exec --workspace @superette/api -- tsx scripts/scrape/scrape-lidl.ts",
+    "scrape:ah": "npm exec --workspace @superette/api -- tsx scripts/scrape/scrape-ah.ts",
+    "scrape:aldi": "npm exec --workspace @superette/api -- tsx scripts/scrape/scrape-aldi.ts",
+    "scrape:carrefour": "npm exec --workspace @superette/api -- tsx scripts/scrape/scrape-carrefour.ts",
+    "import:ah": "npm exec --workspace @superette/api -- tsx scripts/import/import-ah-html.ts",
+    "import:carrefour": "npm exec --workspace @superette/api -- tsx scripts/import/import-carrefour-html.ts",
+    "import:jumbo": "npm exec --workspace @superette/api -- tsx scripts/import/import-jumbo-reviewed.ts",
+    "import:jumbo:w43": "npm exec --workspace @superette/api -- tsx scripts/import/import-jumbo-w43.ts",
+    "import:spar": "npm exec --workspace @superette/api -- tsx scripts/import/import-spar-snapshot.ts",
+    "match:report": "npm exec --workspace @superette/api -- tsx scripts/match-report.ts",
+    "match:review": "npm exec --workspace @superette/api -- tsx scripts/match-review.ts",
+    "match:apply": "npm exec --workspace @superette/api -- tsx scripts/match-apply.ts",
+    "compare:purge-demo": "npm exec --workspace @superette/api -- tsx scripts/purge-demo.ts",
+    "weekly": "node scripts/weekly-update.mjs"
+  },
+  "devDependencies": {
+    "axe-core": "^4.13.0",
+    "playwright": "^1.61.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "overridesReason": "next@15.5 pint postcss@8.4.31 vast; die versie heeft GHSA-qx2v-qp2m-jg93. postcss 8.5 is API-compatibel binnen 8.x en de Next-build is ermee geverifieerd.",
+  "overrides": {
+    "next": {
+      "postcss": "^8.5.16"
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

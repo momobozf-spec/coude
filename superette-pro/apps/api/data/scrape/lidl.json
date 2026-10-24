@@ -1,0 +1,14 @@
+{
+  "startUrls": [
+    "https://www.lidl.be/c/nl-BE/voeding-drank/s10068374"
+  ],
+  "discoverCategories": false,
+  "maxCategories": 1,
+  "scrollRounds": 10,
+  "onlyWorlds": [
+    "Eten en dichtbij voedsel",
+    "Wijn, bier en sterke drank"
+  ],
+  "minDelayMs": 8000,
+  "minProductsToWrite": 5
+}

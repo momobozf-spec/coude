@@ -1,0 +1,1088 @@
+// Jamal & Jamila — datamodel voor de onbemande winkel.
+//
+// Drie regels die het hele schema sturen:
+//
+//  1. GELD IS ALTIJD `Int` IN CENTEN. Nooit Float, nooit Decimal-in-JS.
+//     Een BTW-uitsplitsing over floats loopt vroeg of laat een cent mis, en
+//     dan klopt de kasbon niet met de aangifte.
+//
+//  2. AUDIT-TABELLEN ZIJN APPEND-ONLY. Consent en AccessLog worden nooit
+//     ge-update of verwijderd. Wie toestemming intrekt, krijgt een nieuwe rij.
+//     Bij een AVG-klacht moet je kunnen aantonen wát gold op wélk moment.
+//
+//  3. DE DEUR IS DE GEVOELIGSTE RESOURCE. Alles rond AccessToken is ontworpen
+//     op één aanvalsscenario: iemand fotografeert het scherm van een klant.
+//     Antwoord: korte TTL, eenmalige nonce, en supersession bij rotatie.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Identiteit & toestemming
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Role {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  /// Handmatig geblokkeerd (wanbetaling, vandalisme, misbruik).
+  BLOCKED
+  /// AVG-verwijderverzoek uitgevoerd; PII gewist, id blijft voor de audit-trail.
+  ERASED
+}
+
+model User {
+  id       String     @id @default(cuid())
+  email    String     @unique
+  /// Argon2id-hash. `null` zodra de gebruiker via een externe IdP inlogt.
+  password String?
+  fullName String
+  phone    String?
+  locale   String     @default("nl")
+  role     Role       @default(CUSTOMER)
+  status   UserStatus @default(ACTIVE)
+
+  /// ── Sterke identiteit ──────────────────────────────────────────────────
+  /// Vandaag altijd leeg: we draaien op e-mail + wachtwoord. Deze velden
+  /// bestaan nu al zodat itsme later ingeplugd wordt zonder migratie van
+  /// bestaande accounts. `identityProvider` is de discriminator.
+  identityProvider String    @default("LOCAL") /// LOCAL | ITSME
+  externalSubject  String?   @unique /// `sub` claim van de externe IdP
+  identityVerified Boolean   @default(false)
+  ageVerified      Boolean   @default(false)
+  verifiedAt       DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  consents     Consent[]
+  accessTokens AccessToken[]
+  accessLogs   AccessLog[]
+  baskets      Basket[]
+  orders       Order[]
+
+  /// ── Supermarktvergelijker ──────────────────────────────────────────────
+  shoppingLists      ShoppingList[]
+  comparePreference  ComparePreference?
+  chainPreferences   UserChainPreference[]
+  favoriteLocations  UserFavoriteLocation[]
+  priceAlerts        PriceAlert[]
+  alertNotifications AlertNotification[]
+  matchReports       ProductMatchReport[]
+  sessions           Session[]
+
+  @@index([status])
+}
+
+/// Een ingelogde sessie met refresh-token (HttpOnly-cookie). Het token zelf
+/// staat nergens in de database: alleen de SHA-256-hash. Intrekken is een
+/// `revokedAt`; de rij blijft als audit-spoor tot de opruimtaak hem wist.
+model Session {
+  id                String    @id @default(cuid())
+  userId            String
+  /// Welke app de sessie opende, bv. "web" (Superette). Bepaalt de cookienamen.
+  client            String
+  /// SHA-256 van het huidige refresh-token.
+  refreshTokenHash  String    @unique
+  /// Hash van het vorige token na rotatie; hergebruik ervan verraadt diefstal.
+  previousTokenHash String?   @unique
+  expiresAt         DateTime
+  lastUsedAt        DateTime  @default(now())
+  revokedAt         DateTime?
+  revokedReason     String?
+  /// Ingekorte user-agent, zonder IP-adres: genoeg voor "jouw sessies", geen tracking.
+  userAgent         String?
+  createdAt         DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+enum ConsentType {
+  ACCESS_LOG
+  CAMERA
+  MARKETING
+}
+
+/// Append-only. Toestemming intrekken = nieuwe rij met `granted = false`.
+/// De actuele stand is de rij met de hoogste `recordedAt` per (user, type).
+model Consent {
+  id            String      @id @default(cuid())
+  userId        String
+  type          ConsentType
+  granted       Boolean
+  /// Welke versie van het privacybeleid de gebruiker toen zag.
+  policyVersion String
+  /// Bewijslast: waar en hoe de toestemming gegeven is (AVG art. 7.1).
+  ipAddress     String?
+  userAgent     String?
+  recordedAt    DateTime    @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// De hot path is "wat is de huidige stand" → sorteer aflopend op tijd.
+  @@index([userId, type, recordedAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Winkels & toegang
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Store {
+  id        String @id @default(cuid())
+  name      String
+  slug      String @unique
+  address   String
+  city      String
+  /// Verplicht op elke Belgische kasbon, bv. "BE 0123.456.789".
+  vatNumber String
+
+  /// MQTT-topic-prefix van deze winkel, bv. "store/antwerpen-zuid".
+  /// De deurcontroller subscribet op `{mqttTopicPrefix}/gate/#` en op niets anders.
+  mqttTopicPrefix String @unique
+
+  /// SHA-256 van de device-sleutel die de deurscanner meestuurt.
+  /// Hoge entropie, dus geen bcrypt nodig — en bcrypt op elke deuropening
+  /// zou 100ms latency toevoegen aan iemand die in de regen staat.
+  deviceKeyHash String
+
+  /// Openingsuren als minuten sinds middernacht, in Europe/Brussels.
+  /// 0..1439. `opensAtMinute > closesAtMinute` betekent: over middernacht heen.
+  opensAtMinute  Int @default(360) /// 06:00
+  closesAtMinute Int @default(1380) /// 23:00
+
+  /// Brandweervoorschriften en toezicht: hoeveel mensen tegelijk binnen mogen.
+  maxOccupancy     Int @default(6)
+  currentOccupancy Int @default(0)
+
+  /// Zet op `true` zodra itsme draait. Dan weigert de gate iedereen zonder
+  /// sterk geverifieerde identiteit. Vandaag `false`, zie CLAUDE-notitie.
+  requiresVerifiedIdentity Boolean @default(false)
+
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accessTokens AccessToken[]
+  accessLogs   AccessLog[]
+  inventory    Inventory[]
+  baskets      Basket[]
+  orders       Order[]
+  counters     InvoiceCounter[]
+}
+
+/// Eén uitgegeven QR-code. Leeft ~60 seconden.
+///
+/// Drie onafhankelijke redenen waarom een token kan falen, elk met een eigen
+/// kolom zodat we ze in de audit-trail uit elkaar kunnen houden:
+///   - `expiresAt` gepasseerd  → te oud
+///   - `usedAt` gezet          → replay (iemand scant dezelfde QR twee keer)
+///   - `supersededAt` gezet    → achterhaald (de app heeft al geroteerd)
+model AccessToken {
+  id      String @id @default(cuid())
+  userId  String
+  storeId String
+
+  /// Eenmalige waarde, ook opgenomen in de ondertekende payload.
+  nonce       String @unique
+  /// Monotoon volgnummer per (user, store). Detecteert rotatie-anomalieën.
+  rotationSeq Int
+
+  issuedAt     DateTime  @default(now())
+  expiresAt    DateTime
+  usedAt       DateTime?
+  supersededAt DateTime?
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  accessLogs AccessLog[]
+
+  /// Voor de supersession-sweep bij elke nieuwe uitgifte.
+  @@index([userId, storeId, supersededAt, usedAt])
+  /// Voor de opruimtaak van verlopen tokens.
+  @@index([expiresAt])
+}
+
+enum GateResult {
+  GRANTED
+  DENIED_INVALID_SIGNATURE
+  DENIED_EXPIRED
+  DENIED_REPLAY
+  DENIED_SUPERSEDED
+  DENIED_WRONG_STORE
+  DENIED_USER_BLOCKED
+  DENIED_IDENTITY_REQUIRED
+  DENIED_CONSENT_MISSING
+  DENIED_STORE_CLOSED
+  DENIED_STORE_FULL
+  /// Geen weigering maar een storing: het deurrelais was onbereikbaar.
+  ERROR_GATE_UNREACHABLE
+}
+
+/// Append-only. Elke poging tot deuropening landt hier — geslaagd of niet.
+///
+/// `cameraRef` koppelt het tijdstip aan het CCTV-fragment. Dat is precies wat
+/// AVG art. 30 (verwerkingsregister) en de Belgische camerawet van je vragen:
+/// je moet kunnen zeggen wélke beelden bij wélke betreding horen, en ze na de
+/// bewaartermijn gericht kunnen wissen.
+model AccessLog {
+  id      String     @id @default(cuid())
+  userId  String?
+  storeId String
+  tokenId String?
+  result  GateResult
+  /// Vrije toelichting voor de support-desk. Nooit naar de scanner gestuurd.
+  reason  String?
+
+  /// Welke fysieke scanner het verzoek deed.
+  deviceId  String
+  /// Verwijzing naar het camerafragment, bv. "cam-01/2026-07-08T09:14:22Z".
+  cameraRef String?
+
+  occurredAt DateTime @default(now())
+
+  user  User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  store Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  token AccessToken? @relation(fields: [tokenId], references: [id], onDelete: SetNull)
+
+  @@index([storeId, occurredAt])
+  @@index([userId, occurredAt])
+  @@index([result])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Catalogus
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum VatCode {
+  VAT_0
+  VAT_6
+  VAT_12
+  VAT_21
+}
+
+model Category {
+  id        String @id @default(cuid())
+  slug      String @unique
+  nameNl    String
+  nameFr    String
+  sortOrder Int    @default(0)
+
+  products Product[]
+}
+
+model Product {
+  id      String @id @default(cuid())
+  sku     String @unique
+  /// EAN-8 of EAN-13. Dit is wat de camera leest. Uniek, want één barcode mag
+  /// nooit twee producten kunnen aanwijzen.
+  barcode String @unique
+
+  nameNl        String
+  nameFr        String
+  descriptionNl String?
+  descriptionFr String?
+  imageUrl      String?
+
+  /// Consumentenprijs INCLUSIEF BTW, in centen. Dit is wat op het schap staat
+  /// en wat de klant betaalt (Boek VI WER, art. VI.3).
+  priceInclCents Int
+
+  /// BTW per product, niet per categorie. Een gift set met dadels (6%) én
+  /// arganolie (21%) bestaat, en categorieën vangen dat niet.
+  vat VatCode @default(VAT_21)
+
+  categoryId String
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  category    Category     @relation(fields: [categoryId], references: [id])
+  inventory   Inventory[]
+  basketItems BasketItem[]
+  orderItems  OrderItem[]
+
+  @@index([barcode])
+  @@index([categoryId, active])
+}
+
+model Inventory {
+  storeId   String
+  productId String
+  quantity  Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([storeId, productId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Winkelmandje & bestelling
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum BasketStatus {
+  OPEN
+  PAID
+  /// Klant verliet de winkel zonder af te rekenen. Trigger voor opvolging.
+  ABANDONED
+}
+
+/// Eén winkelbezoek. Wordt aangemaakt op het moment dat de deur opengaat, en
+/// is daarmee de brug tussen de fysieke en de digitale kant.
+///
+/// `channel` maakt Optie A en Optie B mogelijk op dezelfde entiteit: bij
+/// self-scanning vult de app hem, bij een kassa-koppeling vult de kassa hem.
+model Basket {
+  id      String       @id @default(cuid())
+  userId  String
+  storeId String
+  status  BasketStatus @default(OPEN)
+  /// APP_SELF_SCAN | POS_TERMINAL
+  channel String       @default("APP_SELF_SCAN")
+
+  openedAt DateTime  @default(now())
+  closedAt DateTime?
+
+  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  items BasketItem[]
+  order Order?
+
+  /// Eén open mand per gebruiker per winkel. Afgedwongen in de applicatielaag,
+  /// want een partiële unique index op status='OPEN' kan Prisma niet uitdrukken.
+  @@index([userId, status])
+  @@index([storeId, status])
+}
+
+model BasketItem {
+  id        String @id @default(cuid())
+  basketId  String
+  productId String
+  quantity  Int    @default(1)
+
+  /// Prijs- en BTW-snapshot op het moment van scannen. Verandert de catalogus
+  /// terwijl de klant in de winkel staat, dan betaalt hij wat op het schap
+  /// stond — niet wat de admin intussen invoerde.
+  unitPriceInclCents Int
+  vat                VatCode
+
+  scannedAt DateTime @default(now())
+
+  basket  Basket  @relation(fields: [basketId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  /// Tweemaal hetzelfde product scannen verhoogt `quantity`, geeft geen tweede rij.
+  @@unique([basketId, productId])
+  @@index([basketId])
+}
+
+enum OrderStatus {
+  AWAITING_PAYMENT
+  PAID
+  FAILED
+  EXPIRED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  BANCONTACT
+  PAYCONIQ
+  APPLE_PAY
+  GOOGLE_PAY
+  CARD
+}
+
+model Order {
+  id          String @id @default(cuid())
+  /// Menselijk leesbaar, bv. "JJ-2026-000042". Niet hetzelfde als het
+  /// factuurnummer: een order kan mislukken, een factuurnummer nooit.
+  orderNumber String @unique
+
+  userId   String
+  storeId  String
+  basketId String @unique
+
+  status OrderStatus @default(AWAITING_PAYMENT)
+
+  /// Volledige BTW-uitsplitsing, gesnapshot bij het aanmaken van de order.
+  /// Geen berekende velden: een boekhouder moet over vijf jaar exact kunnen
+  /// zien wat er toen op de bon stond.
+  totalExclCents Int
+  totalVatCents  Int
+  totalInclCents Int
+  /// De buckets per tarief, zoals `VatBreakdown.buckets`.
+  vatBuckets     Json
+
+  paymentProvider   String        @default("MOLLIE")
+  paymentMethod     PaymentMethod
+  providerPaymentId String?       @unique
+  paidAt            DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User        @relation(fields: [userId], references: [id])
+  store   Store       @relation(fields: [storeId], references: [id])
+  basket  Basket      @relation(fields: [basketId], references: [id])
+  items   OrderItem[]
+  receipt Receipt?
+
+  @@index([userId, createdAt])
+  @@index([status])
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+
+  /// Namen worden meegekopieerd. Wordt het product hernoemd of verwijderd,
+  /// dan blijft de historische bon leesbaar.
+  nameNl String
+  nameFr String
+
+  quantity           Int
+  unitPriceInclCents Int
+  lineTotalInclCents Int
+  vat                VatCode
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}
+
+/// Doorlopende, gapenloze factuurnummering per winkel per boekjaar.
+/// KB nr. 1 art. 5: de nummering moet ononderbroken zijn. Daarom een
+/// expliciete teller met rijvergrendeling, geen sequence (die verliest
+/// nummers bij rollback) en zeker geen count(*).
+model InvoiceCounter {
+  storeId    String
+  year       Int
+  /// Laatst uitgegeven nummer. Volgende factuur krijgt `lastNumber + 1`.
+  lastNumber Int    @default(0)
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@id([storeId, year])
+}
+
+model Receipt {
+  id            String   @id @default(cuid())
+  orderId       String   @unique
+  /// Bv. "JJ/2026/000042". Gapenloos, per winkel per jaar.
+  invoiceNumber String   @unique
+  issuedAt      DateTime @default(now())
+
+  /// Volledige, onveranderlijke kopie van de bon zoals uitgereikt.
+  /// Een latere prijswijziging of hernoeming mag dit nooit aantasten.
+  snapshot Json
+  pdfUrl   String?
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Supermarktvergelijker (bounded context `compare`)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Staat los van de boetiekcatalogus hierboven. `Product` en `Store` zijn de
+// boetiek; de tegenhangers hieronder heten `CatalogProduct` en `StoreChain`,
+// zodat geen enkele bestaande tabel of route hoeft te wijzigen.
+//
+// Drie regels, dezelfde als hierboven:
+//
+//  1. GELD IS `Int` IN CENTEN. Ook eenheidsprijzen (centen per kg/l/stuk).
+//  2. ELKE PRIJS DRAAGT ZIJN HERKOMST. `source`, `sourceReference`, `observedAt`
+//     en `confidence` zijn verplicht. Een `DEMO`-prijs wordt nooit als actuele
+//     winkelprijs getoond.
+//  3. PRIJSGESCHIEDENIS IS APPEND-ONLY. `PriceHistory` wordt nooit bijgewerkt.
+//
+// De enums spiegelen `packages/contracts/src/compare/enums.ts` één op één.
+
+enum PackageUnit {
+  G
+  KG
+  ML
+  CL
+  L
+  PIECE
+}
+
+enum NormalizedUnit {
+  KG
+  L
+  PIECE
+}
+
+enum PromotionType {
+  NONE
+  TEMPORARY
+  LOYALTY_CARD
+  PERSONALIZED
+  MULTIBUY
+  VOLUME_DISCOUNT
+  BUY_X_GET_Y
+  PERCENTAGE
+  ONLINE_ONLY
+  REGIONAL
+}
+
+enum OfferChannel {
+  IN_STORE
+  ONLINE
+  BOTH
+}
+
+enum DataSourceKind {
+  /// Verzonnen demogegevens. Nooit als echte prijs tonen.
+  DEMO
+  /// Handmatig beheerd JSON/CSV-importbestand.
+  IMPORT_FILE
+  OFFICIAL_API
+  MERCHANT_FEED
+  /// Overeengekomen feed van een partnerketen (opvolger van MERCHANT_FEED).
+  PARTNER_FEED
+  MANUAL
+}
+
+enum BrandType {
+  NATIONAL_BRAND
+  STORE_BRAND
+  UNKNOWN
+}
+
+enum Availability {
+  IN_STOCK
+  OUT_OF_STOCK
+  UNKNOWN
+}
+
+enum ProductMatchType {
+  EXACT
+  EQUIVALENT
+  ALTERNATIVE
+  UNCERTAIN
+}
+
+enum ProductMatchStatus {
+  /// Door de matcher bepaald; kan bij een volgende import herzien worden.
+  AUTO
+  /// Door een mens bevestigd; imports laten dit met rust.
+  CONFIRMED
+  /// Door een mens afgewezen; de matcher stelt dit paar niet opnieuw voor.
+  REJECTED
+}
+
+enum AlertComparisonType {
+  PACKAGE_PRICE
+  UNIT_PRICE
+  DISCOUNT_PERCENTAGE
+}
+
+enum AlertMatchPreference {
+  EXACT
+  EQUIVALENT
+  ALTERNATIVE
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+}
+
+enum PriceAlertStatus {
+  ACTIVE
+  PAUSED
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+enum ImportRunStatus {
+  RUNNING
+  SUCCEEDED
+  PARTIAL
+  FAILED
+}
+
+model StoreChain {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  /// Sleutel van de adapter in `apps/api/src/compare/adapters/adapter-registry.ts`.
+  adapterKey      String   @unique
+  logoUrl         String?
+  websiteUrl      String?
+  loyaltyCardName String?
+  active          Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  locations       StoreLocation[]
+  storeProducts   StoreProduct[]
+  offers          ProductOffer[]
+  priceHistory    PriceHistory[]
+  importRuns      ImportRun[]
+  alertStores     PriceAlertStore[]
+  userPreferences UserChainPreference[]
+}
+
+model StoreLocation {
+  id           String   @id @default(cuid())
+  storeChainId String
+  /// Id van het filiaal in de bron. Uniek per keten.
+  externalId   String
+  name         String
+  address      String
+  postalCode   String
+  city         String
+  latitude     Float?
+  longitude    Float?
+  serviceArea  String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  storeChain   StoreChain             @relation(fields: [storeChainId], references: [id], onDelete: Cascade)
+  offers       ProductOffer[]
+  priceHistory PriceHistory[]
+  alertStores  PriceAlertStore[]
+  favoriteOf   UserFavoriteLocation[]
+
+  @@unique([storeChainId, externalId])
+  @@index([postalCode])
+}
+
+model CatalogCategory {
+  id        String  @id @default(cuid())
+  slug      String  @unique
+  nameNl    String
+  nameFr    String
+  parentId  String?
+  sortOrder Int     @default(0)
+
+  parent   CatalogCategory?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children CatalogCategory[] @relation("CategoryTree")
+  products CatalogProduct[]
+  alerts   PriceAlert[]
+}
+
+/// Canoniek product, keten-onafhankelijk. Eén rij per product + verpakking.
+/// "Coca-Cola Zero 1,5 l" en "Coca-Cola Zero 1 l" zijn twee rijen, met
+/// een `ProductMatch` van het type EQUIVALENT ertussen.
+model CatalogProduct {
+  id              String    @id @default(cuid())
+  name            String
+  /// Kleine letters, geen accenten, geen hoeveelheden. Voor zoeken en matchen.
+  normalizedName  String
+  brand           String?
+  normalizedBrand String?
+  brandType       BrandType @default(UNKNOWN)
+  categoryId      String?
+  imageUrl        String?
+  description     String?
+  /// EAN-8/13. Uniek: dezelfde barcode bij twee ketens is per definitie hetzelfde product.
+  barcode         String?   @unique
+
+  /// Inhoud van één verpakking zoals op het etiket (1.5 bij "1,5 L"). Alleen voor weergave.
+  /// `null` als de bron de inhoud niet meegeeft; dan is er geen eenheidsprijs.
+  packageQuantity    Float?
+  packageUnit        PackageUnit?
+  packCount          Int             @default(1)
+  /// Totale inhoud in basiseenheid: gram, milliliter of stuk. Hierop rekenen we.
+  normalizedQuantity Int?
+  normalizedUnit     NormalizedUnit?
+  /// Deterministische sleutel merk|naam|inhoud, voor matching zonder barcode.
+  matchKey           String
+
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  category      CatalogCategory?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  storeProducts StoreProduct[]
+  matchesFrom   ProductMatch[]     @relation("MatchProduct")
+  matchesTo     ProductMatch[]     @relation("MatchRelated")
+  listItems     ShoppingListItem[]
+  alerts        PriceAlert[]
+
+  @@index([normalizedName])
+  @@index([matchKey])
+  @@index([normalizedBrand])
+  @@index([categoryId, active])
+}
+
+/// Het product zoals één keten het voert, met de naam en sku van die keten.
+/// Verwijst naar precies één canoniek product.
+model StoreProduct {
+  id               String       @id @default(cuid())
+  storeChainId     String
+  catalogProductId String
+  /// Sku of id in de bron van de keten. Uniek per keten.
+  externalId       String
+  name             String
+  brand            String?
+  imageUrl         String?
+  productUrl       String?
+  barcode          String?
+  categoryPath     String?
+  packageQuantity  Float?
+  packageUnit      PackageUnit?
+  packCount        Int          @default(1)
+  active           Boolean      @default(true)
+  lastSeenAt       DateTime     @default(now())
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  storeChain     StoreChain     @relation(fields: [storeChainId], references: [id], onDelete: Cascade)
+  catalogProduct CatalogProduct @relation(fields: [catalogProductId], references: [id], onDelete: Cascade)
+  offers         ProductOffer[]
+  priceHistory   PriceHistory[]
+
+  @@unique([storeChainId, externalId])
+  @@index([catalogProductId])
+  @@index([barcode])
+}
+
+/// Eén prijs voor één winkelproduct, eventueel per filiaal.
+///
+/// `priceCents` is wat je vandaag voor ÉÉN verpakking betaalt, met
+/// onvoorwaardelijke promoties (vaste promoprijs, -30%) al verrekend.
+/// Voorwaardelijke promoties ("2 voor €5", "1+1") staan in `promotionRule`
+/// en worden pas toegepast bij het vereiste aantal — nooit als stukprijs.
+model ProductOffer {
+  id              String  @id @default(cuid())
+  storeProductId  String
+  storeChainId    String
+  storeLocationId String?
+
+  priceCents         Int
+  originalPriceCents Int?
+  /// Centen per kg / l / stuk, berekend bij import. `null` als de inhoud onbekend is.
+  unitPriceCents     Int?
+  unitType           NormalizedUnit?
+  currency           String          @default("EUR")
+
+  promotionType       PromotionType @default(NONE)
+  promotionText       String?
+  /// Rekenregel, zie `promotionRuleSchema` in `@superette/contracts`. `null` bij NONE.
+  promotionRule       Json?
+  conditions          String?
+  requiresLoyaltyCard Boolean       @default(false)
+  isPersonalized      Boolean       @default(false)
+  channel             OfferChannel  @default(BOTH)
+  minimumQuantity     Int           @default(1)
+  depositCents        Int?
+  availability        Availability  @default(UNKNOWN)
+
+  startsAt   DateTime?
+  endsAt     DateTime?
+  /// Laatste controlemoment in de bron.
+  observedAt DateTime
+
+  source          DataSourceKind
+  sourceLabel     String
+  /// Stabiele verwijzing in de bron. Uniek per keten: de sleutel voor idempotente imports.
+  sourceReference String
+  /// 0–1. Hoe zeker we zijn van deze prijs.
+  confidence      Float          @default(1)
+
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  storeProduct  StoreProduct        @relation(fields: [storeProductId], references: [id], onDelete: Cascade)
+  storeChain    StoreChain          @relation(fields: [storeChainId], references: [id], onDelete: Cascade)
+  storeLocation StoreLocation?      @relation(fields: [storeLocationId], references: [id], onDelete: SetNull)
+  notifications AlertNotification[]
+
+  @@unique([storeChainId, sourceReference])
+  @@index([storeProductId, active])
+  @@index([storeChainId, active, promotionType])
+  @@index([endsAt])
+}
+
+/// Append-only. Eén rij per waargenomen prijswijziging per winkelproduct.
+model PriceHistory {
+  id                 String         @id @default(cuid())
+  storeProductId     String
+  storeChainId       String
+  storeLocationId    String?
+  priceCents         Int
+  originalPriceCents Int?
+  unitPriceCents     Int?
+  promotionType      PromotionType
+  observedAt         DateTime
+  source             DataSourceKind
+
+  storeProduct  StoreProduct   @relation(fields: [storeProductId], references: [id], onDelete: Cascade)
+  storeChain    StoreChain     @relation(fields: [storeChainId], references: [id], onDelete: Cascade)
+  storeLocation StoreLocation? @relation(fields: [storeLocationId], references: [id], onDelete: SetNull)
+
+  @@index([storeProductId, observedAt])
+  @@index([storeChainId, observedAt])
+}
+
+/// Relatie tussen twee canonieke producten. Gericht: `product` → `related`.
+/// De matcher schrijft beide richtingen zodat opzoeken in één query kan.
+model ProductMatch {
+  id                String             @id @default(cuid())
+  productId         String
+  relatedProductId  String
+  matchType         ProductMatchType
+  confidence        Float
+  status            ProductMatchStatus @default(AUTO)
+  reason            String?
+  confirmedByUserId String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  product CatalogProduct       @relation("MatchProduct", fields: [productId], references: [id], onDelete: Cascade)
+  related CatalogProduct       @relation("MatchRelated", fields: [relatedProductId], references: [id], onDelete: Cascade)
+  reports ProductMatchReport[]
+
+  @@unique([productId, relatedProductId])
+  @@index([relatedProductId])
+  @@index([status, matchType])
+}
+
+/// Een gebruiker meldt een onjuiste match. Voer voor de beheerfase.
+model ProductMatchReport {
+  id             String   @id @default(cuid())
+  productMatchId String
+  userId         String?
+  reason         String
+  createdAt      DateTime @default(now())
+
+  match ProductMatch @relation(fields: [productMatchId], references: [id], onDelete: Cascade)
+  user  User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([productMatchId])
+}
+
+model ShoppingList {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  archived  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items ShoppingListItem[]
+
+  @@index([userId, archived])
+}
+
+model ShoppingListItem {
+  id               String  @id @default(cuid())
+  listId           String
+  catalogProductId String?
+  /// Vrije regel zonder gekoppeld product. Wordt nergens meegerekend.
+  freeText         String?
+  quantity         Int     @default(1)
+  checked          Boolean @default(false)
+
+  /// Voorkeuren per regel, zie `listItemConstraintsSchema`.
+  exactBrandRequired  Boolean @default(false)
+  allowStoreBrand     Boolean @default(true)
+  allowAlternatives   Boolean @default(true)
+  maxPriceCents       Int?
+  preferredChainSlug  String?
+  desiredPackageLabel String?
+
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  list           ShoppingList    @relation(fields: [listId], references: [id], onDelete: Cascade)
+  catalogProduct CatalogProduct? @relation(fields: [catalogProductId], references: [id], onDelete: SetNull)
+
+  @@index([listId, sortOrder])
+}
+
+/// Winkelvoorkeuren van een gebruiker. Ketenkeuzes staan in `UserChainPreference`.
+model ComparePreference {
+  userId                    String   @id
+  postalCode                String?
+  municipality              String?
+  maxDistanceKm             Int?
+  preferStoreBrands         Boolean  @default(false)
+  preferNationalBrands      Boolean  @default(false)
+  allowAlternatives         Boolean  @default(true)
+  includePersonalizedOffers Boolean  @default(false)
+  includeOnlineOffers       Boolean  @default(true)
+  /// Prijsalerts ook per e-mail (zodra een provider is gekoppeld). Standaard uit: opt-in.
+  emailNotifications        Boolean  @default(false)
+  updatedAt                 DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserChainPreference {
+  userId         String
+  storeChainId   String
+  enabled        Boolean @default(true)
+  isFavorite     Boolean @default(false)
+  hasLoyaltyCard Boolean @default(false)
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storeChain StoreChain @relation(fields: [storeChainId], references: [id], onDelete: Cascade)
+
+  @@id([userId, storeChainId])
+}
+
+model UserFavoriteLocation {
+  userId          String
+  storeLocationId String
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storeLocation StoreLocation @relation(fields: [storeLocationId], references: [id], onDelete: Cascade)
+
+  @@id([userId, storeLocationId])
+}
+
+model PriceAlert {
+  id               String  @id @default(cuid())
+  userId           String
+  /// Precies één van beide: een product-alert of een categorie-alert.
+  catalogProductId String?
+  categoryId       String?
+
+  targetPriceCents          Int?
+  minimumDiscountPercentage Int?
+  comparisonType            AlertComparisonType
+  matchPreference           AlertMatchPreference @default(EXACT)
+  notificationChannel       NotificationChannel  @default(IN_APP)
+  status                    PriceAlertStatus     @default(ACTIVE)
+
+  includeLoyaltyOffers      Boolean @default(true)
+  includePersonalizedOffers Boolean @default(false)
+  includeOnlineOffers       Boolean @default(true)
+
+  /// Staat de alert op scherp? Wordt `false` na een melding en opnieuw `true`
+  /// zodra de prijs weer boven de grens komt. Zo krijgt niemand bij elke
+  /// synchronisatie dezelfde melding.
+  armed                   Boolean   @default(true)
+  lastCheckedAt           DateTime?
+  lastTriggeredAt         DateTime?
+  lastTriggeredPriceCents Int?
+  lastTriggeredOfferId    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  catalogProduct CatalogProduct?     @relation(fields: [catalogProductId], references: [id], onDelete: Cascade)
+  category       CatalogCategory?    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  stores         PriceAlertStore[]
+  notifications  AlertNotification[]
+
+  @@index([userId, status])
+  @@index([status, catalogProductId])
+  @@index([status, categoryId])
+}
+
+/// Voor welke ketens (en eventueel filialen) een alert geldt. Geen rijen = alle ketens.
+model PriceAlertStore {
+  id              String  @id @default(cuid())
+  priceAlertId    String
+  storeChainId    String
+  storeLocationId String?
+
+  alert         PriceAlert     @relation(fields: [priceAlertId], references: [id], onDelete: Cascade)
+  storeChain    StoreChain     @relation(fields: [storeChainId], references: [id], onDelete: Cascade)
+  storeLocation StoreLocation? @relation(fields: [storeLocationId], references: [id], onDelete: Cascade)
+
+  /// Postgres telt NULL als verschillend; de servicelaag dedupliceert daarom óók.
+  @@unique([priceAlertId, storeChainId, storeLocationId])
+  @@index([storeChainId])
+}
+
+model AlertNotification {
+  id             String              @id @default(cuid())
+  priceAlertId   String
+  productOfferId String?
+  userId         String
+  channel        NotificationChannel
+  status         NotificationStatus  @default(PENDING)
+  /// Alert + aanbieding + prijs. Een retry maakt nooit een tweede rij.
+  idempotencyKey String              @unique
+  /// Gebruiker + dag. Groepeert meldingen tot één overzicht per gebruiker per dag.
+  digestKey      String
+
+  triggeredPriceCents Int
+  previousPriceCents  Int?
+  /// De volledige melding zoals opgebouwd (`alertNotificationSchema`), onveranderlijk.
+  payload             Json
+  attempts            Int       @default(0)
+  sentAt              DateTime?
+  readAt              DateTime?
+  errorMessage        String?
+  createdAt           DateTime  @default(now())
+
+  alert PriceAlert    @relation(fields: [priceAlertId], references: [id], onDelete: Cascade)
+  offer ProductOffer? @relation(fields: [productOfferId], references: [id], onDelete: SetNull)
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([status, digestKey])
+}
+
+/// Eén uitvoering van een adapter-import. Meetbaar en controleerbaar.
+model ImportRun {
+  id            String          @id @default(cuid())
+  adapterKey    String
+  storeChainId  String?
+  source        DataSourceKind
+  /// Verklaarde de bron dat haar voorwaarden zijn nagekeken? Zonder dit is een keten nooit "live".
+  termsReviewed Boolean         @default(false)
+  status        ImportRunStatus @default(RUNNING)
+  startedAt     DateTime        @default(now())
+  finishedAt    DateTime?
+
+  productsSeen      Int     @default(0)
+  offersUpserted    Int     @default(0)
+  offersDeactivated Int     @default(0)
+  historyAppended   Int     @default(0)
+  matchesCreated    Int     @default(0)
+  /// Lijst van foutmeldingen zonder geheimen of persoonsgegevens.
+  errors            Json?
+  note              String?
+
+  storeChain StoreChain? @relation(fields: [storeChainId], references: [id], onDelete: SetNull)
+
+  @@index([adapterKey, startedAt])
+}
+
+/// Lease voor achtergrondtaken over meerdere processen heen. Wie de rij kan
+/// claimen (verlopen of eigen lease) mag de taak draaien; een heartbeat verlengt
+/// de lease, een gecrashte houder verliest hem na afloop van `expiresAt`.
+model JobLease {
+  name      String   @id
+  holder    String
+  expiresAt DateTime
+  updatedAt DateTime @updatedAt
+}

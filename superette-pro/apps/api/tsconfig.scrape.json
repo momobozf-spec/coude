@@ -1,0 +1,1 @@
+{ "extends": "./tsconfig.json", "compilerOptions": { "rootDir": ".", "noEmit": true, "lib": ["ES2022","DOM"] }, "include": ["scripts/scrape/*.ts", "scripts/import/*.ts", "src/compare/scrapers/**/*.ts"], "exclude": [] }

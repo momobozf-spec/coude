@@ -1,0 +1,57 @@
+{
+  "name": "@superette/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NestJS backend: toegangscontrole, catalogus, mandje, betalingen",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "//dev": "Nest CLI, niet tsx: esbuild emit geen design:paramtypes-metadata, waardoor Nest constructor-injectie niet kan resolven.",
+    "dev": "nest start --watch",
+    "start": "node dist/main.js",
+    "test": "vitest run",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:status": "prisma migrate status",
+    "db:seed": "tsx prisma/seed.ts",
+    "//compare": "Via de tsc-build, niet tsx: Nest-injectie heeft decorator-metadata nodig (zie //dev).",
+    "db:seed:compare": "tsc -p tsconfig.json && node dist/compare/cli/sync.cli.js",
+    "compare:sync": "tsc -p tsconfig.json && node dist/compare/cli/sync.cli.js"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.1.6",
+    "@nestjs/jwt": "^11.0.0",
+    "@nestjs/passport": "^11.0.5",
+    "@nestjs/platform-express": "^11.1.6",
+    "@nestjs/throttler": "^6.4.0",
+    "@node-rs/argon2": "^2.0.2",
+    "@prisma/client": "^6.16.2",
+    "@superette/contracts": "*",
+    "@superette/pricing": "*",
+    "@superette/vat": "*",
+    "jose": "^6.1.0",
+    "mqtt": "^5.14.1",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.23",
+    "@types/node": "^22.18.1",
+    "@types/passport-jwt": "^4.0.1",
+    "embedded-postgres": "^18.4.0-beta.17",
+    "prisma": "^6.16.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

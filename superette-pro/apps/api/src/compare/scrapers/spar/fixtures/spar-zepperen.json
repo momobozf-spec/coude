@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "sourceUrl": "https://www.mijnspar.be/",
+  "observedAt": "2026-10-08T09:03:11.000Z",
+  "storeConfirmed": true,
+  "store": { "externalId": "spar-zepperen", "name": "Spar Zepperen", "address": "Eynestraat 85", "postalCode": "3800", "city": "Zepperen" },
+  "tiles": [
+    { "title": "Spar", "description": "minisoesjes, miniboules de Berlin of mini-éclairs", "unit": "6 stuks 200 g", "promo": "1+1 GRATIS vanaf 11/10", "date": "Geldig van 11/10 - 11/10/2026", "priceVisible": true },
+    { "title": "witte druiven zonder pit", "description": "Spanje", "unit": "500 g", "promo": "1+1 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "oldWhole": "4", "oldFraction": "58", "whole": "2", "fraction": "29", "prefix": "2 voor", "unitPrice": "€ 2,29/kg" },
+    { "title": "eendenfilet", "unit": "", "promo": "1+1 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "oldWhole": "26", "oldFraction": "99", "whole": "13", "fraction": "49", "prefix": "2 voor" },
+    { "title": "Gratis Leffe of Leffe 0,0% blond of bruin 8 x 33 cl + lg,", "description": "bij aankoop van 1 kg vers rundstoofvlees uit de beenhouwerij-afdeling", "promo": "GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true },
+    { "title": "pavé", "description": "rustiek of campagnard", "unit": "600 g", "promo": "1+1 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "oldWhole": "5", "oldFraction": "38", "whole": "2", "fraction": "69", "prefix": "2 voor", "unitPrice": "€ 2,10/kg" },
+    { "title": "Vivera", "description": "plantaardige vleesvervangers naar keuze", "unit": "vanaf 175 g", "promo": "1+1 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "exampleVisible": true, "example": "2 x plantaardige gyros 175 g", "examplePrice": "€7,20 - €3,60 voor 2 (€ 10,29/kg)" },
+    { "title": "Spar", "description": "worstenbroodjes 2 stuks", "unit": "250 g", "promo": "1+1 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "oldWhole": "5", "oldFraction": "98", "whole": "2", "fraction": "99", "prefix": "2 voor", "unitPrice": "€ 5,98/kg" },
+    { "title": "Benecol", "unit": "", "promo": "1+1 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "exampleVisible": true, "example": "2 x drinkyoghurt aardbei 8 stuks 540 g", "examplePrice": "€16,34 - €7,67 voor 2 (€ 7,10/kg)" },
+    { "title": "Boursin", "description": "plant-based garlic & herbs", "unit": "150 g", "promo": "1+1 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "oldWhole": "7", "oldFraction": "58", "whole": "3", "fraction": "79", "prefix": "2 voor", "unitPrice": "€ 12,63/kg" },
+    { "title": "Barebells", "unit": "55 g", "promo": "1+1 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "exampleVisible": true, "example": "2 x soft protein bar salted peanut caramel 55 g", "examplePrice": "€6,04 - €3,02 voor 2 (€ 27,45/kg)" },
+    { "title": "Magnum after dinner, bomboniera, bonbon, caramel nut bar ,sandwich almond, Solero bonbon exotic, Ben&Jerry's cookie dough sandwiches of Ola napolitana", "unit": "vanaf 64 ml", "promo": "1+1 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "exampleVisible": true, "example": "2 x Magnum after dinner classic 8 stuks 280 ml", "examplePrice": "€13,44 - €6,72 voor 2 (€ 12,00/L)" },
+    { "title": "Hellmann's, Calvé of Effi mayonaise of Amora mosterd", "unit": "vanaf 185 g of 250 ml", "promo": "1+1 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "exampleVisible": true, "example": "2 x Amora mosterd van Dijon 185 g", "examplePrice": "€4,64 - €2,32 voor 2 (€ 6,27/kg)" },
+    { "title": "Iglo Op Z'n Belgisch", "unit": "425 g of 450 g", "promo": "1+1 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "exampleVisible": true, "example": "2 x aardappelgratin met gehakt en spinazie 450 g", "examplePrice": "€14,54 - €7,27 voor 2 (€ 8,08/kg)" },
+    { "title": "Leffe", "unit": "6 x 33 cl + lg,", "promo": "1+1 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "exampleVisible": true, "example": "2 x winterbier 6 x 33 cl + lg,", "examplePrice": "€17,64 - €8,82 voor 2 (€ 2,23/kg)" },
+    { "title": "Head & Shoulders", "unit": "vanaf 220 ml", "promo": "2+2 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "exampleVisible": true, "example": "4 x shampoo classic 250 ml", "examplePrice": "€16,80 - €8,40 voor 4 (€ 8,40/L)" },
+    { "title": "Ariel", "unit": "vanaf 15 wasbeurten", "promo": "1+1 GRATIS", "date": "Geldig van 8/10 - 21/10/2026", "priceVisible": true, "exampleVisible": true, "example": "2 x vloeibaar wasmiddel color 30 wasbeurten", "examplePrice": "€33,98 - €16,99 voor 2 (€ 0,28/st)" }
+  ]
+}
