@@ -16,7 +16,7 @@
  * beoordeling van de voorwaarden (zie docs/COMPARE.md, "Live-criteria").
  */
 import { createHash } from 'node:crypto';
-import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException, type OnModuleDestroy } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SUPERMARKET_ADAPTERS } from '../adapters/adapter-registry';
 import type { FeedFile } from '../adapters/feed-schema';
@@ -61,7 +61,7 @@ export function feedDigest(feed: FeedFile): { sha256: string; sizeBytes: number 
 }
 
 @Injectable()
-export class FeedPushService {
+export class FeedPushService implements OnModuleDestroy {
   private readonly logger = new Logger('FeedPush');
 
   constructor(
@@ -145,21 +145,73 @@ export class FeedPushService {
     }));
   }
 
+  /** Ketens waarvan een push binnenkwam terwijl er al een synchronisatie liep. */
+  private readonly pending = new Set<string>();
+  private retryTimer: ReturnType<typeof setTimeout> | null = null;
+  private retryAttempts = 0;
+  /** Loopt er vanuit deze server al een sync na een push? Dan alleen in de wachtrij zetten. */
+  private inFlight = false;
+  /** Wachttijd tussen pogingen en maximum aantal pogingen (samen ±15 minuten). */
+  static readonly RETRY_DELAY_MS = 30_000;
+  static readonly MAX_RETRY_ATTEMPTS = 30;
+
   /**
    * Op de achtergrond: een import van honderden producten duurt langer dan een
-   * redelijke HTTP-timeout. Loopt er al een synchronisatie (lease), dan is dat
-   * geen fout: de volgende run neemt de opgeslagen feed mee.
+   * redelijke HTTP-timeout. Loopt er al een synchronisatie (lease), dan gaat de
+   * keten in een wachtrij: pushes die kort na elkaar binnenkomen (bv. `feeds:push`
+   * met 7 ketens) worden gebundeld en in één run gesynchroniseerd zodra de lease vrij is.
+   * Na het maximum aantal pogingen neemt de dagelijkse `compare:sync` de opgeslagen feed mee.
    */
   private startSync(adapterKey: string, requestId: string): void {
-    void this.sync.runSync({ keys: [adapterKey], trigger: 'feed-push', requestId }).then(
-      (summary) => this.logger.log(`sync na feed-push klaar requestId=${requestId} adapter=${adapterKey} failed=${summary.failedAdapters.join(',') || '-'}`),
+    this.pending.add(adapterKey);
+    if (!this.inFlight && this.retryTimer === null) this.runPending(requestId);
+  }
+
+  private runPending(requestId: string): void {
+    this.retryTimer = null;
+    const keys = [...this.pending];
+    if (keys.length === 0) return;
+    this.pending.clear();
+    this.inFlight = true;
+    void this.sync.runSync({ keys, trigger: 'feed-push', requestId }).then(
+      (summary) => {
+        this.inFlight = false;
+        this.retryAttempts = 0;
+        this.logger.log(`sync na feed-push klaar requestId=${requestId} adapters=${keys.join(',')} failed=${summary.failedAdapters.join(',') || '-'}`);
+        // Wat tijdens deze run binnenkwam, meteen erachteraan.
+        if (this.pending.size > 0) this.schedule(requestId, 0);
+      },
       (error: unknown) => {
+        this.inFlight = false;
+        for (const key of keys) this.pending.add(key);
         if (error instanceof ConflictException) {
-          this.logger.log(`sync na feed-push uitgesteld requestId=${requestId} adapter=${adapterKey}: er loopt al een synchronisatie`);
+          this.retryAttempts += 1;
+          if (this.retryAttempts > FeedPushService.MAX_RETRY_ATTEMPTS) {
+            this.logger.warn(`sync na feed-push opgegeven na ${FeedPushService.MAX_RETRY_ATTEMPTS} pogingen adapters=${[...this.pending].join(',')}; de volgende compare:sync neemt de opgeslagen feeds mee`);
+            this.pending.clear();
+            this.retryAttempts = 0;
+            return;
+          }
+          this.logger.log(`sync na feed-push uitgesteld requestId=${requestId} adapters=${[...this.pending].join(',')}: er loopt al een synchronisatie; nieuwe poging over ${FeedPushService.RETRY_DELAY_MS / 1000}s`);
+          this.schedule(requestId, FeedPushService.RETRY_DELAY_MS);
           return;
         }
-        this.logger.error(`sync na feed-push mislukt requestId=${requestId} adapter=${adapterKey}: ${error instanceof Error ? error.message : String(error)}`);
+        this.pending.clear();
+        this.retryAttempts = 0;
+        this.logger.error(`sync na feed-push mislukt requestId=${requestId} adapters=${keys.join(',')}: ${error instanceof Error ? error.message : String(error)}`);
       },
     );
+  }
+
+  private schedule(requestId: string, delayMs: number): void {
+    if (this.retryTimer !== null) return;
+    this.retryTimer = setTimeout(() => this.runPending(requestId), delayMs);
+    this.retryTimer.unref?.();
+  }
+
+  /** Bij afsluiten geen hangende timer achterlaten. */
+  onModuleDestroy(): void {
+    if (this.retryTimer !== null) clearTimeout(this.retryTimer);
+    this.retryTimer = null;
   }
 }
