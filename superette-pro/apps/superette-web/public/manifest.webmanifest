@@ -1,19 +1,28 @@
 {
-  "name": "Superette",
+  "id": "/",
+  "name": "Superette — supermarktprijzen vergelijken",
   "short_name": "Superette",
-  "description": "Ontdek waar je boodschappen werkelijk het goedkoopst zijn",
-  "start_url": "/",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#FBF7F0",
-  "theme_color": "#B8432F",
+  "description": "Ontdek waar je boodschappen werkelijk het goedkoopst zijn. Vergelijk prijzen bij Belgische supermarkten.",
   "lang": "nl-BE",
+  "dir": "ltr",
+  "start_url": "/?bron=app",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#F2F3EE",
+  "theme_color": "#0E5A43",
+  "categories": ["shopping", "food", "lifestyle"],
   "icons": [
-    {
-      "src": "/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Zoeken", "url": "/zoeken", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Mijn lijst", "url": "/lijsten", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Promoties", "url": "/promoties", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }

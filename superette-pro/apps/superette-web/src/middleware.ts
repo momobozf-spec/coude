@@ -70,7 +70,7 @@ export const config = {
   matcher: [
     {
       // Alles behalve statische bestanden; die krijgen hun headers van de server.
-      source: '/((?!_next/static|_next/image|icon.svg|manifest.webmanifest).*)',
+      source: '/((?!_next/static|_next/image|icon.svg|icons/|manifest.webmanifest|sw.js|offline.html).*)',
       missing: [
         { type: 'header', key: 'next-router-prefetch' },
         { type: 'header', key: 'purpose', value: 'prefetch' },

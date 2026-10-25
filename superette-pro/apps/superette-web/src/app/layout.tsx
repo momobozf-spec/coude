@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from 'next';
+import '@fontsource-variable/archivo/wdth.css';
+import { ServiceWorkerRegistrar } from '@/components/service-worker-registrar';
 import { AuthProvider } from '@/lib/auth';
 import { I18nProvider } from '@/lib/i18n';
 import { NotificationsProvider } from '@/lib/notifications';
@@ -16,15 +18,27 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: { default: 'Superette', template: '%s · Superette' },
+  applicationName: 'Superette',
   description: 'Ontdek waar je boodschappen werkelijk het goedkoopst zijn. Vergelijk prijzen bij Belgische supermarkten.',
   manifest: '/manifest.webmanifest',
-  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Superette' },
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
+  // Als app op het beginscherm van een iPhone: volledig scherm, de groene balk loopt onder de statusbalk door.
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Superette' },
+  formatDetection: { telephone: false },
+  other: { 'mobile-web-app-capable': 'yes' },
 };
 
 export const viewport: Viewport = {
+  // Kleur van de browser-/statusbalk = de app-balk.
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#FBF7F0' },
-    { media: '(prefers-color-scheme: dark)', color: '#17140F' },
+    { media: '(prefers-color-scheme: light)', color: '#0E5A43' },
+    { media: '(prefers-color-scheme: dark)', color: '#101A16' },
   ],
   viewportFit: 'cover',
   width: 'device-width',
@@ -40,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <I18nProvider>
             <AuthProvider>
               <NotificationsProvider>{children}</NotificationsProvider>
+              <ServiceWorkerRegistrar />
             </AuthProvider>
           </I18nProvider>
         </ThemeProvider>

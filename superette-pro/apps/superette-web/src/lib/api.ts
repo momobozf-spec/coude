@@ -54,7 +54,8 @@ import {
   type WebSessionResponse,
 } from '@superette/contracts';
 
-const BASE_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000/api/v1';
+export const API_BASE_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000/api/v1';
+const BASE_URL = API_BASE_URL;
 
 /** Gebeurtenis voor de rest van de app: de sessie is definitief weg. */
 export const SESSION_EXPIRED_EVENT = 'superette:session-expired';
