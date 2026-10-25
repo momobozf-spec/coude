@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { AppShell } from '@/components/app-shell';
+import { ChevronRightIcon, ListIcon } from '@/components/icons';
 import { ErrorState, errorMessage, ListSkeleton } from '@/components/states';
 import { Button, Card, EmptyState, Field, Notice, PageTitle } from '@/components/ui';
 import { api } from '@/lib/api';
@@ -48,7 +49,7 @@ export default function ListsPage() {
     <AppShell>
       <PageTitle>{t('lists.title')}</PageTitle>
 
-      <form onSubmit={create} className="mb-6 flex items-end gap-2">
+      <form onSubmit={create} className="mb-6 flex items-end gap-2 rounded-[18px] border border-hairline bg-canvas-raised p-3.5">
         <Field label={t('lists.create')} name="name" placeholder={t('lists.namePlaceholder')} value={name} onChange={(e) => setName(e.target.value)} className="flex-1" maxLength={80} />
         <Button type="submit" disabled={busy || name.trim().length === 0}>
           {t('common.add')}
@@ -58,21 +59,32 @@ export default function ListsPage() {
 
       {lists.loading && !lists.data && <ListSkeleton rows={2} />}
       {lists.error ? <ErrorState error={lists.error} onRetry={lists.reload} /> : null}
-      {lists.data && lists.data.length === 0 && <EmptyState title={t('lists.empty.title')} text={t('lists.empty.text')} />}
+      {lists.data && lists.data.length === 0 && <EmptyState title={t('lists.empty.title')} text={t('lists.empty.text')} icon={<ListIcon size={28} />} />}
       {lists.data && lists.data.length > 0 && (
         <ul className="space-y-3">
           {lists.data.map((list) => (
-            <Card key={list.id} as="li" className={list.archived ? 'opacity-70' : ''}>
-              <Link href={`/lijsten/${list.id}`} className="block rounded-lg">
-                <span className="flex items-center justify-between gap-3">
-                  <span className="text-base font-bold text-ink">{list.name}</span>
-                  <span className="text-xs text-ink-muted">{formatRelative(list.updatedAt, locale)}</span>
+            <Card key={list.id} as="li" className={`p-0 ${list.archived ? 'border-dashed bg-canvas-sunken/60' : ''}`}>
+              <Link href={`/lijsten/${list.id}`} className="flex items-center gap-3 rounded-[18px] p-4">
+                <span className="flex size-12 shrink-0 items-center justify-center rounded-[12px] bg-brand-soft text-brand-strong" aria-hidden="true">
+                  <ListIcon />
                 </span>
-                <span className="mt-1 block text-sm text-ink-muted">
+                <span className="min-w-0 flex-1">
+                <span className="flex items-center justify-between gap-3">
+                  <span className="truncate text-[17px] font-bold text-ink">{list.name}</span>
+                  <span className="shrink-0 text-xs text-ink-muted">{formatRelative(list.updatedAt, locale)}</span>
+                </span>
+                <span className="mt-0.5 block text-sm text-ink-muted">
                   {list.itemCount === 1 ? t('lists.item') : t('lists.items', { n: list.itemCount })}
                   {list.itemCount > 0 && ` · ${t('lists.checked', { checked: list.checkedCount, total: list.itemCount })}`}
                   {list.archived && ` · ${t('lists.archived')}`}
                 </span>
+                {list.itemCount > 0 && (
+                  <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-canvas-sunken" aria-hidden="true">
+                    <span className="block h-full rounded-full bg-brand" style={{ width: `${Math.round((list.checkedCount / list.itemCount) * 100)}%` }} />
+                  </span>
+                )}
+                </span>
+                <ChevronRightIcon size={20} className="shrink-0 text-ink-muted" />
               </Link>
             </Card>
           ))}

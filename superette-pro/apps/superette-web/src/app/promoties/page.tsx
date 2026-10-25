@@ -5,9 +5,10 @@ import type { SearchResultItem } from '@superette/contracts';
 import { AddToListDialog } from '@/components/add-to-list-dialog';
 import { AppShell } from '@/components/app-shell';
 import { ChainPicker } from '@/components/chain-picker';
-import { ProductCard } from '@/components/product-card';
-import { CoverageNotice, ErrorState, ListSkeleton } from '@/components/states';
-import { EmptyState, Notice, PageTitle } from '@/components/ui';
+import { TagIcon } from '@/components/icons';
+import { PromoCard } from '@/components/product-card';
+import { DataNotice, ErrorState, ListSkeleton } from '@/components/states';
+import { EmptyState, PageTitle } from '@/components/ui';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { usePreferences } from '@/lib/use-preferences';
@@ -31,26 +32,26 @@ export default function PromotionsPage() {
     <AppShell wide>
       <PageTitle lead={t('promotions.intro')}>{t('promotions.title')}</PageTitle>
 
-      <details className="mb-4 rounded-2xl border border-hairline bg-canvas-raised p-4">
-        <summary className="cursor-pointer text-sm font-semibold text-ink">{t('search.filters.chains')}</summary>
-        <div className="mt-3">
-          {chains.data && <ChainPicker name="promo-chains" legend={t('search.filters.chains')} hint={t('prefs.enabledChains.hint')} chains={chains.data} selected={effectiveChains} onChange={setChainSlugs} />}
+      {chains.data && (
+        <div className="scroll-row -mx-4 mb-4 overflow-x-auto px-4 pb-1">
+          <div className="w-max">
+            <ChainPicker variant="chips" name="promo-chains" legend={t('search.filters.chains')} chains={chains.data} selected={effectiveChains} onChange={setChainSlugs} />
+          </div>
         </div>
-      </details>
+      )}
 
-      {promotions.loading && !promotions.data && <ListSkeleton />}
+      {promotions.loading && !promotions.data && <ListSkeleton rows={2} />}
       {promotions.error ? <ErrorState error={promotions.error} onRetry={promotions.reload} /> : null}
       {promotions.data && (
         <div className="space-y-3">
-          <CoverageNotice coverage={promotions.data.coverage} />
-          {promotions.data.containsDemoData && <Notice tone="warning">{t('search.demoNotice')}</Notice>}
+          <DataNotice coverage={promotions.data.coverage} containsDemoData={promotions.data.containsDemoData} />
           {promotions.data.items.length === 0 ? (
-            <EmptyState title={t('promotions.empty')} />
+            <EmptyState title={t('promotions.empty')} icon={<TagIcon size={28} />} />
           ) : (
-            <ul className="grid gap-3 md:grid-cols-2">
+            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {promotions.data.items.map((item) => (
                 <li key={item.product.id}>
-                  <ProductCard item={item} onAddToList={setListTarget} />
+                  <PromoCard item={item} onAddToList={setListTarget} />
                 </li>
               ))}
             </ul>

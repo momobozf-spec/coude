@@ -156,7 +156,7 @@ export function AlertForm({
       noValidate
     >
       <div className="rounded-xl border border-hairline bg-canvas-raised p-3">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">{t('alerts.form.product')}</p>
+        <p className="text-xs font-semibold text-ink-muted">{t('alerts.form.product')}</p>
         <p className="font-bold text-ink">
           {product.brand && !product.name.toLowerCase().includes(product.brand.toLowerCase()) ? `${product.brand} ` : ''}
           {product.name} <span className="font-normal text-ink-muted">· {product.packageLabel}</span>
@@ -247,7 +247,7 @@ export function AlertForm({
             <p className="text-ink">{preview.sentence}</p>
             {preview.currentLowest ? (
               <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">{t('alerts.form.preview.current')}</p>
+                <p className="text-xs font-semibold text-ink-muted">{t('alerts.form.preview.current')}</p>
                 <OfferRow offer={preview.currentLowest.offer} compact />
                 {preview.differenceCents !== null && (
                   <p className={`text-sm font-semibold ${preview.differenceCents <= 0 ? 'text-accent-strong' : 'text-ink'}`}>

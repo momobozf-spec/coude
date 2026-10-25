@@ -6,10 +6,11 @@ import { useState, type FormEvent } from 'react';
 import type { SearchResultItem } from '@superette/contracts';
 import { AddToListDialog } from '@/components/add-to-list-dialog';
 import { AppShell } from '@/components/app-shell';
+import { SearchIcon } from '@/components/icons';
 import { ChainBadge } from '@/components/price';
-import { ProductCard } from '@/components/product-card';
-import { ErrorState, ProductCardSkeleton } from '@/components/states';
-import { Badge, Button, Card } from '@/components/ui';
+import { PromoCard } from '@/components/product-card';
+import { ErrorState } from '@/components/states';
+import { Badge, SectionTitle, Skeleton } from '@/components/ui';
 import { api } from '@/lib/api';
 import { formatRelative } from '@/lib/format';
 import { useI18n } from '@/lib/i18n';
@@ -24,7 +25,7 @@ export default function HomePage() {
   const [listTarget, setListTarget] = useState<SearchResultItem | null>(null);
 
   const chains = useAsync(() => api.chains(), []);
-  const promotions = useAsync(() => api.promotions({ pageSize: 4 }), []);
+  const promotions = useAsync(() => api.promotions({ pageSize: 6 }), []);
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -32,53 +33,94 @@ export default function HomePage() {
     router.push(q ? `/zoeken?q=${encodeURIComponent(q)}` : '/zoeken');
   }
 
-  return (
-    <AppShell wide>
-      <section className="gingham -mx-4 -mt-5 px-4 pb-10 pt-10 sm:rounded-b-3xl">
-        <div className="mx-auto max-w-2xl text-center">
-          <h1 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">{t('home.heroTitle')}</h1>
-          <p className="mt-3 text-base text-ink-muted">{t('home.heroText')}</p>
+  const hero = (
+    <section className="bg-bar text-bar-ink" aria-labelledby="home-title">
+      <div className="px-safe mx-auto max-w-3xl pb-7 pt-4 md:pb-12 md:pt-10">
+        <h1 id="home-title" className="max-w-[16ch] text-[2.5rem] text-bar-ink sm:text-[3.25rem]">
+          {t('home.heroTitle')}
+        </h1>
+        <p className="mt-3 max-w-[38ch] text-[15px] leading-relaxed text-bar-muted">{t('home.heroText')}</p>
 
-          <form onSubmit={submit} role="search" className="mt-6 flex flex-col gap-2 sm:flex-row">
-            <label htmlFor="home-search" className="sr-only">
-              {t('search.title')}
-            </label>
+        <form onSubmit={submit} role="search" className="mt-5 flex flex-col gap-2 sm:flex-row">
+          <label htmlFor="home-search" className="sr-only">
+            {t('search.title')}
+          </label>
+          <div className="relative flex-1">
+            <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" />
             <input
               id="home-search"
               type="search"
+              enterKeyHint="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder={t('home.searchPlaceholder')}
-              className="min-h-12 flex-1 rounded-xl border border-hairline-strong bg-canvas-raised px-4 text-base text-ink placeholder:text-ink-muted/70 focus:border-brand focus:outline-none"
+              className="min-h-13 w-full rounded-[14px] border-0 bg-canvas-raised pl-11 ring-1 ring-hairline-strong pr-4 text-base text-ink shadow-[var(--shadow)] placeholder:text-ink-muted focus:outline-none focus-visible:ring-3 focus-visible:ring-tag"
             />
-            <Button type="submit" size="lg">
-              {t('home.searchButton')}
-            </Button>
-          </form>
+          </div>
+          <button
+            type="submit"
+            className="inline-flex min-h-13 items-center justify-center rounded-[14px] bg-tag px-6 text-base font-bold text-tag-ink shadow-[inset_0_-3px_0_var(--tag-edge)] transition-transform active:scale-[0.98]"
+          >
+            {t('home.searchButton')}
+          </button>
+        </form>
 
-          <p className="mt-4 text-xs text-ink-muted">{t('home.popularSearches')}</p>
-          <ul className="mt-1.5 flex flex-wrap justify-center gap-2">
-            {POPULAR.map((term) => (
-              <li key={term}>
-                <Link href={`/zoeken?q=${encodeURIComponent(term)}`} className="inline-flex min-h-9 items-center rounded-full border border-hairline-strong bg-canvas-raised px-3 text-sm text-ink hover:bg-canvas-sunken">
-                  {term}
-                </Link>
+        <p className="mt-5 text-[13px] font-semibold text-bar-muted">{t('home.popularSearches')}</p>
+        <ul className="scroll-row -mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1">
+          {POPULAR.map((term) => (
+            <li key={term} className="shrink-0">
+              <Link
+                href={`/zoeken?q=${encodeURIComponent(term)}`}
+                className="inline-flex min-h-10 items-center rounded-full border border-bar-ink/25 px-4 text-sm font-semibold text-bar-ink hover:bg-bar-ink/10"
+              >
+                {term}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+
+  return (
+    <AppShell hero={hero}>
+      <section className="mt-3" aria-labelledby="promo-title">
+        <SectionTitle
+          id="promo-title"
+          action={
+            <Link href="/promoties" className="inline-flex min-h-10 items-center text-sm font-semibold text-brand-strong underline-offset-2 hover:underline">
+              {t('common.seeAll')}
+            </Link>
+          }
+        >
+          {t('home.promotionsTitle')}
+        </SectionTitle>
+        {promotions.error ? <ErrorState error={promotions.error} onRetry={promotions.reload} /> : null}
+        <ul className="scroll-row -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0">
+          {promotions.loading &&
+            !promotions.data &&
+            [0, 1].map((i) => (
+              <li key={i} className="w-[17.5rem] shrink-0 md:w-auto" aria-hidden="true">
+                <Skeleton className="h-64 w-full rounded-[18px]" />
               </li>
             ))}
-          </ul>
-        </div>
+          {promotions.data?.items.map((item) => (
+            <li key={item.product.id} className="w-[17.5rem] shrink-0 md:w-auto">
+              <PromoCard item={item} compact onAddToList={setListTarget} />
+            </li>
+          ))}
+        </ul>
+        {promotions.data && promotions.data.items.length === 0 && <p className="text-sm text-ink-muted">{t('promotions.empty')}</p>}
       </section>
 
-      <section className="mt-10" aria-labelledby="chains-title">
-        <h2 id="chains-title" className="text-lg font-bold text-ink">
-          {t('home.chainsTitle')}
-        </h2>
+      <section className="mt-9" aria-labelledby="chains-title">
+        <SectionTitle id="chains-title">{t('home.chainsTitle')}</SectionTitle>
         {chains.error ? <ErrorState error={chains.error} onRetry={chains.reload} /> : null}
-        <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+        <ul className="divide-y divide-hairline overflow-hidden rounded-[18px] border border-hairline bg-canvas-raised md:grid md:grid-cols-2 md:divide-y-0">
           {(chains.data ?? []).map((chain) => (
-            <li key={chain.id} className="rounded-xl border border-hairline bg-canvas-raised p-3">
+            <li key={chain.id} className="flex min-h-14 items-center justify-between gap-3 px-4 py-2.5 md:border-b md:border-hairline">
               <ChainBadge chain={chain} />
-              <p className="mt-1.5 flex flex-wrap items-center gap-1 text-[11px] text-ink-muted">
+              <span className="flex flex-col items-end gap-0.5 text-right text-xs text-ink-muted">
                 {chain.dataSourceKind ? (
                   <>
                     <Badge tone={chain.dataSourceKind === 'DEMO' ? 'demo' : 'accent'}>{chain.dataSourceKind === 'DEMO' ? t('app.demoBadge') : t(`source.${chain.dataSourceKind}`)}</Badge>
@@ -87,57 +129,42 @@ export default function HomePage() {
                 ) : (
                   <Badge tone="neutral">{t('chain.noData')}</Badge>
                 )}
-              </p>
+              </span>
             </li>
           ))}
-          {chains.loading && !chains.data && Array.from({ length: 7 }, (_, i) => <li key={i} className="skeleton h-16" aria-hidden="true" />)}
+          {chains.loading &&
+            !chains.data &&
+            Array.from({ length: 7 }, (_, i) => (
+              <li key={i} className="px-4 py-3" aria-hidden="true">
+                <Skeleton className="h-7 w-2/3" />
+              </li>
+            ))}
         </ul>
       </section>
 
-      <section className="mt-10" aria-labelledby="how-title">
-        <h2 id="how-title" className="text-lg font-bold text-ink">
-          {t('home.howTitle')}
-        </h2>
-        <ol className="mt-3 grid gap-3 sm:grid-cols-3">
+      <section className="mt-9" aria-labelledby="how-title">
+        <SectionTitle id="how-title">{t('home.howTitle')}</SectionTitle>
+        <ol className="grid gap-3 sm:grid-cols-3">
           {(['how1', 'how2', 'how3'] as const).map((step, index) => (
-            <li key={step}>
-              <Card className="h-full">
-                <span className="mb-2 inline-flex size-8 items-center justify-center rounded-full bg-brand text-sm font-bold text-brand-ink" aria-hidden="true">
-                  {index + 1}
-                </span>
+            <li key={step} className="flex gap-3.5 rounded-[18px] border border-hairline bg-canvas-raised p-4 sm:flex-col">
+              <span className="price-figure flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-tag text-[1.4rem] text-tag-ink" aria-hidden="true">
+                {index + 1}
+              </span>
+              <div>
                 <h3 className="font-bold text-ink">{t(`home.${step}.title`)}</h3>
                 <p className="mt-1 text-sm text-ink-muted">{t(`home.${step}.text`)}</p>
-              </Card>
+              </div>
             </li>
           ))}
         </ol>
       </section>
 
-      <section className="mt-10" aria-labelledby="promo-title">
-        <div className="flex items-baseline justify-between">
-          <h2 id="promo-title" className="text-lg font-bold text-ink">
-            {t('home.promotionsTitle')}
-          </h2>
-          <Link href="/promoties" className="text-sm font-semibold text-brand underline-offset-2 hover:underline">
-            {t('common.seeAll')}
-          </Link>
-        </div>
-        {promotions.error ? <ErrorState error={promotions.error} onRetry={promotions.reload} /> : null}
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
-          {promotions.loading && !promotions.data && [0, 1].map((i) => <ProductCardSkeleton key={i} />)}
-          {promotions.data?.items.map((item) => (
-            <ProductCard key={item.product.id} item={item} onAddToList={setListTarget} />
-          ))}
-          {promotions.data && promotions.data.items.length === 0 && <p className="text-sm text-ink-muted">{t('promotions.empty')}</p>}
-        </div>
-      </section>
-
-      <section className="mt-10 rounded-2xl border border-warning/40 bg-warning-soft p-5" aria-labelledby="data-title">
-        <h2 id="data-title" className="text-lg font-bold text-ink">
+      <section className="mt-9 rounded-[18px] border border-warning/40 bg-warning-soft p-5" aria-labelledby="data-title">
+        <h2 id="data-title" className="display text-[1.4rem] text-ink">
           {t('home.dataTitle')}
         </h2>
-        <p className="mt-1 text-sm text-ink">{t('home.dataText')}</p>
-        <Link href="/over-de-gegevens" className="mt-2 inline-block text-sm font-semibold text-brand underline-offset-2 hover:underline">
+        <p className="mt-2 text-sm leading-relaxed text-ink">{t('home.dataText')}</p>
+        <Link href="/over-de-gegevens" className="mt-3 inline-flex min-h-10 items-center text-sm font-bold text-ink underline underline-offset-2">
           {t('nav.data')}
         </Link>
       </section>

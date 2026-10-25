@@ -7,7 +7,7 @@ import type { BasketCompareResult, CompareMode, ShoppingList, ShoppingListItem, 
 import { AppShell } from '@/components/app-shell';
 import { CombinationCard, StoreBasketCard } from '@/components/basket-results';
 import { CoverageNotice, ErrorState, errorMessage, ListSkeleton } from '@/components/states';
-import { Button, Card, Checkbox, EmptyState, Field, LiveRegion, Notice, PageTitle, SegmentedControl, SelectField, Skeleton } from '@/components/ui';
+import { Button, Card, Checkbox, EmptyState, Field, LiveRegion, Notice, PageTitle, SectionTitle, SegmentedControl, SelectField, Skeleton } from '@/components/ui';
 import { api, ApiError } from '@/lib/api';
 import { useRequireAuth } from '@/lib/auth';
 import { centsToEuroInput, euroInputToCents } from '@/lib/format';
@@ -87,11 +87,9 @@ export default function ListDetailPage() {
       <LiveRegion message={message} />
       {error && <Notice tone="danger" className="mb-4">{error}</Notice>}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-        <section aria-labelledby="items-title" className="space-y-4">
-          <h2 id="items-title" className="text-lg font-bold text-ink">
-            {data.items.length === 1 ? t('lists.item') : t('lists.items', { n: data.items.length })}
-          </h2>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+        <section aria-labelledby="items-title" className="space-y-3">
+          <SectionTitle id="items-title">{data.items.length === 1 ? t('lists.item') : t('lists.items', { n: data.items.length })}</SectionTitle>
 
           {data.items.length === 0 && <EmptyState title={t('lists.empty.text')} action={<Link href="/zoeken" className="font-semibold text-brand underline">{t('nav.search')}</Link>} />}
 
@@ -101,15 +99,15 @@ export default function ListDetailPage() {
             ))}
           </ul>
 
-          <form onSubmit={addFreeText} className="flex items-end gap-2">
+          <form onSubmit={addFreeText} className="flex items-start gap-2 rounded-[18px] border border-dashed border-hairline-strong p-3">
             <Field label={t('lists.addFreeText')} name="freeText" placeholder={t('lists.freeTextPlaceholder')} value={freeText} onChange={(e) => setFreeText(e.target.value)} className="flex-1" maxLength={120} hint={t('lists.freeTextNote')} />
-            <Button type="submit" variant="secondary" disabled={freeText.trim().length === 0}>
+            <Button type="submit" variant="secondary" className="mt-7" disabled={freeText.trim().length === 0}>
               {t('common.add')}
             </Button>
           </form>
 
-          <div className="flex flex-wrap gap-2 border-t border-hairline pt-4">
-            <Link href="/zoeken" className="inline-flex min-h-11 items-center rounded-xl border border-hairline-strong px-4 text-sm font-semibold text-ink hover:bg-canvas-sunken">
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Link href="/zoeken" className="inline-flex min-h-12 items-center gap-2 rounded-[14px] bg-brand px-4 text-[15px] font-semibold text-brand-ink hover:bg-brand-strong">
               {t('search.addToList')}
             </Link>
             <Button variant="secondary" onClick={() => void mutate(() => api.updateList(id, { archived: !data.archived }), t('common.saved'))}>
@@ -147,14 +145,14 @@ function ItemRow({
   const patch = (input: Parameters<typeof api.updateItem>[2]) => onMutate(() => api.updateItem(listId, item.id, input));
 
   return (
-    <Card as="li" className={item.checked ? 'opacity-70' : ''}>
+    <Card as="li" className={`p-3.5 ${item.checked ? 'bg-canvas-sunken/60' : ''}`}>
       <div className="flex items-start gap-3">
         <input
           type="checkbox"
           checked={item.checked}
           onChange={(e) => void patch({ checked: e.target.checked })}
           aria-label={item.checked ? t('lists.uncheckItem', { name: label }) : t('lists.checkItem', { name: label })}
-          className="mt-1 size-5 shrink-0 rounded accent-[var(--brand)]"
+          className="mt-0.5 size-6 shrink-0 rounded accent-[var(--brand)]"
         />
         <div className="min-w-0 flex-1">
           <p className={`font-semibold text-ink ${item.checked ? 'line-through' : ''}`}>
@@ -170,14 +168,14 @@ function ItemRow({
 
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="text-xs text-ink-muted">{t('lists.quantity')}</span>
-            <div className="inline-flex items-center rounded-lg border border-hairline">
-              <button type="button" aria-label="−" className="flex size-9 items-center justify-center text-ink-muted hover:text-ink disabled:opacity-40" disabled={item.quantity <= 1} onClick={() => void patch({ quantity: item.quantity - 1 })}>
+            <div className="inline-flex items-center rounded-full bg-canvas-sunken">
+              <button type="button" aria-label="−" className="flex size-11 items-center justify-center text-lg font-bold text-ink disabled:opacity-40" disabled={item.quantity <= 1} onClick={() => void patch({ quantity: item.quantity - 1 })}>
                 −
               </button>
-              <span className="w-8 text-center text-sm tabular-nums" aria-live="polite">
+              <span className="w-7 text-center text-base font-bold tabular-nums" aria-live="polite">
                 {item.quantity}
               </span>
-              <button type="button" aria-label="+" className="flex size-9 items-center justify-center text-ink-muted hover:text-ink disabled:opacity-40" disabled={item.quantity >= 99} onClick={() => void patch({ quantity: item.quantity + 1 })}>
+              <button type="button" aria-label="+" className="flex size-11 items-center justify-center text-lg font-bold text-ink disabled:opacity-40" disabled={item.quantity >= 99} onClick={() => void patch({ quantity: item.quantity + 1 })}>
                 +
               </button>
             </div>
@@ -188,7 +186,7 @@ function ItemRow({
 
           {item.product && (
             <details className="mt-2">
-              <summary className="cursor-pointer text-xs font-semibold text-ink-muted">{t('lists.itemOptions', { name: '' }).trim()}</summary>
+              <summary className="flex min-h-10 cursor-pointer items-center text-[13px] font-semibold text-brand-strong">{t('lists.itemOptions', { name: '' }).trim()}</summary>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
                 <Checkbox label={t('lists.exactBrand')} checked={item.exactBrandRequired} onChange={(e) => void patch({ exactBrandRequired: e.target.checked })} />
                 <Checkbox label={t('lists.allowStoreBrand')} checked={item.allowStoreBrand} onChange={(e) => void patch({ allowStoreBrand: e.target.checked })} />
@@ -256,51 +254,55 @@ function ComparePanel({ listId, hasProducts }: { listId: string; hasProducts: bo
   }
 
   const sortedStores = result ? [...result.perStore].sort((a, b) => Number(b.hasData) - Number(a.hasData) || a.missingCount - b.missingCount || a.totalCents - b.totalCents) : [];
+  const withData = sortedStores.filter((store) => store.hasData);
+  const cheapestStore = withData.find((store) => store.missingCount === 0) ?? withData[0];
+  const maxCents = withData.length > 0 ? Math.max(...withData.map((store) => store.totalCents)) : 0;
 
   return (
     <section aria-labelledby="compare-title" className="space-y-4">
-      <h2 id="compare-title" className="text-lg font-bold text-ink">
-        {t('lists.compare')}
-      </h2>
+      <SectionTitle id="compare-title">{t('lists.compare')}</SectionTitle>
 
       {!hasProducts && <Notice tone="info">{t('lists.compareEmpty')}</Notice>}
 
-      <SegmentedControl<CompareMode>
-        label={t('lists.compare')}
-        value={mode}
-        onChange={setMode}
-        options={[
-          { value: 'SINGLE_STORE', label: t('lists.mode.SINGLE_STORE') },
-          { value: 'CHEAPEST_COMBINATION', label: t('lists.mode.CHEAPEST_COMBINATION') },
-          { value: 'BALANCED', label: t('lists.mode.BALANCED') },
-        ]}
-      />
-      <p className="text-sm text-ink-muted">{t(`lists.mode.${mode}.text`)}</p>
+      <div className="space-y-4 rounded-[18px] border border-hairline bg-canvas-raised p-4">
+        <SegmentedControl<CompareMode>
+          label={t('lists.compare')}
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: 'SINGLE_STORE', label: t('lists.mode.SINGLE_STORE') },
+            { value: 'CHEAPEST_COMBINATION', label: t('lists.mode.CHEAPEST_COMBINATION') },
+            { value: 'BALANCED', label: t('lists.mode.BALANCED') },
+          ]}
+        />
+        <p className="text-sm text-ink-muted">{t(`lists.mode.${mode}.text`)}</p>
 
-      {mode === 'BALANCED' && (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <SelectField label={t('lists.settings.maxStores')} name="maxStores" value={String(maxStores)} onChange={(e) => setMaxStores(Number(e.target.value))}>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-          </SelectField>
-          <Field label={`${t('lists.settings.minimumSaving')} (€)`} name="minimumSaving" inputMode="decimal" value={minimumSaving} onChange={(e) => setMinimumSaving(e.target.value)} />
+        {mode === 'BALANCED' && (
+          <div className="grid grid-cols-2 gap-3">
+            <SelectField label={t('lists.settings.maxStores')} name="maxStores" value={String(maxStores)} onChange={(e) => setMaxStores(Number(e.target.value))}>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </SelectField>
+            <Field label={`${t('lists.settings.minimumSaving')} (€)`} name="minimumSaving" inputMode="decimal" value={minimumSaving} onChange={(e) => setMinimumSaving(e.target.value)} />
+          </div>
+        )}
+        <div className="divide-y divide-hairline">
+          <Checkbox label={t('lists.settings.useLoyaltyCards')} checked={useLoyaltyCards} onChange={(e) => setUseLoyaltyCards(e.target.checked)} />
+          <Checkbox label={t('lists.settings.includePersonalized')} checked={includePersonalized} onChange={(e) => setIncludePersonalized(e.target.checked)} />
+          <Checkbox label={t('lists.settings.includeOnline')} checked={includeOnline} onChange={(e) => setIncludeOnline(e.target.checked)} />
         </div>
-      )}
-      <div className="grid sm:grid-cols-3">
-        <Checkbox label={t('lists.settings.useLoyaltyCards')} checked={useLoyaltyCards} onChange={(e) => setUseLoyaltyCards(e.target.checked)} />
-        <Checkbox label={t('lists.settings.includePersonalized')} checked={includePersonalized} onChange={(e) => setIncludePersonalized(e.target.checked)} />
-        <Checkbox label={t('lists.settings.includeOnline')} checked={includeOnline} onChange={(e) => setIncludeOnline(e.target.checked)} />
-      </div>
 
-      <Button size="lg" onClick={() => void run()} disabled={busy || !hasProducts}>
-        {busy ? t('common.loading') : t('lists.compare')}
-      </Button>
+        <Button size="lg" full onClick={() => void run()} disabled={busy || !hasProducts}>
+          {busy ? t('common.loading') : t('lists.compare')}
+        </Button>
+      </div>
 
       {busy && !result && (
         <div className="space-y-3" aria-busy="true">
-          <Skeleton className="h-28 w-full" />
-          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-40 w-full rounded-[18px]" />
+          <Skeleton className="h-24 w-full rounded-[18px]" />
+          <Skeleton className="h-24 w-full rounded-[18px]" />
         </div>
       )}
       {error !== null && <ErrorState error={error} onRetry={() => void run()} />}
@@ -310,26 +312,35 @@ function ComparePanel({ listId, hasProducts }: { listId: string; hasProducts: bo
           <Notice tone="success" role="status">
             {result.summary}
           </Notice>
-          <CoverageNotice coverage={result.coverage} />
-          {result.containsDemoData && <Notice tone="warning">{t('search.demoNotice')}</Notice>}
+          <CoverageNotice coverage={result.coverage} size="sm" />
+          {result.containsDemoData && (
+            <Notice tone="warning" size="sm">
+              {t('search.demoNotice')}
+            </Notice>
+          )}
           {result.freeTextLines.length > 0 && (
             <p className="text-xs text-ink-muted">
               {t('lists.freeTextNote')} ({result.freeTextLines.join(', ')})
             </p>
           )}
 
-          {result.mode === 'SINGLE_STORE' && result.bestSingleStore && <StoreBasketCard store={result.bestSingleStore} recommended />}
           {result.mode === 'CHEAPEST_COMBINATION' && result.cheapestCombination && <CombinationCard combination={result.cheapestCombination} title={t('lists.mode.CHEAPEST_COMBINATION')} />}
           {result.mode === 'BALANCED' && result.balanced && <CombinationCard combination={result.balanced} title={t('lists.mode.BALANCED')} />}
 
-          <h3 className="pt-2 text-base font-bold text-ink">{t('lists.result.perStore')}</h3>
-          <ul className="space-y-3">
+          <h3 className="display pt-2 text-[1.3rem] text-ink">{t('lists.result.totalPerChain')}</h3>
+          <ol className="space-y-3">
             {sortedStores.map((store) => (
               <li key={store.storeChain.slug}>
-                <StoreBasketCard store={store} recommended={result.mode === 'SINGLE_STORE' && store.storeChain.slug === result.bestSingleStore?.storeChain.slug} />
+                <StoreBasketCard
+                  store={store}
+                  recommended={result.mode === 'SINGLE_STORE' && store.storeChain.slug === result.bestSingleStore?.storeChain.slug}
+                  cheapest={store.storeChain.slug === cheapestStore?.storeChain.slug}
+                  cheapestCents={cheapestStore?.totalCents}
+                  maxCents={maxCents}
+                />
               </li>
             ))}
-          </ul>
+          </ol>
         </div>
       )}
     </section>

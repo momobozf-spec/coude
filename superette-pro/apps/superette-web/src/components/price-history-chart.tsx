@@ -190,6 +190,7 @@ export function PriceHistoryChart({ history, chainNames }: { history: PriceHisto
             height={plotH}
             fill="transparent"
             tabIndex={0}
+            role="group"
             aria-label={t('product.history.chart')}
             onPointerMove={onPointerMove}
             onPointerLeave={() => setHover(null)}

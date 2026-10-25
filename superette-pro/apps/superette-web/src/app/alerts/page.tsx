@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import type { AlertDerivedState, AlertListQuery, PriceAlert } from '@superette/contracts';
 import { AppShell } from '@/components/app-shell';
+import { BellIcon, ChevronRightIcon, FilterIcon } from '@/components/icons';
 import { ChainBadge, OfferRow, Price } from '@/components/price';
 import { ErrorState, errorMessage, ListSkeleton } from '@/components/states';
 import { Badge, Button, ButtonLink, Card, EmptyState, LiveRegion, Notice, PageTitle, SelectField, type BadgeTone } from '@/components/ui';
@@ -65,7 +66,13 @@ function AlertsInner() {
       {message && <Notice tone="success" className="mb-4">{message}</Notice>}
       {error && <Notice tone="danger" className="mb-4">{error}</Notice>}
 
-      <div className="mb-4 grid gap-3 sm:grid-cols-4">
+      <details className="group mb-4 rounded-[18px] border border-hairline bg-canvas-raised">
+        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-4 text-sm font-semibold text-ink">
+          <FilterIcon size={18} />
+          {t('alerts.filtersToggle')}
+          <ChevronRightIcon size={18} className="ml-auto text-ink-muted transition-transform group-open:rotate-90" />
+        </summary>
+      <div className="grid gap-3 px-4 pb-4 sm:grid-cols-4">
         <SelectField label={t('alerts.filter.state')} name="state" value={query.state ?? ''} onChange={(e) => setQuery({ ...query, state: (e.target.value || undefined) as AlertDerivedState | undefined })}>
           <option value="">{t('common.all')}</option>
           {STATES.map((state) => (
@@ -96,11 +103,12 @@ function AlertsInner() {
           ))}
         </SelectField>
       </div>
+      </details>
 
       {alerts.loading && !alerts.data && <ListSkeleton />}
       {alerts.error ? <ErrorState error={alerts.error} onRetry={alerts.reload} /> : null}
       {alerts.data && alerts.data.length === 0 && (
-        <EmptyState title={t('alerts.empty.title')} text={t('alerts.empty.text')} action={<ButtonLink href="/zoeken">{t('nav.search')}</ButtonLink>} />
+        <EmptyState title={t('alerts.empty.title')} text={t('alerts.empty.text')} icon={<BellIcon size={28} />} action={<ButtonLink href="/zoeken">{t('nav.search')}</ButtonLink>} />
       )}
 
       {alerts.data && alerts.data.length > 0 && (
@@ -126,8 +134,8 @@ function AlertsInner() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[11px] uppercase tracking-wide text-ink-muted">{alert.comparisonType === 'DISCOUNT_PERCENTAGE' ? t('alerts.minimumDiscount') : t('alerts.target')}</p>
-                  <p className="text-lg font-extrabold tabular-nums text-ink">
+                  <p className="text-xs font-semibold text-ink-muted">{alert.comparisonType === 'DISCOUNT_PERCENTAGE' ? t('alerts.minimumDiscount') : t('alerts.target')}</p>
+                  <p className="price-figure text-[1.6rem] text-ink">
                     {alert.comparisonType === 'DISCOUNT_PERCENTAGE'
                       ? `${alert.minimumDiscountPercentage ?? 0}%`
                       : alert.comparisonType === 'UNIT_PRICE' && alert.product?.normalizedUnit
@@ -143,7 +151,7 @@ function AlertsInner() {
 
               {alert.currentLowest ? (
                 <div className="space-y-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">{t('alerts.currentLowest')}</p>
+                  <p className="text-xs font-semibold text-ink-muted">{t('alerts.currentLowest')}</p>
                   <OfferRow offer={alert.currentLowest.offer} compact />
                   {alert.differenceCents !== null && (
                     <p className={`text-sm font-semibold ${alert.differenceCents <= 0 ? 'text-accent-strong' : 'text-ink'}`}>
@@ -162,7 +170,7 @@ function AlertsInner() {
                 <p className="text-xs text-ink-muted">{t('alerts.form.preview.noPrice')}</p>
               )}
 
-              <p className="text-[11px] text-ink-muted">
+              <p className="text-xs text-ink-muted">
                 {alert.lastCheckedAt ? t('alerts.lastChecked', { date: formatRelative(alert.lastCheckedAt, locale) }) : t('alerts.neverChecked')}
                 {alert.lastTriggeredAt && ` · ${t('alerts.lastTriggered', { date: formatRelative(alert.lastTriggeredAt, locale) })}`}
                 {alert.lastTriggeredPriceCents !== null && (

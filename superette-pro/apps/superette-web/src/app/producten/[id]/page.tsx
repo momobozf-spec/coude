@@ -5,10 +5,12 @@ import { useMemo, useState } from 'react';
 import type { CatalogProductSummary, RelatedProduct } from '@superette/contracts';
 import { AddToListDialog } from '@/components/add-to-list-dialog';
 import { AppShell } from '@/components/app-shell';
-import { MatchBadge, OfferRow } from '@/components/price';
+import { BellPlusIcon, ListAddIcon } from '@/components/icons';
+import { ChainBadge, MatchBadge, OfferRow, PriceTag, PromoBadges, ProvenanceLine } from '@/components/price';
 import { HistoryStats, PriceHistoryChart } from '@/components/price-history-chart';
 import { CoverageNotice, ErrorState, errorMessage } from '@/components/states';
-import { Badge, Button, ButtonLink, Dialog, EmptyState, Notice, Skeleton, TextareaField } from '@/components/ui';
+import { Badge, Button, ButtonLink, Dialog, EmptyState, Notice, SectionTitle, Skeleton, TextareaField } from '@/components/ui';
+import { formatEuro } from '@/lib/format';
 import { api, ApiError } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { usePreferences } from '@/lib/use-preferences';
@@ -16,7 +18,7 @@ import { useAsync } from '@/lib/use-async';
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { preferences, loading: prefsLoading } = usePreferences();
   const [listTarget, setListTarget] = useState<CatalogProductSummary | null>(null);
   const [reportTarget, setReportTarget] = useState<RelatedProduct | null>(null);
@@ -50,10 +52,12 @@ export default function ProductPage() {
           <ErrorState error={detail.error} onRetry={detail.reload} />
         ) : (
           <div className="space-y-4" aria-busy="true">
-            <Skeleton className="h-8 w-2/3" />
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-10 w-3/4" />
             <Skeleton className="h-4 w-1/3" />
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-32 w-full rounded-[18px]" />
+            <Skeleton className="h-20 w-full rounded-[14px]" />
+            <Skeleton className="h-20 w-full rounded-[14px]" />
           </div>
         )}
       </AppShell>
@@ -65,71 +69,89 @@ export default function ProductPage() {
   const chainCount = new Set(offers.map((offer) => offer.storeChain.slug)).size;
   const title = `${product.brand && !product.name.toLowerCase().includes(product.brand.toLowerCase()) ? `${product.brand} ` : ''}${product.name}`;
 
+  const others = sortedOffers.filter((offer) => offer.id !== bestOffer?.id);
+  const maxSaving = bestOffer && others.length > 0 ? Math.max(...others.map((o) => o.priceCents)) - bestOffer.priceCents : 0;
+
   return (
     <AppShell wide>
       <article className="space-y-8">
-        <header>
-          <div className="flex flex-wrap items-center gap-2">
-            {product.brandType === 'STORE_BRAND' && <Badge tone="neutral">{t('match.storeBrand')}</Badge>}
-            {containsDemoData && (
-              <Badge tone="demo" title={t('app.demoBadgeLong')}>
-                {t('app.demoBadge')}
-              </Badge>
-            )}
-          </div>
-          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">{title}</h1>
-          <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-muted">
-            <div>
-              <dt className="inline">{t('product.package')}: </dt>
-              <dd className="inline font-medium text-ink">{product.packageLabel}</dd>
+        <header className="space-y-4">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              {product.categoryName && <span className="text-sm font-semibold text-ink-muted">{product.categoryName}</span>}
+              {product.brandType === 'STORE_BRAND' && <Badge tone="neutral">{t('match.storeBrand')}</Badge>}
+              {containsDemoData && (
+                <Badge tone="demo" title={t('app.demoBadgeLong')}>
+                  {t('app.demoBadge')}
+                </Badge>
+              )}
             </div>
-            {product.brand && (
+            <h1 className="mt-1 text-[2.25rem] text-ink sm:text-[2.75rem]">{title}</h1>
+            <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-muted">
               <div>
-                <dt className="inline">{t('product.brand')}: </dt>
-                <dd className="inline font-medium text-ink">{product.brand}</dd>
+                <dt className="inline">{t('product.package')}: </dt>
+                <dd className="inline font-semibold text-ink">{product.packageLabel}</dd>
               </div>
-            )}
-            {product.categoryName && (
-              <div>
-                <dt className="inline">{t('product.category')}: </dt>
-                <dd className="inline font-medium text-ink">{product.categoryName}</dd>
-              </div>
-            )}
-            {product.barcode && (
-              <div>
-                <dt className="inline">{t('product.barcode')}: </dt>
-                <dd className="inline font-mono text-xs text-ink">{product.barcode}</dd>
-              </div>
-            )}
-          </dl>
-          {product.description && <p className="mt-2 text-sm text-ink-muted">{product.description}</p>}
+              {product.brand && (
+                <div>
+                  <dt className="inline">{t('product.brand')}: </dt>
+                  <dd className="inline font-semibold text-ink">{product.brand}</dd>
+                </div>
+              )}
+              {product.barcode && (
+                <div>
+                  <dt className="inline">{t('product.barcode')}: </dt>
+                  <dd className="inline tabular text-ink">{product.barcode}</dd>
+                </div>
+              )}
+            </dl>
+            {product.description && <p className="mt-2 text-sm text-ink-muted">{product.description}</p>}
+          </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button onClick={() => setListTarget(product)}>{t('search.addToList')}</Button>
+          {bestOffer && (
+            <div className="rounded-[18px] border border-hairline bg-canvas-raised p-4 shadow-[var(--shadow)]">
+              <div className="flex items-center gap-4">
+                <PriceTag cents={bestOffer.priceCents} unitPrice={bestOffer.unitPrice} originalCents={bestOffer.originalPriceCents} size="lg" />
+                <div className="min-w-0 space-y-1">
+                  <p className="text-xs font-semibold text-ink-muted">{t('search.bestAt', { chain: '' }).trim()}</p>
+                  <ChainBadge chain={bestOffer.storeChain} />
+                  {maxSaving > 0 && <p className="text-[13px] font-semibold leading-snug text-accent-strong">{t('search.saveUpTo', { amount: formatEuro(maxSaving, locale) })}</p>}
+                </div>
+              </div>
+              <div className="mt-3 space-y-1.5">
+                <PromoBadges offer={bestOffer} loyaltyCardName={loyaltyByChain[bestOffer.storeChain.slug] ?? null} />
+                <ProvenanceLine provenance={bestOffer.provenance} />
+              </div>
+            </div>
+          )}
+
+          <div className="grid gap-2 sm:flex">
+            <Button onClick={() => setListTarget(product)}>
+              <ListAddIcon size={20} />
+              {t('search.addToList')}
+            </Button>
             <ButtonLink href={`/alerts/nieuw?product=${product.id}`} variant="secondary">
+              <BellPlusIcon size={20} />
               {t('search.setAlert')}
             </ButtonLink>
           </div>
         </header>
 
         <section aria-labelledby="offers-title" className="space-y-3">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 id="offers-title" className="text-lg font-bold text-ink">
-              {t('product.pricesPerChain')}
-            </h2>
-            <span className="text-xs text-ink-muted">{t('product.comparedAt', { n: chainCount })}</span>
-          </div>
-          <CoverageNotice coverage={coverage} />
+          <SectionTitle id="offers-title" action={<span className="text-xs text-ink-muted">{t('product.comparedAt', { n: chainCount })}</span>}>
+            {t('product.pricesPerChain')}
+          </SectionTitle>
+          <CoverageNotice coverage={coverage} size="sm" />
           {sortedOffers.length === 0 ? (
             <Notice tone="info">{t('product.noOffers')}</Notice>
           ) : (
-            <ul className="space-y-2">
+            <ol className="grid gap-2 lg:grid-cols-2">
               {sortedOffers.map((offer) => (
                 <li key={offer.id}>
-                  <OfferRow offer={offer} highlight={offer.id === bestOffer?.id} loyaltyCardName={loyaltyByChain[offer.storeChain.slug] ?? null} />
+                  <OfferRow offer={offer} highlight={offer.id === bestOffer?.id} loyaltyCardName={loyaltyByChain[offer.storeChain.slug] ?? null} bestCents={bestOffer?.priceCents} />
                 </li>
               ))}
-            </ul>
+            </ol>
           )}
         </section>
 
@@ -144,14 +166,14 @@ export default function ProductPage() {
         {uncertainCount > 0 && <p className="text-xs text-ink-muted">{t('match.uncertainHidden', { n: uncertainCount })}</p>}
 
         <section aria-labelledby="history-title" className="space-y-3">
-          <h2 id="history-title" className="text-lg font-bold text-ink">
-            {t('product.history')} <span className="text-sm font-normal text-ink-muted">· {t('product.history.period', { days: history?.periodDays ?? 90 })}</span>
-          </h2>
+          <SectionTitle id="history-title" action={<span className="text-xs text-ink-muted">{t('product.history.period', { days: history?.periodDays ?? 90 })}</span>}>
+            {t('product.history')}
+          </SectionTitle>
           {history ? (
-            <>
+            <div className="space-y-3 rounded-[18px] border border-hairline bg-canvas-raised p-4">
               <HistoryStats history={history} />
               <PriceHistoryChart history={history} chainNames={chainNames} />
-            </>
+            </div>
           ) : (
             <Notice tone="info">{t('product.history.insufficient')}</Notice>
           )}
@@ -180,13 +202,13 @@ function RelatedSection({
   const { t } = useI18n();
   return (
     <section className="space-y-3">
-      <h2 className="text-lg font-bold text-ink">{title}</h2>
+      <SectionTitle>{title}</SectionTitle>
       {notice && <Notice tone="info">{notice}</Notice>}
       <ul className="space-y-3">
         {items.map((item) => {
           const best = [...item.offers].sort((a, b) => a.priceCents - b.priceCents)[0];
           return (
-            <li key={item.product.id} className="rounded-2xl border border-hairline bg-canvas-raised p-3">
+            <li key={item.product.id} className="rounded-[18px] border border-hairline bg-canvas-raised p-3.5">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <p className="font-bold text-ink">

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { AccountSection } from '@/components/account-section';
 import { AppShell } from '@/components/app-shell';
+import { ChevronRightIcon, TagIcon } from '@/components/icons';
 import { Button, ButtonLink, Card, PageTitle, SelectField } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import type { AppLocale } from '@/lib/format';
@@ -20,17 +21,26 @@ export default function ProfilePage() {
 
       <div className="space-y-4">
         <Card as="section" aria-labelledby="account-title">
-          <h2 id="account-title" className="text-base font-bold text-ink">
+          <h2 id="account-title" className="display text-[1.3rem] text-ink">
             {t('profile.account')}
           </h2>
           {loading && <p className="mt-2 text-sm text-ink-muted">{t('common.loading')}</p>}
           {!loading && user && (
-            <div className="mt-2 space-y-3">
-              <p className="text-sm text-ink">
-                {t('auth.loggedInAs', { name: user.fullName })}
-                <br />
-                <span className="text-ink-muted">{user.email}</span>
-              </p>
+            <div className="mt-3 space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="display flex size-14 shrink-0 items-center justify-center rounded-full bg-brand text-[1.5rem] text-brand-ink" aria-hidden="true">
+                  {user.fullName
+                    .split(/\s+/)
+                    .map((part) => part[0] ?? '')
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase()}
+                </span>
+                <p className="min-w-0 text-[15px] text-ink">
+                  <span className="block font-bold">{t('auth.loggedInAs', { name: user.fullName })}</span>
+                  <span className="block truncate text-sm text-ink-muted">{user.email}</span>
+                </p>
+              </div>
               <Button variant="secondary" onClick={() => void logout()}>
                 {t('auth.logout')}
               </Button>
@@ -50,18 +60,23 @@ export default function ProfilePage() {
           )}
         </Card>
 
-        <Card as="section" aria-labelledby="prefs-title">
-          <h2 id="prefs-title" className="text-base font-bold text-ink">
-            {t('profile.preferencesLink')}
-          </h2>
-          <p className="mt-1 text-sm text-ink-muted">{t('profile.preferencesText')}</p>
-          <ButtonLink href="/profiel/voorkeuren" variant="secondary" className="mt-3">
-            {t('profile.preferencesLink')}
-          </ButtonLink>
+        <Card as="section" aria-labelledby="prefs-title" className="p-0">
+          <Link href="/profiel/voorkeuren" className="flex items-center gap-3 rounded-[18px] p-4">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-[12px] bg-tag text-tag-ink" aria-hidden="true">
+              <TagIcon />
+            </span>
+            <span className="min-w-0 flex-1">
+              <h2 id="prefs-title" className="text-base font-bold text-ink">
+                {t('profile.preferencesLink')}
+              </h2>
+              <span className="mt-0.5 block text-sm text-ink-muted">{t('profile.preferencesText')}</span>
+            </span>
+            <ChevronRightIcon size={20} className="shrink-0 text-ink-muted" />
+          </Link>
         </Card>
 
         <Card as="section" aria-labelledby="settings-title">
-          <h2 id="settings-title" className="text-base font-bold text-ink">
+          <h2 id="settings-title" className="display text-[1.3rem] text-ink">
             {t('profile.settings')}
           </h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -84,16 +99,16 @@ export default function ProfilePage() {
 
         {user && <AccountSection />}
 
-        <Card as="section" aria-labelledby="privacy-title">
-          <h2 id="privacy-title" className="text-base font-bold text-ink">
+        <Card>
+          <h2 id="privacy-title" className="display text-[1.3rem] text-ink">
             {t('profile.privacyTitle')}
           </h2>
           <p className="mt-1 text-sm text-ink-muted">{t('profile.privacyText')}</p>
           <div className="mt-2 flex flex-wrap gap-4">
-            <Link href="/privacy" className="text-sm font-semibold text-brand underline-offset-2 hover:underline">
+            <Link href="/privacy" className="inline-flex min-h-10 items-center text-sm font-semibold text-brand-strong underline underline-offset-2">
               {t('privacy.title')}
             </Link>
-            <Link href="/over-de-gegevens" className="text-sm font-semibold text-brand underline-offset-2 hover:underline">
+            <Link href="/over-de-gegevens" className="inline-flex min-h-10 items-center text-sm font-semibold text-brand-strong underline underline-offset-2">
               {t('profile.dataLink')}
             </Link>
           </div>
