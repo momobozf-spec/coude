@@ -69,8 +69,11 @@ export function checkProductionEnv(env: NodeJS.ProcessEnv = process.env): EnvRep
   else if (!env.RESEND_FROM || /@resend\.dev>?$/i.test(env.RESEND_FROM.trim())) {
     warnings.push("RESEND_FROM gebruikt geen eigen domein: Resend mailt dan alleen naar het adres van je Resend-account, klanten krijgen niets");
   }
-  if (!env.LEGAL_ENTITY_ADDRESS) {
-    warnings.push("LEGAL_ENTITY_ADDRESS ontbreekt: de site toont alleen 'Zaventem' als adres; een webshop moet het volledige adres van de zetel vermelden");
+  // Leeg = de zetel uit het KBO-register (src/lib/legal.ts). Een overschrijving
+  // zonder postcode (bv. alleen een gemeente) is geen volledig adres.
+  const legalAddress = env.LEGAL_ENTITY_ADDRESS?.trim();
+  if (legalAddress && !/\b\d{4}\b/.test(legalAddress)) {
+    warnings.push("LEGAL_ENTITY_ADDRESS is onvolledig (geen straat, nr en postcode): een webshop moet het volledige adres van de zetel vermelden");
   }
   if (!env.CRON_SECRET || env.CRON_SECRET.length < 32) {
     warnings.push("CRON_SECRET ontbreekt of is te kort: de reconcile-taak staat uit");

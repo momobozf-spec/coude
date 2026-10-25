@@ -5,18 +5,16 @@ import "server-only";
  * economisch recht, boek VI en XII) verplicht een webshop om naam,
  * ondernemingsnummer, geografisch adres en contactgegevens te tonen.
  *
- * Uitbater: Marhaba Data & AI Agent BV (BE 1003.552.102), Zaventem.
- * De standaardwaarden hieronder zijn de echte gegevens van de BV; elke
- * waarde kan via de omgeving overschreven worden.
- *
- * TODO(Mohamed): straat + huisnummer + postcode van de maatschappelijke zetel
- * invullen in LEGAL_ENTITY_ADDRESS (bv. "Straat 1, 1930 Zaventem"). Dat adres
- * staat bewust niet in de code: het is niet gekend en wordt niet verzonnen.
+ * Uitbater: Marhaba Cooperation BV (BE 1037.222.285), Sweetstraat 13,
+ * 3870 Heers. De standaardwaarden hieronder zijn de echte gegevens van de BV;
+ * het adres van de maatschappelijke zetel komt uit het KBO-register (publieke
+ * gegevens). Elke waarde kan via de omgeving overschreven worden.
  */
 export const LEGAL_DEFAULTS = {
-  name: "Marhaba Data & AI Agent BV",
-  vat: "BE 1003.552.102",
-  city: "Zaventem",
+  name: "Marhaba Cooperation BV",
+  vat: "BE 1037.222.285",
+  address: "Sweetstraat 13, 3870 Heers",
+  city: "Heers",
   country: "België",
   email: "momobozf@gmail.com",
 } as const;
@@ -24,12 +22,12 @@ export const LEGAL_DEFAULTS = {
 export interface LegalEntity {
   name: string;
   vat: string;
-  /** Volledig adres uit LEGAL_ENTITY_ADDRESS, of null als dat nog niet ingevuld is. */
-  address: string | null;
-  /** Wat op de site getoond wordt: het volledige adres, of minstens de gemeente. */
+  /** Volledig adres uit LEGAL_ENTITY_ADDRESS, anders de zetel uit het KBO-register. */
+  address: string;
+  /** Wat op de site getoond wordt: het volledige adres van de zetel. */
   displayAddress: string;
   email: string;
-  /** true zodra ook het volledige adres ingevuld is. */
+  /** true als het adres een volledig adres is (met postcode), niet enkel een gemeente. */
   complete: boolean;
 }
 
@@ -41,15 +39,15 @@ function env(name: string, source: NodeJS.ProcessEnv): string | null {
 export function legalEntity(source: NodeJS.ProcessEnv = process.env): LegalEntity {
   const name = env("LEGAL_ENTITY_NAME", source) ?? LEGAL_DEFAULTS.name;
   const vat = env("LEGAL_ENTITY_VAT", source) ?? LEGAL_DEFAULTS.vat;
-  const address = env("LEGAL_ENTITY_ADDRESS", source);
+  const address = env("LEGAL_ENTITY_ADDRESS", source) ?? LEGAL_DEFAULTS.address;
   const email = env("LEGAL_CONTACT_EMAIL", source) ?? env("SUPPORT_EMAIL", source) ?? LEGAL_DEFAULTS.email;
   return {
     name,
     vat,
     address,
-    displayAddress: address ?? `${LEGAL_DEFAULTS.city}, ${LEGAL_DEFAULTS.country}`,
+    displayAddress: address,
     email,
-    complete: Boolean(address),
+    complete: /\b\d{4}\b/.test(address),
   };
 }
 

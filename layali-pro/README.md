@@ -21,7 +21,7 @@ fragrance, decoratie en cadeaus. NL/FR, betalen via Mollie.
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind 4 · Prisma 7 op
 PostgreSQL (pg-driver) · NextAuth 4 · next-intl · Zod · Vitest
 
-Uitbater: **Marhaba Data & AI Agent BV** (BE 1003.552.102, Zaventem) — zie
+Uitbater: **Marhaba Cooperation BV** (BE 1037.222.285, Sweetstraat 13, 3870 Heers) — zie
 `src/lib/legal.ts`.
 
 ## Lokaal starten
@@ -67,7 +67,7 @@ Layali heeft PostgreSQL nodig en draait als Docker-container: **Render**
 
 1. **Neon**: project in *AWS Europe Central 1 (Frankfurt)*, Postgres 17; een
    betaald plan met point-in-time restore. Kopieer de connection string.
-2. **Mollie**: account op naam van Marhaba Data & AI Agent BV, verificatie
+2. **Mollie**: account op naam van Marhaba Cooperation BV, verificatie
    afronden, betaalmethodes activeren (Bancontact, iDEAL, kaarten). Mollie werkt
    zonder producten of prijzen: de webshop stuurt per bestelling het bedrag mee.
    De webhook-URL (`https://<domein>/api/webhooks/mollie`) wordt per betaling
@@ -93,8 +93,7 @@ Layali heeft PostgreSQL nodig en draait als Docker-container: **Render**
 | `MOLLIE_API_KEY` | ja | `live_…` (een `test_…`-sleutel alleen met `STAGING=1`) |
 | `RESEND_API_KEY`, `RESEND_FROM` | ja | `Layali <bestellingen@jouwdomein.be>` |
 | `ADMIN_EMAIL`, `SUPPORT_EMAIL` | ja | meldingen van bestellingen / klantendienst |
-| `LEGAL_ENTITY_ADDRESS` | ja | straat, nr, postcode van de zetel (TODO) |
-| `LEGAL_ENTITY_NAME`, `LEGAL_ENTITY_VAT`, `LEGAL_CONTACT_EMAIL` | nee | standaard de BV-gegevens |
+| `LEGAL_ENTITY_ADDRESS`, `LEGAL_ENTITY_NAME`, `LEGAL_ENTITY_VAT`, `LEGAL_CONTACT_EMAIL` | nee | standaard de BV-gegevens (zetel uit het KBO-register: Sweetstraat 13, 3870 Heers) |
 | `RETURN_COSTS_PAID_BY` | nee | `customer` (standaard) of `seller` |
 | `LEGAL_TEXTS_REVIEWED` | nee | `1` na juridische nalezing |
 | `CRON_SECRET` | aanbevolen | ≥ 32 tekens, voor `/api/cron/reconcile` |

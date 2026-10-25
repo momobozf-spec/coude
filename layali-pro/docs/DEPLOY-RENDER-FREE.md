@@ -52,7 +52,6 @@ Render → **New** → **Blueprint** → `layali` → **Blueprint Path:**
 | `RESEND_API_KEY` | je Resend-sleutel |
 | `RESEND_FROM` | `Layali <onboarding@resend.dev>` |
 | `ADMIN_EMAIL`, `SUPPORT_EMAIL` | het e-mailadres van je Resend-account |
-| `LEGAL_ENTITY_ADDRESS` | straat, huisnummer en postcode van de zetel van Marhaba Data & AI Agent BV (naam, btw-nummer en e-mail staan al in de blueprint) |
 | `BOOTSTRAP_ADMIN_EMAIL` | het e-mailadres waarmee je beheert |
 
 Zonder geverifieerd domein mailt Resend alleen naar het adres van je eigen

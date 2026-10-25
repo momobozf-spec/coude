@@ -5,11 +5,10 @@ aanleveren. Niets hiervan is in de code verzonnen.
 
 ## Gegevens en accounts
 
-- [ ] **Verkoper**: Marhaba Data & AI Agent BV, ondernemingsnummer BE 1003.552.102,
-      Zaventem, momobozf@gmail.com — staan als standaard in `src/lib/legal.ts`.
-      **Nog invullen:** `LEGAL_ENTITY_ADDRESS` (straat, huisnummer, postcode van de
-      maatschappelijke zetel). Zonder adres toont de site alleen "Zaventem" en
-      logt de app een waarschuwing; een webshop moet het volledige adres tonen.
+- [ ] **Verkoper**: Marhaba Cooperation BV, ondernemingsnummer BE 1037.222.285,
+      Sweetstraat 13, 3870 Heers (zetel volgens het KBO-register),
+      momobozf@gmail.com — staan als standaard in `src/lib/legal.ts` en in
+      `render.free.yaml` (`LEGAL_ENTITY_ADDRESS`).
 - [ ] **Domein kopen** (bv. layali.be, ± €10 per jaar) en in Resend verifiëren
       (SPF/DKIM). **Zonder eigen domein krijgen klanten geen orderbevestiging,
       verzendmail of wachtwoordherstel**: Resend mailt dan alleen naar je eigen
