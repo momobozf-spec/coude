@@ -21,21 +21,21 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent';
 type Size = 'sm' | 'md' | 'lg';
 
 const BUTTON_BASE =
-  'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors ' +
-  'disabled:cursor-not-allowed disabled:opacity-50 select-none';
+  'inline-flex items-center justify-center gap-2 rounded-[14px] font-semibold transition-[background-color,transform] active:scale-[0.98] ' +
+  'disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 select-none';
 
 const BUTTON_VARIANTS: Record<Variant, string> = {
   primary: 'bg-brand text-brand-ink hover:bg-brand-strong',
   secondary: 'border border-hairline-strong bg-canvas-raised text-ink hover:bg-canvas-sunken',
-  ghost: 'text-ink hover:bg-canvas-sunken',
+  ghost: 'text-brand-strong hover:bg-brand-soft',
   danger: 'border border-danger/40 text-danger hover:bg-danger-soft',
   accent: 'bg-accent text-accent-ink hover:bg-accent-strong',
 };
 
 const BUTTON_SIZES: Record<Size, string> = {
-  sm: 'min-h-9 px-3 text-sm',
-  md: 'min-h-11 px-4 text-sm',
-  lg: 'min-h-12 px-5 text-base',
+  sm: 'min-h-10 px-3.5 text-sm',
+  md: 'min-h-12 px-4 text-[15px]',
+  lg: 'min-h-13 px-6 text-base',
 };
 
 export function Button({
@@ -99,7 +99,7 @@ export function Field({
       </label>
       <input
         id={id}
-        className="min-h-11 w-full rounded-xl border border-hairline-strong bg-canvas-raised px-3.5 py-2.5 text-ink placeholder:text-ink-muted/70 focus:border-brand focus:outline-none"
+        className="min-h-12 w-full rounded-xl border border-hairline-strong bg-canvas-raised px-3.5 py-2.5 text-base text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none"
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
         {...props}
@@ -134,7 +134,7 @@ export function TextareaField({
       </label>
       <textarea
         id={id}
-        className="min-h-24 w-full rounded-xl border border-hairline-strong bg-canvas-raised px-3.5 py-2.5 text-ink placeholder:text-ink-muted/70 focus:border-brand focus:outline-none"
+        className="min-h-24 w-full rounded-xl border border-hairline-strong bg-canvas-raised px-3.5 py-2.5 text-base text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none"
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
         {...props}
@@ -169,7 +169,7 @@ export function SelectField({
       </label>
       <select
         id={id}
-        className="min-h-11 w-full rounded-xl border border-hairline-strong bg-canvas-raised px-3.5 py-2.5 text-ink focus:border-brand focus:outline-none"
+        className="min-h-12 w-full rounded-xl border border-hairline-strong bg-canvas-raised px-3.5 py-2.5 text-base text-ink focus:border-brand focus:outline-none"
         aria-describedby={hint ? `${id}-hint` : undefined}
         {...props}
       >
@@ -261,15 +261,27 @@ export function RadioCards<T extends string>({
   );
 }
 
-export function Card({ children, className = '', as: Tag = 'div', testId }: { children: ReactNode; className?: string; as?: 'div' | 'section' | 'article' | 'li'; testId?: string }) {
+export function Card({
+  children,
+  className = '',
+  as: Tag = 'div',
+  testId,
+  'aria-labelledby': labelledBy,
+}: {
+  children: ReactNode;
+  className?: string;
+  as?: 'div' | 'section' | 'article' | 'li';
+  testId?: string;
+  'aria-labelledby'?: string;
+}) {
   return (
-    <Tag data-testid={testId} className={`rounded-2xl border border-hairline bg-canvas-raised p-4 shadow-[var(--shadow)] ${className}`}>
+    <Tag data-testid={testId} aria-labelledby={labelledBy} className={`rounded-[18px] border border-hairline bg-canvas-raised p-4 shadow-[var(--shadow)] ${className}`}>
       {children}
     </Tag>
   );
 }
 
-export type BadgeTone = 'neutral' | 'brand' | 'accent' | 'warning' | 'danger' | 'info' | 'demo';
+export type BadgeTone = 'neutral' | 'brand' | 'accent' | 'warning' | 'danger' | 'info' | 'demo' | 'promo';
 
 const BADGE_TONES: Record<BadgeTone, string> = {
   neutral: 'bg-canvas-sunken text-ink border-hairline',
@@ -278,30 +290,40 @@ const BADGE_TONES: Record<BadgeTone, string> = {
   warning: 'bg-warning-soft text-warning border-transparent',
   danger: 'bg-danger-soft text-danger border-transparent',
   info: 'bg-info-soft text-info border-transparent',
-  demo: 'bg-warning-soft text-warning border-warning/40 border-dashed',
+  // DEMO blijft altijd herkenbaar: gestreepte rand, eigen kleur, ook in donker.
+  demo: 'bg-warning-soft text-warning border-warning/60 border-dashed font-bold',
+  promo: 'bg-promo-soft text-promo-text border-transparent',
 };
 
 export function Badge({ tone = 'neutral', children, title, className = '' }: { tone?: BadgeTone; children: ReactNode; title?: string; className?: string }) {
   return (
-    <span
-      title={title}
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${BADGE_TONES[tone]} ${className}`}
-    >
+    <span title={title} className={`inline-flex items-center gap-1 whitespace-nowrap rounded-md border px-1.5 py-px text-xs font-semibold leading-5 ${BADGE_TONES[tone]} ${className}`}>
       {children}
     </span>
   );
 }
 
-export function Notice({ tone = 'info', children, className = '', role }: { tone?: 'info' | 'warning' | 'danger' | 'success'; children: ReactNode; className?: string; role?: 'alert' | 'status' }) {
+const NOTICE_ICON = {
+  info: 'M12 8h.01M11 12h1v4h1',
+  warning: 'M12 9v4m0 3h.01',
+  danger: 'M12 9v4m0 3h.01',
+  success: 'm8.5 12.5 2.5 2.5 4.5-5',
+} as const;
+
+export function Notice({ tone = 'info', children, className = '', role, size = 'md' }: { tone?: 'info' | 'warning' | 'danger' | 'success'; children: ReactNode; className?: string; role?: 'alert' | 'status'; size?: 'sm' | 'md' }) {
   const tones = {
-    info: 'border-info/30 bg-info-soft text-ink',
-    warning: 'border-warning/40 bg-warning-soft text-ink',
-    danger: 'border-danger/40 bg-danger-soft text-ink',
-    success: 'border-accent/40 bg-accent-soft text-ink',
+    info: 'bg-info-soft text-ink [--notice:var(--info)]',
+    warning: 'bg-warning-soft text-ink [--notice:var(--warning)]',
+    danger: 'bg-danger-soft text-ink [--notice:var(--danger)]',
+    success: 'bg-accent-soft text-ink [--notice:var(--accent-strong)]',
   } as const;
   return (
-    <div role={role ?? (tone === 'danger' ? 'alert' : 'status')} className={`rounded-xl border px-4 py-3 text-sm leading-relaxed ${tones[tone]} ${className}`}>
-      {children}
+    <div role={role ?? (tone === 'danger' ? 'alert' : 'status')} className={`flex gap-2.5 rounded-xl ${size === 'sm' ? 'px-3 py-2 text-[13px] leading-snug' : 'px-3.5 py-3 text-sm leading-relaxed'} ${tones[tone]} ${className}`}>
+      <svg width={size === 'sm' ? 18 : 20} height={size === 'sm' ? 18 : 20} viewBox="0 0 24 24" fill="none" stroke="var(--notice)" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className="mt-px shrink-0">
+        <circle cx="12" cy="12" r="9" />
+        <path d={NOTICE_ICON[tone]} />
+      </svg>
+      <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
 }
@@ -312,11 +334,19 @@ export function Skeleton({ className = '' }: { className?: string }) {
 
 export function EmptyState({ title, text, action, icon }: { title: string; text?: string; action?: ReactNode; icon?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-dashed border-hairline-strong px-6 py-10 text-center">
-      {icon && <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-canvas-sunken text-ink-muted">{icon}</div>}
-      <h2 className="text-base font-semibold text-ink">{title}</h2>
-      {text && <p className="mx-auto mt-1 max-w-md text-sm text-ink-muted">{text}</p>}
-      {action && <div className="mt-4 flex justify-center">{action}</div>}
+    <div className="flex flex-col items-center rounded-[18px] border border-dashed border-hairline-strong bg-canvas-raised/60 px-6 py-10 text-center">
+      <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-brand-soft text-brand-strong" aria-hidden="true">
+        {icon ?? (
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 5h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L19.5 8H6" />
+            <circle cx="9" cy="20" r="1.2" />
+            <circle cx="17" cy="20" r="1.2" />
+          </svg>
+        )}
+      </div>
+      <h2 className="text-lg font-bold text-ink">{title}</h2>
+      {text && <p className="mt-1.5 max-w-sm text-sm text-ink-muted">{text}</p>}
+      {action && <div className="mt-5 flex justify-center">{action}</div>}
     </div>
   );
 }
@@ -332,7 +362,8 @@ export function LiveRegion({ message }: { message: string | null }) {
 
 /**
  * Toegankelijke dialoog op het native <dialog>-element: focus gaat erin bij
- * openen, Escape sluit, focus keert terug naar de knop die hem opende.
+ * openen, Escape sluit, focus keert terug naar de knop die hem opende. Op een
+ * telefoon is het een bodemblad (duim-bereik), op grotere schermen een venster.
  */
 export function Dialog({
   open,
@@ -369,29 +400,32 @@ export function Dialog({
     <dialog
       ref={ref}
       aria-labelledby={titleId}
-      className="m-auto w-[min(100%-2rem,32rem)] rounded-2xl border border-hairline bg-canvas-raised p-0 text-ink shadow-[var(--shadow)] backdrop:bg-black/40"
+      className="sheet mx-auto mb-0 mt-auto max-h-[92dvh] w-full max-w-full rounded-t-[24px] border border-hairline bg-canvas-raised p-0 text-ink shadow-[var(--shadow)] backdrop:bg-black/50 md:m-auto md:w-[min(100%-2rem,32rem)] md:rounded-[20px]"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="p-5">
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <h2 id={titleId} className="text-lg font-bold">
-            {title}
-          </h2>
-          <button type="button" onClick={onClose} aria-label={closeLabel} className="flex size-9 shrink-0 items-center justify-center rounded-full text-ink-muted hover:bg-canvas-sunken">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
-            </svg>
-          </button>
+      <div className="pb-safe">
+        <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-hairline-strong md:hidden" aria-hidden="true" />
+        <div className="p-5 pt-3 md:pt-5">
+          <div className="mb-4 flex items-start justify-between gap-4">
+            <h2 id={titleId} className="display text-2xl">
+              {title}
+            </h2>
+            <button type="button" onClick={onClose} aria-label={closeLabel} className="-mr-1 flex size-11 shrink-0 items-center justify-center rounded-full text-ink-muted hover:bg-canvas-sunken">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+          {children}
         </div>
-        {children}
       </div>
     </dialog>
   );
 }
 
-/** Segmentknoppen met tab-semantiek. */
+/** Segmentknoppen (aria-pressed): één keuze uit enkele. */
 export function SegmentedControl<T extends string>({
   label,
   value,
@@ -404,7 +438,7 @@ export function SegmentedControl<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <div role="group" aria-label={label} className="inline-flex w-full rounded-xl border border-hairline bg-canvas-sunken p-1">
+    <div role="group" aria-label={label} className="flex w-full gap-1 rounded-[14px] bg-canvas-sunken p-1">
       {options.map((option) => {
         const active = option.value === value;
         return (
@@ -413,7 +447,7 @@ export function SegmentedControl<T extends string>({
             type="button"
             aria-pressed={active}
             onClick={() => onChange(option.value)}
-            className={`min-h-10 flex-1 rounded-lg px-3 text-sm font-semibold transition-colors ${active ? 'bg-canvas-raised text-ink shadow-[var(--shadow)]' : 'text-ink-muted hover:text-ink'}`}
+            className={`min-h-11 flex-1 rounded-[10px] px-2 text-[13px] font-semibold leading-tight transition-colors ${active ? 'bg-canvas-raised text-ink shadow-[var(--shadow)]' : 'text-ink-muted hover:text-ink'}`}
           >
             {option.label}
           </button>
@@ -423,28 +457,47 @@ export function SegmentedControl<T extends string>({
   );
 }
 
+/** Het beeldmerk: een schapkaartje. Kleur via `currentColor`, zodat het op de groene balk én op papier werkt. */
+export function LogoMark({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" aria-hidden="true" className={`shrink-0 ${className}`}>
+      <rect x="1" y="1" width="30" height="30" rx="8" fill="var(--tag)" />
+      <circle cx="7.5" cy="16" r="2.2" fill="var(--tag-ink)" opacity="0.85" />
+      <path d="M13 11.5h11M13 16h11M13 20.5h7" stroke="var(--tag-ink)" strokeWidth="2.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 /** Het logotype. Eén plek, zodat de merknaam nergens uit de pas loopt. */
 export function Wordmark({ className = '' }: { className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-2 font-[family-name:var(--font-display)] font-extrabold tracking-tight text-ink ${className}`}>
-      <svg width="28" height="28" viewBox="0 0 512 512" aria-hidden="true" className="shrink-0">
-        <rect width="512" height="512" rx="112" fill="var(--brand)" />
-        <path d="M96 176h320l-16 56H112z" fill="var(--canvas)" />
-        <path d="M152 280h208l-20 112H172z" fill="none" stroke="var(--canvas)" strokeWidth="22" strokeLinejoin="round" />
-        <path d="M200 280l24-56M312 280l-24-56" stroke="var(--canvas)" strokeWidth="22" strokeLinecap="round" />
-      </svg>
-      <span>
-        Super<span className="text-brand">ette</span>
-      </span>
+    <span className={`inline-flex items-center gap-2 ${className}`}>
+      <LogoMark className="size-7" />
+      <span className="display text-[1.4em] leading-none tracking-tight">Superette</span>
     </span>
   );
 }
 
-export function PageTitle({ children, lead }: { children: ReactNode; lead?: ReactNode }) {
+export function PageTitle({ children, lead, action }: { children: ReactNode; lead?: ReactNode; action?: ReactNode }) {
   return (
-    <header className="mb-5">
-      <h1 className="text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">{children}</h1>
-      {lead && <p className="mt-1.5 max-w-2xl text-sm text-ink-muted sm:text-base">{lead}</p>}
+    <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
+      <div className="min-w-0">
+        <h1 className="text-[2rem] text-ink sm:text-[2.5rem]">{children}</h1>
+        {lead && <p className="mt-2 max-w-2xl text-[15px] text-ink-muted">{lead}</p>}
+      </div>
+      {action}
     </header>
+  );
+}
+
+/** Kopje van een sectie, met optioneel een link rechts. */
+export function SectionTitle({ id, children, action }: { id?: string; children: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+      <h2 id={id} className="display text-[1.5rem] text-ink">
+        {children}
+      </h2>
+      {action}
+    </div>
   );
 }

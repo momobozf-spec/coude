@@ -37,7 +37,7 @@ export function StatusBadge({ status }: { status: PriceStatus }) {
 export function ProvenanceLine({ provenance, compact = false }: { provenance: Provenance; compact?: boolean }) {
   const { t, locale } = useI18n();
   return (
-    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] leading-snug text-ink-muted">
+    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs leading-snug text-ink-muted">
       <StatusBadge status={provenance.status} />
       {!compact && (
         <span>
@@ -57,15 +57,62 @@ export function ProvenanceLine({ provenance, compact = false }: { provenance: Pr
 
 export function ChainBadge({ chain, size = 'md' }: { chain: StoreChainRef; size?: 'sm' | 'md' }) {
   return (
-    <span className="inline-flex items-center gap-1.5 font-semibold text-ink">
+    <span className="inline-flex min-w-0 items-center gap-1.5 font-semibold text-ink">
       <span
         aria-hidden="true"
-        className={`inline-flex shrink-0 items-center justify-center rounded-md font-bold ${size === 'sm' ? 'size-5 text-[9px]' : 'size-7 text-[11px]'}`}
+        className={`inline-flex shrink-0 items-center justify-center rounded-[6px] font-bold leading-none ${size === 'sm' ? 'size-5 text-[9px]' : 'size-7 text-[11px]'}`}
         style={{ backgroundColor: chainColorVar(chain.slug), color: chainInkVar(chain.slug) }}
       >
         {chainInitials(chain.name)}
       </span>
-      <span className={size === 'sm' ? 'text-xs' : 'text-sm'}>{chain.name}</span>
+      <span className={`truncate ${size === 'sm' ? 'text-[13px]' : 'text-[15px]'}`}>{chain.name}</span>
+    </span>
+  );
+}
+
+/**
+ * Het schapkaartje: de prijs groot en smal, de prijs per kilo/liter/stuk
+ * eronder, zoals op een winkellabel. Alleen voor de goedkoopste prijs.
+ */
+export function PriceTag({
+  cents,
+  unitPrice,
+  originalCents,
+  size = 'md',
+  className = '',
+}: {
+  cents: number;
+  unitPrice: ProductOffer['unitPrice'];
+  originalCents?: number | null;
+  size?: 'md' | 'lg';
+  className?: string;
+}) {
+  const { t, locale } = useI18n();
+  return (
+    <div className={`shelf-tag inline-flex flex-col py-2 pr-3.5 ${className}`}>
+      {originalCents !== null && originalCents !== undefined && originalCents > cents && (
+        <s className="text-xs font-semibold opacity-75" aria-label={t('promo.originalPrice', { price: formatEuro(originalCents, locale) })}>
+          {formatEuro(originalCents, locale)}
+        </s>
+      )}
+      <span className={`price-figure ${size === 'lg' ? 'text-[2.75rem]' : 'text-[2.1rem]'}`}>{formatEuro(cents, locale)}</span>
+      <span className="mt-1 border-t border-tag-ink/25 pt-0.5 text-xs font-semibold tabular">
+        {unitPrice ? formatUnitPrice(unitPrice.cents, unitPrice.unit, locale) : t('search.noUnitPrice')}
+      </span>
+    </div>
+  );
+}
+
+/** "+ € 0,20" tegenover de goedkoopste, met een voluit-tekst voor schermlezers. */
+export function PriceDiff({ cents, className = '' }: { cents: number; className?: string }) {
+  const { t, locale } = useI18n();
+  if (cents === 0) return <span className={`text-xs font-semibold text-accent-strong ${className}`}>{t('search.samePrice')}</span>;
+  const amount = formatEuro(Math.abs(cents), locale);
+  const label = cents > 0 ? t('search.moreExpensive', { amount }) : t('search.cheaper', { amount });
+  return (
+    <span className={`tabular text-xs font-semibold ${cents > 0 ? 'text-ink-muted' : 'text-accent-strong'} ${className}`} aria-label={label} title={label}>
+      {cents > 0 ? '+' : '−'}
+      {amount}
     </span>
   );
 }
@@ -82,13 +129,13 @@ export function MatchBadge({ matchType, long = false }: { matchType: MatchType; 
 }
 
 /** Promotie en voorwaarden, altijd zichtbaar. */
-export function PromoBadges({ offer, loyaltyCardName }: { offer: ProductOffer; loyaltyCardName?: string | null }) {
+export function PromoBadges({ offer, loyaltyCardName, hidePromoLabel = false }: { offer: ProductOffer; loyaltyCardName?: string | null; hidePromoLabel?: boolean }) {
   const { t, locale } = useI18n();
   const items: Array<{ key: string; tone: BadgeTone; text: string }> = [];
 
-  if (offer.promotionLabel && offer.promotionType !== 'NONE') items.push({ key: 'promo', tone: 'brand', text: offer.promotionLabel });
-  if (offer.discountPercentage !== null && offer.discountPercentage > 0 && !offer.promotionLabel?.includes('%')) {
-    items.push({ key: 'discount', tone: 'brand', text: t('promo.discount', { percent: `${offer.discountPercentage}%` }) });
+  if (!hidePromoLabel && offer.promotionLabel && offer.promotionType !== 'NONE') items.push({ key: 'promo', tone: 'promo', text: offer.promotionLabel });
+  if (!hidePromoLabel && offer.discountPercentage !== null && offer.discountPercentage > 0 && !offer.promotionLabel?.includes('%')) {
+    items.push({ key: 'discount', tone: 'promo', text: t('promo.discount', { percent: `${offer.discountPercentage}%` }) });
   }
   if (offer.minimumQuantity > 1) items.push({ key: 'min', tone: 'warning', text: t('promo.minimumQuantity', { n: offer.minimumQuantity }) });
   if (offer.requiresLoyaltyCard) {
@@ -113,23 +160,26 @@ export function PromoBadges({ offer, loyaltyCardName }: { offer: ProductOffer; l
   );
 }
 
-/** Eén prijsregel van één keten: verpakkingsprijs, eenheidsprijs, promotie, herkomst. */
+/** Eén prijsregel van één keten: verpakkingsprijs, eenheidsprijs, verschil, promotie, herkomst. */
 export function OfferRow({
   offer,
   highlight = false,
   loyaltyCardName,
   compact = false,
+  bestCents,
 }: {
   offer: ProductOffer;
   highlight?: boolean;
   loyaltyCardName?: string | null;
   compact?: boolean;
+  /** Prijs van de goedkoopste; dan tonen we het verschil. */
+  bestCents?: number;
 }) {
   const { t, locale } = useI18n();
 
   return (
-    <div className={`rounded-xl border p-3 ${highlight ? 'border-accent bg-accent-soft/40' : 'border-hairline bg-canvas-raised'}`}>
-      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+    <div className={`rounded-[14px] border p-3 ${highlight ? 'border-brand/50 bg-brand-soft/40' : 'border-hairline bg-canvas-raised'}`}>
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <ChainBadge chain={offer.storeChain} />
@@ -139,22 +189,23 @@ export function OfferRow({
           {!compact && <p className="mt-1 truncate text-xs text-ink-muted">{offer.storeProductName}</p>}
         </div>
 
-        <div className="text-right">
+        <div className="shrink-0 text-right">
           <div className="flex items-baseline justify-end gap-2">
             {offer.originalPriceCents !== null && offer.originalPriceCents > offer.priceCents && (
               <s className="text-xs text-ink-muted" aria-label={t('promo.originalPrice', { price: formatEuro(offer.originalPriceCents, locale) })}>
                 {formatEuro(offer.originalPriceCents, locale)}
               </s>
             )}
-            <Price cents={offer.priceCents} className={`font-extrabold ${compact ? 'text-base' : 'text-lg'} ${highlight ? 'text-accent-strong' : 'text-ink'}`} />
+            <Price cents={offer.priceCents} className={`price-figure ${compact ? 'text-xl' : 'text-[1.6rem]'} ${highlight ? 'text-brand-strong' : 'text-ink'}`} />
           </div>
-          <p className="text-xs text-ink-muted">
+          <p className="tabular text-xs text-ink-muted">
             {offer.unitPrice ? formatUnitPrice(offer.unitPrice.cents, offer.unitPrice.unit, locale) : t('search.noUnitPrice')}
           </p>
+          {bestCents !== undefined && !highlight && <PriceDiff cents={offer.priceCents - bestCents} />}
           {offer.effectivePrice && offer.effectivePrice.conditional && (
-            <p className="text-xs font-medium text-brand-strong">
+            <p className="text-xs font-semibold text-promo-text">
               {t('promo.effective', { price: formatEuro(offer.effectivePrice.unitCents, locale), n: offer.effectivePrice.atQuantity })}
-              {offer.effectivePrice.unitPrice && ` · ${formatUnitPrice(offer.effectivePrice.unitPrice.cents, offer.effectivePrice.unitPrice.unit, locale)}`}
+              {offer.effectivePrice.unitPrice && ` (${formatUnitPrice(offer.effectivePrice.unitPrice.cents, offer.effectivePrice.unitPrice.unit, locale)})`}
             </p>
           )}
         </div>

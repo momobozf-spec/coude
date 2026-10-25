@@ -12,7 +12,9 @@ export function ChainPicker({
   selected,
   onChange,
   name,
+  variant = 'list',
 }: {
+  variant?: 'list' | 'chips';
   legend: string;
   hint?: string;
   chains: ReadonlyArray<StoreChain | StoreChainRef>;
@@ -30,14 +32,21 @@ export function ChainPicker({
 
   return (
     <fieldset>
-      <legend className="mb-1 text-sm font-semibold text-ink">{legend}</legend>
+      <legend className="mb-1 text-[15px] font-bold text-ink">{legend}</legend>
       {hint && <p className="mb-2 text-xs text-ink-muted">{hint}</p>}
-      <div className="grid gap-1 sm:grid-cols-2">
+      <div className={variant === 'chips' ? 'flex flex-wrap gap-2' : 'grid gap-1 sm:grid-cols-2'}>
         {chains.map((chain) => {
           const checked = selected.includes(chain.slug);
           const noData = 'dataSourceKind' in chain && chain.dataSourceKind === null;
           return (
-            <label key={chain.slug} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-2 hover:bg-canvas-sunken">
+            <label
+              key={chain.slug}
+              className={
+                variant === 'chips'
+                  ? `flex min-h-11 cursor-pointer items-center gap-2 rounded-full border py-1 pl-3 pr-3.5 transition-colors ${checked ? 'border-brand bg-brand-soft' : 'border-hairline-strong bg-canvas-raised hover:bg-canvas-sunken'}`
+                  : 'flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-2 hover:bg-canvas-sunken'
+              }
+            >
               <input
                 type="checkbox"
                 name={name}
@@ -47,7 +56,7 @@ export function ChainPicker({
                 className="size-5 shrink-0 rounded accent-[var(--brand)]"
               />
               <ChainBadge chain={chain} size="sm" />
-              {noData && <span className="text-[11px] text-ink-muted">({t('chain.noData')})</span>}
+              {noData && <span className="text-xs text-ink-muted">({t('chain.noData')})</span>}
             </label>
           );
         })}

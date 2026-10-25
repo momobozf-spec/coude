@@ -3,39 +3,61 @@
 /*
  * ── Superette designtokens ──────────────────────────────────────────────────
  *
- * Warm, lokaal, betrouwbaar. Een lichte "papier"-ondergrond met een warme
- * baksteenrode merkkleur en een kruideniersgroen voor prijzen en de beste
- * deal. Bewust licht en warm, met een eigen identiteit.
+ * Beeldtaal uit de winkel zelf: een dennengroene luifel als app-balk, een
+ * koele "tegelvloer"-ondergrond, en het gele schapkaartje als het ene
+ * opvallende element — daar staat de goedkoopste prijs op, groot en smal
+ * gezet, met de prijs per kilo/liter eronder, zoals op een echt schaplabel.
+ * Promoties krijgen het rode stickerrood. Al de rest blijft rustig.
  *
- * Contrast (WCAG 2.1 AA, gecontroleerd):
- *   ink #1F1B17 op canvas #FBF7F0      ≈ 15,6 : 1
- *   ink-muted #6B625A op canvas        ≈  5,3 : 1
- *   brand #B8432F op wit               ≈  5,1 : 1   (tekst én knoppen met witte tekst)
- *   accent #2F6B4F op wit              ≈  6,4 : 1
- *   warning-ink #7A4F0B op warning-bg  ≈  7,0 : 1
+ * Contrast (WCAG 2.1 AA, nagerekend met de WCAG-formule):
+ *   licht  ink #16201B op canvas #F2F3EE          ≈ 15,0 : 1
+ *          ink-muted #56615B op canvas            ≈  5,8 : 1
+ *          wit op brand/balk #0E5A43              ≈  8,2 : 1
+ *          bar-muted #B9DCCB op balk              ≈  5,5 : 1
+ *          tag-ink #211C00 op tag #FFD43B         ≈ 12,0 : 1
+ *          wit op promo #C8102E                   ≈  5,9 : 1
+ *          promo-text #A80D26 op promo-soft       ≈  6,3 : 1
+ *          accent-strong #0D5A3B op wit           ≈  8,3 : 1
+ *   donker ink #E9EFEA op canvas #0C1310          ≈ 16,1 : 1
+ *          ink-muted #9BABA2 op raised #141D19    ≈  7,2 : 1
+ *          brand-ink #04211A op brand #6FD0A2     ≈  9,1 : 1
+ *          tag-ink op tag #F4C837                 ≈ 10,7 : 1
+ *          wit op promo #C42039                   ≈  5,8 : 1
+ *          promo-text #FF8C9C op promo-soft       ≈  7,3 : 1
  *
  * Geen component kent een kleurwaarde; alles loopt via deze namen. Het thema
- * wisselen is één attribuut op <html> (`data-theme`), net als in de boetiek-app.
+ * wisselen is één attribuut op <html> (`data-theme`); zonder attribuut
+ * beslist `prefers-color-scheme`.
  */
 
 :root,
 [data-theme='light'] {
   color-scheme: light;
-  --canvas: #fbf7f0;
+  --canvas: #f2f3ee;
   --canvas-raised: #ffffff;
-  --canvas-sunken: #f3ede2;
-  --ink: #1f1b17;
-  --ink-muted: #6b625a;
-  --brand: #b8432f;
-  --brand-strong: #9a3524;
-  --brand-soft: #f8e4de;
+  --canvas-sunken: #e7e9e2;
+  --ink: #16201b;
+  --ink-muted: #56615b;
+  --brand: #0e5a43;
+  --brand-strong: #0a4434;
+  --brand-soft: #dcede4;
   --brand-ink: #ffffff;
-  --accent: #2f6b4f;
-  --accent-strong: #245640;
-  --accent-soft: #e3f0e8;
+  --accent: #13704a;
+  --accent-strong: #0d5a3b;
+  --accent-soft: #ddf1e6;
   --accent-ink: #ffffff;
-  --hairline: #e6dccb;
-  --hairline-strong: #cdbfa8;
+  --tag: #ffd43b;
+  --tag-edge: #e2b300;
+  --tag-ink: #211c00;
+  --promo: #c8102e;
+  --promo-ink: #ffffff;
+  --promo-soft: #fbe3e6;
+  --promo-text: #a80d26;
+  --bar: #0e5a43;
+  --bar-ink: #ffffff;
+  --bar-muted: #b9dccb;
+  --hairline: #dce0d7;
+  --hairline-strong: #bcc3b7;
   --danger: #b42318;
   --danger-soft: #fde8e6;
   --warning: #7a4f0b;
@@ -43,9 +65,9 @@
   --info: #2b5c8a;
   --info-soft: #e2edf7;
   --focus: #1d4ed8;
-  --shadow: 0 1px 2px rgb(31 27 23 / 0.06), 0 8px 24px -12px rgb(31 27 23 / 0.18);
+  --shadow: 0 1px 0 rgb(22 32 27 / 0.06), 0 6px 18px -10px rgb(22 32 27 / 0.22);
 
-  /* Categorisch grafiekpalet, vaste volgorde per keten. Gevalideerd (licht). */
+  /* Categorisch palet per keten, vaste volgorde. Gevalideerd (licht). */
   --chart-1: #2a78d6;
   --chart-2: #eb6834;
   --chart-3: #1baf7a;
@@ -54,9 +76,8 @@
   --chart-6: #4a3aa7;
   --chart-7: #e34948;
   --chart-other: #8a8178;
-  /* Tekst op de ketenkleur (badge-initialen), ≥ 4,5:1 in beide thema's:
-     wit alleen op het paars (8,6:1 / 5,3:1); zwart op de rest (4,7:1 – 7,9:1).
-     Berekend per kleur; wit op het blauw haalt 4,4:1 en valt dus af. */
+  /* Tekst op de ketenkleur, ≥ 4,5:1 in beide thema's: wit alleen op het paars,
+     zwart op de rest. Berekend per kleur. */
   --chart-1-ink: #000000;
   --chart-2-ink: #000000;
   --chart-3-ink: #000000;
@@ -70,21 +91,31 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --canvas: #17140f;
-    --canvas-raised: #221d17;
-    --canvas-sunken: #100e0a;
-    --ink: #f4ede2;
-    --ink-muted: #b4a898;
-    --brand: #e8846f;
-    --brand-strong: #f2a391;
-    --brand-soft: #3a211b;
-    --brand-ink: #1a0f0b;
-    --accent: #7fc9a3;
-    --accent-strong: #9ad8b8;
-    --accent-soft: #1d3328;
-    --accent-ink: #0d1f16;
-    --hairline: #3a3127;
-    --hairline-strong: #55483a;
+    --canvas: #0c1310;
+    --canvas-raised: #141d19;
+    --canvas-sunken: #080d0b;
+    --ink: #e9efea;
+    --ink-muted: #9baba2;
+    --brand: #6fd0a2;
+    --brand-strong: #96e0bc;
+    --brand-soft: #12352a;
+    --brand-ink: #04211a;
+    --accent: #6fd0a2;
+    --accent-strong: #96e0bc;
+    --accent-soft: #12352a;
+    --accent-ink: #04211a;
+    --tag: #f4c837;
+    --tag-edge: #b38f12;
+    --tag-ink: #211c00;
+    --promo: #c42039;
+    --promo-ink: #ffffff;
+    --promo-soft: #3a1419;
+    --promo-text: #ff8c9c;
+    --bar: #101a16;
+    --bar-ink: #e9efea;
+    --bar-muted: #9baba2;
+    --hairline: #24302a;
+    --hairline-strong: #3a4740;
     --danger: #f08d84;
     --danger-soft: #3c1d1a;
     --warning: #f2c66d;
@@ -92,9 +123,7 @@
     --info: #8fbbe8;
     --info-soft: #182a3c;
     --focus: #93c5fd;
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
-
-    /* Eigen stappen voor donker, gevalideerd tegen de donkere ondergrond. */
+    --shadow: 0 1px 0 rgb(0 0 0 / 0.4), 0 8px 22px -12px rgb(0 0 0 / 0.7);
     --chart-1: #2a78d6;
     --chart-2: #e0602c;
     --chart-3: #1baf7a;
@@ -108,21 +137,31 @@
 
 [data-theme='dark'] {
   color-scheme: dark;
-  --canvas: #17140f;
-  --canvas-raised: #221d17;
-  --canvas-sunken: #100e0a;
-  --ink: #f4ede2;
-  --ink-muted: #b4a898;
-  --brand: #e8846f;
-  --brand-strong: #f2a391;
-  --brand-soft: #3a211b;
-  --brand-ink: #1a0f0b;
-  --accent: #7fc9a3;
-  --accent-strong: #9ad8b8;
-  --accent-soft: #1d3328;
-  --accent-ink: #0d1f16;
-  --hairline: #3a3127;
-  --hairline-strong: #55483a;
+  --canvas: #0c1310;
+  --canvas-raised: #141d19;
+  --canvas-sunken: #080d0b;
+  --ink: #e9efea;
+  --ink-muted: #9baba2;
+  --brand: #6fd0a2;
+  --brand-strong: #96e0bc;
+  --brand-soft: #12352a;
+  --brand-ink: #04211a;
+  --accent: #6fd0a2;
+  --accent-strong: #96e0bc;
+  --accent-soft: #12352a;
+  --accent-ink: #04211a;
+  --tag: #f4c837;
+  --tag-edge: #b38f12;
+  --tag-ink: #211c00;
+  --promo: #c42039;
+  --promo-ink: #ffffff;
+  --promo-soft: #3a1419;
+  --promo-text: #ff8c9c;
+  --bar: #101a16;
+  --bar-ink: #e9efea;
+  --bar-muted: #9baba2;
+  --hairline: #24302a;
+  --hairline-strong: #3a4740;
   --danger: #f08d84;
   --danger-soft: #3c1d1a;
   --warning: #f2c66d;
@@ -130,7 +169,7 @@
   --info: #8fbbe8;
   --info-soft: #182a3c;
   --focus: #93c5fd;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --shadow: 0 1px 0 rgb(0 0 0 / 0.4), 0 8px 22px -12px rgb(0 0 0 / 0.7);
   --chart-1: #2a78d6;
   --chart-2: #e0602c;
   --chart-3: #1baf7a;
@@ -155,6 +194,16 @@
   --color-accent-strong: var(--accent-strong);
   --color-accent-soft: var(--accent-soft);
   --color-accent-ink: var(--accent-ink);
+  --color-tag: var(--tag);
+  --color-tag-edge: var(--tag-edge);
+  --color-tag-ink: var(--tag-ink);
+  --color-promo: var(--promo);
+  --color-promo-ink: var(--promo-ink);
+  --color-promo-soft: var(--promo-soft);
+  --color-promo-text: var(--promo-text);
+  --color-bar: var(--bar);
+  --color-bar-ink: var(--bar-ink);
+  --color-bar-muted: var(--bar-muted);
   --color-hairline: var(--hairline);
   --color-hairline-strong: var(--hairline-strong);
   --color-danger: var(--danger);
@@ -165,8 +214,10 @@
   --color-info-soft: var(--info-soft);
   --color-focus: var(--focus);
 
-  --font-sans: 'Nunito', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
-  --font-display: 'Nunito', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  /* Eén familie (Archivo, variabel in gewicht én breedte, zelf gehost):
+     normale breedte voor tekst, smal en zwaar voor prijzen en titels. */
+  --font-sans: 'Archivo Variable', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Archivo Variable', 'Arial Narrow', 'Segoe UI', system-ui, sans-serif;
   --shadow-card: var(--shadow);
 }
 
@@ -175,43 +226,145 @@ body {
   background-color: var(--canvas);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   font-family: var(--font-sans);
   min-height: 100dvh;
+  font-size: 16px;
+  line-height: 1.5;
+  overscroll-behavior-y: none;
+}
+
+@layer components {
+/* Titels: smal en zwaar, zoals het opschrift op een winkelluifel. */
+h1,
+.display {
+  font-family: var(--font-display);
+  font-stretch: 78%;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+/* Prijzen: smalle, zware cijfers met vaste breedte, zodat bedragen onder elkaar uitlijnen. */
+.price-figure {
+  font-family: var(--font-display);
+  font-stretch: 72%;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.005em;
+  line-height: 1;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Het schapkaartje: geel label met een gestanst gaatje links. */
+.shelf-tag {
+  position: relative;
+  background-color: var(--tag);
+  color: var(--tag-ink);
+  border-radius: 6px 10px 10px 6px;
+  box-shadow: inset 0 -3px 0 var(--tag-edge);
+  padding-left: 1.65rem;
+}
+.shelf-tag::before {
+  content: '';
+  position: absolute;
+  left: 0.55rem;
+  top: 50%;
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-top: -0.225rem;
+  border-radius: 999px;
+  background-color: var(--canvas-raised);
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.25);
+}
+}
+
+/* Veilige zones van telefoons met een inkeping of thuisbalk. */
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.px-safe {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+/* Ruimte onder de inhoud voor de tabbalk (64 px) plus de thuisbalk. */
+.pb-tabbar {
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+}
+@media (min-width: 768px) {
+  .pb-tabbar {
+    padding-bottom: 2.5rem;
+  }
+}
+
+/* Horizontaal scrollende rij (promoties, snelle filters) zonder zichtbare balk. */
+.scroll-row {
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-row::-webkit-scrollbar {
+  display: none;
+}
+.scroll-row > * {
+  scroll-snap-align: start;
 }
 
 /* Zichtbare focus voor iedereen die met toetsenbord of schermlezer werkt. */
-:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
-/* Skeletons: een rustige puls, uit bij verminderde beweging. */
-@keyframes pulse-soft {
-  0%,
-  100% {
-    opacity: 1;
+/* Skeletons: een rustige glans, stil bij verminderde beweging. */
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
   }
-  50% {
-    opacity: 0.55;
+  100% {
+    background-position: -100% 0;
   }
 }
 
 .skeleton {
   background-color: var(--canvas-sunken);
+  background-image: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--canvas-raised) 55%, transparent) 50%, transparent 100%);
+  background-size: 200% 100%;
   border-radius: 8px;
-  animation: pulse-soft 1.6s ease-in-out infinite;
+  animation: shimmer 1.4s ease-in-out infinite;
 }
 
-/* Subtiele "geruit tafelkleed"-textuur voor de landingspagina. */
-.gingham {
-  background-image:
-    linear-gradient(0deg, color-mix(in srgb, var(--brand) 5%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--brand) 5%, transparent) 1px, transparent 1px);
-  background-size: 28px 28px;
+/* Bodemblad (dialoog) schuift op mobiel van onder in beeld. */
+@keyframes sheet-in {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+dialog[open].sheet {
+  animation: sheet-in 0.18s ease-out;
+}
+
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
