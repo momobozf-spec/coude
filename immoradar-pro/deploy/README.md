@@ -17,7 +17,7 @@ het eenvoudigste verhaal. Een kleine server kost een paar euro per maand
 ## 1. Account en verwerkersovereenkomst
 
 1. Maak een account op [hetzner.com](https://www.hetzner.com/cloud/) op naam van
-   Marhaba Data & AI Agent BV, met het btw-nummer.
+   Marhaba Cooperation BV, met het btw-nummer.
 2. Sluit de verwerkersovereenkomst af in je account:
    [accounts.hetzner.com/account/dpa](https://accounts.hetzner.com/account/dpa).
    Kies als gegevens "contactgegevens van klanten en prospecten van
@@ -81,8 +81,9 @@ nano .env.production
 chmod 600 .env.production
 ```
 
-Vul `DOMAIN`, `ACME_EMAIL`, beide geheimen en `LEGAL_ENTITY_ADDRESS` /
-`LEGAL_CONTACT_EMAIL` in. `TELEGRAM_BOT_TOKEN` blijft leeg tijdens de pilot.
+Vul `DOMAIN`, `ACME_EMAIL`, beide geheimen en `LEGAL_CONTACT_EMAIL` in.
+`LEGAL_ENTITY_ADDRESS` staat al op de zetel uit het KBO-register
+(Sweetstraat 13, 3870 Heers). `TELEGRAM_BOT_TOKEN` blijft leeg tijdens de pilot.
 
 ## 7. Starten
 

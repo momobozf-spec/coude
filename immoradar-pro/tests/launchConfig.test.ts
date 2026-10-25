@@ -25,7 +25,7 @@ const PRODUCTION = {
   NODE_ENV: 'production',
   SESSION_SECRET: SECRET,
   APP_BASE_URL: 'https://app.leadrevive.example',
-  LEGAL_ENTITY_ADDRESS: 'Straat 1, 1930 Zaventem',
+  LEGAL_ENTITY_ADDRESS: 'Sweetstraat 13, 3870 Heers',
   COLLECTOR_ENABLED_SOURCES: '',
 }
 
@@ -71,31 +71,37 @@ describe('productieconfiguratie', () => {
     expect(() => assertProductionSecrets(env)).not.toThrow()
   })
 
-  it('eist het adres van de uitbater op een publieke URL', () => {
-    const env = withEnv({ ...PRODUCTION, LEGAL_ENTITY_ADDRESS: '' })
+  it('eist het volledige adres van de uitbater op een publieke URL', () => {
+    const env = withEnv({ ...PRODUCTION, LEGAL_ENTITY_ADDRESS: 'Heers' })
     expect(() => assertProductionSecrets(env)).toThrow(/LEGAL_ENTITY_ADDRESS/)
   })
 
-  it('laat een lokale demo zonder adres toe', () => {
-    const env = withEnv({ ...PRODUCTION, APP_BASE_URL: 'http://localhost:3000', LEGAL_ENTITY_ADDRESS: '' })
+  it('start op een publieke URL met het standaardadres uit het KBO-register', () => {
+    const env = withEnv({ ...PRODUCTION, LEGAL_ENTITY_ADDRESS: '' })
+    expect(env.LEGAL_ENTITY_ADDRESS).toBe('Sweetstraat 13, 3870 Heers')
+    expect(() => assertProductionSecrets(env)).not.toThrow()
+  })
+
+  it('laat een lokale demo zonder volledig adres toe', () => {
+    const env = withEnv({ ...PRODUCTION, APP_BASE_URL: 'http://localhost:3000', LEGAL_ENTITY_ADDRESS: 'Heers' })
     expect(() => assertProductionSecrets(env)).not.toThrow()
   })
 
   it('gebruikt de BV-gegevens als standaard', () => {
     const env = withEnv({})
-    expect(env.LEGAL_ENTITY_NAME).toBe('Marhaba Data & AI Agent BV')
-    expect(env.LEGAL_ENTITY_VAT).toBe('BE 1003.552.102')
-    expect(env.LEGAL_ENTITY_MUNICIPALITY).toBe('Zaventem')
+    expect(env.LEGAL_ENTITY_NAME).toBe('Marhaba Cooperation BV')
+    expect(env.LEGAL_ENTITY_VAT).toBe('BE 1037.222.285')
+    expect(env.LEGAL_ENTITY_MUNICIPALITY).toBe('Heers')
     expect(env.LEGAL_CONTACT_EMAIL).toBe('momobozf@gmail.com')
-    expect(env.LEGAL_ENTITY_ADDRESS).toBe('')
+    expect(env.LEGAL_ENTITY_ADDRESS).toBe('Sweetstraat 13, 3870 Heers')
   })
 })
 
 describe('juridische identiteit uit compose', () => {
   it('valt terug op de BV-gegevens bij lege variabelen', () => {
     const env = withEnv({ LEGAL_ENTITY_NAME: '', LEGAL_ENTITY_VAT: '', LEGAL_CONTACT_EMAIL: ' ' })
-    expect(env.LEGAL_ENTITY_NAME).toBe('Marhaba Data & AI Agent BV')
-    expect(env.LEGAL_ENTITY_VAT).toBe('BE 1003.552.102')
+    expect(env.LEGAL_ENTITY_NAME).toBe('Marhaba Cooperation BV')
+    expect(env.LEGAL_ENTITY_VAT).toBe('BE 1037.222.285')
     expect(env.LEGAL_CONTACT_EMAIL).toBe('momobozf@gmail.com')
   })
 })

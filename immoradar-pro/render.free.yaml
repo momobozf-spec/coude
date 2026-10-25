@@ -33,11 +33,11 @@ envVarGroups:
       - key: RETENTION_IMPORT_ROWS_DAYS
         value: '90'
       - key: LEGAL_ENTITY_NAME
-        value: Marhaba Data & AI Agent BV
+        value: Marhaba Cooperation BV
       - key: LEGAL_ENTITY_VAT
-        value: BE 1003.552.102
+        value: BE 1037.222.285
       - key: LEGAL_ENTITY_MUNICIPALITY
-        value: Zaventem
+        value: Heers
       # LeadRevive only: marktradar uit tot er een legale bron is.
       - key: FEATURE_MARKET_RADAR
         value: 'false'
@@ -62,7 +62,7 @@ services:
       - key: APP_BASE_URL
         sync: false
       - key: LEGAL_ENTITY_ADDRESS
-        sync: false
+        value: Sweetstraat 13, 3870 Heers
       - key: LEGAL_CONTACT_EMAIL
         sync: false
       - key: BOOTSTRAP_ADMIN_EMAIL

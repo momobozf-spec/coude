@@ -47,7 +47,8 @@ Controleer na de push op GitHub dat er géén `.env` tussen staat.
      https-URL. Nog geen eigen domein? Neem voorlopig
      `https://immoradar-web.onrender.com` (de echte naam zie je na het
      aanmaken; pas hem dan aan).
-   - `LEGAL_ENTITY_ADDRESS` en `LEGAL_CONTACT_EMAIL`.
+   - `LEGAL_CONTACT_EMAIL` (`LEGAL_ENTITY_ADDRESS` staat al in de blueprint:
+     Sweetstraat 13, 3870 Heers, uit het KBO-register).
 4. **Apply**. De eerste build duurt enkele minuten.
 
 De database is alleen intern bereikbaar (`ipAllowList: []`). De web-service

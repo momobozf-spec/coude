@@ -27,7 +27,7 @@ productie — de app weigert anders te starten (`src/instrumentation.ts`,
 | `DATABASE_URL` | Verbinding met PostgreSQL, met `sslmode=require` bij een managed database. |
 | `SESSION_SECRET` | Minstens 32 willekeurige tekens. `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"` |
 | `APP_BASE_URL` | De publieke URL, met `https://`. |
-| `LEGAL_ENTITY_ADDRESS` | Straat, nr. en postcode van de zetel van Marhaba Data & AI Agent BV (verplicht op een publieke URL; wettelijke vermelding). |
+| `LEGAL_ENTITY_ADDRESS` | Straat, nr. en postcode van de zetel van Marhaba Cooperation BV; standaard `Sweetstraat 13, 3870 Heers` (KBO-register). Verplicht met postcode op een publieke URL; wettelijke vermelding. |
 
 Daarnaast weigert de app te starten met `demo-be`/`fixture-be` in
 `COLLECTOR_ENABLED_SOURCES` (tenzij `ALLOW_DEMO_SOURCES=true`), en in productie
@@ -41,7 +41,7 @@ Sterk aanbevolen:
 
 | Variabele | Waarom |
 | --- | --- |
-| `LEGAL_ENTITY_NAME/VAT/MUNICIPALITY`, `LEGAL_CONTACT_EMAIL` | Standaard Marhaba Data & AI Agent BV, BE 1003.552.102, Zaventem, momobozf@gmail.com. Verschijnen op `/privacy`, `/voorwaarden` en `/verwerkersovereenkomst`. |
+| `LEGAL_ENTITY_NAME/VAT/MUNICIPALITY`, `LEGAL_CONTACT_EMAIL` | Standaard Marhaba Cooperation BV, BE 1037.222.285, Heers, momobozf@gmail.com. Verschijnen op `/privacy`, `/voorwaarden` en `/verwerkersovereenkomst`. |
 | `TELEGRAM_BOT_TOKEN` | Zonder token worden meldingen aangemaakt maar niet verstuurd. |
 | `CRON_SECRET` | Alleen als je de taken via HTTP laat aanroepen in plaats van met de worker. |
 | `DATABASE_POOL_MAX` | Zet web + worker samen onder de verbindingslimiet van je database. |
