@@ -8,7 +8,7 @@ const GOOD = {
   NEXT_PUBLIC_SUPABASE_URL: 'https://abcd.supabase.co',
   NEXT_PUBLIC_SUPABASE_ANON_KEY: 'eyJ-anon',
   SUPABASE_SERVICE_ROLE_KEY: 'eyJ-service',
-  LEGAL_ENTITY_ADDRESS: 'Straat 1, 1930 Zaventem',
+  LEGAL_ENTITY_ADDRESS: 'Sweetstraat 13, 3870 Heers',
   STRIPE_SECRET_KEY: 'sk_live_abc',
   STRIPE_WEBHOOK_SECRET: 'whsec_abc',
 };
@@ -36,10 +36,14 @@ describe('productie-guard', () => {
     expect(productionConfigProblems({ ...GOOD, APP_URL: 'http://localhost:3000' })).toHaveLength(1);
   });
 
-  it('eist het adres van de uitbater', () => {
-    expect(productionConfigProblems({ ...GOOD, LEGAL_ENTITY_ADDRESS: '' })[0]).toMatch(
+  it('eist het volledige adres van de uitbater', () => {
+    expect(productionConfigProblems({ ...GOOD, LEGAL_ENTITY_ADDRESS: 'Heers' })[0]).toMatch(
       /LEGAL_ENTITY_ADDRESS/,
     );
+  });
+
+  it('valt zonder LEGAL_ENTITY_ADDRESS terug op de zetel uit het KBO-register', () => {
+    expect(productionConfigProblems({ ...GOOD, LEGAL_ENTITY_ADDRESS: '' })).toEqual([]);
   });
 
   it('weigert Stripe-testsleutels, tenzij expliciet voor staging', () => {
