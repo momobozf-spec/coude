@@ -54,7 +54,7 @@ Kost bij de start: €0 op de gratis plannen van Supabase en Vercel, plus je dom
 3. Vul de omgevingsvariabelen in uit `.env.example` (Production én Preview):
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (nooit de service-role-key)
    - `NEXT_PUBLIC_SITE_URL` = `https://jouwdomein.be` (zonder slash op het einde)
-   - `NEXT_PUBLIC_SITE_NAME`, `NEXT_PUBLIC_COMPANY_NAME` (Marhaba Data & AI Agent BV), `NEXT_PUBLIC_COMPANY_VAT` (BE 1003.552.102), `NEXT_PUBLIC_COMPANY_ADDRESS` (straat + nr + postcode zetel), `NEXT_PUBLIC_CONTACT_EMAIL` (momobozf@gmail.com of je domeinadres)
+   - `NEXT_PUBLIC_SITE_NAME`, `NEXT_PUBLIC_COMPANY_NAME` (Marhaba Cooperation BV), `NEXT_PUBLIC_COMPANY_VAT` (BE 1037.222.285), `NEXT_PUBLIC_COMPANY_ADDRESS` (Sweetstraat 13, 3870 Heers — zetel uit het KBO-register), `NEXT_PUBLIC_CONTACT_EMAIL` (momobozf@gmail.com of je domeinadres)
 4. Klik **Deploy**. Koppel daarna je domein onder **Settings → Domains**.
    - **Productie-guard:** een productiebuild op Vercel faalt bewust zolang er placeholders staan (`jouw-project`, `jouw-anon-key`, `jouwdomein`, `localhost`, `example.com`) of een `NEXT_PUBLIC_*SERVICE_ROLE*`-variabele bestaat; zelf gehost weigert `next start` dan te starten (`lib/production-guard.mjs`, `instrumentation.ts`). Zonder straatadres krijg je enkel een waarschuwing.
 5. Wijzig je later een omgevingsvariabele, deploy dan opnieuw: de CSP-header en de links worden bij de build vastgelegd.
@@ -94,7 +94,7 @@ Node.js 20.9 of nieuwer.
 ## Vóór je publiek gaat
 
 - **Juridisch:** laat `/voorwaarden` en `/privacy` nakijken door een jurist, ook de vraag of het in contact brengen van kopers en verkopers van (aandelen van) bedrijven onder FSMA-regels valt. Dat is nog niet bevestigd.
-- **Adres:** vul je volledige maatschappelijke zetel in via `NEXT_PUBLIC_COMPANY_ADDRESS` (uitbater: Marhaba Data & AI Agent BV, BE 1003.552.102, Zaventem).
+- **Adres:** de maatschappelijke zetel staat standaard op Sweetstraat 13, 3870 Heers (KBO-register; uitbater: Marhaba Cooperation BV, BE 1037.222.285). Overschrijven kan via `NEXT_PUBLIC_COMPANY_ADDRESS`.
 - **SMTP:** zonder eigen mailserver komen aanmeldlinks traag of niet aan zodra meer mensen zich aanmelden.
 - **Back-ups:** controleer welke back-ups je Supabase-plan biedt. Exporteer anders zelf regelmatig de database.
 
