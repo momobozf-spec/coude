@@ -1,7 +1,7 @@
 # Noor Printables (printable-generator)
 
 Islamitische werkbladen (kleurplaten, doolhoven, woordzoekers) als PDF + digitaal kleuren, voor ouders,
-leerkrachten en (weekend)scholen. Uitbater: **Marhaba Data & AI Agent BV** (BE 1003.552.102, Zaventem).
+leerkrachten en (weekend)scholen. Uitbater: **Marhaba Cooperation BV** (BE 1037.222.285, Sweetstraat 13, 3870 Heers).
 
 **Kern (standaard aan):** generator + login (e-mail/wachtwoord, optioneel Google/Microsoft/Apple) +
 Stripe-abonnement Pro/School (maand/jaar) + juridische pagina's.
@@ -73,8 +73,9 @@ moeten gelijk zijn aan de Stripe-prijzen. Zolang `NEXT_PUBLIC_PRICES_CONFIRMED` 
    events hierboven → kopieer de signing secret naar `STRIPE_WEBHOOK_SECRET`.
 3. **Vercel:** importeer de repo, Root Directory `printable-generator`, Framework Next.js, Functions region
    `fra1` (Settings → Functions). Zet alle env-vars uit `.env.example` (minstens: `AUTH_SECRET`,
-   `NEXT_PUBLIC_APP_URL`, `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, alle `STRIPE_*`, `NEXT_PUBLIC_PRICE_*`,
-   `NEXT_PUBLIC_LEGAL_ENTITY_ADDRESS`). Zonder deze weigert de app te starten (productie-guard).
+   `NEXT_PUBLIC_APP_URL`, `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, alle `STRIPE_*`, `NEXT_PUBLIC_PRICE_*`).
+   Zonder deze weigert de app te starten (productie-guard). `NEXT_PUBLIC_LEGAL_ENTITY_ADDRESS` staat standaard
+   op de zetel uit het KBO-register.
 4. **E-mail (optioneel maar aangeraden):** Resend-account, domein verifiëren, `RESEND_API_KEY` + `EMAIL_FROM`.
 5. **Domein:** koppel in Vercel, zet `NEXT_PUBLIC_APP_URL` op `https://<domein>` en redeploy.
 6. **Admin:** registreer je op de live site en voer `npm run admin:set-role -- <email> admin` uit met de
@@ -88,4 +89,4 @@ moeten gelijk zijn aan de Stripe-prijzen. Zolang `NEXT_PUBLIC_PRICES_CONFIRMED` 
 DE (`src/legal/*.ts`). Status: **Concept — laten nalezen door een jurist.** Kinderen: accounts alleen voor
 18+ (ouder/voogd/leerkracht), geen kindgegevens in de kern (GDPR art. 8 / Belgische leeftijdsgrens 13 jaar).
 Cookiebanner: Google Analytics laadt alleen na toestemming. Adres maatschappelijke zetel:
-`NEXT_PUBLIC_LEGAL_ENTITY_ADDRESS` (TODO).
+Sweetstraat 13, 3870 Heers (KBO-register; overschrijfbaar via `NEXT_PUBLIC_LEGAL_ENTITY_ADDRESS`).
