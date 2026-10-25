@@ -3,7 +3,7 @@
 Plak of upload een cv (PDF/TXT) en krijg een eerlijke, AI-gegenereerde review (Claude via de Anthropic API).
 Frontend: React 19 + Vite 8 + Tailwind 4. Backend: Express 5 (`server.js` → `server/app.js`).
 
-Uitbater: Marhaba Data & AI Agent BV (BE 1003.552.102, Zaventem).
+Uitbater: Marhaba Cooperation BV (BE 1037.222.285, Sweetstraat 13, 3870 Heers).
 
 ## Lokaal draaien
 
@@ -40,7 +40,7 @@ npm test                    # node:test, 24 tests, geen API-key nodig (Anthropic
    - `ANTHROPIC_MODEL=claude-sonnet-5-5` (of `claude-haiku-5-5` voor lagere kosten)
    - `TRUST_PROXY=1`
    - `DAILY_ROAST_LIMIT=200`, `RATE_LIMIT_MAX=5`, `RATE_LIMIT_WINDOW_MINUTES=60` (naar wens)
-   - `VITE_LEGAL_ENTITY_ADDRESS=<straat + nr, postcode Zaventem>` (build-time; vereist een nieuwe build na wijzigen)
+   - `VITE_LEGAL_ENTITY_ADDRESS` is optioneel: standaard de zetel uit het KBO-register, `Sweetstraat 13, 3870 Heers, Belgium` (build-time; vereist een nieuwe build na wijzigen)
    - `ALLOWED_ORIGINS` alleen nodig als de frontend op een ander domein draait.
 5. Deploy, open `/api/health` → `{"status":"ok",...}`, test een roast, controleer `/privacy` en `/terms`.
 6. Eigen domein: koppel het in Render (Custom Domains); de eigen origin wordt automatisch toegelaten.
@@ -51,5 +51,5 @@ door een gedeelde store (Redis) als je opschaalt.
 ## Juridisch
 
 `/privacy` en `/terms` (Engels, zoals de app) staan in `src/components/LegalPage.jsx` en zijn een
-**concept — laten nalezen door een jurist**. Adres van de maatschappelijke zetel via `VITE_LEGAL_ENTITY_ADDRESS`.
+**concept — laten nalezen door een jurist**. Adres van de maatschappelijke zetel: Sweetstraat 13, 3870 Heers (KBO-register; overschrijfbaar via `VITE_LEGAL_ENTITY_ADDRESS`).
 Geen cookies of trackers in de app; als je analytics toevoegt, eerst een cookiebanner/consent.
