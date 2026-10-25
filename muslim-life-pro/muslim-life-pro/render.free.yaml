@@ -42,12 +42,14 @@ services:
       # accepted in production together with STAGING=1.
       - key: STAGING
         value: '1'
-      # Operator. Name, enterprise number and e-mail are also the defaults in
-      # src/config/legal.ts; fill in LEGAL_ENTITY_ADDRESS yourself.
+      # Operator. Name, enterprise number, registered office (KBO register) and
+      # e-mail are also the defaults in src/config/legal.ts.
       - key: LEGAL_ENTITY_NAME
-        value: Marhaba Data & AI Agent BV
+        value: Marhaba Cooperation BV
       - key: LEGAL_ENTITY_VAT
-        value: BE 1003.552.102
+        value: BE 1037.222.285
+      - key: LEGAL_ENTITY_ADDRESS
+        value: Sweetstraat 13, 3870 Heers
       - key: LEGAL_CONTACT_EMAIL
         value: momobozf@gmail.com
       - key: AUTH_SECRET
@@ -64,8 +66,6 @@ services:
       - key: RESEND_API_KEY
         sync: false
       - key: EMAIL_FROM
-        sync: false
-      - key: LEGAL_ENTITY_ADDRESS
         sync: false
       - key: BOOTSTRAP_ADMIN_EMAIL
         sync: false

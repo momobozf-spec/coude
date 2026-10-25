@@ -1,29 +1,28 @@
 /**
  * The legal entity behind the service.
  *
- * Operator: Marhaba Data & AI Agent BV, enterprise number BE 1003.552.102,
- * Zaventem (Belgium), contact momobozf@gmail.com. These are the BV's real
- * details and serve as defaults; every value can be overridden from the
- * environment. EU consumer law and the GDPR's transparency duty require the
- * operator's name, geographic address, enterprise number and a contact address.
- *
- * TODO(Mohamed): set LEGAL_ENTITY_ADDRESS to the street, number and postcode
- * of the registered office. It is deliberately not in the code: it is not known
- * here and is never invented. Without it the pages show "Zaventem, Belgium".
+ * Operator: Marhaba Cooperation BV, enterprise number BE 1037.222.285,
+ * registered office Sweetstraat 13, 3870 Heers (Belgium), contact
+ * momobozf@gmail.com. These are the BV's real details (the address comes from
+ * the KBO/BCE register, public data) and serve as defaults; every value can be
+ * overridden from the environment. EU consumer law and the GDPR's transparency
+ * duty require the operator's name, geographic address, enterprise number and a
+ * contact address.
  */
 export const LEGAL_DEFAULTS = {
-  name: 'Marhaba Data & AI Agent BV',
-  vat: 'BE 1003.552.102',
-  city: 'Zaventem',
+  name: 'Marhaba Cooperation BV',
+  vat: 'BE 1037.222.285',
+  address: 'Sweetstraat 13, 3870 Heers',
+  city: 'Heers',
   email: 'momobozf@gmail.com',
 } as const
 
 export interface LegalEntity {
   name: string
   vat: string
-  /** Full registered-office address from LEGAL_ENTITY_ADDRESS, or null while not configured. */
-  address: string | null
-  /** What the pages show: the full address, or at least the municipality. */
+  /** Full registered-office address from LEGAL_ENTITY_ADDRESS, else the one from the KBO register. */
+  address: string
+  /** What the pages show: the full registered-office address. */
   displayAddress: string
   email: string
 }
@@ -34,12 +33,12 @@ function clean(value: string | undefined): string | null {
 }
 
 export function legalEntity(env: NodeJS.ProcessEnv = process.env): LegalEntity {
-  const address = clean(env['LEGAL_ENTITY_ADDRESS'])
+  const address = clean(env['LEGAL_ENTITY_ADDRESS']) ?? LEGAL_DEFAULTS.address
   return {
     name: clean(env['LEGAL_ENTITY_NAME']) ?? LEGAL_DEFAULTS.name,
     vat: clean(env['LEGAL_ENTITY_VAT']) ?? LEGAL_DEFAULTS.vat,
     address,
-    displayAddress: address ?? `${LEGAL_DEFAULTS.city}, Belgium`,
+    displayAddress: address,
     email: clean(env['LEGAL_CONTACT_EMAIL']) ?? LEGAL_DEFAULTS.email,
   }
 }

@@ -87,8 +87,11 @@ export function checkProductionEnv(env: NodeJS.ProcessEnv = process.env): EnvRep
     warnings.push('EMAIL_FROM uses resend.dev: Resend only delivers to the account owner, members get nothing')
   }
 
-  if (!env.LEGAL_ENTITY_ADDRESS) {
-    warnings.push('LEGAL_ENTITY_ADDRESS missing: the legal pages show only "Zaventem" instead of the full registered-office address')
+  // Empty = the registered office from the KBO register (src/config/legal.ts).
+  // An override without a postcode (e.g. only a municipality) is not a full address.
+  const legalAddress = env.LEGAL_ENTITY_ADDRESS?.trim()
+  if (legalAddress && !/\b\d{4}\b/.test(legalAddress)) {
+    warnings.push('LEGAL_ENTITY_ADDRESS is incomplete (no street, number and postcode): the legal pages must show the full registered-office address')
   }
   if (!env.HEALTH_CHECK_TOKEN || env.HEALTH_CHECK_TOKEN.length < 32) {
     warnings.push('HEALTH_CHECK_TOKEN missing or short: the maintenance job (account deletions) is disabled')

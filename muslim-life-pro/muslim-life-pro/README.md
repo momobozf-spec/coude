@@ -228,7 +228,7 @@ than a request. This is enforced by an ESLint rule and by `import 'server-only'`
 
 ## Live zetten
 
-Operator: **Marhaba Data & AI Agent BV** (BE 1003.552.102, Zaventem) — see
+Operator: **Marhaba Cooperation BV** (BE 1037.222.285, Sweetstraat 13, 3870 Heers) — see
 `src/config/legal.ts`. The app needs PostgreSQL and a daily maintenance call, so it runs
 as a Docker web service on **Render (Frankfurt)** with **Neon Postgres (Frankfurt)**.
 Free test setup: [docs/DEPLOY-RENDER-FREE.md](docs/DEPLOY-RENDER-FREE.md). For real members:
@@ -263,8 +263,7 @@ Free test setup: [docs/DEPLOY-RENDER-FREE.md](docs/DEPLOY-RENDER-FREE.md). For r
 | `STRIPE_PRICE_PREMIUM_MONTHLY`, `STRIPE_PRICE_PREMIUM_YEARLY` | yes | the two `price_…` ids |
 | `RESEND_API_KEY`, `EMAIL_FROM` | yes | `Muslim Life <noreply@<domain>>` |
 | `HEALTH_CHECK_TOKEN` | yes | ≥ 32 random characters |
-| `LEGAL_ENTITY_ADDRESS` | yes | street, number, postcode of the registered office (TODO) |
-| `LEGAL_ENTITY_NAME`, `LEGAL_ENTITY_VAT`, `LEGAL_CONTACT_EMAIL` | no | default to the BV |
+| `LEGAL_ENTITY_ADDRESS`, `LEGAL_ENTITY_NAME`, `LEGAL_ENTITY_VAT`, `LEGAL_CONTACT_EMAIL` | no | default to the BV (registered office per the KBO register: Sweetstraat 13, 3870 Heers) |
 | `AI_PROVIDER` + `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | no | without a key the assistant is unavailable |
 | `ANALYTICS_PROVIDER` | no | `database` (default) |
 | `LEGAL_TEXTS_REVIEWED`, `RELIGIOUS_CONTENT_REVIEWED` | no | `1` only after the reviews |

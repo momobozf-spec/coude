@@ -139,8 +139,9 @@ describe('checkProductionEnv', () => {
     expect(example.errors.join(' ')).toMatch(/placeholder/)
   })
 
-  it('warns while the registered-office address is missing', () => {
-    expect(checkProductionEnv(good).warnings.join(' ')).toMatch(/LEGAL_ENTITY_ADDRESS/)
+  it('warns when the registered-office address is incomplete, not for the KBO default', () => {
+    expect(checkProductionEnv(good).warnings.join(' ')).not.toMatch(/LEGAL_ENTITY_ADDRESS/)
+    expect(checkProductionEnv({ ...good, LEGAL_ENTITY_ADDRESS: 'Heers' }).warnings.join(' ')).toMatch(/LEGAL_ENTITY_ADDRESS/)
   })
 
   it('does nothing outside production', () => {
@@ -157,17 +158,17 @@ describe('runtime configuration', () => {
     expect(appUrl({} as NodeJS.ProcessEnv)).toBe('http://localhost:3000')
   })
 
-  it('names Marhaba Data & AI Agent BV by default and never invents a street address', () => {
+  it('names Marhaba Cooperation BV by default with the registered office from the KBO register', () => {
     expect(legalEntity({ LEGAL_ENTITY_NAME: '  ' } as unknown as NodeJS.ProcessEnv)).toEqual({
-      name: 'Marhaba Data & AI Agent BV',
-      vat: 'BE 1003.552.102',
-      address: null,
-      displayAddress: 'Zaventem, Belgium',
+      name: 'Marhaba Cooperation BV',
+      vat: 'BE 1037.222.285',
+      address: 'Sweetstraat 13, 3870 Heers',
+      displayAddress: 'Sweetstraat 13, 3870 Heers',
       email: 'momobozf@gmail.com',
     })
-    const configured = legalEntity({ LEGAL_ENTITY_ADDRESS: 'Straat 1, 1930 Zaventem' } as unknown as NodeJS.ProcessEnv)
-    expect(configured.displayAddress).toBe('Straat 1, 1930 Zaventem')
-    expect(JSON.stringify(legalEntity({} as NodeJS.ProcessEnv))).not.toMatch(/Cooperation/i)
+    const configured = legalEntity({ LEGAL_ENTITY_ADDRESS: 'Andere Straat 2, 3870 Heers' } as unknown as NodeJS.ProcessEnv)
+    expect(configured.displayAddress).toBe('Andere Straat 2, 3870 Heers')
+    expect(JSON.stringify(legalEntity({} as NodeJS.ProcessEnv))).not.toMatch(/Data & AI Agent/i)
   })
 })
 
