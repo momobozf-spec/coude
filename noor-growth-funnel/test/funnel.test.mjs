@@ -86,9 +86,9 @@ test('privacyverklaring bestaat, is gelinkt vanuit de toestemming en noemt de ui
   const privacy = await read('privacy.html');
   assert.match(privacy, /Concept — laten nalezen door een jurist/);
   for (const page of [html, privacy]) {
-    assert.match(page, /Marhaba Data &amp; AI Agent BV/);
-    assert.match(page, /BE 1003\.552\.102/);
-    assert.match(page, /Zaventem/);
+    assert.match(page, /Marhaba Cooperation BV/);
+    assert.match(page, /BE 1037\.222\.285/);
+    assert.match(page, /Sweetstraat 13, 3870 Heers/);
   }
   assert.match(privacy, /leeftijdsgroep/);
 });
