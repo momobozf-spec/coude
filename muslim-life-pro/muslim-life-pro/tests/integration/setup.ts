@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { createPgAdapter } from '../../src/server/db/database-url'
 
 /**
  * Integration-test harness.
@@ -26,7 +26,7 @@ export function testPrisma(): PrismaClient {
   }
 
   client ??= new PrismaClient({
-    adapter: new PrismaPg({ connectionString: TEST_DATABASE_URL, max: 3 }),
+    adapter: createPgAdapter(TEST_DATABASE_URL, { max: 3 }),
     log: ['error'],
   })
 

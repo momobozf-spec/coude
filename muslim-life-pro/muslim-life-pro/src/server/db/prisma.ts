@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { createPgAdapter } from './database-url'
 
 /**
  * Prisma singleton (Prisma 7, `pg` driver adapter — no query-engine binary).
@@ -19,7 +19,8 @@ function poolMax(): number {
 function createClient(): PrismaClient {
   const connectionString = process.env.DATABASE_URL
   if (!connectionString) throw new Error('DATABASE_URL is not set')
-  const adapter = new PrismaPg({ connectionString, max: poolMax() })
+  // `?schema=<naam>` in de URL kiest het Postgres-schema (zie database-url.ts).
+  const adapter = createPgAdapter(connectionString, { max: poolMax() })
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === 'production' ? ['error'] : ['warn', 'error'],

@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { createPgAdapter } from '../../src/server/db/database-url'
 
 import { seedGeography } from './geography'
 import { seedCategories } from './categories'
@@ -27,7 +27,7 @@ if (!connectionString) {
   process.exit(1)
 }
 
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString, max: 2 }) })
+const prisma = new PrismaClient({ adapter: createPgAdapter(connectionString, { max: 2 }) })
 const isProduction = process.env.NODE_ENV === 'production'
 
 async function main() {
