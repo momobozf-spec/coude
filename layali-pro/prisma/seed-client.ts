@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { createPgAdapter } from "../src/lib/database-url";
 
 /**
  * PrismaClient voor de seedscripts. De demo-seeds (verzonnen producten) weigeren
@@ -21,5 +21,5 @@ export function seedClient(): PrismaClient {
     console.error("DATABASE_URL ontbreekt.");
     process.exit(1);
   }
-  return new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+  return new PrismaClient({ adapter: createPgAdapter(connectionString) });
 }

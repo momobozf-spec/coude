@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { createPgAdapter } from "./database-url";
 
 /**
  * Eén PrismaClient per proces, op PostgreSQL via de pg-driver (Prisma 7).
@@ -33,7 +33,8 @@ function createExtendedClient() {
   if (!connectionString) {
     throw new Error("DATABASE_URL ontbreekt");
   }
-  const adapter = new PrismaPg({ connectionString, max: poolMax() });
+  // `?schema=<naam>` in de URL kiest het Postgres-schema (zie database-url.ts).
+  const adapter = createPgAdapter(connectionString, { max: poolMax() });
   const base = new PrismaClient({ adapter });
 
   return base.$extends({
