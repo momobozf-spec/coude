@@ -57,11 +57,11 @@ describe('e-mailoverzicht', () => {
 describe('afzender in de e-mail', () => {
   it('vermeldt uitbater, ondernemingsnummer en adres (geëscapet) als die is meegegeven', async () => {
     const { legalFooterLine } = await import('../../../config/legal-entity');
-    const line = legalFooterLine('Straat 1 <b>, 1930 Zaventem');
+    const line = legalFooterLine('Straat 1 <b>, 3870 Heers');
     const email = buildDigestEmail([notification()], 'https://superette.example', line);
-    expect(email.text).toContain('Marhaba Data & AI Agent BV · BE 1003.552.102 · Straat 1 <b>, 1930 Zaventem');
-    expect(email.html).toContain('Marhaba Data &amp; AI Agent BV');
+    expect(email.text).toContain('Marhaba Cooperation BV · BE 1037.222.285 · Straat 1 <b>, 3870 Heers');
+    expect(email.html).toContain('Marhaba Cooperation BV');
     expect(email.html).not.toContain('<b>,');
-    expect(legalFooterLine(undefined)).toContain('Zaventem');
+    expect(legalFooterLine(undefined)).toContain('Sweetstraat 13, 3870 Heers');
   });
 });

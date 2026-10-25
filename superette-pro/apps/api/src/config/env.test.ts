@@ -21,7 +21,7 @@ const production: Record<string, string> = {
   SUPERETTE_WEB_URL: 'https://superette.example',
   TRUST_PROXY: '1',
   COMPARE_JOB_KEY: 'Jq8vN2xR5tK9mW3pL7zH4cB6yF1dG0sA',
-  LEGAL_ENTITY_ADDRESS: 'Teststraat 1, 1930 Zaventem',
+  LEGAL_ENTITY_ADDRESS: 'Sweetstraat 13, 3870 Heers',
 };
 
 /** Productie mét boetiek (niet de huidige productie; voor de boetiekregels). */
@@ -85,11 +85,16 @@ describe('validateEnv in productie', () => {
     expectRejected({ ...production, DATABASE_URL: 'postgresql://superette:superette@localhost:5432/superette' }, /DATABASE_URL/);
   });
 
-  it('eist het adres van de uitbater (LEGAL_ENTITY_ADDRESS)', () => {
-    const { LEGAL_ENTITY_ADDRESS: _omit, ...withoutAddress } = production;
-    expectRejected(withoutAddress, /LEGAL_ENTITY_ADDRESS/);
-    expectRejected({ ...production, LEGAL_ENTITY_ADDRESS: '' }, /LEGAL_ENTITY_ADDRESS/);
+  it('eist een volledig adres van de uitbater (LEGAL_ENTITY_ADDRESS)', () => {
+    expectRejected({ ...production, LEGAL_ENTITY_ADDRESS: 'Heers' }, /LEGAL_ENTITY_ADDRESS/);
+    expectRejected({ ...production, LEGAL_ENTITY_ADDRESS: 'Sweetstraat 13, Heers' }, /LEGAL_ENTITY_ADDRESS/);
     expectRejected({ ...production, LEGAL_ENTITY_ADDRESS: 'TODO adres invullen' }, /LEGAL_ENTITY_ADDRESS/);
+  });
+
+  it('valt zonder LEGAL_ENTITY_ADDRESS terug op de zetel uit het KBO-register', () => {
+    const { LEGAL_ENTITY_ADDRESS: _omit, ...withoutAddress } = production;
+    expect(validateEnv(withoutAddress).LEGAL_ENTITY_ADDRESS).toBe('Sweetstraat 13, 3870 Heers');
+    expect(validateEnv({ ...production, LEGAL_ENTITY_ADDRESS: '  ' }).LEGAL_ENTITY_ADDRESS).toBe('Sweetstraat 13, 3870 Heers');
   });
 
   it('weigert de dev-deurscanner en http-URL\'s van providers', () => {

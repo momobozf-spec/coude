@@ -17,7 +17,7 @@ describe('juridische teksten', () => {
     }
   });
 
-  it('noemen de uitbater via plaatshouders en verzinnen geen adres', () => {
+  it('noemen de uitbater via plaatshouders, met de zetel uit het KBO-register', () => {
     for (const locale of LOCALES) {
       const privacy = allText(LEGAL_DOCUMENTS.privacy[locale]);
       expect(privacy).toContain('{name}');
@@ -25,10 +25,10 @@ describe('juridische teksten', () => {
       expect(privacy).toContain('{address}');
       expect(allText(LEGAL_DOCUMENTS.terms[locale])).toContain('{address}');
     }
-    expect(LEGAL_ENTITY).toEqual({ name: 'Marhaba Data & AI Agent BV', enterpriseNumber: 'BE 1003.552.102', city: 'Zaventem', email: 'momobozf@gmail.com' });
-    expect(legalAddress({})).toBeNull();
-    expect(legalAddress({ LEGAL_ENTITY_ADDRESS: '  ' })).toBeNull();
-    expect(legalAddress({ LEGAL_ENTITY_ADDRESS: 'Straat 1, 1930 Zaventem' })).toBe('Straat 1, 1930 Zaventem');
+    expect(LEGAL_ENTITY).toEqual({ name: 'Marhaba Cooperation BV', enterpriseNumber: 'BE 1037.222.285', city: 'Heers', address: 'Sweetstraat 13, 3870 Heers', email: 'momobozf@gmail.com' });
+    expect(legalAddress({})).toBe('Sweetstraat 13, 3870 Heers');
+    expect(legalAddress({ LEGAL_ENTITY_ADDRESS: '  ' })).toBe('Sweetstraat 13, 3870 Heers');
+    expect(legalAddress({ LEGAL_ENTITY_ADDRESS: 'Andere Straat 2, 3870 Heers' })).toBe('Andere Straat 2, 3870 Heers');
   });
 
   it('bevatten geen boetiekbranding en geen bewering dat er niet gescrapet wordt', () => {

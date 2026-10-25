@@ -8,9 +8,9 @@ staan hier alleen waar ze een Superette-gebruiker raken.
 > gebruiksvoorwaarden (`/voorwaarden`) en de cookieverklaring (`/cookies`) in de
 > app staan sinds 24 oktober 2026 in het Nederlands, Frans en Engels
 > (`apps/superette-web/src/lib/legal-content.ts`), met als
-> verwerkingsverantwoordelijke **Marhaba Data & AI Agent BV**
-> (BE 1003.552.102, Zaventem, momobozf@gmail.com; adres via
-> `LEGAL_ENTITY_ADDRESS`). Het blijven **concepten**: een jurist moet
+> verwerkingsverantwoordelijke **Marhaba Cooperation BV**
+> (BE 1037.222.285, Sweetstraat 13, 3870 Heers, momobozf@gmail.com; zetel uit
+> het KBO-register, overschrijfbaar via `LEGAL_ENTITY_ADDRESS`). Het blijven **concepten**: een jurist moet
 > rechtsgronden, bewaartermijnen, de doorgifte (Render, VS-moederbedrijf) en de
 > tekst goedkeuren vóór publicatie.
 >

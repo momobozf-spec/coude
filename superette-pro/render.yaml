@@ -49,13 +49,13 @@ envVarGroups:
       - key: NOTIFY_EMAIL_ENABLED
         value: "false"
 
-  # Straat, nummer, postcode en gemeente van Marhaba Data & AI Agent BV.
-  # Eén keer invullen; API, cron (e-mailvoet, productie-guard) en app
-  # (juridische pagina's) lezen dezelfde waarde. Nooit verzinnen.
+  # Straat, nummer, postcode en gemeente van Marhaba Cooperation BV, uit het
+  # KBO-register. API, cron (e-mailvoet, productie-guard) en app (juridische
+  # pagina's) lezen dezelfde waarde.
   - name: superette-legal
     envVars:
       - key: LEGAL_ENTITY_ADDRESS
-        sync: false
+        value: Sweetstraat 13, 3870 Heers
 
 databases:
   - name: superette-db

@@ -3,8 +3,7 @@
 /**
  * Toont een juridisch document (privacy, voorwaarden, cookies) in de taal van
  * de gebruiker, met de gegevens van de uitbater ingevuld. Het adres komt van
- * de server (`LEGAL_ENTITY_ADDRESS`); ontbreekt het, dan staat er een
- * zichtbare plaatshouder — nooit een verzonnen adres.
+ * de server (`LEGAL_ENTITY_ADDRESS`, standaard de zetel uit het KBO-register).
  */
 import Link from 'next/link';
 import { AppShell } from '@/components/app-shell';
@@ -13,12 +12,6 @@ import { useI18n } from '@/lib/i18n';
 import { LEGAL_ENTITY } from '@/lib/legal';
 import { LEGAL_DOCUMENTS, type LegalDocumentId } from '@/lib/legal-content';
 
-const MISSING_ADDRESS = {
-  nl: `${LEGAL_ENTITY.city} [straat en nummer: nog in te vullen]`,
-  fr: `${LEGAL_ENTITY.city} [rue et numéro : à compléter]`,
-  en: `${LEGAL_ENTITY.city} [street and number: to be completed]`,
-} as const;
-
 const RELATED: ReadonlyArray<{ href: string; id: LegalDocumentId | 'data' }> = [
   { href: '/privacy', id: 'privacy' },
   { href: '/voorwaarden', id: 'terms' },
@@ -26,7 +19,7 @@ const RELATED: ReadonlyArray<{ href: string; id: LegalDocumentId | 'data' }> = [
   { href: '/over-de-gegevens', id: 'data' },
 ];
 
-export function LegalDocumentView({ document: id, address }: { document: LegalDocumentId; address: string | null }) {
+export function LegalDocumentView({ document: id, address }: { document: LegalDocumentId; address: string }) {
   const { t, locale } = useI18n();
   const doc = LEGAL_DOCUMENTS[id][locale];
   const values: Record<string, string> = {
@@ -34,7 +27,7 @@ export function LegalDocumentView({ document: id, address }: { document: LegalDo
     kbo: LEGAL_ENTITY.enterpriseNumber,
     city: LEGAL_ENTITY.city,
     email: LEGAL_ENTITY.email,
-    address: address ?? MISSING_ADDRESS[locale],
+    address,
   };
   const fill = (text: string) => text.replace(/\{(\w+)\}/g, (match, key: string) => values[key] ?? match);
 

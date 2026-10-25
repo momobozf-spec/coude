@@ -5,6 +5,7 @@
  * en dan pas falen wanneer een klant voor de deur staat. Fail fast, luid.
  */
 import { z } from 'zod';
+import { LEGAL_ENTITY } from './legal-entity';
 
 /** Een JWK als JSON-string in de env. Wordt hier alleen op vorm gecontroleerd. */
 const jwkStringSchema = z
@@ -84,11 +85,14 @@ export const envSchema = z
     MOLLIE_WEBHOOK_URL: blankAsUndefined(z.string().url()),
 
     /**
-     * Straat, huisnummer, postcode en gemeente van de uitbater (Marhaba Data & AI
-     * Agent BV, Zaventem). Verplicht in productie (WER boek XII, AVG art. 13);
-     * wordt nooit verzonnen — Mohamed vult het in.
+     * Straat, huisnummer, postcode en gemeente van de uitbater (Marhaba Cooperation BV).
+     * Standaard de zetel uit het KBO-register (Sweetstraat 13, 3870 Heers); in productie
+     * gevalideerd (WER boek XII, AVG art. 13).
      */
-    LEGAL_ENTITY_ADDRESS: blankAsUndefined(z.string().trim().max(200)),
+    LEGAL_ENTITY_ADDRESS: z.preprocess(
+      (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+      z.string().trim().max(200).default(LEGAL_ENTITY.address),
+    ),
 
     /** Dev-only deurscanner van de boetiek-PWA; mag nooit in een productie-omgeving staan. */
     NEXT_PUBLIC_ENABLE_DEV_SCANNER: blankAsUndefined(z.string()),
@@ -202,8 +206,8 @@ export const envSchema = z
       if (env.DATABASE_URL.includes(DEFAULT_DATABASE_CREDENTIALS)) {
         issue('DATABASE_URL', 'Standaardgebruiker/-wachtwoord uit docker-compose; gebruik de connection string van de beheerde database');
       }
-      if (!env.LEGAL_ENTITY_ADDRESS || env.LEGAL_ENTITY_ADDRESS.length < 8 || /todo|\[/i.test(env.LEGAL_ENTITY_ADDRESS)) {
-        issue('LEGAL_ENTITY_ADDRESS', 'Verplicht in productie: straat, nummer, postcode en gemeente van Marhaba Data & AI Agent BV');
+      if (!env.LEGAL_ENTITY_ADDRESS || env.LEGAL_ENTITY_ADDRESS.length < 8 || !/\b\d{4}\b/.test(env.LEGAL_ENTITY_ADDRESS) || /todo|\[/i.test(env.LEGAL_ENTITY_ADDRESS)) {
+        issue('LEGAL_ENTITY_ADDRESS', 'Verplicht in productie: straat, nummer, postcode en gemeente van Marhaba Cooperation BV');
       }
       if (env.NEXT_PUBLIC_ENABLE_DEV_SCANNER === 'true' || env.NEXT_PUBLIC_DEV_DEVICE_KEY) {
         issue('NEXT_PUBLIC_DEV_DEVICE_KEY', 'De dev-deurscanner (en zijn sleutel) mag niet in een productie-omgeving staan');

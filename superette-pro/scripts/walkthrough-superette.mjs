@@ -488,7 +488,7 @@ async function main() {
   await wide.waitForSelector('h1');
   check('privacypagina gemarkeerd als voorstel voor juridische controle', /jurist/.test(await wide.locator('main').innerText()));
   check('privacypagina noemt rechten en bewaartermijnen', /hoe lang/.test(await wide.locator('main').innerText()) && /Je rechten/.test(await wide.locator('main').innerText()));
-  check('privacypagina noemt de uitbater', /Marhaba Data & AI Agent BV/.test(await wide.locator('main').innerText()) && /BE 1003\.552\.102/.test(await wide.locator('main').innerText()));
+  check('privacypagina noemt de uitbater', /Marhaba Cooperation BV/.test(await wide.locator('main').innerText()) && /BE 1037\.222\.285/.test(await wide.locator('main').innerText()));
   await a11y(wide, 'privacy');
   for (const [path, heading] of [['/voorwaarden', /Gebruiksvoorwaarden/], ['/cookies', /Cookies/]]) {
     await wide.goto(`${WEB}${path}`);

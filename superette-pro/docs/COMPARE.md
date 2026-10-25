@@ -447,7 +447,7 @@ en is herhaalbaar met de stappen hierboven.
 | Variabele | Standaard | Betekenis |
 |---|---|---|
 | `BOUTIQUE_ENABLED` | `false` | boetiek Jamal & Jamila laden; uit = boetiekroutes 404, geen MQTT/Mollie/gate-sleutels nodig |
-| `LEGAL_ENTITY_ADDRESS` | leeg | adres van Marhaba Data & AI Agent BV; verplicht in productie (API én web-build), getoond op de juridische pagina's en in e-mails |
+| `LEGAL_ENTITY_ADDRESS` | `Sweetstraat 13, 3870 Heers` | adres van de zetel van Marhaba Cooperation BV (KBO-register); in productie gevalideerd (API én web-build: met postcode, geen TODO), getoond op de juridische pagina's en in e-mails |
 | `COMPARE_FEED_DIR` | `data/feeds` | map met `<key>.json` / `<key>.csv`, relatief aan `apps/api` |
 | `COMPARE_FEED_PUSH_MAX_MB` | `15` | maximale (uitgepakte) grootte van één aangeleverde feed |
 | `PUSH_API_URL`, `PUSH_JOB_KEY` (laptop) | leeg | doel en sleutel voor `npm run feeds:push`; https verplicht |

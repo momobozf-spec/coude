@@ -3,8 +3,8 @@
 Prijzen van Belgische supermarkten naast elkaar: productzoeken, eenheidsprijzen
 per kg/l/stuk, productmatching, boodschappenlijsten, mandje-vergelijking en
 prijsalerts. App in `apps/superette-web` (nl/fr/en), API in `apps/api`
-(`src/compare/*`). Uitbater: **Marhaba Data & AI Agent BV** (BE 1003.552.102,
-Zaventem). Zie **[docs/COMPARE.md](docs/COMPARE.md)** en hieronder
+(`src/compare/*`). Uitbater: **Marhaba Cooperation BV** (BE 1037.222.285,
+Sweetstraat 13, 3870 Heers). Zie **[docs/COMPARE.md](docs/COMPARE.md)** en hieronder
 **[Live zetten (Superette)](#live-zetten-superette)**.
 
 > **Productie = alleen de vergelijker.** Dezelfde monorepo bevat ook de
@@ -101,8 +101,10 @@ hiervan gebeurt vanzelf; jij beslist wanneer.
 1. **Domein** kopen en DNS kunnen beheren (bv. `superette.be`). Nodig: app en
    API moeten op één *site* staan voor de sessiecookies. Op twee
    `*.onrender.com`-adressen werkt inloggen niet (Public Suffix List).
-2. **Adres van de BV**: straat, nummer, postcode, gemeente → `LEGAL_ENTITY_ADDRESS`.
-   Zonder adres weigert de API te starten en faalt de web-build.
+2. **Adres van de BV**: `LEGAL_ENTITY_ADDRESS` = de zetel uit het KBO-register,
+   Sweetstraat 13, 3870 Heers (standaard in de code en vast in de blueprint).
+   Met een onvolledig adres (zonder postcode, TODO) weigert de API te starten en
+   faalt de web-build.
 3. **Juridische teksten** (`/privacy`, `/voorwaarden`, `/cookies`, `/over-de-gegevens`)
    zijn een **concept**: laat ze nalezen door een jurist vóór de lancering.
 4. **Databronnen**: alle feeds staan op `termsReviewed: false` → in de app
@@ -126,7 +128,6 @@ twee env-groepen. Plannen in de blueprint: `starter` voor de services en
 
 | Waar | Variabele | Waarde |
 |---|---|---|
-| groep `superette-legal` | `LEGAL_ENTITY_ADDRESS` | bv. `Straat 1, 1930 Zaventem` (het echte adres) |
 | groep `superette-api-shared` | `SUPERETTE_WEB_URL` | `https://superette.be` (exact de origin van de app) |
 | `superette-web` | `NEXT_PUBLIC_API_URL` | `https://api.superette.be/api/v1` |
 | `superette-api` en `superette-sync` (optioneel) | `EMAIL_FROM`, `EMAIL_HTTP_URL`, `EMAIL_API_KEY` | pas als je een e-mailprovider kiest, zie stap 6 |
@@ -136,11 +137,12 @@ Door Render gegenereerd (niet zelf verzinnen): `JWT_SECRET`, `COMPARE_JOB_KEY`
 (groep `superette-api-shared`), `DATABASE_URL` (uit de database).
 Vast in de blueprint: `NODE_ENV=production`, `BOUTIQUE_ENABLED=false`,
 `MQTT_ENABLED=false`, `TRUST_PROXY=1`, `COMPARE_ALLOW_DEMO=false`,
-`EMAIL_PROVIDER=none`, `NOTIFY_EMAIL_ENABLED=false`.
+`EMAIL_PROVIDER=none`, `NOTIFY_EMAIL_ENABLED=false`,
+`LEGAL_ENTITY_ADDRESS=Sweetstraat 13, 3870 Heers` (groep `superette-legal`).
 
 De API weigert te starten in productie bij: demo aan, standaard-/zwakke
 geheimen (plaatshouders, < 32 tekens jobsleutel, docker-compose-databasewachtwoord),
-ontbrekend adres, http-URL's (app, e-mail, foutmonitoring), de dev-deurscanner
+onvolledig adres, http-URL's (app, e-mail, foutmonitoring), de dev-deurscanner
 (`NEXT_PUBLIC_DEV_*`) of — met boetiek aan — de publieke dev-scannersleutel uit
 `prisma/seed.ts`, een Mollie-testsleutel of MQTT zonder TLS.
 
