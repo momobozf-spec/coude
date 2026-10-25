@@ -44,7 +44,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <p className="mt-4 text-xs text-muted">Accounts worden tijdens de pilot door de beheerder aangemaakt.</p>
           <p className="mt-2 text-xs text-muted">
             <Link href="/voorwaarden" className="underline">Algemene voorwaarden</Link> ·{" "}
-            <Link href="/privacy" className="underline">Privacyverklaring</Link> · Marhaba Data &amp; AI Agent BV · BE 1003.552.102
+            <Link href="/privacy" className="underline">Privacyverklaring</Link> · Marhaba Cooperation BV · BE 1037.222.285
           </p>
         </div>
       </div>

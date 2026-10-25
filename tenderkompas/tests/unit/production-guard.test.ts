@@ -9,7 +9,7 @@ const good = {
   BETTER_AUTH_URL: "https://app.tenderkompas.be",
   SMTP_HOST: "smtp.provider.eu",
   SMTP_FROM: "TenderKompas IT <digest@tenderkompas.be>",
-  LEGAL_ENTITY_ADDRESS: "Straat 1, 1930 Zaventem",
+  LEGAL_ENTITY_ADDRESS: "Sweetstraat 13, 3870 Heers",
 };
 
 describe("productie-guard", () => {
@@ -42,8 +42,8 @@ describe("productie-guard", () => {
     expect(errors.some((e) => msg.test(e))).toBe(true);
   });
 
-  it("waarschuwt (maar weigert niet) zonder SMTP of adres", () => {
-    const r = checkProductionConfig({ ...good, SMTP_HOST: "", LEGAL_ENTITY_ADDRESS: "" });
+  it("waarschuwt (maar weigert niet) zonder SMTP of met een onvolledig adres", () => {
+    const r = checkProductionConfig({ ...good, SMTP_HOST: "", LEGAL_ENTITY_ADDRESS: "Heers" });
     expect(r.errors).toEqual([]);
     expect(r.warnings).toHaveLength(2);
   });
@@ -54,11 +54,17 @@ describe("productie-guard", () => {
 });
 
 describe("wettelijke vermeldingen", () => {
-  it("BV-gegevens en adres uit LEGAL_ENTITY_ADDRESS, anders Zaventem", () => {
-    expect(LEGAL.entityName).toBe("Marhaba Data & AI Agent BV");
-    expect(LEGAL.enterpriseNumber).toBe("BE 1003.552.102");
-    expect(legalAddress({})).toBe("Zaventem");
-    expect(legalAddress({ LEGAL_ENTITY_ADDRESS: " Straat 1, 1930 Zaventem " })).toBe("Straat 1, 1930 Zaventem");
-    expect(legalLine({})).toBe("TenderKompas IT is een dienst van Marhaba Data & AI Agent BV · ondernemingsnummer BE 1003.552.102 · Zaventem · momobozf@gmail.com");
+  it("BV-gegevens en adres uit LEGAL_ENTITY_ADDRESS, anders de zetel uit het KBO-register", () => {
+    expect(LEGAL.entityName).toBe("Marhaba Cooperation BV");
+    expect(LEGAL.enterpriseNumber).toBe("BE 1037.222.285");
+    expect(LEGAL.city).toBe("Heers");
+    expect(legalAddress({})).toBe("Sweetstraat 13, 3870 Heers");
+    expect(legalAddress({ LEGAL_ENTITY_ADDRESS: " Andere Straat 2, 3870 Heers " })).toBe("Andere Straat 2, 3870 Heers");
+    expect(legalLine({})).toBe("TenderKompas IT is een dienst van Marhaba Cooperation BV · ondernemingsnummer BE 1037.222.285 · Sweetstraat 13, 3870 Heers · momobozf@gmail.com");
+  });
+
+  it("productie-guard waarschuwt bij een adres zonder postcode, niet bij de standaard", () => {
+    expect(checkProductionConfig({ ...good, LEGAL_ENTITY_ADDRESS: "" }).warnings).toEqual([]);
+    expect(checkProductionConfig({ ...good, LEGAL_ENTITY_ADDRESS: "Heers" }).warnings.join(" ")).toMatch(/LEGAL_ENTITY_ADDRESS/);
   });
 });

@@ -43,9 +43,9 @@ async function main() {
   const admin = await ensureUser("e2e-beheer@tenderkompas.test", "E2E Beheerder", "admin");
 
   // 1. Bedrijfsprofiel
-  let org = await db.query.organization.findFirst({ where: eq(organization.name, "Marhaba Data & AI Agent BV (TESTPROFIEL)") });
+  let org = await db.query.organization.findFirst({ where: eq(organization.name, "Marhaba Cooperation BV (TESTPROFIEL)") });
   if (!org) {
-    org = await createOrganization(db, { name: "Marhaba Data & AI Agent BV (TESTPROFIEL)", isDemo: false, subscriptionStatus: "pilot" }, admin);
+    org = await createOrganization(db, { name: "Marhaba Cooperation BV (TESTPROFIEL)", isDemo: false, subscriptionStatus: "pilot" }, admin);
     await addClientUser(db, { organizationId: org.id, email: "e2e-klant@tenderkompas.test", name: "E2E Klant", password: PW }, admin);
   }
   // EXPLICIET TESTPROFIEL: enkel gegevens die de eigenaar zelf heeft opgegeven. Geen referenties, omzet of
@@ -54,7 +54,7 @@ async function main() {
     db,
     org.id,
     {
-      companyName: "Marhaba Data & AI Agent BV",
+      companyName: "Marhaba Cooperation BV",
       website: null,
       contactName: null,
       contactEmail: null,

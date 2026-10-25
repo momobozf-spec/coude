@@ -27,7 +27,7 @@ services:
       - key: BETTER_AUTH_URL
         sync: false # https://<jouw-domein>
       - key: LEGAL_ENTITY_ADDRESS
-        sync: false # straat + nr + postcode zetel
+        value: Sweetstraat 13, 3870 Heers # zetel volgens het KBO-register
       - key: STORAGE_DIR
         value: /app/storage
       - key: SMTP_HOST

@@ -1,20 +1,22 @@
 /**
  * Uitbatergegevens (WER boek III art. III.74 / boek XII, AVG). Eén bron voor footer, voorwaarden en privacy.
- * Het straatadres is (nog) onbekend: configureerbaar via LEGAL_ENTITY_ADDRESS — nooit een adres verzinnen.
+ * Het adres van de zetel komt uit het KBO-register (publieke gegevens); LEGAL_ENTITY_ADDRESS kan het overschrijven.
  */
 export const LEGAL = {
-  entityName: "Marhaba Data & AI Agent BV",
+  entityName: "Marhaba Cooperation BV",
   legalForm: "besloten vennootschap (BV)",
-  enterpriseNumber: "BE 1003.552.102",
-  city: "Zaventem",
+  enterpriseNumber: "BE 1037.222.285",
+  city: "Heers",
+  /** Maatschappelijke zetel volgens het KBO-register. */
+  address: "Sweetstraat 13, 3870 Heers",
   email: "momobozf@gmail.com",
   product: "TenderKompas IT",
 } as const;
 
-/** Volledig adres van de zetel uit LEGAL_ENTITY_ADDRESS; zonder waarde enkel de gemeente. */
+/** Volledig adres van de zetel uit LEGAL_ENTITY_ADDRESS; zonder waarde de zetel uit het KBO-register. */
 export function legalAddress(env: Record<string, string | undefined> = process.env): string {
   const a = env.LEGAL_ENTITY_ADDRESS?.trim();
-  return a ? a : LEGAL.city;
+  return a ? a : LEGAL.address;
 }
 
 export function legalLine(env: Record<string, string | undefined> = process.env): string {

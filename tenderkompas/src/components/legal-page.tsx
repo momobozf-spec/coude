@@ -31,11 +31,11 @@ export function EntityBlock({ address }: { address: string }) {
   return (
     <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1">
       <dt className="font-semibold">Onderneming</dt>
-      <dd>Marhaba Data &amp; AI Agent BV (besloten vennootschap)</dd>
+      <dd>Marhaba Cooperation BV (besloten vennootschap)</dd>
       <dt className="font-semibold">Zetel</dt>
       <dd>{address}</dd>
       <dt className="font-semibold">Ondernemingsnummer / btw</dt>
-      <dd>BE 1003.552.102</dd>
+      <dd>BE 1037.222.285</dd>
       <dt className="font-semibold">E-mail</dt>
       <dd>
         <a className="underline" href="mailto:momobozf@gmail.com">

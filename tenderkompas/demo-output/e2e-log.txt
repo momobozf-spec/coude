@@ -1,4 +1,4 @@
-1. Profiel opgeslagen voor Marhaba Data & AI Agent BV (TESTPROFIEL) (onbekende velden blijven onbekend).
+1. Profiel opgeslagen voor Marhaba Cooperation BV (TESTPROFIEL) (onbekende velden blijven onbekend).
 2. Echte bron ingevoerd: Provision of services in the areas of Data Engineering, Business Intelligence, and Data Integration (status open).
 2b. Echte Belgische bron: Zorgband Leie & Schelde — Data project framework agreement: advies=not_suitable, relevantiescore=43, blokkades=Alle bekende deadlines zijn verstreken., ontbrekend=7
 3. Analyse v1: advies=not_suitable, relevantiescore=70, blokkades=Alle bekende deadlines zijn verstreken.

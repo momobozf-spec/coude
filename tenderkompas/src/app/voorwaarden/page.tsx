@@ -52,7 +52,7 @@ export default function Voorwaarden() {
       <h2>6. Bronnen en intellectuele eigendom</h2>
       <p>
         Aankondigingen komen uit openbare bronnen (o.a. TED, hergebruikt onder de open-dataregels van de Europese Unie) of uit documenten die de
-        klant rechtmatig aanlevert. De rechten op de software, selecties, samenvattingen en beoordelingen blijven bij Marhaba Data &amp; AI Agent BV;
+        klant rechtmatig aanlevert. De rechten op de software, selecties, samenvattingen en beoordelingen blijven bij Marhaba Cooperation BV;
         de klant krijgt een niet-exclusief gebruiksrecht voor de duur van het abonnement.
       </p>
 
