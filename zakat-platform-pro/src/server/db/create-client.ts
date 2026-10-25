@@ -1,6 +1,5 @@
-import { PrismaPg } from '@prisma/adapter-pg'
-
 import { PrismaClient } from '@/generated/prisma/client'
+import { createPgAdapter } from '@/server/db/database-url'
 
 /**
  * Bouwt een PrismaClient met de pg-driver.
@@ -22,8 +21,8 @@ export function createPrismaClient(
   }
 
   const max = Number.parseInt(process.env.DATABASE_POOL_MAX ?? '10', 10)
-  const adapter = new PrismaPg({
-    connectionString,
+  // `?schema=<naam>` in de URL kiest het Postgres-schema (zie database-url.ts).
+  const adapter = createPgAdapter(connectionString, {
     max: Number.isFinite(max) && max > 0 ? max : 10,
   })
 
