@@ -18,9 +18,9 @@ code zijn en die niemand anders voor je kan afvinken.
 - [ ] `/privacy` en `/voorwaarden` door een jurist laten nalezen. Het gaat om
   financiële gegevens en (art. 9) religieuze overtuiging; de teksten zijn een
   degelijke basis, geen juridisch advies. Daarna `LEGAL_TEXTS_REVIEWED=1`.
-- [ ] Uitbater: Marhaba Data & AI Agent BV, BE 1003.552.102, Zaventem,
-  momobozf@gmail.com (standaard in `src/modules/legal/identity.tsx`). Nog
-  invullen: `LEGAL_ENTITY_ADDRESS` (straat, nr, postcode van de zetel).
+- [ ] Uitbater: Marhaba Cooperation BV, BE 1037.222.285, Sweetstraat 13,
+  3870 Heers (zetel volgens het KBO-register), momobozf@gmail.com (standaard in
+  `src/modules/legal/identity.tsx` en in `render.free.yaml`).
 - [ ] Registratie vraagt nu uitdrukkelijke toestemming (art. 9.2.a) en bewaart
   het tijdstip (`users.specialDataConsentAt`). Google-login vraagt dat nog niet:
   laat `AUTH_GOOGLE_ID/SECRET` leeg tot dat ook daar gebeurt.
