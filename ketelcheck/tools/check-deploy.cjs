@@ -15,7 +15,7 @@ if (!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]{20,}\/exec$/.test
 if (/JOUWDOMEIN/.test(c.privacyEmail || ""))
   warnings.push("privacyEmail is nog een placeholder — de site toont tot dan " + c.contactEmail);
 if (!c.legal || !c.legal.address)
-  warnings.push("legal.address (straat + nr + postcode zetel) is nog leeg — de site toont alleen 'Zaventem'");
+  warnings.push("legal.address (straat + nr + postcode zetel) is nog leeg — de site toont alleen '" + ((c.legal && c.legal.city) || "de gemeente") + "'");
 
 const headers = fs.readFileSync(path.join(web, "_headers"), "utf8");
 if (!/Content-Security-Policy:.*connect-src 'self' https:\/\/script\.google\.com/.test(headers))
@@ -23,7 +23,7 @@ if (!/Content-Security-Policy:.*connect-src 'self' https:\/\/script\.google\.com
 for (const f of ["index.html", "fr/index.html", "privacy.html", "partners.html"]) {
   const html = fs.readFileSync(path.join(web, f), "utf8");
   if (/JOUWDOMEIN|VUL_HIER/.test(html)) errors.push(f + " bevat nog een placeholder");
-  if (!/BE 1003\.552\.102/.test(html)) errors.push(f + " mist het ondernemingsnummer");
+  if (!/BE 1037\.222\.285/.test(html)) errors.push(f + " mist het ondernemingsnummer");
 }
 
 warnings.forEach((w) => console.warn("LET OP: " + w));
