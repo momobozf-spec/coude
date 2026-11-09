@@ -7,7 +7,7 @@
 > (externe/gescrapete bronnen, particuliere verkopers, panden) staat achter de
 > feature-flag `FEATURE_MARKET_RADAR`, die in productie standaard **uit** staat,
 > tot er een bron is waarvan het gebruik contractueel en juridisch vaststaat.
-> Uitbater: Marhaba Data & AI Agent BV (BE 1003.552.102, Zaventem). Zie
+> Uitbater: Marhaba Cooperation BV (BE 1037.222.285, Sweetstraat 13, 3870 Heers). Zie
 > §Live zetten.
 
 ImmoRadar beantwoordt elke ochtend één vraag voor een makelaar:
@@ -231,11 +231,10 @@ niets vertrekt.
    van Render (docs/DEPLOY-RENDER.md §1).
 2. Render vraagt om:
    - `APP_BASE_URL` — `https://<jouw domein>` (web én worker dezelfde waarde);
-   - `LEGAL_ENTITY_ADDRESS` — straat, nr. en postcode van de zetel (**verplicht**,
-     de app start anders niet);
    - `LEGAL_CONTACT_EMAIL` — mag leeg (standaard momobozf@gmail.com).
-   `FEATURE_MARKET_RADAR=false` en een lege `COLLECTOR_ENABLED_SOURCES` staan al
-   in de blueprint.
+   `FEATURE_MARKET_RADAR=false`, een lege `COLLECTOR_ENABLED_SOURCES` en
+   `LEGAL_ENTITY_ADDRESS` (zetel uit het KBO-register: Sweetstraat 13, 3870 Heers)
+   staan al in de blueprint.
 3. Na de eerste deploy, in de Shell van `immoradar-web`:
    `BOOTSTRAP_ADMIN_EMAIL=jij@domein.be npm run bootstrap:admin` → tijdelijk
    wachtwoord, bij eerste login wijzigen.
@@ -264,7 +263,7 @@ npm run worker                # achtergrondwerk, aparte service
 Web en worker weigeren te starten zonder `SESSION_SECRET` van minstens 32
 tekens of met een `APP_BASE_URL` zonder https — een vervalsbaar sessiecookie
 maakt de tenantscheiding een suggestie in plaats van een grens. Ook zonder
-`LEGAL_ENTITY_ADDRESS` op een publieke URL, en met demo-/fixturebronnen
+volledig `LEGAL_ENTITY_ADDRESS` (met postcode) op een publieke URL, en met demo-/fixturebronnen
 (behalve met `ALLOW_DEMO_SOURCES=true`). Het demo-seedwachtwoord wordt in
 productie nooit aanvaard bij het inloggen.
 

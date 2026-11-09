@@ -50,7 +50,7 @@ async function run(file, lang) {
   assert.strictEqual(d.getElementById("done").style.display, "block");
   assert.ok(/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(endpoint), "endpoint uit config.js: " + endpoint);
   const legal = d.querySelector("[data-legal-line]").textContent;
-  assert.ok(/Marhaba Data & AI Agent BV · (ondernemingsnummer|n° d'entreprise) BE 1003\.552\.102 · Zaventem/.test(legal), "footer: " + legal);
+  assert.ok(/Marhaba Cooperation BV · (ondernemingsnummer|n° d'entreprise) BE 1037\.222\.285 · Sweetstraat 13, 3870 Heers/.test(legal), "footer: " + legal);
   assert.strictEqual(d.querySelector("[data-contact-email]").getAttribute("href"), "mailto:momobozf@gmail.com");
   console.log(lang.toUpperCase(), "formulier OK");
 }
@@ -67,10 +67,10 @@ function privacyPage() {
   let d = run();
   const mails = [...d.querySelectorAll("[data-privacy-email]")].map((a) => a.getAttribute("href"));
   assert.ok(mails.length === 2 && mails.every((m) => m === "mailto:momobozf@gmail.com"), "placeholder-privacyadres valt terug op contactadres: " + mails);
-  d = run('window.KETELCHECK_CONFIG.privacyEmail = "privacy@ketelcheck.be"; window.KETELCHECK_CONFIG.legal.address = "Straat 1, 1930 Zaventem";');
+  d = run('window.KETELCHECK_CONFIG.privacyEmail = "privacy@ketelcheck.be"; window.KETELCHECK_CONFIG.legal.address = "Andere Straat 2, 3870 Heers";');
   assert.ok([...d.querySelectorAll("[data-privacy-email]")].every((a) => a.textContent === "privacy@ketelcheck.be"), "ingesteld privacyadres wordt gebruikt");
-  assert.ok(d.querySelector("[data-legal-address]").textContent === "Straat 1, 1930 Zaventem");
-  assert.ok(/Concept — laten nalezen door een jurist/.test(html) && /BE 1003\.552\.102/.test(html));
+  assert.ok(d.querySelector("[data-legal-address]").textContent === "Andere Straat 2, 3870 Heers");
+  assert.ok(/Concept — laten nalezen door een jurist/.test(html) && /BE 1037\.222\.285/.test(html));
   console.log("Privacy OK");
 }
 (async () => { await run("index.html", "nl"); await run("fr/index.html", "fr"); privacyPage(); })().catch(e => { console.error(e); process.exit(1); });

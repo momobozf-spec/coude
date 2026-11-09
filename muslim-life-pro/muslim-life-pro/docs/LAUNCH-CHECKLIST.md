@@ -5,9 +5,9 @@ jij kunt aanleveren — niets hiervan is in de code verzonnen.
 
 ## Gegevens en accounts
 
-- [ ] Uitbater: **Marhaba Data & AI Agent BV**, BE 1003.552.102, Zaventem,
-      momobozf@gmail.com — standaard in `src/config/legal.ts`. Nog invullen:
-      `LEGAL_ENTITY_ADDRESS` (straat, nr, postcode van de zetel). Verschijnt in de
+- [ ] Uitbater: **Marhaba Cooperation BV**, BE 1037.222.285, Sweetstraat 13,
+      3870 Heers (zetel volgens het KBO-register), momobozf@gmail.com — standaard
+      in `src/config/legal.ts` en in `render.free.yaml`. Verschijnt in de
       voorwaarden, het privacybeleid en de footer.
 - [ ] Productie zonder `STAGING`: de app weigert dan te starten met mock-AI,
       stub-betalingen, demo-vermeldingen of een Stripe-testsleutel.

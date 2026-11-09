@@ -5,30 +5,29 @@ import { serverEnv } from '@/config/env'
 /**
  * Wie achter de dienst staat.
  *
- * Uitbater: Marhaba Data & AI Agent BV, ondernemingsnummer BE 1003.552.102,
- * Zaventem, momobozf@gmail.com. Dat zijn de echte gegevens van de BV en de
- * standaardwaarden; LEGAL_ENTITY_* kan ze overschrijven.
- *
- * TODO(Mohamed): LEGAL_ENTITY_ADDRESS = straat, huisnummer en postcode van de
- * maatschappelijke zetel. Dat adres staat bewust niet in de code (niet gekend,
- * niet verzonnen); zonder staat er "Zaventem, België".
+ * Uitbater: Marhaba Cooperation BV, ondernemingsnummer BE 1037.222.285,
+ * Sweetstraat 13, 3870 Heers, momobozf@gmail.com. Dat zijn de echte gegevens
+ * van de BV (het adres van de maatschappelijke zetel komt uit het KBO-register,
+ * publieke gegevens) en de standaardwaarden; LEGAL_ENTITY_* kan ze overschrijven.
  */
 export const LEGAL_DEFAULTS = {
-  name: 'Marhaba Data & AI Agent BV',
-  vat: 'BE 1003.552.102',
-  city: 'Zaventem',
+  name: 'Marhaba Cooperation BV',
+  vat: 'BE 1037.222.285',
+  address: 'Sweetstraat 13, 3870 Heers',
+  city: 'Heers',
   email: 'momobozf@gmail.com',
 } as const
 
 export function legalIdentity() {
   const env = serverEnv()
+  const address = env.LEGAL_ENTITY_ADDRESS.trim() || LEGAL_DEFAULTS.address
   return {
     name: env.LEGAL_ENTITY_NAME || LEGAL_DEFAULTS.name,
     vat: env.LEGAL_ENTITY_VAT || LEGAL_DEFAULTS.vat,
-    address: env.LEGAL_ENTITY_ADDRESS || `${LEGAL_DEFAULTS.city}, België`,
+    address,
     email: env.LEGAL_CONTACT_EMAIL || LEGAL_DEFAULTS.email,
-    /** true zodra ook het volledige adres van de zetel ingevuld is. */
-    configured: Boolean(env.LEGAL_ENTITY_ADDRESS),
+    /** true als het adres van de zetel volledig is (met postcode), niet enkel een gemeente. */
+    configured: /\b\d{4}\b/.test(address),
     googleLogin: Boolean(env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET),
     email_provider: env.EMAIL_PROVIDER,
   }

@@ -1,4 +1,5 @@
 import { isProductionMode } from "@/lib/demo-guard";
+import { legalAddress } from "@/lib/legal";
 
 /**
  * Productie-guard: de app weigert te starten in productie met dev-/testinstellingen of standaardwachtwoorden.
@@ -35,7 +36,7 @@ export function checkProductionConfig(env: Record<string, string | undefined> = 
     if (!env.SMTP_FROM || /example\.invalid/.test(env.SMTP_FROM)) errors.push("SMTP_FROM is niet ingesteld (nog example.invalid).");
   } else warnings.push("SMTP_HOST niet ingesteld: e-mailselecties enkel als preview/export.");
 
-  if (!env.LEGAL_ENTITY_ADDRESS?.trim()) warnings.push("LEGAL_ENTITY_ADDRESS niet ingesteld: footer/voorwaarden tonen enkel 'Zaventem'.");
+  if (!/\b\d{4}\b/.test(legalAddress(env))) warnings.push("LEGAL_ENTITY_ADDRESS is onvolledig (geen straat + nr + postcode): footer/voorwaarden tonen geen volledig adres van de zetel.");
   return { errors, warnings };
 }
 

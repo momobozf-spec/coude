@@ -143,8 +143,8 @@ Supabase-instellingen (Authentication → URL Configuration):
    en SMTP in zoals hierboven.
 2. **Vercel**: importeer de repo, root directory `rentguard`, framework Next.js,
    *Function Region* `fra1` (Frankfurt). Zet alle env-vars uit `.env.example`
-   (Production): minimaal `APP_URL`, de drie Supabase-waarden en
-   `LEGAL_ENTITY_ADDRESS`.
+   (Production): minimaal `APP_URL` en de drie Supabase-waarden
+   (`LEGAL_ENTITY_ADDRESS` staat standaard op de zetel uit het KBO-register).
 3. **Stripe**: live-sleutels, producten/prijzen en webhook zoals in §Betalingen;
    Bancontact activeren.
 4. **Optioneel**: `ANTHROPIC_API_KEY` (AI-vergelijking), `RESEND_API_KEY` +
@@ -156,7 +156,7 @@ Supabase-instellingen (Authentication → URL Configuration):
 
 **Productie-guard** (`src/lib/production-guard.ts`, via
 `src/instrumentation.ts`): in productie stopt de server bij een niet-https
-`APP_URL`, placeholder-Supabase-waarden, ontbrekend `LEGAL_ENTITY_ADDRESS`, een
+`APP_URL`, placeholder-Supabase-waarden, een `LEGAL_ENTITY_ADDRESS` zonder postcode, een
 Stripe-sleutel zonder webhookgeheim, of een `sk_test_`-sleutel (tenzij
 `ALLOW_STRIPE_TEST_KEYS_IN_PRODUCTION=true`).
 
@@ -181,8 +181,9 @@ ophangen. De volgende punten moeten door een jurist zijn nagekeken vóór er
 6. **Disclaimers en framing** — zie
    [ADR 0003](docs/decisions/0003-bewijswaarde-framing.md).
 7. **Privacyverklaring en algemene voorwaarden** (concept, NL/FR) onder
-   `src/app/[locale]/legal/`. Uitbater: Marhaba Data & AI Agent BV,
-   BE 1003.552.102, Zaventem (adres via `LEGAL_ENTITY_ADDRESS`).
+   `src/app/[locale]/legal/`. Uitbater: Marhaba Cooperation BV,
+   BE 1037.222.285, Sweetstraat 13, 3870 Heers (zetel uit het KBO-register;
+   overschrijfbaar via `LEGAL_ENTITY_ADDRESS`).
 8. **Verwerkersovereenkomsten** met Supabase, Vercel, Anthropic, Resend en
    Stripe afsluiten/accepteren; DPIA-vraag uit `docs/privacy.md` beantwoorden.
 

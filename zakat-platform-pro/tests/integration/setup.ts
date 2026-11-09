@@ -26,14 +26,15 @@ export { prisma }
  * later.
  */
 export async function resetDatabase(): Promise<void> {
-  const tables = await prisma.$queryRaw<Array<{ tablename: string }>>`
-    SELECT tablename FROM pg_tables
-    WHERE schemaname = 'public' AND tablename NOT LIKE '_prisma%'
+  // current_schema(): het app-schema uit `?schema=` (via search_path), anders public.
+  const tables = await prisma.$queryRaw<Array<{ schemaname: string; tablename: string }>>`
+    SELECT schemaname, tablename FROM pg_tables
+    WHERE schemaname = current_schema() AND tablename NOT LIKE '_prisma%'
   `
 
   if (tables.length === 0) return
 
-  const list = tables.map((t) => `"public"."${t.tablename}"`).join(', ')
+  const list = tables.map((t) => `"${t.schemaname}"."${t.tablename}"`).join(', ')
   await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${list} RESTART IDENTITY CASCADE`)
 }
 

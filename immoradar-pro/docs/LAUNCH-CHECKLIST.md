@@ -31,15 +31,16 @@ op `true` zetten als bovenstaande punten afgevinkt zijn.
 - [ ] `/privacy`, `/voorwaarden` en `/verwerkersovereenkomst` (concepten, met
       banner "Concept — laten nalezen door een jurist") laten nalezen.
 - [ ] Verwerkersovereenkomst (art. 28 AVG) per kantoor laten ondertekenen: het
-      kantoor is verwerkingsverantwoordelijke, Marhaba Data & AI Agent BV
+      kantoor is verwerkingsverantwoordelijke, Marhaba Cooperation BV
       verwerker. Concepttekst: `/verwerkersovereenkomst`
       (`src/app/(public)/verwerkersovereenkomst/page.tsx`).
 - [ ] Register van verwerkingsactiviteiten bijhouden.
 - [ ] Nagaan of een DPIA nodig is (grootschalige verwerking van contactgegevens
       van particulieren voor prospectie).
 - [ ] Commerciële overeenkomst met prijs, looptijd en opzegging.
-- [ ] `LEGAL_ENTITY_ADDRESS` invullen (verplicht; de app start anders niet op
-      een publieke URL). `LEGAL_CONTACT_EMAIL` staat standaard op
+- [ ] `LEGAL_ENTITY_ADDRESS` controleren: standaard de zetel uit het
+      KBO-register, Sweetstraat 13, 3870 Heers (verplicht met postcode; de app
+      start anders niet op een publieke URL). `LEGAL_CONTACT_EMAIL` staat standaard op
       momobozf@gmail.com.
 
 ## 3. Infrastructuur

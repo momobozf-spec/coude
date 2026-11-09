@@ -60,8 +60,9 @@ export function Section({
 }
 
 /**
- * Naam, ondernemingsnummer en adres van de uitbater. Zolang straat en nummer
- * niet ingevuld zijn (`LEGAL_ENTITY_ADDRESS`), staat enkel de gemeente er.
+ * Naam, ondernemingsnummer en adres van de uitbater (`LEGAL_ENTITY_ADDRESS`,
+ * standaard de zetel uit het KBO-register). Is dat leeg, dan staat enkel de
+ * gemeente er.
  */
 export function LegalIdentity({
   name,

@@ -9,10 +9,10 @@ window.NOOR_CONFIG = Object.freeze({
 
   contactEmail: 'momobozf@gmail.com',
   legal: {
-    entityName: 'Marhaba Data & AI Agent BV',
-    enterpriseNumber: 'BE 1003.552.102',
-    city: 'Zaventem',
-    // TODO(Mohamed): straat + huisnummer + postcode van de zetel. Leeg = alleen "Zaventem".
-    address: ''
+    entityName: 'Marhaba Cooperation BV',
+    enterpriseNumber: 'BE 1037.222.285',
+    city: 'Heers',
+    // Maatschappelijke zetel volgens het KBO-register (publieke gegevens).
+    address: 'Sweetstraat 13, 3870 Heers'
   }
 });

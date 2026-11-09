@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 export const PG = { host: 'localhost', port: 54329, user: 'postgres', password: 'lokaal' };
-export const DATABASES = ['ritna', 'tenderkompas'];
+export const DATABASES = ['ritna', 'tenderkompas', 'tenderkompas_test'];
 export const url = (db) => `postgres://${PG.user}:${PG.password}@${PG.host}:${PG.port}/${db}`;
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -18,10 +18,28 @@ async function alreadyRunning() {
   try { await c.connect(); await c.end(); return true; } catch { return false; }
 }
 
+async function ensureDatabases(client) {
+  const enc = await client.query("select datname from pg_database where datname = any($1) and pg_encoding_to_char(encoding) <> 'UTF8'", [DATABASES]);
+  for (const { datname } of enc.rows) console.warn(`[db] let op: database ${datname} is niet UTF-8 (oude lokale aanmaak). Arabische tekens of emoji kunnen falen.`);
+  for (const name of DATABASES) {
+    const r = await client.query('select 1 from pg_database where datname = $1', [name]);
+    if (!r.rowCount) {
+      // UTF-8 expliciet: de Windows-standaard (WIN1252) kan geen Arabisch of emoji opslaan.
+      await client.query(`create database ${name} encoding 'UTF8' lc_collate 'C' lc_ctype 'C' template template0`);
+      console.log(`[db] database ${name} aangemaakt`);
+    }
+  }
+}
+
 export async function startDb() {
   // Venster hard gesloten bij een vorige run? Dan draait postgres soms nog: gewoon hergebruiken.
   if (await alreadyRunning()) {
     console.log(`[db] PostgreSQL draaide nog op poort ${PG.port}, wordt hergebruikt`);
+    const { default: pgLib } = await import('pg');
+    const c = new pgLib.Client({ connectionString: url('postgres') });
+    await c.connect();
+    await ensureDatabases(c);
+    await c.end();
     return { stop: async () => {} , reused: true };
   }
   const pg = new EmbeddedPostgres({
@@ -32,6 +50,7 @@ export async function startDb() {
     persistent: true,
     onLog: () => {},
     onError: (e) => console.error('[db]', String(e).trim()),
+    initdbFlags: ['--encoding=UTF8', '--locale=C'],
   });
   if (!existsSync(path.join(dataDir, 'PG_VERSION'))) {
     console.log('[db] eerste keer: database aanmaken...');
@@ -40,13 +59,7 @@ export async function startDb() {
   await pg.start();
   const client = pg.getPgClient();
   await client.connect();
-  for (const name of DATABASES) {
-    const r = await client.query('select 1 from pg_database where datname = $1', [name]);
-    if (!r.rowCount) {
-      await client.query(`create database ${name}`);
-      console.log(`[db] database ${name} aangemaakt`);
-    }
-  }
+  await ensureDatabases(client);
   await client.end();
   console.log(`[db] PostgreSQL draait op poort ${PG.port}`);
   return pg;

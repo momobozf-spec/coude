@@ -4,22 +4,24 @@ import { adminProductSchema } from "@/lib/admin";
 import { missingSafetyFields, requiresSafetyInfo } from "@/lib/productSafety";
 
 describe("juridische gegevens van de verkoper", () => {
-  it("gebruikt standaard Marhaba Data & AI Agent BV, nooit de oude naam", () => {
+  it("gebruikt standaard Marhaba Cooperation BV, nooit de oude naam", () => {
     const e = legalEntity({} as NodeJS.ProcessEnv);
-    expect(e.name).toBe("Marhaba Data & AI Agent BV");
-    expect(e.vat).toBe("BE 1003.552.102");
+    expect(e.name).toBe("Marhaba Cooperation BV");
+    expect(e.vat).toBe("BE 1037.222.285");
     expect(e.email).toBe("momobozf@gmail.com");
-    expect(e.name).not.toMatch(/Cooperation/i);
+    expect(e.name).not.toMatch(/Data & AI Agent/i);
   });
 
-  it("verzint geen straat: zonder LEGAL_ENTITY_ADDRESS alleen de gemeente en complete=false", () => {
+  it("zonder LEGAL_ENTITY_ADDRESS de zetel uit het KBO-register; alleen een gemeente is niet volledig", () => {
     const e = legalEntity({} as NodeJS.ProcessEnv);
-    expect(e.address).toBeNull();
-    expect(e.displayAddress).toBe("Zaventem, België");
-    expect(e.complete).toBe(false);
-    const full = legalEntity({ LEGAL_ENTITY_ADDRESS: "Straat 1, 1930 Zaventem" } as unknown as NodeJS.ProcessEnv);
-    expect(full.displayAddress).toBe("Straat 1, 1930 Zaventem");
-    expect(full.complete).toBe(true);
+    expect(e.address).toBe("Sweetstraat 13, 3870 Heers");
+    expect(e.displayAddress).toBe("Sweetstraat 13, 3870 Heers");
+    expect(e.complete).toBe(true);
+    const other = legalEntity({ LEGAL_ENTITY_ADDRESS: "Andere Straat 2, 3870 Heers" } as unknown as NodeJS.ProcessEnv);
+    expect(other.displayAddress).toBe("Andere Straat 2, 3870 Heers");
+    expect(other.complete).toBe(true);
+    const cityOnly = legalEntity({ LEGAL_ENTITY_ADDRESS: "Heers" } as unknown as NodeJS.ProcessEnv);
+    expect(cityOnly.complete).toBe(false);
   });
 
   it("retourkosten: standaard voor de klant, instelbaar naar de verkoper", () => {

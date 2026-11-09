@@ -6,7 +6,7 @@ const good = {
   NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiJ9.abc",
   NEXT_PUBLIC_SITE_URL: "https://overnamemarkt.be",
   NEXT_PUBLIC_CONTACT_EMAIL: "momobozf@gmail.com",
-  NEXT_PUBLIC_COMPANY_ADDRESS: "Straat 1, 1930 Zaventem",
+  NEXT_PUBLIC_COMPANY_ADDRESS: "Sweetstraat 13, 3870 Heers",
 };
 
 describe("productie-guard", () => {
@@ -19,10 +19,13 @@ describe("productie-guard", () => {
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "jouw-anon-key",
       NEXT_PUBLIC_SITE_URL: "https://jouwdomein.be",
       NEXT_PUBLIC_CONTACT_EMAIL: "info@jouwdomein.be",
-      NEXT_PUBLIC_COMPANY_ADDRESS: "Zaventem",
+      NEXT_PUBLIC_COMPANY_ADDRESS: "Heers",
     });
     expect(r.errors).toHaveLength(4);
     expect(r.warnings).toHaveLength(1);
+  });
+  it("zonder NEXT_PUBLIC_COMPANY_ADDRESS geldt de zetel uit het KBO-register (geen waarschuwing)", () => {
+    expect(checkProductionEnv({ ...good, NEXT_PUBLIC_COMPANY_ADDRESS: "" }).warnings).toEqual([]);
   });
   it("weigert lokale Supabase, http en localhost", () => {
     expect(checkProductionEnv({ ...good, NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321" }).errors).toHaveLength(1);

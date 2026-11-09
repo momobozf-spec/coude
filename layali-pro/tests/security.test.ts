@@ -90,9 +90,10 @@ describe("checkProductionEnv", () => {
     ).toMatch(/voorbeeldwaarde/);
   });
 
-  it("waarschuwt als het adres van de zetel ontbreekt", () => {
-    expect(checkProductionEnv(good).warnings.join(" ")).toMatch(/LEGAL_ENTITY_ADDRESS/);
-    expect(checkProductionEnv({ ...good, LEGAL_ENTITY_ADDRESS: "Straat 1, 1930 Zaventem" }).warnings.join(" ")).not.toMatch(
+  it("waarschuwt als het adres van de zetel onvolledig is, niet bij de standaard uit het KBO-register", () => {
+    expect(checkProductionEnv(good).warnings.join(" ")).not.toMatch(/LEGAL_ENTITY_ADDRESS/);
+    expect(checkProductionEnv({ ...good, LEGAL_ENTITY_ADDRESS: "Heers" }).warnings.join(" ")).toMatch(/LEGAL_ENTITY_ADDRESS/);
+    expect(checkProductionEnv({ ...good, LEGAL_ENTITY_ADDRESS: "Sweetstraat 13, 3870 Heers" }).warnings.join(" ")).not.toMatch(
       /LEGAL_ENTITY_ADDRESS/,
     );
   });

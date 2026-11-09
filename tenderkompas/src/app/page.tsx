@@ -192,7 +192,7 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
             <label className="flex items-start gap-2 text-sm font-normal">
               <input type="checkbox" name="consent" required className="mt-1" />
               <span>
-                Ik ga akkoord dat Marhaba Data &amp; AI Agent BV (TenderKompas IT) deze gegevens gebruikt om contact op te nemen over de pilot. Zie de{" "}
+                Ik ga akkoord dat Marhaba Cooperation BV (TenderKompas IT) deze gegevens gebruikt om contact op te nemen over de pilot. Zie de{" "}
                 <Link href="/privacy" className="underline">
                   privacyverklaring
                 </Link>

@@ -1,3 +1,5 @@
+import { getLegalEntity } from '@/lib/legal/entity';
+
 /**
  * Productie-guard: de server weigert te starten in productie met een
  * configuratie die alleen voor ontwikkeling bedoeld is.
@@ -28,9 +30,12 @@ export function productionConfigProblems(
     }
   }
 
-  if (!env.LEGAL_ENTITY_ADDRESS?.trim()) {
+  // Standaard de zetel uit het KBO-register; een overschrijving met enkel een
+  // gemeente (zonder postcode) volstaat niet.
+  const entityAddress = getLegalEntity(env).address;
+  if (!/\b\d{4}\b/.test(entityAddress)) {
     problems.push(
-      'LEGAL_ENTITY_ADDRESS ontbreekt (straat + nr. van de maatschappelijke zetel; wettelijk verplicht op de site).',
+      'LEGAL_ENTITY_ADDRESS is onvolledig (straat + nr. + postcode van de maatschappelijke zetel; wettelijk verplicht op de site).',
     );
   }
 

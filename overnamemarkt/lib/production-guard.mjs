@@ -22,8 +22,10 @@ export function checkProductionEnv(env) {
   for (const key of Object.keys(env)) {
     if (/^NEXT_PUBLIC_.*(SERVICE_ROLE|SECRET)/i.test(key)) errors.push(`${key}: een service-role-sleutel of geheim mag nooit NEXT_PUBLIC_ zijn (komt in de browser terecht).`);
   }
+  // Leeg = de zetel uit het KBO-register (lib/site.ts). Een overschrijving zonder postcode
+  // (bv. alleen een gemeente) is geen volledig adres.
   const address = (env.NEXT_PUBLIC_COMPANY_ADDRESS || "").trim();
-  if (!address || /^zaventem$/i.test(address)) warnings.push("NEXT_PUBLIC_COMPANY_ADDRESS bevat nog geen straat en huisnummer van de zetel.");
+  if (address && !/\b\d{4}\b/.test(address)) warnings.push("NEXT_PUBLIC_COMPANY_ADDRESS bevat geen straat, huisnummer en postcode van de zetel.");
   return { errors, warnings };
 }
 

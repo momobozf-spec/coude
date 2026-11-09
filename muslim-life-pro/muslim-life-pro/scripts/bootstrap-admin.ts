@@ -8,7 +8,7 @@
  */
 import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { createPgAdapter } from '../src/server/db/database-url'
 
 async function main() {
   const email = process.env.BOOTSTRAP_ADMIN_EMAIL?.trim().toLowerCase()
@@ -18,7 +18,7 @@ async function main() {
     return
   }
 
-  const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString, max: 1 }) })
+  const prisma = new PrismaClient({ adapter: createPgAdapter(connectionString, { max: 1 }) })
   try {
     const result = await prisma.user.updateMany({
       where: { email, deletedAt: null },

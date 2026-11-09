@@ -42,6 +42,7 @@ lokaal/bron/
 # lokale dev-databases en sessiebestanden
 **/.devdb/
 **/cookies.txt
+lokaal/verify-resultaat.json
 
 # Losse sleutelbestanden (bv. SLEUTELS-INVULLEN.env) - nooit in git
 *.env

@@ -1,6 +1,6 @@
 # Noor Growth Funnel
 
-Statische landingspagina + aanmeldformulier ("vroege toegang") om vraag en betaalbereidheid voor het Noor-ecosysteem te meten. Uitbater: Marhaba Data & AI Agent BV.
+Statische landingspagina + aanmeldformulier ("vroege toegang") om vraag en betaalbereidheid voor het Noor-ecosysteem te meten. Uitbater: Marhaba Cooperation BV.
 
 ## Hoe het werkt
 
@@ -30,7 +30,7 @@ Lokaal bekijken: open `index.html` in je browser (of `npx serve .`).
 2. Zet de endpoint-URL in `config.js` → `LEAD_ENDPOINT`.
 3. Voeg de origin toe aan `connect-src` in `_headers` (bv. `connect-src 'self' https://formspree.io`).
 4. Vul in `privacy.html` sectie 5 de naam en het land van die dienst in (TODO-commentaar staat er).
-5. Vul `config.js` → `legal.address` (straat + nr + postcode van de zetel) in.
+5. Controleer `config.js` → `legal.address` (zetel uit het KBO-register: Sweetstraat 13, 3870 Heers).
 6. Cloudflare Pages: Create → Pages → Upload assets: `index.html`, `privacy.html`, `styles.css`, `config.js`, `funnel.js`, `app.js`, `legal.js`, `_headers`. Custom domain koppelen.
 7. Test: één aanmelding versturen en controleren dat ze in de dienst aankomt. Marketingmails alleen via een mailtool met afmeldlink.
 

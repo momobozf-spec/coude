@@ -162,7 +162,7 @@ De opgegeven database wordt tussen tests volledig geleegd — gebruik een wegwer
 
 ## Live zetten
 
-Uitbater: **Marhaba Data & AI Agent BV** (BE 1003.552.102, Zaventem) — zie
+Uitbater: **Marhaba Cooperation BV** (BE 1037.222.285, Sweetstraat 13, 3870 Heers) — zie
 `src/modules/legal/identity.tsx`. Volledig draaiboek: [docs/DEPLOY.md](docs/DEPLOY.md);
 gratis testopstelling: [docs/DEPLOY-RENDER-FREE.md](docs/DEPLOY-RENDER-FREE.md).
 Barakah heeft PostgreSQL, een worker en een persistente schijf nodig, dus **Render**
@@ -177,8 +177,9 @@ Barakah heeft PostgreSQL, een worker en een persistente schijf nodig, dus **Rend
    (`npx auth secret`), `NEXT_PUBLIC_APP_URL` = `AUTH_URL` (https), `TRUSTED_PROXY_HOPS=1`,
    `METAL_PRICE_PROVIDER=published`, `FX_PROVIDER=published`, `FX_SYNC=frankfurter`,
    `EMAIL_PROVIDER=resend`, `RESEND_API_KEY`, `EMAIL_FROM`, `CRON_SECRET`,
-   **`LEGAL_ENTITY_ADDRESS`** (straat, nr, postcode van de zetel — TODO). Naam,
-   ondernemingsnummer en contactmail staan standaard op de BV.
+   `LEGAL_ENTITY_ADDRESS` (zetel uit het KBO-register: Sweetstraat 13, 3870 Heers;
+   staat ook standaard in de code). Naam, ondernemingsnummer en contactmail staan
+   standaard op de BV.
 6. Eigen account registreren, `ADMIN_EMAIL` zetten voor de beheerdersrol, daarna weer weg.
 7. Elke werkdag goud/zilver publiceren op `/admin/prijzen` (anders weigert de app te rekenen).
 8. Uptime-monitor op `/api/health` en `/api/ready`.

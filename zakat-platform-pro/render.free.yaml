@@ -41,9 +41,11 @@ services:
       - key: STORAGE_PROVIDER
         value: local
       - key: LEGAL_ENTITY_NAME
-        value: Marhaba Data & AI Agent BV
+        value: Marhaba Cooperation BV
       - key: LEGAL_ENTITY_VAT
-        value: BE 1003.552.102
+        value: BE 1037.222.285
+      - key: LEGAL_ENTITY_ADDRESS
+        value: Sweetstraat 13, 3870 Heers
       - key: LEGAL_CONTACT_EMAIL
         value: momobozf@gmail.com
       - key: AUTH_SECRET
@@ -59,8 +61,6 @@ services:
       - key: RESEND_API_KEY
         sync: false
       - key: EMAIL_FROM
-        sync: false
-      - key: LEGAL_ENTITY_ADDRESS
         sync: false
       - key: ADMIN_EMAIL
         sync: false

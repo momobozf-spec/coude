@@ -36,12 +36,14 @@ services:
       # Marktplaats (verkopers/diensten) uit tot er echte verkopers zijn.
       - key: MARKETPLACE_ENABLED
         value: '0'
-      # Uitbater. Naam, ondernemingsnummer en e-mail staan ook als standaard in
-      # src/lib/legal.ts; het adres van de zetel vul je zelf in (LEGAL_ENTITY_ADDRESS).
+      # Uitbater. Naam, ondernemingsnummer, zetel (KBO-register) en e-mail staan
+      # ook als standaard in src/lib/legal.ts.
       - key: LEGAL_ENTITY_NAME
-        value: Marhaba Data & AI Agent BV
+        value: Marhaba Cooperation BV
       - key: LEGAL_ENTITY_VAT
-        value: BE 1003.552.102
+        value: BE 1037.222.285
+      - key: LEGAL_ENTITY_ADDRESS
+        value: Sweetstraat 13, 3870 Heers
       - key: LEGAL_CONTACT_EMAIL
         value: momobozf@gmail.com
       - key: NEXTAUTH_SECRET
@@ -63,8 +65,6 @@ services:
       - key: ADMIN_EMAIL
         sync: false
       - key: SUPPORT_EMAIL
-        sync: false
-      - key: LEGAL_ENTITY_ADDRESS
         sync: false
       - key: BOOTSTRAP_ADMIN_EMAIL
         sync: false

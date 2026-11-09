@@ -54,15 +54,17 @@ var ACCEPTED_STATES = ["geaccepteerd", "credit_gevraagd", "gecrediteerd", "gefac
 var START_SERVICE = "vervanging_gas";
 
 /** Uitbatergegevens (WER boek XII): onderaan elke mail. Adres: tab Config → ADRES_ZETEL. */
-var LEGAL_ENTITY = "Marhaba Data & AI Agent BV";
-var LEGAL_ENTERPRISE_NO = "BE 1003.552.102";
-var LEGAL_CITY = "Zaventem";
+var LEGAL_ENTITY = "Marhaba Cooperation BV";
+var LEGAL_ENTERPRISE_NO = "BE 1037.222.285";
+var LEGAL_CITY = "Heers";
+/** Maatschappelijke zetel volgens het KBO-register; fallback als Config!ADRES_ZETEL leeg is. */
+var LEGAL_ADDRESS = "Sweetstraat 13, 3870 Heers";
 
 var CONFIG_DEFAULTS = [
   ["BRAND", "KetelCheck", "Merknaam in e-mails"],
   ["ADMIN_EMAIL", "", "Jouw e-mail voor meldingen (bevatten GEEN contactgegevens van aanvragers)"],
   ["REPLY_TO", "", "Reply-to adres in mails naar aanvragers/partners"],
-  ["ADRES_ZETEL", "", "TODO: straat + nr + postcode van de zetel (Zaventem) — komt onderaan elke mail"],
+  ["ADRES_ZETEL", "Sweetstraat 13, 3870 Heers", "Maatschappelijke zetel volgens het KBO-register — komt onderaan elke mail"],
   ["WEB_APP_URL", "", "URL van deze web app (eindigt op /exec) — nodig voor de partnerlinks"],
   ["ACCEPT_HOURS", "24", "Uren dat een partnerlink geldig is om te aanvaarden/weigeren"],
   ["CREDIT_HOURS", "72", "Uren na aanvaarden waarin een partner credit kan vragen"],
@@ -676,7 +678,7 @@ function safeSend_(msg, context) {
 
 function legalFooter_() {
   return (cfg_("BRAND") || "KetelCheck") + " is een dienst van " + LEGAL_ENTITY + " · ondernemingsnummer " + LEGAL_ENTERPRISE_NO +
-    " · " + (cfg_("ADRES_ZETEL") || LEGAL_CITY) + (cfg_("REPLY_TO") ? " · " + cfg_("REPLY_TO") : "");
+    " · " + (cfg_("ADRES_ZETEL") || LEGAL_ADDRESS) + (cfg_("REPLY_TO") ? " · " + cfg_("REPLY_TO") : "");
 }
 
 function notifyAdmin_(subject, body) {

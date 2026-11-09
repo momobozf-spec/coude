@@ -45,7 +45,6 @@ git push -u origin main
 | `DATABASE_URL` | de Neon-string uit stap 1 |
 | `APP_URL` | `https://muslim-life-test.onrender.com` |
 | `AUTH_URL` | exact hetzelfde als `APP_URL` |
-| `LEGAL_ENTITY_ADDRESS` | straat, nr en postcode van de zetel van Marhaba Data & AI Agent BV (naam, ondernemingsnummer en e-mail staan al in de blueprint) |
 | `BOOTSTRAP_ADMIN_EMAIL` | leeg laten (stap 5) |
 | `RESEND_API_KEY` / `EMAIL_FROM` | leeg laten, of zie stap 6 |
 

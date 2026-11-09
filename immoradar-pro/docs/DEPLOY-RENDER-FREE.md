@@ -30,8 +30,8 @@ git push
 3. Vul in:
    - `APP_BASE_URL`: `https://immoradar-test.onrender.com` (controleer na het
      aanmaken de echte naam en pas aan als die anders is).
-   - `LEGAL_ENTITY_ADDRESS`: volledig adres met postcode en gemeente.
-   - `LEGAL_CONTACT_EMAIL`.
+   - `LEGAL_CONTACT_EMAIL` (`LEGAL_ENTITY_ADDRESS` staat al in de blueprint:
+     Sweetstraat 13, 3870 Heers, uit het KBO-register).
    - `BOOTSTRAP_ADMIN_EMAIL`: het e-mailadres waarmee jij inlogt.
 4. Controleer dat er **$0** staat, dan **Apply**.
 

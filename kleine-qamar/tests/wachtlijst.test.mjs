@@ -18,29 +18,30 @@ test('privacyverklaring: NL/FR/AR, Brevo als verwerker, uitbater, concept-marker
   assert.match(html, /Concept — laten nalezen door een jurist/);
   assert.match(html, /Verwerker: Brevo/);
   assert.match(html, /Sous-traitant : Brevo/);
-  assert.match(html, /Marhaba Data &amp; AI Agent BV/);
-  assert.match(html, /BE 1003\.552\.102/);
-  assert.match(html, /Zaventem/);
+  assert.match(html, /Marhaba Cooperation BV/);
+  assert.match(html, /BE 1037\.222\.285/);
+  assert.match(html, /Sweetstraat 13, 3870 Heers/);
   assert.match(html, /momobozf@gmail\.com/);
 });
 
 test('footer van de wachtlijst toont uitbatergegevens en privacylink', async () => {
   const html = await read('index.html');
-  assert.match(html, /Marhaba Data &amp; AI Agent BV · BE 1003\.552\.102 · Zaventem/);
+  assert.match(html, /Marhaba Cooperation BV · BE 1037\.222\.285 · Sweetstraat 13, 3870 Heers/);
   assert.match(html, /id="privacy-link" href="privacy\.html#nl"/);
   assert.match(html, /mailto:momobozf@gmail\.com/);
 });
 
-test('config: één plek voor endpoint en uitbatergegevens, adres als TODO', async () => {
+test('config: één plek voor endpoint en uitbatergegevens, zetel uit het KBO-register', async () => {
   const ctx = { window: {} };
   vm.createContext(ctx);
   vm.runInContext(await read('config.js'), ctx);
   const c = ctx.window.QAMAR_CONFIG;
   assert.match(c.FORM_ENDPOINT, /^https:\/\/[a-z0-9]+\.sibforms\.com\/serve\//);
-  assert.equal(c.legal.entityName, 'Marhaba Data & AI Agent BV');
-  assert.equal(c.legal.enterpriseNumber, 'BE 1003.552.102');
-  assert.equal(c.legal.address, '');
-  assert.match(await read('config.js'), /TODO\(Mohamed\)/);
+  assert.equal(c.legal.entityName, 'Marhaba Cooperation BV');
+  assert.equal(c.legal.enterpriseNumber, 'BE 1037.222.285');
+  assert.equal(c.legal.city, 'Heers');
+  assert.equal(c.legal.address, 'Sweetstraat 13, 3870 Heers');
+  assert.match(await read('config.js'), /KBO-register/);
 });
 
 test('geen externe fonts of scripts (geen Google Fonts), fontbestanden aanwezig', async () => {

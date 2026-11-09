@@ -48,7 +48,7 @@ Open http://localhost:3000 → Aanmelden.
 Bestanden: `Dockerfile`, `.dockerignore`, `render.yaml` (web + PostgreSQL 16 + dagelijkse cron `ted:import`, alles in regio Frankfurt), health check `GET /api/health`.
 
 1. Render-account → **New → Blueprint** → kies de repo → Blueprint path `tenderkompas/render.yaml`. Render maakt aan: web service `tenderkompas` (Docker, starter, 1 GB disk op `/app/storage`), cron job `tenderkompas-ted-import` (dagelijks 04:15 UTC) en database `tenderkompas-db`.
-2. Vul de `sync: false`-variabelen in: `BETTER_AUTH_URL` (`https://<jouw-domein>`), `LEGAL_ENTITY_ADDRESS` (straat + nr + postcode zetel), `SMTP_HOST/USER/PASSWORD/FROM` (EU-provider, eigen domein met SPF/DKIM), optioneel `ANTHROPIC_API_KEY`. `BETTER_AUTH_SECRET` genereert Render zelf.
+2. Vul de `sync: false`-variabelen in: `BETTER_AUTH_URL` (`https://<jouw-domein>`), `SMTP_HOST/USER/PASSWORD/FROM` (EU-provider, eigen domein met SPF/DKIM), optioneel `ANTHROPIC_API_KEY`. `BETTER_AUTH_SECRET` genereert Render zelf.
 3. Deploy. Bij elke deploy draait eerst `npm run db:migrate:prod` (preDeployCommand). Daarna Render-shell van de web service: `npm run admin:create -- --email jij@domein.be --name "Mohamed Bouzouf"` (wachtwoord wordt gevraagd).
 4. Custom domain koppelen (Settings → Custom Domains) en `BETTER_AUTH_URL` gelijkzetten.
 5. Controle: `https://<domein>/api/health` → `{"status":"ok","db":"ok"}`; `/voorwaarden` en `/privacy` tonen het volledige adres.
@@ -59,7 +59,7 @@ Bestanden: `Dockerfile`, `.dockerignore`, `render.yaml` (web + PostgreSQL 16 + d
 Zonder Render: elke host met Docker + PostgreSQL ≥ 14 werkt (`docker build -t tenderkompas .`, `docker run -e DATABASE_URL=… -e BETTER_AUTH_SECRET=… -e BETTER_AUTH_URL=… -v tk-storage:/app/storage -p 3000:3000 tenderkompas`, cron: `docker run … tenderkompas npm run ted:import`).
 
 ## Wettelijk
-Uitbater: Marhaba Data & AI Agent BV, BE 1003.552.102, Zaventem (adres via `LEGAL_ENTITY_ADDRESS`). Pagina's `/voorwaarden` (B2B-voorwaarden incl. verwerkersclausule art. 28 AVG) en `/privacy`, gelinkt in elke footer en bij het aanvraagformulier. Concept — laten nalezen door een jurist.
+Uitbater: Marhaba Cooperation BV, BE 1037.222.285, Sweetstraat 13, 3870 Heers (zetel uit het KBO-register; overschrijfbaar via `LEGAL_ENTITY_ADDRESS`, staat vast in `render.yaml`). Pagina's `/voorwaarden` (B2B-voorwaarden incl. verwerkersclausule art. 28 AVG) en `/privacy`, gelinkt in elke footer en bij het aanvraagformulier. Concept — laten nalezen door een jurist.
 
 ## Tests
 ```bash

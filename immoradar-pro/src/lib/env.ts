@@ -176,16 +176,16 @@ const envSchema = z.object({
 
   // ── Juridische identiteit (privacyverklaring, voorwaarden, DPA) ──────────
   /** De rechtspersoon achter het platform: verwerker voor de klantenbestanden. */
-  LEGAL_ENTITY_NAME: textWithFallback('Marhaba Data & AI Agent BV'),
-  LEGAL_ENTITY_VAT: textWithFallback('BE 1003.552.102'),
+  LEGAL_ENTITY_NAME: textWithFallback('Marhaba Cooperation BV'),
+  LEGAL_ENTITY_VAT: textWithFallback('BE 1037.222.285'),
   /** Gemeente van de zetel; staat er altijd, ook zonder volledig adres. */
-  LEGAL_ENTITY_MUNICIPALITY: textWithFallback('Zaventem'),
+  LEGAL_ENTITY_MUNICIPALITY: textWithFallback('Heers'),
   /**
-   * Straat + huisnummer + postcode van de zetel. Nog onbekend: TODO(Mohamed)
-   * invullen vóór de lancering. Op een publieke productie-URL weigert de app
-   * te starten zonder deze waarde (zie `assertProductionSecrets`).
+   * Straat + huisnummer + postcode van de zetel, volgens het KBO-register
+   * (publieke gegevens). Op een publieke productie-URL weigert de app te
+   * starten zonder volledig adres met postcode (zie `assertProductionSecrets`).
    */
-  LEGAL_ENTITY_ADDRESS: z.string().default(''),
+  LEGAL_ENTITY_ADDRESS: textWithFallback('Sweetstraat 13, 3870 Heers'),
   /** Adres voor privacyverzoeken (inzage, verwijdering, bezwaar). */
   LEGAL_CONTACT_EMAIL: textWithFallback('momobozf@gmail.com'),
 
@@ -249,7 +249,8 @@ export function assertProductionSecrets(env: Env = getEnv()): void {
 
   // Wettelijke vermeldingen (WER art. XII.6): op een publiek adres moet het
   // volledige adres van de uitbater er staan. Een lokale demo mag zonder.
-  if (!isLocalBaseUrl(env.APP_BASE_URL) && env.LEGAL_ENTITY_ADDRESS.trim() === '') {
+  // Alleen een gemeente (bv. "Heers") volstaat niet: er moet een postcode in staan.
+  if (!isLocalBaseUrl(env.APP_BASE_URL) && !/\b\d{4}\b/.test(env.LEGAL_ENTITY_ADDRESS)) {
     missing.push('LEGAL_ENTITY_ADDRESS (straat, nr. en postcode van de zetel)')
   }
 
