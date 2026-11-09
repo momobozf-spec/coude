@@ -11,14 +11,14 @@ export default function WhiteLabelPage() {
   const [demoBrand, setDemoBrand] = useState<"green" | "blue" | "purple">("green");
 
   async function handlePurchase(plan: string) {
-    if (!session) { window.location.href = "/register"; return; }
+    if (!session) { window.location.assign("/register"); return; }
     setPurchasing(true);
     const res = await fetch("/api/white-label/purchase", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ plan }),
     });
     const data = await res.json();
-    if (data.url) window.location.href = data.url;
+    if (data.url) window.location.assign(data.url);
     setPurchasing(false);
   }
 

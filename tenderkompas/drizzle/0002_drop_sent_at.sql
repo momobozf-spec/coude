@@ -1,0 +1,1 @@
+ALTER TABLE "email_delivery" DROP COLUMN "sent_at";

@@ -14,6 +14,7 @@ export default function GamesPage() {
   const [filter, setFilter] = useState("all");
   const [fact, setFact] = useState("");
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- read client-only value after mount (not available during SSR)
   useEffect(() => { setFact(getRandomFact("memory")); }, []);
 
   const filtered = filter === "all" ? ALL_GAMES : ALL_GAMES.filter(g => g.category === filter);

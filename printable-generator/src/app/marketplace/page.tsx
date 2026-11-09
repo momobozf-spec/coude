@@ -120,7 +120,7 @@ export default function MarketplacePage() {
       {/* Become a seller banner */}
       <section className="px-4 pb-16">
         <div className="max-w-4xl mx-auto rounded-2xl p-8 text-center text-white" style={{ background: "linear-gradient(135deg, #1a6b4a, #145239)" }}>
-          <h2 className="text-2xl font-bold mb-2">Share your Islamic worksheets with 10,000+ families</h2>
+          <h2 className="text-2xl font-bold mb-2">Share your Islamic worksheets with other families</h2>
           <p className="text-green-100 mb-4">Earn 70% on every sale. Free to list.</p>
           <Link href="/sell" className="inline-block px-8 py-3 rounded-lg font-bold bg-white" style={{ color: "#1a6b4a" }}>
             Start Selling &rarr;

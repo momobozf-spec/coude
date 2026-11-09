@@ -1,0 +1,374 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MUSLIM LIFE — DESIGN TOKENS
+
+   Two layers:
+   1. Primitives  (--ml-*)  — the raw palette. Change these to rebrand.
+   2. Semantics   (--*)     — role-based tokens consumed by components.
+
+   Components must only ever use semantic tokens (bg-surface, text-muted, …).
+   No component should reference a primitive or a raw hex value.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  :root {
+    /* ── Primitives ──────────────────────────────────────────────────────── */
+
+    /* Sand — warm neutral. The calm ivory ground the product sits on. */
+    --ml-sand-50: oklch(0.991 0.004 85);
+    --ml-sand-100: oklch(0.975 0.007 84);
+    --ml-sand-200: oklch(0.945 0.011 83);
+    --ml-sand-300: oklch(0.902 0.014 82);
+    --ml-sand-400: oklch(0.815 0.016 81);
+    --ml-sand-500: oklch(0.702 0.017 80);
+    --ml-sand-600: oklch(0.575 0.017 79);
+    --ml-sand-700: oklch(0.455 0.016 78);
+    --ml-sand-800: oklch(0.335 0.014 77);
+    --ml-sand-900: oklch(0.235 0.012 76);
+    --ml-sand-950: oklch(0.165 0.010 75);
+
+    /* Ink — cool charcoal for dark surfaces and high-contrast text. */
+    --ml-ink-50: oklch(0.975 0.002 250);
+    --ml-ink-100: oklch(0.940 0.003 250);
+    --ml-ink-200: oklch(0.875 0.004 250);
+    --ml-ink-300: oklch(0.760 0.006 250);
+    --ml-ink-400: oklch(0.610 0.008 250);
+    --ml-ink-500: oklch(0.480 0.010 250);
+    --ml-ink-600: oklch(0.385 0.011 250);
+    --ml-ink-700: oklch(0.300 0.012 250);
+    --ml-ink-800: oklch(0.228 0.011 250);
+    --ml-ink-900: oklch(0.178 0.010 250);
+    --ml-ink-950: oklch(0.135 0.009 250);
+
+    /* Emerald — the brand. Deep, calm, confident. Not neon, not "mosque green". */
+    --ml-emerald-50: oklch(0.972 0.018 165);
+    --ml-emerald-100: oklch(0.940 0.036 165);
+    --ml-emerald-200: oklch(0.880 0.062 165);
+    --ml-emerald-300: oklch(0.800 0.090 164);
+    --ml-emerald-400: oklch(0.705 0.108 163);
+    --ml-emerald-500: oklch(0.610 0.110 162);
+    --ml-emerald-600: oklch(0.510 0.098 162);
+    --ml-emerald-700: oklch(0.425 0.082 162);
+    --ml-emerald-800: oklch(0.348 0.066 162);
+    --ml-emerald-900: oklch(0.285 0.052 163);
+    --ml-emerald-950: oklch(0.205 0.038 164);
+
+    /* Gold — accent only. Never a background, never more than one per view. */
+    --ml-gold-50: oklch(0.978 0.020 88);
+    --ml-gold-100: oklch(0.950 0.040 87);
+    --ml-gold-200: oklch(0.905 0.070 86);
+    --ml-gold-300: oklch(0.850 0.095 85);
+    --ml-gold-400: oklch(0.795 0.110 83);
+    --ml-gold-500: oklch(0.735 0.115 81);
+    --ml-gold-600: oklch(0.645 0.105 79);
+    --ml-gold-700: oklch(0.540 0.090 77);
+    --ml-gold-800: oklch(0.440 0.072 76);
+    --ml-gold-900: oklch(0.360 0.058 75);
+
+    /* Status */
+    --ml-success: oklch(0.610 0.110 162);
+    --ml-warning: oklch(0.760 0.120 70);
+    --ml-danger: oklch(0.585 0.170 25);
+    --ml-info: oklch(0.630 0.100 240);
+
+    /* ── Semantic tokens — LIGHT ─────────────────────────────────────────── */
+
+    --background: var(--ml-sand-50);
+    --foreground: var(--ml-ink-900);
+
+    --surface: oklch(1 0 0);
+    --surface-foreground: var(--ml-ink-900);
+    --surface-raised: oklch(1 0 0);
+    --surface-sunken: var(--ml-sand-100);
+
+    --muted: var(--ml-sand-100);
+    --muted-foreground: var(--ml-sand-700);
+
+    --primary: var(--ml-emerald-700);
+    --primary-hover: var(--ml-emerald-800);
+    --primary-foreground: oklch(0.99 0.004 165);
+    --primary-subtle: var(--ml-emerald-50);
+    --primary-subtle-foreground: var(--ml-emerald-800);
+
+    --accent: var(--ml-gold-600);
+    --accent-foreground: oklch(0.18 0.01 80);
+    --accent-subtle: var(--ml-gold-50);
+    --accent-subtle-foreground: var(--ml-gold-800);
+
+    --secondary: var(--ml-sand-100);
+    --secondary-foreground: var(--ml-ink-800);
+
+    --success: var(--ml-success);
+    --success-subtle: var(--ml-emerald-50);
+    --warning: var(--ml-warning);
+    --warning-subtle: oklch(0.968 0.030 78);
+    --danger: var(--ml-danger);
+    --danger-subtle: oklch(0.966 0.020 25);
+    --danger-foreground: oklch(0.99 0 0);
+    --info: var(--ml-info);
+
+    --border: var(--ml-sand-200);
+    --border-strong: var(--ml-sand-300);
+    --input: var(--ml-sand-300);
+    --ring: var(--ml-emerald-600);
+
+    --overlay: oklch(0.235 0.012 76 / 0.45);
+
+    /* Elevation — warm-tinted rather than pure black, so cards sit *in* the
+       page instead of floating above a grey void. */
+    --shadow-color: 32 24 16;
+    --shadow-xs: 0 1px 2px 0 rgb(var(--shadow-color) / 0.05);
+    --shadow-sm: 0 1px 3px 0 rgb(var(--shadow-color) / 0.06), 0 1px 2px -1px rgb(var(--shadow-color) / 0.05);
+    --shadow-md: 0 4px 12px -2px rgb(var(--shadow-color) / 0.07), 0 2px 6px -2px rgb(var(--shadow-color) / 0.04);
+    --shadow-lg: 0 12px 28px -6px rgb(var(--shadow-color) / 0.10), 0 4px 10px -4px rgb(var(--shadow-color) / 0.05);
+    --shadow-xl: 0 24px 48px -12px rgb(var(--shadow-color) / 0.14);
+  }
+
+  .dark {
+    --background: var(--ml-ink-950);
+    --foreground: var(--ml-ink-100);
+
+    --surface: var(--ml-ink-900);
+    --surface-foreground: var(--ml-ink-100);
+    --surface-raised: var(--ml-ink-800);
+    --surface-sunken: oklch(0.115 0.008 250);
+
+    --muted: var(--ml-ink-800);
+    --muted-foreground: var(--ml-ink-400);
+
+    /* Lifted in dark mode: a 700-level green on a near-black ground fails
+       contrast. Brand identity is preserved by hue, not by exact lightness. */
+    --primary: var(--ml-emerald-400);
+    --primary-hover: var(--ml-emerald-300);
+    --primary-foreground: oklch(0.16 0.03 164);
+    --primary-subtle: oklch(0.255 0.042 163);
+    --primary-subtle-foreground: var(--ml-emerald-200);
+
+    --accent: var(--ml-gold-400);
+    --accent-foreground: oklch(0.17 0.02 80);
+    --accent-subtle: oklch(0.275 0.040 82);
+    --accent-subtle-foreground: var(--ml-gold-200);
+
+    --secondary: var(--ml-ink-800);
+    --secondary-foreground: var(--ml-ink-100);
+
+    --success: var(--ml-emerald-400);
+    --success-subtle: oklch(0.255 0.042 163);
+    --warning: oklch(0.800 0.115 72);
+    --warning-subtle: oklch(0.280 0.045 72);
+    --danger: oklch(0.680 0.165 25);
+    --danger-subtle: oklch(0.270 0.060 25);
+    --danger-foreground: oklch(0.99 0 0);
+    --info: oklch(0.700 0.100 240);
+
+    --border: oklch(0.278 0.010 250);
+    --border-strong: oklch(0.345 0.011 250);
+    --input: oklch(0.320 0.011 250);
+    --ring: var(--ml-emerald-400);
+
+    --overlay: oklch(0.08 0.006 250 / 0.65);
+
+    --shadow-color: 0 0 0;
+    --shadow-xs: 0 1px 2px 0 rgb(var(--shadow-color) / 0.24);
+    --shadow-sm: 0 1px 3px 0 rgb(var(--shadow-color) / 0.30), 0 1px 2px -1px rgb(var(--shadow-color) / 0.24);
+    --shadow-md: 0 4px 12px -2px rgb(var(--shadow-color) / 0.36), 0 2px 6px -2px rgb(var(--shadow-color) / 0.24);
+    --shadow-lg: 0 12px 28px -6px rgb(var(--shadow-color) / 0.44), 0 4px 10px -4px rgb(var(--shadow-color) / 0.28);
+    --shadow-xl: 0 24px 48px -12px rgb(var(--shadow-color) / 0.55);
+  }
+}
+
+/* ═══ Tailwind theme mapping ═══════════════════════════════════════════════ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-surface: var(--surface);
+  --color-surface-foreground: var(--surface-foreground);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-primary-subtle-foreground: var(--primary-subtle-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-accent-subtle-foreground: var(--accent-subtle-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-danger: var(--danger);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-info: var(--info);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-overlay: var(--overlay);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  /* `--font-naskh` is what next/font sets. Naming the theme token the same
+     thing made this `var(--font-arabic)` refer to itself, so Arabic silently
+     fell back to the browser's default serif. */
+  --font-arabic: var(--font-naskh), 'Noto Naskh Arabic', 'Segoe UI', serif;
+
+  /* Slightly larger than Tailwind's defaults — soft, calm corners. */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.125rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --animate-fade-in: fade-in 0.35s var(--ease-out-soft) both;
+  --animate-rise: rise 0.45s var(--ease-out-soft) both;
+  --animate-scale-in: scale-in 0.2s var(--ease-out-soft) both;
+  --animate-shimmer: shimmer 1.8s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.8; }
+}
+
+/* ═══ Base ═════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Consistent, visible focus. Never remove without replacing. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  ::selection {
+    background-color: var(--primary-subtle);
+    color: var(--primary-subtle-foreground);
+  }
+
+  /* Arabic needs more line-height and its own face to stay legible. */
+  [lang='ar'],
+  .font-arabic {
+    font-family: var(--font-arabic);
+    line-height: 2;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ═══ Utilities ════════════════════════════════════════════════════════════ */
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility text-pretty {
+  text-wrap: pretty;
+}
+
+/* A faint eight-point geometric motif. Islamic influence as texture, not
+   decoration — it should read as paper grain, not as ornament. */
+@utility bg-geometric {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in oklch, var(--foreground) 7%, transparent) 1px,
+    transparent 0
+  );
+  background-size: 28px 28px;
+}
+
+@utility surface-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Scrollbars that don't shout. */
+@utility scrollbar-subtle {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--border-strong);
+    border-radius: 9999px;
+  }
+}

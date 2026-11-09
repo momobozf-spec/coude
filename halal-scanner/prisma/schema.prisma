@@ -1,0 +1,976 @@
+// ---------------------------------------------------------------------------
+// Halal Product Scanner - Prisma schema
+//
+// Ontwerpprincipes:
+//  1. Elke halal-classificatie is herleidbaar naar een bron (Source) of naar
+//     een expliciete interne regel. Er wordt nooit een status opgeslagen zonder
+//     dat vastligt waarom.
+//  2. Er is geen enkele "universele religieuze waarheid" gehardcodeerd. Per
+//     certificeringsinstantie kan een afwijkende beoordeling van een E-nummer
+//     of ingredient worden vastgelegd (ENumberRuling / IngredientRuling).
+//  3. Analyses zijn geversioneerd (ProductAnalysis + AnalysisFinding), zodat
+//     achteraf te reconstrueren is waarom een product op moment X een bepaalde
+//     status kreeg.
+//  4. Het datamodel is multi-user ready (User + rollen + auth-tabellen), ook al
+//     is authenticatie in de MVP nog niet volledig uitgewerkt.
+// ---------------------------------------------------------------------------
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================================================================
+// ENUMS
+// ===========================================================================
+
+/// Rollen. Moderator mag community-content beoordelen, admin alles.
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+/// Expliciet halal-statusmodel. Bewust fijnmaziger dan halal/haram/mushbooh,
+/// zodat "we weten het niet" en "waarschijnlijk, maar niet gecertificeerd"
+/// niet op één hoop belanden.
+enum HalalStatus {
+  /// Geldig, geverifieerd certificaat van een geregistreerde instantie.
+  CERTIFIED_HALAL
+  /// Geen problematische ingredienten gevonden, maar geen certificaat.
+  LIKELY_HALAL
+  /// Twijfelachtig: oorsprong van een of meer ingredienten is onbekend.
+  MUSHBOOH
+  /// Sterke aanwijzing voor een haram ingredient, zonder harde bevestiging.
+  LIKELY_HARAM
+  /// Expliciet haram ingredient aangetroffen.
+  HARAM
+  /// Onvoldoende informatie om uberhaupt te classificeren.
+  UNKNOWN
+}
+
+enum ConfidenceLevel {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+/// Hoe risicovol de herkomst van een ingredient is voor halal-beoordeling.
+enum OriginRisk {
+  /// Herkomst is irrelevant (bv. water, zout).
+  NONE
+  /// Uitsluitend plantaardig.
+  PLANT_ONLY
+  /// Uitsluitend synthetisch/mineraal.
+  SYNTHETIC_ONLY
+  /// Kan dierlijk zijn; bron bepaalt de uitkomst.
+  ANIMAL_POSSIBLE
+  /// Is per definitie dierlijk.
+  ANIMAL_CERTAIN
+  /// Alcohol-gerelateerd; context (restalcohol vs. ingredient) bepaalt.
+  ALCOHOL_RELATED
+  /// Herkomst onbekend.
+  UNKNOWN
+}
+
+enum IngredientCategory {
+  PLANT
+  ANIMAL
+  INSECT
+  MINERAL
+  SYNTHETIC
+  MICROBIAL
+  ALCOHOL
+  ADDITIVE
+  UNKNOWN
+}
+
+enum SourceType {
+  CERTIFICATION_BODY
+  FOOD_DATABASE
+  MANUFACTURER
+  SCIENTIFIC_REFERENCE
+  COMMUNITY
+  INTERNAL_RULE
+}
+
+/// Waar productdata vandaan komt.
+enum ExternalSource {
+  OPEN_FOOD_FACTS
+  OCR
+  MANUAL
+  ADMIN
+}
+
+/// Waar een specifieke product-ingredient-koppeling vandaan komt.
+enum IngredientOrigin {
+  OPEN_FOOD_FACTS
+  OCR
+  USER
+  ADMIN
+  AI_ASSISTED
+}
+
+enum CertificateStatus {
+  PENDING
+  COMMUNITY_REVIEWED
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+enum ReviewType {
+  INGREDIENT_CHANGE
+  MANUFACTURER_CONFIRMATION
+  CERTIFICATE_INFORMATION
+  PRODUCT_INFORMATION
+  GENERAL
+}
+
+enum ReviewStatus {
+  VISIBLE
+  HIDDEN
+  REMOVED
+}
+
+enum ReportType {
+  WRONG_INGREDIENTS
+  WRONG_PRODUCT_FOR_BARCODE
+  CERTIFICATE_EXPIRED
+  WRONG_HALAL_STATUS
+  PACKAGING_CHANGED
+  SUSPICIOUS_REVIEW
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+/// Soort bevinding in een analyse. Maakt de uitleg in de UI groepeerbaar.
+enum FindingType {
+  HARAM_INGREDIENT
+  MUSHBOOH_INGREDIENT
+  HALAL_INGREDIENT
+  UNKNOWN_INGREDIENT
+  E_NUMBER
+  CERTIFICATE
+  PRODUCT_LABEL
+  /// Certificaat en ingredientenanalyse spreken elkaar tegen.
+  CONFLICT
+  /// Geen ingredientendata beschikbaar.
+  MISSING_DATA
+}
+
+enum OcrStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  /// Gebruiker heeft het OCR-resultaat nagekeken en bevestigd.
+  CONFIRMED
+  DISCARDED
+}
+
+// ===========================================================================
+// USERS & AUTH
+// ===========================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  /// Optioneel: alleen gevuld bij credentials-login.
+  passwordHash  String?
+
+  role UserRole @default(USER)
+
+  /// Voorbereid op een reputatiesysteem (nog niet actief in de MVP).
+  reputationScore     Int     @default(0)
+  verifiedContributor Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+
+  reviews              CommunityReview[] @relation("ReviewAuthor")
+  votes                ReviewVote[]
+  reports              Report[]          @relation("ReportAuthor")
+  resolvedReports      Report[]          @relation("ReportResolver")
+  uploadedCertificates Certificate[]     @relation("CertificateUploader")
+  verifiedCertificates Certificate[]     @relation("CertificateVerifier")
+  favorites            Favorite[]
+  scanEvents           ScanEvent[]
+  ocrSubmissions       OcrSubmission[]
+  triggeredAnalyses    ProductAnalysis[] @relation("AnalysisTrigger")
+  auditLogs            AuditLog[]
+
+  @@index([role])
+}
+
+/// Auth.js/NextAuth-compatibel. Aanwezig zodat auth later ingeplugd kan worden
+/// zonder migratie van bestaande gebruikersdata.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ===========================================================================
+// BRONNEN
+// ===========================================================================
+
+/// Elke inhoudelijke uitspraak in de app verwijst idealiter naar een Source.
+/// sourceType INTERNAL_RULE markeert expliciet onze eigen heuristiek, zodat de
+/// UI dat kan onderscheiden van een externe autoriteit.
+model Source {
+  id           String     @id @default(cuid())
+  name         String
+  /// Verplicht (mag "" zijn): maakt de compound unique betrouwbaar, want in
+  /// Postgres botsen NULL-waarden niet met elkaar in een unique index.
+  organization String
+  url          String?
+  country      String?
+  sourceType   SourceType
+
+  /// Korte omschrijving van wat deze bron precies onderbouwt.
+  description String?
+
+  lastVerifiedAt DateTime?
+
+  certificationBodyId String?
+  certificationBody   CertificationBody? @relation(fields: [certificationBodyId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  eNumberSources    ENumberSource[]
+  ingredientSources IngredientSource[]
+  eNumberRulings    ENumberRuling[]
+  ingredientRulings IngredientRuling[]
+  findings          AnalysisFinding[]
+
+  @@unique([name, organization])
+  @@index([sourceType])
+}
+
+/// Certificerende instantie. `hasImportedRulings` maakt in de UI zichtbaar of
+/// we daadwerkelijk beoordelingen van deze instantie hebben geimporteerd, of
+/// dat we de instantie alleen kennen als uitgever van certificaten.
+model CertificationBody {
+  id      String  @id @default(cuid())
+  name    String  @unique
+  slug    String  @unique
+  country String?
+  website String?
+  logoUrl String?
+
+  /// Officieel erkend/overheidsgebonden orgaan.
+  official Boolean @default(false)
+  active   Boolean @default(true)
+
+  /// False = wij hebben geen inhoudelijke uitspraken van deze instantie.
+  hasImportedRulings Boolean @default(false)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  certificates      Certificate[]
+  sources           Source[]
+  eNumberRulings    ENumberRuling[]
+  ingredientRulings IngredientRuling[]
+
+  @@index([active])
+}
+
+// ===========================================================================
+// E-NUMMERS
+// ===========================================================================
+
+model ENumber {
+  id          String  @id @default(cuid())
+  /// Genormaliseerde code, altijd in de vorm "E471".
+  code        String  @unique
+  name        String
+  description String?
+
+  /// Onze eigen (conservatieve) standaardbeoordeling.
+  defaultStatus     HalalStatus     @default(UNKNOWN)
+  defaultConfidence ConfidenceLevel @default(LOW)
+  originRisk        OriginRisk      @default(UNKNOWN)
+
+  animalDerivedPossible Boolean @default(false)
+  plantDerivedPossible  Boolean @default(false)
+  syntheticPossible     Boolean @default(false)
+  microbialPossible     Boolean @default(false)
+
+  /// Vrije opsomming van bekende productieroutes, bv. ["palmolie", "rundvet"].
+  possibleSources String[] @default([])
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sources     ENumberSource[]
+  rulings     ENumberRuling[]
+  ingredients Ingredient[]
+  findings    AnalysisFinding[]
+
+  @@index([defaultStatus])
+}
+
+model ENumberSource {
+  id        String @id @default(cuid())
+  eNumberId String
+  sourceId  String
+
+  /// Vrije tekst uit/over de bron, bv. het geciteerde fragment.
+  note        String?
+  retrievedAt DateTime @default(now())
+
+  eNumber ENumber @relation(fields: [eNumberId], references: [id], onDelete: Cascade)
+  source  Source  @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@unique([eNumberId, sourceId])
+  @@index([sourceId])
+}
+
+/// Afwijkende beoordeling van een E-nummer door een specifieke instantie.
+/// Hierdoor is er geen enkele gehardcodeerde universele religieuze uitspraak.
+model ENumberRuling {
+  id                  String @id @default(cuid())
+  eNumberId           String
+  certificationBodyId String
+
+  status     HalalStatus
+  confidence ConfidenceLevel @default(MEDIUM)
+  reason     String?
+
+  sourceId String?
+
+  retrievedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  eNumber           ENumber           @relation(fields: [eNumberId], references: [id], onDelete: Cascade)
+  certificationBody CertificationBody @relation(fields: [certificationBodyId], references: [id], onDelete: Cascade)
+  source            Source?           @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  @@unique([eNumberId, certificationBodyId])
+  @@index([certificationBodyId])
+}
+
+// ===========================================================================
+// INGREDIENTEN
+// ===========================================================================
+
+model Ingredient {
+  id             String  @id @default(cuid())
+  name           String
+  /// Lowercase, ontdaan van accenten/leestekens. Sleutel voor matching.
+  normalizedName String  @unique
+  description    String?
+
+  category          IngredientCategory @default(UNKNOWN)
+  defaultStatus     HalalStatus        @default(UNKNOWN)
+  defaultConfidence ConfidenceLevel    @default(LOW)
+  originRisk        OriginRisk         @default(UNKNOWN)
+
+  /// Gekoppeld E-nummer wanneer het ingredient een additief is.
+  eNumberId String?
+  eNumber   ENumber? @relation(fields: [eNumberId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  aliases      IngredientAlias[]
+  sources      IngredientSource[]
+  rulings      IngredientRuling[]
+  productLinks ProductIngredient[]
+  findings     AnalysisFinding[]
+
+  @@index([defaultStatus])
+  @@index([eNumberId])
+}
+
+/// Synoniemen en vertalingen ("varkensvet", "lard", "saindoux").
+model IngredientAlias {
+  id           String  @id @default(cuid())
+  ingredientId String
+  /// Genormaliseerd, net als Ingredient.normalizedName.
+  alias        String  @unique
+  locale       String?
+
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@index([ingredientId])
+}
+
+model IngredientSource {
+  id           String @id @default(cuid())
+  ingredientId String
+  sourceId     String
+
+  note        String?
+  retrievedAt DateTime @default(now())
+
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  source     Source     @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@unique([ingredientId, sourceId])
+  @@index([sourceId])
+}
+
+model IngredientRuling {
+  id                  String @id @default(cuid())
+  ingredientId        String
+  certificationBodyId String
+
+  status     HalalStatus
+  confidence ConfidenceLevel @default(MEDIUM)
+  reason     String?
+
+  sourceId String?
+
+  retrievedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ingredient        Ingredient        @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  certificationBody CertificationBody @relation(fields: [certificationBodyId], references: [id], onDelete: Cascade)
+  source            Source?           @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  @@unique([ingredientId, certificationBodyId])
+  @@index([certificationBodyId])
+}
+
+// ===========================================================================
+// PRODUCTEN
+// ===========================================================================
+
+model Brand {
+  id             String  @id @default(cuid())
+  name           String
+  normalizedName String  @unique
+  website        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products     Product[]
+  certificates Certificate[]
+}
+
+model Product {
+  id      String @id @default(cuid())
+  barcode String @unique
+
+  name      String?
+  /// Merknaam zoals aangeleverd door de externe bron (ongenormaliseerd).
+  brandName String?
+  brandId   String?
+  brand     Brand?  @relation(fields: [brandId], references: [id], onDelete: SetNull)
+
+  imageUrl String?
+
+  /// Ruwe ingrediententekst zoals op de verpakking / uit de bron.
+  ingredientsRaw  String? @db.Text
+  /// Taal van ingredientsRaw, ISO 639-1 waar bekend.
+  ingredientsLang String?
+
+  categories String[] @default([])
+  labels     String[] @default([])
+  countries  String[] @default([])
+  allergens  String[] @default([])
+
+  externalSource    ExternalSource?
+  externalId        String?
+  /// Wanneer de externe bron het product voor het laatst wijzigde.
+  externalUpdatedAt DateTime?
+  /// Wanneer wij voor het laatst bij de externe bron zijn gaan kijken.
+  lastSyncedAt      DateTime?
+
+  /// Hoe betrouwbaar de externe bron is. Open Food Facts is community-data en
+  /// krijgt daarom nooit HIGH; dat voorkomt dat externe data zwaarder weegt dan
+  /// een geverifieerd certificaat of een expliciete regel.
+  sourceConfidence ConfidenceLevel @default(MEDIUM)
+
+  /// Welke herkomst de HUIDIGE ingredientenlijst bezit. Een externe sync mag
+  /// een lijst die door een mens (USER/ADMIN) of via OCR is vastgesteld niet
+  /// zomaar overschrijven - zie ProductSyncService.
+  ingredientsOrigin IngredientOrigin?
+
+  /// Oplopend revisienummer; hoogste waarde komt overeen met de laatste
+  /// ProductRevision.
+  revision Int @default(0)
+
+  /// Gecachte uitkomst van de laatste analyse. Bron van waarheid blijft de
+  /// meest recente ProductAnalysis; deze velden bestaan voor snelle lijsten.
+  halalStatus     HalalStatus     @default(UNKNOWN)
+  confidenceLevel ConfidenceLevel @default(LOW)
+
+  analysisVersion String?
+  lastAnalyzedAt  DateTime?
+
+  /// True wanneer certificaat en ingredienten elkaar tegenspreken.
+  needsHumanReview Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ingredients    ProductIngredient[]
+  analyses       ProductAnalysis[]
+  revisions      ProductRevision[]
+  certificates   Certificate[]
+  reviews        CommunityReview[]
+  reports        Report[]
+  favorites      Favorite[]
+  scanEvents     ScanEvent[]
+  ocrSubmissions OcrSubmission[]
+
+  @@index([name])
+  @@index([brandId])
+  @@index([halalStatus])
+  @@index([lastAnalyzedAt])
+  @@index([lastSyncedAt])
+}
+
+/// Onveranderlijke momentopname van de door een bron beheerde productvelden.
+///
+/// Wordt geschreven bij elke inhoudelijke wijziging. Hierdoor vernietigt een
+/// update bij Open Food Facts geen geschiedenis: samen met ProductAnalysis
+/// (dat via productRevisionId naar de gebruikte revisie wijst) is achteraf te
+/// reconstrueren welke ingredientenlijst tot welke halal-status leidde.
+model ProductRevision {
+  id        String @id @default(cuid())
+  productId String
+
+  /// 1-based, oplopend per product.
+  revision Int
+
+  /// Welke velden ten opzichte van de vorige revisie zijn gewijzigd.
+  changedFields String[] @default([])
+
+  name            String?
+  brandName       String?
+  imageUrl        String?
+  ingredientsRaw  String?  @db.Text
+  ingredientsLang String?
+  categories      String[] @default([])
+  labels          String[] @default([])
+  countries       String[] @default([])
+  allergens       String[] @default([])
+
+  /// SHA-256 over de genormaliseerde ingrediententekst. Gelijke hash betekent
+  /// dat een her-analyse dezelfde uitkomst zou geven.
+  ingredientsHash String?
+
+  externalSource    ExternalSource?
+  externalId        String?
+  externalUpdatedAt DateTime?
+
+  /// Herkomst van de ingredientenlijst in deze revisie.
+  ingredientsOrigin IngredientOrigin?
+
+  createdByUserId String?
+  createdAt       DateTime @default(now())
+
+  product  Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  analyses ProductAnalysis[]
+
+  @@unique([productId, revision])
+  @@index([productId, createdAt])
+}
+
+/// Koppeling product <-> ingredient. rawName blijft altijd bewaard, ook als er
+/// geen match met de Ingredient-tabel is (ingredientId = null).
+model ProductIngredient {
+  id           String  @id @default(cuid())
+  productId    String
+  ingredientId String?
+
+  /// Exact zoals op het etiket.
+  rawName        String
+  /// Genormaliseerde variant die gebruikt is voor de matching.
+  normalizedName String
+  /// Volgorde op het etiket (0-based); relevant want etiketten zijn gesorteerd
+  /// op afnemend gewicht.
+  position       Int
+  quantityText   String?
+
+  /// Waar deze regel vandaan komt.
+  origin IngredientOrigin @default(OPEN_FOOD_FACTS)
+
+  createdAt DateTime @default(now())
+
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  ingredient Ingredient? @relation(fields: [ingredientId], references: [id], onDelete: SetNull)
+
+  @@unique([productId, position])
+  @@index([ingredientId])
+  @@index([normalizedName])
+}
+
+// ===========================================================================
+// ANALYSE (geversioneerd)
+// ===========================================================================
+
+model ProductAnalysis {
+  id        String @id @default(cuid())
+  productId String
+
+  status     HalalStatus
+  confidence ConfidenceLevel
+
+  /// Korte, voor de gebruiker leesbare samenvatting.
+  summary String @db.Text
+
+  /// Versie van de rules engine; maakt her-analyse na regelwijziging mogelijk.
+  engineVersion String
+
+  /// Hash van de genormaliseerde ingredienteninput. Identieke hash + identieke
+  /// engineVersion => analyse hoeft niet opnieuw te draaien.
+  inputHash String
+
+  hasConflict Boolean @default(false)
+
+  /// Menselijke verificatie nodig. Nu altijd gelijk aan `hasConflict`, maar als
+  /// eigen kolom opgeslagen omdat de moderatiewachtrij hierop filtert en de
+  /// redenen om review te vragen later kunnen groeien zonder dat bestaande
+  /// analyses opnieuw uitgerekend hoeven te worden.
+  needsHumanReview Boolean @default(false)
+
+  /// Op welke productrevisie deze analyse gebaseerd is. Maakt achteraf hard
+  /// zichtbaar welke ingredientenlijst tot deze status leidde.
+  productRevisionId String?
+
+  triggeredByUserId String?
+  triggeredBy       User?   @relation("AnalysisTrigger", fields: [triggeredByUserId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  product         Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productRevision ProductRevision?  @relation(fields: [productRevisionId], references: [id], onDelete: SetNull)
+  findings        AnalysisFinding[]
+
+  /// Dezelfde input onder dezelfde engineversie is per definitie dezelfde
+  /// analyse. Deze constraint maakt dat een databasegarantie in plaats van een
+  /// application-level check: twee gelijktijdige requests die hetzelfde product
+  /// analyseren kunnen niet allebei een record wegschrijven. De verliezer vangt
+  /// de unique violation op en leest de winnaar terug.
+  @@unique([productId, inputHash, engineVersion])
+  @@index([productId, createdAt])
+  @@index([engineVersion])
+  @@index([needsHumanReview, createdAt])
+}
+
+/// Een enkele, expliciete bevinding. Dit is wat de UI onder "Waarom deze
+/// beoordeling?" toont. Elke bevinding heeft een reden en waar mogelijk een bron.
+model AnalysisFinding {
+  id         String @id @default(cuid())
+  analysisId String
+
+  findingType FindingType
+  status      HalalStatus
+  confidence  ConfidenceLevel
+
+  /// Wat er beoordeeld is, bv. "E471" of "varkensgelatine".
+  label  String
+  /// Waarom, in gewone taal. Wordt letterlijk aan de gebruiker getoond.
+  reason String @db.Text
+
+  ingredientId  String?
+  eNumberId     String?
+  certificateId String?
+  sourceId      String?
+
+  /// Volgorde waarin de bevindingen getoond worden.
+  position Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  analysis    ProductAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  ingredient  Ingredient?     @relation(fields: [ingredientId], references: [id], onDelete: SetNull)
+  eNumber     ENumber?        @relation(fields: [eNumberId], references: [id], onDelete: SetNull)
+  certificate Certificate?    @relation(fields: [certificateId], references: [id], onDelete: SetNull)
+  source      Source?         @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  @@index([analysisId, position])
+  @@index([findingType])
+}
+
+// ===========================================================================
+// CERTIFICATEN
+// ===========================================================================
+
+/// Een certificaat hangt aan een product of aan een merk. Precies een van beide
+/// moet gezet zijn; dat wordt afgedwongen met een CHECK-constraint in de
+/// migratie (Prisma kent geen declaratieve check constraints).
+model Certificate {
+  id String @id @default(cuid())
+
+  productId String?
+  brandId   String?
+
+  certificateNumber String
+
+  certificationBodyId String
+
+  issuedAt  DateTime?
+  expiresAt DateTime?
+
+  /// Opslagsleutel bij de storage provider, geen publieke URL.
+  documentKey       String?
+  documentMimeType  String?
+  documentSizeBytes Int?
+
+  /// Waar het certificaat over gaat, bv. "alle vleesproducten".
+  scope String?
+
+  /// Nieuwe uploads starten ALTIJD op PENDING. Zie docs/DECISION-TREE.md.
+  status CertificateStatus @default(PENDING)
+
+  uploadedByUserId String
+  verifiedByUserId String?
+  verifiedAt       DateTime?
+  rejectionReason  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product           Product?          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  brand             Brand?            @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  certificationBody CertificationBody @relation(fields: [certificationBodyId], references: [id], onDelete: Restrict)
+  uploadedBy        User              @relation("CertificateUploader", fields: [uploadedByUserId], references: [id], onDelete: Restrict)
+  verifiedBy        User?             @relation("CertificateVerifier", fields: [verifiedByUserId], references: [id], onDelete: SetNull)
+
+  findings AnalysisFinding[]
+  reports  Report[]
+
+  @@unique([certificationBodyId, certificateNumber])
+  @@index([productId, status])
+  @@index([brandId, status])
+  @@index([status, expiresAt])
+}
+
+// ===========================================================================
+// COMMUNITY
+// ===========================================================================
+
+model CommunityReview {
+  id        String @id @default(cuid())
+  productId String
+  userId    String
+
+  reviewType ReviewType @default(GENERAL)
+  content    String     @db.Text
+
+  evidenceUrl String?
+
+  /// Gecachte som van ReviewVote.vote. Wordt uitsluitend herberekend uit de
+  /// votes-tabel, nooit rechtstreeks door een client gezet.
+  score Int @default(0)
+
+  status ReviewStatus @default(VISIBLE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User         @relation("ReviewAuthor", fields: [userId], references: [id], onDelete: Cascade)
+  votes   ReviewVote[]
+  reports Report[]
+
+  @@index([productId, createdAt])
+  @@index([userId])
+  @@index([status])
+}
+
+/// Een stem per gebruiker per review. De unique constraint is de enige plek
+/// waar dat wordt afgedwongen; wijzigen van je stem is een update, geen insert.
+/// vote is beperkt tot +1 / -1 via een CHECK-constraint in de migratie.
+model ReviewVote {
+  id       String @id @default(cuid())
+  reviewId String
+  userId   String
+
+  vote Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  review CommunityReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
+  @@index([userId])
+}
+
+model Report {
+  id     String @id @default(cuid())
+  userId String
+
+  productId     String?
+  reviewId      String?
+  certificateId String?
+
+  type        ReportType
+  description String       @db.Text
+  status      ReportStatus @default(OPEN)
+
+  resolutionNote   String?
+  resolvedByUserId String?
+
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  user        User             @relation("ReportAuthor", fields: [userId], references: [id], onDelete: Cascade)
+  resolvedBy  User?            @relation("ReportResolver", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
+  product     Product?         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  review      CommunityReview? @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  certificate Certificate?     @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([productId])
+  @@index([userId])
+}
+
+// ===========================================================================
+// OCR
+// ===========================================================================
+
+/// Een OCR-poging op een foto van de ingredientenlijst. De geextraheerde
+/// ingredienten worden pas naar ProductIngredient geschreven nadat de gebruiker
+/// ze heeft nagekeken (status CONFIRMED).
+model OcrSubmission {
+  id     String  @id @default(cuid())
+  userId String?
+
+  barcode   String?
+  productId String?
+
+  /// Opslagsleutel bij de storage provider (UUID-filename, nooit de
+  /// originele bestandsnaam van de gebruiker).
+  imageKey       String
+  imageMimeType  String
+  imageSizeBytes Int
+
+  /// Welke vision provider gebruikt is, bv. "anthropic" of "openai".
+  provider String?
+
+  rawText              String?  @db.Text
+  extractedIngredients String[] @default([])
+  /// Door de gebruiker gecorrigeerde lijst.
+  confirmedIngredients String[] @default([])
+
+  status       OcrStatus @default(PENDING)
+  errorMessage String?
+
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+  confirmedAt DateTime?
+
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([userId])
+}
+
+// ===========================================================================
+// GEBRUIKERSACTIVITEIT & AUDIT
+// ===========================================================================
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId])
+}
+
+/// Scanhistoriek. userId mag null zijn zodat anonieme scans ook meetellen voor
+/// "barcode niet gevonden"-statistiek.
+model ScanEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  barcode   String
+  productId String?
+  found     Boolean
+  createdAt DateTime @default(now())
+
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([barcode])
+  @@index([userId, createdAt])
+}
+
+/// Audittrail voor moderatie- en adminacties. metadata is bewust Json: de vorm
+/// verschilt per event en er wordt niet relationeel op gequeried.
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  event       String
+  entityType  String
+  entityId    String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  actor User? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}

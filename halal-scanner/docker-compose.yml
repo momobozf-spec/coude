@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: halal-scanner-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: halal
+      POSTGRES_PASSWORD: halal
+      POSTGRES_DB: halal_scanner
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U halal -d halal_scanner"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Fase 1: gebruik alleen `docker compose up -d db`. De app-service verwijst
+  # naar een Dockerfile die in fase 8 wordt toegevoegd, samen met de Next.js
+  # applicatie zelf.
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: halal-scanner-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://halal:halal@db:5432/halal_scanner?schema=public
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NODE_ENV: production
+      # Secrets komen uit .env, niet uit dit bestand.
+      AI_PROVIDER: ${AI_PROVIDER:-none}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      AUTH_SECRET: ${AUTH_SECRET:-}
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-local}
+      LOCAL_STORAGE_DIR: /data/storage
+      MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB:-10}
+    ports:
+      - "3000:3000"
+    volumes:
+      # Uploads staan buiten de webroot en overleven een container-rebuild.
+      - storage-data:/data/storage
+
+volumes:
+  db-data:
+  storage-data:

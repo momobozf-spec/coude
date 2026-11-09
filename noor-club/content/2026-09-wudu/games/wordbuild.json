@@ -1,0 +1,65 @@
+{
+  "slug": "2026-09-wudu-wordbuild",
+  "engine": "WORDBUILD",
+  "ageBand": "7-9",
+  "xp": 25,
+  "order": 5,
+  "titles": {
+    "nl": "Bouw het woord",
+    "en": "Build the word",
+    "fr": "Construis le mot",
+    "de": "Baue das Wort"
+  },
+  "data": {
+    "words": [
+      {
+        "id": "w1",
+        "word": "وضوء",
+        "letters": ["ض", "و", "ن", "ء", "ص", "و", "ط"],
+        "meaning": {
+          "nl": "wudu, de wassing voor het gebed",
+          "en": "wudu, the washing before prayer",
+          "fr": "le wudu, les ablutions avant la prière",
+          "de": "Wudu, die Waschung vor dem Gebet"
+        },
+        "audioUrl": "/audio/2026-09-wudu/w1.mp3"
+      },
+      {
+        "id": "w2",
+        "word": "ماء",
+        "letters": ["ء", "ن", "م", "ه", "ا", "ل"],
+        "meaning": {
+          "nl": "water",
+          "en": "water",
+          "fr": "l’eau",
+          "de": "Wasser"
+        },
+        "audioUrl": "/audio/2026-09-wudu/w2.mp3"
+      },
+      {
+        "id": "w3",
+        "word": "وجه",
+        "letters": ["ه", "ح", "و", "د", "ج", "خ"],
+        "meaning": {
+          "nl": "gezicht",
+          "en": "face",
+          "fr": "le visage",
+          "de": "Gesicht"
+        },
+        "audioUrl": "/audio/2026-09-wudu/w3.mp3"
+      },
+      {
+        "id": "w4",
+        "word": "رأس",
+        "letters": ["س", "أ", "ش", "ر", "ز", "ص"],
+        "meaning": {
+          "nl": "hoofd",
+          "en": "head",
+          "fr": "la tête",
+          "de": "Kopf"
+        },
+        "audioUrl": "/audio/2026-09-wudu/w4.mp3"
+      }
+    ]
+  }
+}

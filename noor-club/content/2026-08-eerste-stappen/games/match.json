@@ -1,0 +1,61 @@
+{
+  "slug": "2026-08-eerste-stappen-match",
+  "engine": "MATCH",
+  "ageBand": "4-6",
+  "xp": 20,
+  "order": 1,
+  "titles": {
+    "nl": "Zoek het juiste paar",
+    "en": "Find the Matching Pair",
+    "fr": "Trouve la bonne paire",
+    "de": "Finde das passende Paar"
+  },
+  "data": {
+    "pairs": [
+      {
+        "id": "match-salaam",
+        "left": "السَّلَامُ عَلَيْكُمْ",
+        "right": {
+          "nl": "Vrede zij met jullie — zo groet je elkaar",
+          "en": "Peace be upon you — this is how we greet",
+          "fr": "Que la paix soit sur vous — voilà comment on se salue",
+          "de": "Friede sei mit euch — so grüßen wir einander"
+        },
+        "audioUrl": "/audio/2026-08-eerste-stappen/match-salaam.mp3"
+      },
+      {
+        "id": "match-wa-alaykum-salaam",
+        "left": "وَعَلَيْكُمُ السَّلَامُ",
+        "right": {
+          "nl": "En ook met jullie vrede — het antwoord op de groet",
+          "en": "And peace be upon you too — the reply to the greeting",
+          "fr": "Et que la paix soit sur vous aussi — la réponse à la salutation",
+          "de": "Und auch mit euch sei Friede — die Antwort auf den Gruß"
+        },
+        "audioUrl": "/audio/2026-08-eerste-stappen/match-wa-alaykum-salaam.mp3"
+      },
+      {
+        "id": "match-bismillah",
+        "left": "بِسْمِ اللَّهِ",
+        "right": {
+          "nl": "In de naam van Allah — zeg je als je begint",
+          "en": "In the name of Allah — you say it when you begin",
+          "fr": "Au nom d’Allah — on le dit quand on commence",
+          "de": "Im Namen Allahs — das sagst du, wenn du anfängst"
+        },
+        "audioUrl": "/audio/2026-08-eerste-stappen/match-bismillah.mp3"
+      },
+      {
+        "id": "match-alhamdulillah",
+        "left": "الْحَمْدُ لِلَّهِ",
+        "right": {
+          "nl": "Alle lof is voor Allah — zeg je als dank",
+          "en": "All praise is for Allah — you say it to give thanks",
+          "fr": "Toute louange est à Allah — on le dit pour remercier",
+          "de": "Alles Lob gebührt Allah — das sagst du zum Danken"
+        },
+        "audioUrl": "/audio/2026-08-eerste-stappen/match-alhamdulillah.mp3"
+      }
+    ]
+  }
+}

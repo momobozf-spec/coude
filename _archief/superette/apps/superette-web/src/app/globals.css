@@ -1,0 +1,226 @@
+@import 'tailwindcss';
+
+/*
+ * ── Superette designtokens ──────────────────────────────────────────────────
+ *
+ * Warm, lokaal, betrouwbaar. Een lichte "papier"-ondergrond met een warme
+ * baksteenrode merkkleur en een kruideniersgroen voor prijzen en de beste
+ * deal. Bewust ver van het donkere boetiekpalet van Jamal & Jamila.
+ *
+ * Contrast (WCAG 2.1 AA, gecontroleerd):
+ *   ink #1F1B17 op canvas #FBF7F0      ≈ 15,6 : 1
+ *   ink-muted #6B625A op canvas        ≈  5,3 : 1
+ *   brand #B8432F op wit               ≈  5,1 : 1   (tekst én knoppen met witte tekst)
+ *   accent #2F6B4F op wit              ≈  6,4 : 1
+ *   warning-ink #7A4F0B op warning-bg  ≈  7,0 : 1
+ *
+ * Geen component kent een kleurwaarde; alles loopt via deze namen. Het thema
+ * wisselen is één attribuut op <html> (`data-theme`), net als in de boetiek-app.
+ */
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --canvas: #fbf7f0;
+  --canvas-raised: #ffffff;
+  --canvas-sunken: #f3ede2;
+  --ink: #1f1b17;
+  --ink-muted: #6b625a;
+  --brand: #b8432f;
+  --brand-strong: #9a3524;
+  --brand-soft: #f8e4de;
+  --brand-ink: #ffffff;
+  --accent: #2f6b4f;
+  --accent-strong: #245640;
+  --accent-soft: #e3f0e8;
+  --accent-ink: #ffffff;
+  --hairline: #e6dccb;
+  --hairline-strong: #cdbfa8;
+  --danger: #b42318;
+  --danger-soft: #fde8e6;
+  --warning: #7a4f0b;
+  --warning-soft: #fdf1d6;
+  --info: #2b5c8a;
+  --info-soft: #e2edf7;
+  --focus: #1d4ed8;
+  --shadow: 0 1px 2px rgb(31 27 23 / 0.06), 0 8px 24px -12px rgb(31 27 23 / 0.18);
+
+  /* Categorisch grafiekpalet, vaste volgorde per keten. Gevalideerd (licht). */
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
+  --chart-5: #e87ba4;
+  --chart-6: #4a3aa7;
+  --chart-7: #e34948;
+  --chart-other: #8a8178;
+  /* Tekst op de ketenkleur (badge-initialen), ≥ 4,5:1 in beide thema's:
+     wit alleen op het paars (8,6:1 / 5,3:1); zwart op de rest (4,7:1 – 7,9:1).
+     Berekend per kleur; wit op het blauw haalt 4,4:1 en valt dus af. */
+  --chart-1-ink: #000000;
+  --chart-2-ink: #000000;
+  --chart-3-ink: #000000;
+  --chart-4-ink: #000000;
+  --chart-5-ink: #000000;
+  --chart-6-ink: #ffffff;
+  --chart-7-ink: #000000;
+  --chart-other-ink: #000000;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --canvas: #17140f;
+    --canvas-raised: #221d17;
+    --canvas-sunken: #100e0a;
+    --ink: #f4ede2;
+    --ink-muted: #b4a898;
+    --brand: #e8846f;
+    --brand-strong: #f2a391;
+    --brand-soft: #3a211b;
+    --brand-ink: #1a0f0b;
+    --accent: #7fc9a3;
+    --accent-strong: #9ad8b8;
+    --accent-soft: #1d3328;
+    --accent-ink: #0d1f16;
+    --hairline: #3a3127;
+    --hairline-strong: #55483a;
+    --danger: #f08d84;
+    --danger-soft: #3c1d1a;
+    --warning: #f2c66d;
+    --warning-soft: #3b2d10;
+    --info: #8fbbe8;
+    --info-soft: #182a3c;
+    --focus: #93c5fd;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+
+    /* Eigen stappen voor donker, gevalideerd tegen de donkere ondergrond. */
+    --chart-1: #2a78d6;
+    --chart-2: #e0602c;
+    --chart-3: #1baf7a;
+    --chart-4: #bf8200;
+    --chart-5: #d8609a;
+    --chart-6: #6a5bc8;
+    --chart-7: #e34948;
+    --chart-other: #8a8178;
+  }
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --canvas: #17140f;
+  --canvas-raised: #221d17;
+  --canvas-sunken: #100e0a;
+  --ink: #f4ede2;
+  --ink-muted: #b4a898;
+  --brand: #e8846f;
+  --brand-strong: #f2a391;
+  --brand-soft: #3a211b;
+  --brand-ink: #1a0f0b;
+  --accent: #7fc9a3;
+  --accent-strong: #9ad8b8;
+  --accent-soft: #1d3328;
+  --accent-ink: #0d1f16;
+  --hairline: #3a3127;
+  --hairline-strong: #55483a;
+  --danger: #f08d84;
+  --danger-soft: #3c1d1a;
+  --warning: #f2c66d;
+  --warning-soft: #3b2d10;
+  --info: #8fbbe8;
+  --info-soft: #182a3c;
+  --focus: #93c5fd;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --chart-1: #2a78d6;
+  --chart-2: #e0602c;
+  --chart-3: #1baf7a;
+  --chart-4: #bf8200;
+  --chart-5: #d8609a;
+  --chart-6: #6a5bc8;
+  --chart-7: #e34948;
+  --chart-other: #8a8178;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-canvas-raised: var(--canvas-raised);
+  --color-canvas-sunken: var(--canvas-sunken);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-ink: var(--brand-ink);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-focus: var(--focus);
+
+  --font-sans: 'Nunito', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Nunito', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --shadow-card: var(--shadow);
+}
+
+html,
+body {
+  background-color: var(--canvas);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-sans);
+  min-height: 100dvh;
+}
+
+/* Zichtbare focus voor iedereen die met toetsenbord of schermlezer werkt. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Skeletons: een rustige puls, uit bij verminderde beweging. */
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.skeleton {
+  background-color: var(--canvas-sunken);
+  border-radius: 8px;
+  animation: pulse-soft 1.6s ease-in-out infinite;
+}
+
+/* Subtiele "geruit tafelkleed"-textuur voor de landingspagina. */
+.gingham {
+  background-image:
+    linear-gradient(0deg, color-mix(in srgb, var(--brand) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--brand) 5%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

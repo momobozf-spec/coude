@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+{% if order.payment_mode == 'demo' %}<div class="banner">DEMO-BESTELLING: er is niets betaald.</div>{% endif %}
+{% if not paid %}
+<h1>Je betaling wordt bevestigd…</h1>
+<p>Dat duurt meestal enkele seconden. <a href="">Ververs deze pagina</a>.</p>
+{% else %}
+<h1>Bedankt, {{ order.buyer_name }}.</h1>
+<p class="lead">Het cadeau voor {{ order.storyteller_name }} staat klaar.</p>
+<div class="card">
+  <h3>1. De cadeaubon</h3>
+  <p><a class="btn" href="/bedankt/cadeaubon.pdf?k={{ k }}&v={{ v }}">Download de cadeaubon (PDF)</a></p>
+  <p class="small">Op de bon staat de persoonlijke link voor {{ order.storyteller_name }}.</p>
+</div>
+<div class="card">
+  <h3>2. De link voor {{ order.storyteller_name }}</h3>
+  <p class="small">Stuur hem door via WhatsApp of sms op het moment dat je het cadeau geeft.</p>
+  <input type="text" readonly value="{{ storyteller_link }}" onclick="this.select()">
+</div>
+<div class="card">
+  <h3>3. Jouw beheerpagina</h3>
+  <p class="small">Bewaar deze link: hier kies je vragen, nodig je familie uit en volg je het verloop.</p>
+  <input type="text" readonly value="{{ buyer_link }}" onclick="this.select()">
+  <p><a class="btn secondary" href="/k/{{ k }}">Naar mijn beheerpagina</a></p>
+</div>
+<p class="small">We sturen deze links ook per e-mail zodra de mailkoppeling actief is. (Nog niet actief in deze versie.)</p>
+{% endif %}
+{% endblock %}

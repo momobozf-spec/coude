@@ -1,0 +1,341 @@
+# CI-poorten voor Superette (monorepo in ./superette).
+#
+# Elke job is een poort: typecheck, unit- en integratietests, API-rooktests,
+# webbuild + bundelcontrole, PWA-regressie, migratievalidatie, geheimenscan,
+# dependency-audit, containerbuilds en de toegankelijkheidsdoorloop. Geen
+# enkele job deployt iets; dat blijft een bewuste, handmatige stap
+# (zie superette/docs/DEPLOYMENT.md).
+name: superette-ci
+
+on:
+  push:
+    paths: ['superette/**', '.github/workflows/superette-ci.yml']
+  pull_request:
+    paths: ['superette/**', '.github/workflows/superette-ci.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: superette-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24'
+  # Alleen publieke, niet-geheime testwaarden. Echte geheimen komen uit de
+  # omgevingsconfiguratie van staging/productie, nooit uit dit bestand.
+  CI_DATABASE_URL: postgresql://superette:superette@127.0.0.1:5432/superette?schema=public
+  CI_ADMIN_URL: postgresql://superette:superette@127.0.0.1:5432/postgres
+  CI_JOB_KEY: ci-job-key-not-a-secret-0123456789
+  CI_JOB_KEY_PREVIOUS: ci-job-key-previous-0123456789
+
+defaults:
+  run:
+    working-directory: superette
+
+jobs:
+  # ── 1. Statische controles en unit-tests ────────────────────────────────────
+  check:
+    name: typecheck · unit · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: superette/package-lock.json
+      - name: Installeren vanaf de lockfile
+        run: npm ci
+      - name: Prisma-client genereren
+        run: npm run db:generate
+      - name: Gedeelde packages bouwen
+        run: npm run build -w @superette/vat && npm run build -w @superette/pricing && npm run build -w @superette/contracts
+      - name: Typecheck (strikt; geen ESLint in de repo, zie docs/PRODUCTION-READINESS.md)
+        run: npm run typecheck
+      - name: Unit-tests
+        run: npm test
+      - name: API bouwen
+        run: npm run build -w @superette/api
+      - name: Superette-app bouwen (productie, standalone)
+        run: npm run build -w @superette/web
+        env:
+          NEXT_PUBLIC_API_URL: https://api.staging.superette.invalid/api/v1
+          NEXT_TELEMETRY_DISABLED: '1'
+      - name: Bundelcontrole op geheimen en tokens
+        run: node scripts/check-bundle-secrets.mjs
+      - name: Boetiek-PWA bouwen (regressie, ongewijzigde app)
+        run: npm run build -w @superette/pwa
+        env:
+          NEXT_PUBLIC_API_URL: https://api.staging.superette.invalid/api/v1
+          NEXT_PUBLIC_ENABLE_DEV_SCANNER: 'false'
+          NEXT_TELEMETRY_DISABLED: '1'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: builds
+          retention-days: 3
+          path: |
+            superette/apps/api/dist
+            superette/packages/*/dist
+            superette/apps/superette-web/.next
+            !superette/apps/superette-web/.next/cache
+
+  # ── 2. Migraties: lege database, drift, bestaande boetiekdata, rollback ────
+  migrations:
+    name: migraties
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: superette
+          POSTGRES_PASSWORD: superette
+          POSTGRES_DB: superette
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U superette" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: superette/package-lock.json
+      - run: npm ci
+      - run: npm run db:generate
+      - name: Packages en API bouwen (voor de seed-CLI)
+        run: npm run build -w @superette/vat && npm run build -w @superette/pricing && npm run build -w @superette/contracts && npm run build -w @superette/api
+      - name: Wegwerpsleutels voor deze run (de seed-CLI valideert de omgeving)
+        run: node scripts/gen-keys.mjs | grep -E '^(JWT_SECRET|GATE_SIGNING_(PRIVATE|PUBLIC)_JWK)=' | sed "s/'//g" >> "$GITHUB_ENV"
+      - name: Migratietest (leeg, drift, boetiekdata, rollback)
+        run: bash apps/api/scripts/migration-test.sh
+        env:
+          DATABASE_ADMIN_URL: postgresql://superette:superette@127.0.0.1:5432/postgres
+          MQTT_ENABLED: 'false'
+
+  # ── 3. API-rooktests: vergelijker + hardening ──────────────────────────────
+  smoke:
+    name: API-rooktests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: check
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: superette
+          POSTGRES_PASSWORD: superette
+          POSTGRES_DB: superette
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U superette" --health-interval 5s --health-timeout 5s --health-retries 10
+    # Let op: de `env`-context is op jobniveau niet beschikbaar in GitHub Actions;
+    # daarom staan de testwaarden hier letterlijk (zelfde als de workflow-env).
+    env:
+      DATABASE_URL: postgresql://superette:superette@127.0.0.1:5432/superette?schema=public
+      NODE_ENV: test
+      MQTT_ENABLED: 'false'
+      APP_URL: http://localhost:3000
+      SUPERETTE_WEB_URL: http://localhost:3001
+      COMPARE_ALLOW_DEMO: 'true'
+      COMPARE_JOB_KEY: ci-job-key-not-a-secret-0123456789
+      COMPARE_JOB_KEY_PREVIOUS: ci-job-key-previous-0123456789
+      EMAIL_PROVIDER: file
+      EMAIL_FROM: Superette CI <ci@superette.invalid>
+      EMAIL_OUTBOX_DIR: /tmp/outbox
+      NOTIFY_EMAIL_ENABLED: 'true'
+      LOG_FORMAT: json
+      APP_VERSION: ci-${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: superette/package-lock.json
+      - run: npm ci
+      - run: npm run db:generate
+      - uses: actions/download-artifact@v4
+        with:
+          name: builds
+          path: superette
+      - name: Wegwerpsleutels voor deze run (geen geheimen)
+        run: node scripts/gen-keys.mjs | grep -E '^(JWT_SECRET|GATE_SIGNING_(PRIVATE|PUBLIC)_JWK)=' | sed "s/'//g" >> "$GITHUB_ENV"
+      - name: Migreren en vullen (demogegevens)
+        run: npm run db:migrate:deploy && npx --workspace @superette/api tsx prisma/seed.ts && node apps/api/dist/compare/cli/sync.cli.js
+      - name: API starten
+        run: |
+          mkdir -p /tmp/outbox
+          (cd apps/api && node dist/main.js > /tmp/api.log 2>&1 &)
+          for i in $(seq 1 30); do curl -fsS http://localhost:4000/api/v1/health/ready && break; sleep 2; done
+      - name: Rooktest vergelijker
+        run: npm run smoke:compare
+      - name: Rooktest hardening (cookies, CSRF, CORS, privacy, jobs)
+        # De limieten per IP per minuut (sync 5, login 5) worden door de vorige
+        # rooktest deels verbruikt; één minuut wachten houdt deze test deterministisch.
+        run: sleep 61 && npm run smoke:auth
+      - name: Databaselease (verlopen lease, heartbeat, gelijktijdigheid)
+        run: npm run smoke:lease
+      - name: "Werker: start, synchroniseert, sluit netjes af op SIGTERM"
+        if: runner.os == 'Linux'
+        run: |
+          (cd apps/api && COMPARE_SYNC_INTERVAL_MINUTES=1 node dist/compare/cli/worker.cli.js > /tmp/worker.log 2>&1 & echo $! > /tmp/worker.pid)
+          for i in $(seq 1 60); do grep -q "synchronisatie klaar" /tmp/worker.log && break; sleep 1; done
+          grep -q "synchronisatie klaar" /tmp/worker.log
+          kill -TERM "$(cat /tmp/worker.pid)"
+          for i in $(seq 1 30); do kill -0 "$(cat /tmp/worker.pid)" 2>/dev/null || break; sleep 1; done
+          ! kill -0 "$(cat /tmp/worker.pid)" 2>/dev/null
+          grep -q "SIGTERM ontvangen" /tmp/worker.log
+          tail -5 /tmp/worker.log
+      - name: Logs bevatten geen sleutels of wachtwoorden
+        run: |
+          ! grep -q "$COMPARE_JOB_KEY" /tmp/api.log
+          ! grep -q "een-lang-genoeg-wachtwoord" /tmp/api.log
+          ! grep -q '"password":"' /tmp/api.log
+      - name: Belastingstest (kort, als signaal)
+        run: node scripts/loadtest.mjs
+        env:
+          CONCURRENCY: '10'
+          DURATION_SECONDS: '15'
+          SPOOF_IPS: 'false'
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-log
+          path: /tmp/api.log
+          retention-days: 3
+
+  # ── 4. Toegankelijkheid en browserdoorloop (axe op elke route) ─────────────
+  accessibility:
+    name: doorloop + axe
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: check
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: superette
+          POSTGRES_PASSWORD: superette
+          POSTGRES_DB: superette
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U superette" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://superette:superette@127.0.0.1:5432/superette?schema=public
+      NODE_ENV: test
+      MQTT_ENABLED: 'false'
+      APP_URL: http://localhost:3000
+      SUPERETTE_WEB_URL: http://localhost:3001
+      COMPARE_ALLOW_DEMO: 'true'
+      COMPARE_JOB_KEY: ci-job-key-not-a-secret-0123456789
+      NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: superette/package-lock.json
+      - run: npm ci
+      - run: npm run db:generate
+      - run: npx playwright install --with-deps chromium
+      - name: Bouwen (packages, API, app met lokale API-URL)
+        run: |
+          npm run build -w @superette/vat && npm run build -w @superette/pricing && npm run build -w @superette/contracts
+          npm run build -w @superette/api
+          npm run build -w @superette/web
+      - name: Wegwerpsleutels voor deze run (geen geheimen)
+        run: node scripts/gen-keys.mjs | grep -E '^(JWT_SECRET|GATE_SIGNING_(PRIVATE|PUBLIC)_JWK)=' | sed "s/'//g" >> "$GITHUB_ENV"
+      - name: Migreren, vullen, API en app starten
+        run: |
+          npm run db:migrate:deploy && npx --workspace @superette/api tsx prisma/seed.ts && node apps/api/dist/compare/cli/sync.cli.js
+          (cd apps/api && node dist/main.js > /tmp/api.log 2>&1 &)
+          (cd apps/superette-web && npx next start -p 3001 > /tmp/web.log 2>&1 &)
+          for i in $(seq 1 30); do curl -fsS http://localhost:4000/api/v1/health/ready && curl -fsS -o /dev/null http://localhost:3001/ && break; sleep 2; done
+      - name: Doorloop met axe-core, headers, sessieverloop en accountverwijdering
+        run: npm run walkthrough:superette
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: superette/docs/screenshots-superette
+          retention-days: 7
+
+  # ── 5. Geheimen en afhankelijkheden ────────────────────────────────────────
+  security:
+    name: geheimenscan · audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Geheimenscan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: superette/package-lock.json
+      - run: npm ci --ignore-scripts
+      - name: Audit productie-afhankelijkheden (poort op critical)
+        run: npm audit --omit=dev --audit-level=critical
+      - name: Audit high (rapport; bekende uitzondering deepmerge-ts via prisma, zie docs/SECURITY.md)
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true
+
+  # ── 6. Containerbuilds (geen push) ─────────────────────────────────────────
+  containers:
+    name: containers
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: API-image
+        uses: docker/build-push-action@v6
+        with:
+          context: superette
+          file: superette/apps/api/Dockerfile
+          push: false
+          load: true
+          tags: superette-api:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Migratie-image
+        uses: docker/build-push-action@v6
+        with:
+          context: superette
+          file: superette/apps/api/Dockerfile
+          target: migrate
+          push: false
+          tags: superette-migrate:ci
+          cache-from: type=gha
+      - name: Web-image
+        uses: docker/build-push-action@v6
+        with:
+          context: superette
+          file: superette/apps/superette-web/Dockerfile
+          push: false
+          load: true
+          tags: superette-web:ci
+          build-args: |
+            NEXT_PUBLIC_API_URL=https://api.staging.superette.invalid/api/v1
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Images draaien als non-root en starten
+        run: |
+          test "$(docker run --rm superette-api:ci whoami)" = "node"
+          test "$(docker run --rm superette-web:ci whoami)" = "node"
+          docker run -d --name web -p 3001:3001 superette-web:ci
+          for i in $(seq 1 15); do curl -fsS -o /dev/null http://localhost:3001/ && break; sleep 2; done
+          curl -fsSI http://localhost:3001/ | grep -i "content-security-policy"
+          docker rm -f web

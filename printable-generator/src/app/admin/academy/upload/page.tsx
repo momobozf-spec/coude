@@ -5,8 +5,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 interface Course { id: string; title: string; slug: string; totalLessons: number; }
 
 export default function AdminUploadPage() {
-  const [password, setPassword] = useState("");
-  const [authenticated, setAuthenticated] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [title, setTitle] = useState("");
@@ -20,11 +18,6 @@ export default function AdminUploadPage() {
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const saved = sessionStorage.getItem("admin_pwd");
-    if (saved) { setPassword(saved); setAuthenticated(true); }
-  }, []);
-
   const fetchCourses = useCallback(async () => {
     const res = await fetch("/api/academy/courses");
     const data = await res.json();
@@ -33,13 +26,8 @@ export default function AdminUploadPage() {
     })));
   }, []);
 
-  useEffect(() => { if (authenticated) fetchCourses(); }, [authenticated, fetchCourses]);
-
-  function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    sessionStorage.setItem("admin_pwd", password);
-    setAuthenticated(true);
-  }
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch data on mount / when the session becomes available
+  useEffect(() => { fetchCourses(); }, [fetchCourses]);
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
@@ -82,7 +70,6 @@ export default function AdminUploadPage() {
     try {
       const res = await fetch("/api/admin/academy/upload", {
         method: "POST",
-        headers: { "x-admin-password": password },
         body: formData,
       });
 
@@ -107,21 +94,6 @@ export default function AdminUploadPage() {
     } finally {
       setUploading(false);
     }
-  }
-
-  if (!authenticated) {
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#fdf8f0", fontFamily: "Inter, sans-serif" }}>
-        <form onSubmit={handleLogin} style={{ background: "#fff", padding: 32, borderRadius: 12, boxShadow: "0 2px 12px rgba(0,0,0,.08)", width: 360 }}>
-          <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16, color: "#1a6b4a" }}>&#127909; Academy Video Upload</h1>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Admin password"
-            style={{ width: "100%", padding: "10px 14px", border: "1px solid #ddd", borderRadius: 8, fontSize: 14, marginBottom: 12, boxSizing: "border-box" }} />
-          <button type="submit" style={{ width: "100%", padding: 12, background: "#1a6b4a", color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer" }}>
-            Access Upload
-          </button>
-        </form>
-      </div>
-    );
   }
 
   const Card: React.CSSProperties = { background: "#fff", borderRadius: 12, padding: 24, border: "1px solid #e8e4dc" };

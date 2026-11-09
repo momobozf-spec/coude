@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "@/components/ui/Toaster";
+import CookieConsent from "@/components/CookieConsent";
+import { PRICES, PRICE_CURRENCY } from "@/lib/pricing";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -40,8 +41,6 @@ export const metadata: Metadata = {
   icons: { icon: "/favicon.ico" },
 };
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
-
 export default function RootLayout({
   children,
 }: {
@@ -50,7 +49,6 @@ export default function RootLayout({
   return (
     <html lang="nl" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -62,9 +60,9 @@ export default function RootLayout({
               operatingSystem: "Web",
               description: "Islamic educational activities for children aged 4-8",
               offers: [
-                { "@type": "Offer", price: "0", priceCurrency: "USD", name: "Free" },
-                { "@type": "Offer", price: "12", priceCurrency: "USD", name: "Pro" },
-                { "@type": "Offer", price: "49", priceCurrency: "USD", name: "School" },
+                { "@type": "Offer", price: "0", priceCurrency: PRICE_CURRENCY, name: "Free" },
+                { "@type": "Offer", price: String(PRICES.pro.monthly), priceCurrency: PRICE_CURRENCY, name: "Pro" },
+                { "@type": "Offer", price: String(PRICES.school.monthly), priceCurrency: PRICE_CURRENCY, name: "School" },
               ],
             }),
           }}
@@ -78,15 +76,8 @@ export default function RootLayout({
             <Footer />
           </div>
           <Toaster />
+          <CookieConsent />
         </Providers>
-        {GA_ID && GA_ID !== "G-XXXXXXXXXX" && (
-          <>
-            <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
-            <Script id="ga" strategy="afterInteractive">
-              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}
-            </Script>
-          </>
-        )}
       </body>
     </html>
   );

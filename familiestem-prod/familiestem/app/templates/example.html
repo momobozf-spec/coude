@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="banner">VOORBEELD · Deze verteller en verhalen zijn verzonnen. Het geluid is een testtoon, geen echte stem.</div>
+{% if not order %}<p>Er is nog geen voorbeeld geladen.</p>{% else %}
+<h1>Zo ziet het eruit: de verhalen van {{ order.storyteller_name }}</h1>
+<p><a class="btn secondary" href="/voorbeeld/boek.pdf">Voorbeeldboek (PDF)</a></p>
+{% for s in stories %}
+<div class="card"><h3>{{ s.question }}</h3>
+<audio controls src="/voorbeeld/audio/{{ s.id }}" style="width:100%"></audio>
+{% for p in s.final_text.split('\n\n') %}<p>{{ p }}</p>{% endfor %}
+</div>{% endfor %}
+{% endif %}
+<p><a class="btn" href="/#bestellen">Geef het cadeau · €49</a></p>
+{% endblock %}

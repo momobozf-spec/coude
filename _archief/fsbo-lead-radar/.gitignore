@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next
+.next/
+out/
+build/
+next-env.d.ts
+
+# production
+dist/
+
+# env — nooit committen, .env.example is de gedeelde versie
+.env
+.env.local
+.env.*.local
+
+# lokale ontwikkeldatabase (scripts/dev-db.ts)
+.devdb/
+
+# tests / tooling
+coverage/
+*.tsbuildinfo
+
+# logs
+*.log
+npm-debug.log*
+
+# os
+.DS_Store
+Thumbs.db

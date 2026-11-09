@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { PUBLIC_PRODUCT_SELECT, toPublicProduct } from "@/lib/marketplace-public";
 
 export async function GET(req: NextRequest) {
   try {
@@ -11,7 +12,7 @@ export async function GET(req: NextRequest) {
     const maxPrice = url.searchParams.get("maxPrice");
     const sort = url.searchParams.get("sort") || "newest";
     const search = url.searchParams.get("q");
-    const page = parseInt(url.searchParams.get("page") || "1");
+    const page = Math.max(1, Math.min(500, parseInt(url.searchParams.get("page") || "1") || 1));
     const perPage = 20;
 
     const where: Record<string, unknown> = {
@@ -37,7 +38,8 @@ export async function GET(req: NextRequest) {
         orderBy: orderBy as never,
         skip: (page - 1) * perPage,
         take: perPage,
-        include: {
+        select: {
+          ...PUBLIC_PRODUCT_SELECT,
           seller: { select: { name: true, image: true } },
         },
       }),
@@ -45,12 +47,10 @@ export async function GET(req: NextRequest) {
     ]);
 
     return NextResponse.json({
-      products: products.map(p => ({
-        ...p,
-        languages: p.languages.split(","),
-        tags: p.tags ? p.tags.split(",") : [],
-        sellerName: p.seller.name,
-        sellerAvatar: p.seller.image,
+      products: products.map(({ seller, ...p }) => ({
+        ...toPublicProduct(p),
+        sellerName: seller.name,
+        sellerAvatar: seller.image,
       })),
       total,
       pages: Math.ceil(total / perPage),

@@ -1,0 +1,8 @@
+node_modules
+.next
+.env
+.env.local
+storage
+.test-storage
+demo-output
+tests

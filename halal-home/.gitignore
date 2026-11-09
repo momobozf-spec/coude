@@ -1,0 +1,24 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Documentopslag voor development. Hier staan geüploade identiteitsdocumenten
+# en loonfiches — die horen nooit in git.
+.storage/
+
+.env
+.env.*
+!.env.example
+
+*.log
+.DS_Store
+Thumbs.db
+
+/coverage
+next-env.d.ts
+*.tsbuildinfo
+
+# Lokale ontwikkeldatabase (scripts/dev-db.ts)
+.devdb/

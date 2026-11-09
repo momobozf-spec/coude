@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parking Brussel Helper</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Parking Brussel Helper</p>
+      <h1>Boetes betwisten en bewonerskaartwijzigingen voorbereiden.</h1>
+    </div>
+    <nav class="quick-actions" aria-label="Snelle acties">
+      <a href="https://parking.brussels/nl/retributies-bezwaarschriften-en-betwistingen" target="_blank" rel="noreferrer">Bezwaarinfo</a>
+      <a href="https://parking.brussels/nl/e-loket" target="_blank" rel="noreferrer">E-loket</a>
+    </nav>
+  </header>
+
+  <main class="app-shell">
+    <section class="workspace">
+      <aside class="sidebar" aria-label="Dossierbeheer">
+        <div class="sidebar-header">
+          <h2>Dossiers</h2>
+          <button class="icon-button" id="new-case-button" type="button" title="Nieuw dossier" aria-label="Nieuw dossier">+</button>
+        </div>
+        <div class="stats">
+          <span><strong id="open-count">0</strong> open</span>
+          <span><strong id="draft-count">0</strong> klaar</span>
+        </div>
+        <ul class="case-list" id="case-list"></ul>
+        <p class="empty-list" id="empty-list">Nog geen dossiers. Maak er eentje aan en bouw je bezwaar stap voor stap op.</p>
+      </aside>
+
+      <section class="editor" aria-label="Dossier editor">
+        <div class="tabs" role="tablist" aria-label="Type dossier">
+          <button class="tab is-active" type="button" data-type="fine">Boete betwisten</button>
+          <button class="tab" type="button" data-type="plate">Nummerplaat wijzigen</button>
+        </div>
+
+        <form class="case-form" id="case-form">
+          <div class="form-grid">
+            <label>
+              Naam
+              <input id="name" name="name" autocomplete="name" placeholder="Voornaam Naam">
+            </label>
+            <label>
+              E-mail
+              <input id="email" name="email" type="email" autocomplete="email" placeholder="naam@email.be">
+            </label>
+            <label>
+              Gemeente
+              <select id="municipality" name="municipality">
+                <option value="">Kies gemeente</option>
+                <option>Anderlecht</option>
+                <option>Berchem-Sainte-Agathe</option>
+                <option>Brussel-Stad</option>
+                <option>Evere</option>
+                <option>Forest</option>
+                <option>Ganshoren</option>
+                <option>Ixelles</option>
+                <option>Jette</option>
+                <option>Koekelberg</option>
+                <option>Molenbeek-Saint-Jean</option>
+                <option>Saint-Gilles</option>
+                <option>Schaerbeek</option>
+                <option>Watermael-Boitsfort</option>
+                <option>Woluwe-Saint-Pierre</option>
+              </select>
+            </label>
+            <label>
+              Dossierstatus
+              <select id="status" name="status">
+                <option value="open">Open</option>
+                <option value="ready">Klaar om in te dienen</option>
+                <option value="sent">Ingediend</option>
+                <option value="closed">Afgesloten</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="dynamic-fields" id="fine-fields">
+            <div class="form-grid">
+              <label>
+                Referentie retributie
+                <input id="fine-reference" name="fineReference" placeholder="Bijv. 2026/000000">
+              </label>
+              <label>
+                Datum retributie
+                <input id="fine-date" name="fineDate" type="date">
+              </label>
+              <label>
+                Nummerplaat
+                <input id="plate" name="plate" placeholder="1ABC123">
+              </label>
+              <label>
+                Straat / locatie
+                <input id="street" name="street" placeholder="Bijv. Gasthuisstraat 31">
+              </label>
+              <label>
+                Vaststelling rond
+                <input id="fine-time" name="fineTime" type="time">
+              </label>
+              <label>
+                Parkeerzone
+                <select id="zone" name="zone">
+                  <option value="">Onbekend</option>
+                  <option value="blue">Blauwe zone</option>
+                  <option value="green">Groene zone</option>
+                  <option value="grey">Grijze zone</option>
+                  <option value="red">Rode zone</option>
+                  <option value="orange">Oranje zone</option>
+                  <option value="event">Evenementenzone</option>
+                  <option value="delivery">Leveringszone</option>
+                  <option value="kiss">Kiss & Ride</option>
+                  <option value="reserved">Voorbehouden plaatsen</option>
+                </select>
+              </label>
+              <label>
+                Reden bezwaar
+                <select id="reason" name="reason">
+                  <option value="resident-card">Geldige bewonerskaart</option>
+                  <option value="paid-ticket">Parkeerticket betaald</option>
+                  <option value="blue-disc">Correct gebruik blauwe schijf</option>
+                  <option value="wrong-plate">Foutieve nummerplaat</option>
+                  <option value="signage">Onduidelijke signalisatie</option>
+                  <option value="other">Andere reden</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              Feiten en uitleg
+              <textarea id="facts" name="facts" rows="5" placeholder="Leg kort uit wat er gebeurde, met datums, straat, bewijs en waarom de retributie volgens jou niet klopt."></textarea>
+            </label>
+          </div>
+
+          <div class="dynamic-fields is-hidden" id="plate-fields">
+            <div class="form-grid">
+              <label>
+                Oude nummerplaat
+                <input id="old-plate" name="oldPlate" placeholder="1ABC123">
+              </label>
+              <label>
+                Nieuwe nummerplaat
+                <input id="new-plate" name="newPlate" placeholder="2XYZ987">
+              </label>
+              <label>
+                Type wijziging
+                <select id="change-type" name="changeType">
+                  <option>Definitieve plaatwijziging</option>
+                  <option>Tijdelijk vervangvoertuig</option>
+                  <option>Voertuigwijziging zonder plaatwijziging</option>
+                  <option>Adreswijziging</option>
+                </select>
+              </label>
+              <label>
+                Tot datum, indien tijdelijk
+                <input id="replacement-until" name="replacementUntil" type="date">
+              </label>
+            </div>
+            <label>
+              Extra toelichting
+              <textarea id="plate-note" name="plateNote" rows="5" placeholder="Bijv. nieuw voertuig, leasing, garageattest of vanaf welke datum de wijziging moet ingaan."></textarea>
+            </label>
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <section class="action-center" aria-label="Parking.brussels functionaliteiten">
+      <article class="panel">
+        <div class="panel-header">
+          <h2>Scenario's</h2>
+          <span class="mini-label">1 klik voorbereiding</span>
+        </div>
+        <div class="scenario-grid">
+          <button class="scenario-card" type="button" data-scenario="resident-card">
+            <strong>Bewonerskaart geldig</strong>
+            <span>Maak bezwaar met focus op kaart, zone en nummerplaat.</span>
+          </button>
+          <button class="scenario-card" type="button" data-scenario="paid-ticket">
+            <strong>Betaald via app/sms</strong>
+            <span>Vraag betalingsbewijs, sessie-id en zonecode op.</span>
+          </button>
+          <button class="scenario-card" type="button" data-scenario="blue-disc">
+            <strong>Blauwe schijf</strong>
+            <span>Controleer schijf, tijdslimiet en bijkomend bord.</span>
+          </button>
+          <button class="scenario-card" type="button" data-scenario="plate-change">
+            <strong>Plaat wijzigen</strong>
+            <span>Schakel naar bewonerskaartwijziging met juiste documenten.</span>
+          </button>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <h2>Zone-check</h2>
+          <span class="mini-label" id="zone-summary">Kies een zone</span>
+        </div>
+        <div class="zone-box" id="zone-box">
+          Kies in je dossier een parkeerzone om de normale regels en mogelijke retributie te zien.
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <h2>Officiële routes</h2>
+          <span class="mini-label">NL site</span>
+        </div>
+        <div class="route-list">
+          <a href="https://parking.brussels/nl/e-loket" target="_blank" rel="noreferrer">E-loket</a>
+          <a href="https://parking.brussels/nl/retributies-bezwaarschriften-en-betwistingen" target="_blank" rel="noreferrer">Retributies en bezwaar</a>
+          <a href="https://parking.brussels/nl/e-loket" target="_blank" rel="noreferrer">Parkeerkaart wijzigen</a>
+          <a href="https://parking.brussels/nl/contact-en-support" target="_blank" rel="noreferrer">Contact en support</a>
+          <a href="https://parking.brussels/nl/je-fiets-parkeren/parkeerzones" target="_blank" rel="noreferrer">Parkeerzones</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="bottom-grid">
+      <article class="panel">
+        <div class="panel-header">
+          <h2>Bewijschecklist</h2>
+          <button id="reset-checklist" type="button">Reset</button>
+        </div>
+        <div class="checklist" id="checklist"></div>
+      </article>
+
+      <article class="panel output-panel">
+        <div class="panel-header">
+          <h2>Brieftekst</h2>
+          <button id="copy-letter" type="button">Kopieer</button>
+        </div>
+        <textarea id="letter-output" rows="14" readonly></textarea>
+        <p class="helper-text">Gebruik dit als voorbereiding. Dien je klacht of wijziging altijd in via het officiële Parking.brussels formulier.</p>
+      </article>
+    </section>
+
+    <section class="source-strip" aria-label="Officiële bronnen">
+      <p><strong>Bronbasis:</strong> gebaseerd op de Nederlandstalige Parking.brussels site: online procedures via het e-loket, bezwaar/betwisting voor retributies, parkeerkaart wijzigen, parkeerzones en contact/support.</p>
+      <a href="https://parking.brussels/nl" target="_blank" rel="noreferrer">Parking.brussels NL</a>
+      <a href="https://parking.brussels/nl/e-loket" target="_blank" rel="noreferrer">E-loket</a>
+      <a href="https://parking.brussels/nl/retributies-bezwaarschriften-en-betwistingen" target="_blank" rel="noreferrer">Retributies</a>
+      <a href="https://parking.brussels/nl/e-loket" target="_blank" rel="noreferrer">Kaartwijziging</a>
+    </section>
+  </main>
+
+  <template id="case-template">
+    <li>
+      <button class="case-card" type="button">
+        <span class="case-title"></span>
+        <span class="case-meta"></span>
+      </button>
+    </li>
+  </template>
+
+  <script src="./app.js"></script>
+</body>
+</html>

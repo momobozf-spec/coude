@@ -1,13 +1,11 @@
+import { requireAdmin } from "@/lib/authz";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createVideo, uploadVideo, getEmbedUrl, getThumbnailUrl, isBunnyConfigured } from "@/lib/bunny";
 
 export async function POST(req: NextRequest) {
-  // Admin auth
-  const adminPwd = req.headers.get("x-admin-password");
-  if (adminPwd !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const admin = await requireAdmin();
+  if (!admin.ok) return admin.response;
 
   if (!isBunnyConfigured()) {
     return NextResponse.json({ error: "Bunny.net not configured. Set BUNNY_STREAM_LIBRARY_ID and BUNNY_STREAM_API_KEY in .env.local" }, { status: 503 });

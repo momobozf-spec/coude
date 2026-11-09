@@ -1,0 +1,12 @@
+{
+  "name": "ketelcheck",
+  "private": true,
+  "scripts": {
+    "dev": "node lokaal/server.cjs",
+    "test": "node tests/mock-backend.test.js apps-script/Code.gs && node tests/frontend.test.js web",
+    "check:deploy": "node tools/check-deploy.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.3"
+  }
+}

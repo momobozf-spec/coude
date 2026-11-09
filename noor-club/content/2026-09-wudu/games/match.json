@@ -1,0 +1,83 @@
+{
+  "slug": "2026-09-wudu-match",
+  "engine": "MATCH",
+  "ageBand": "4-6",
+  "xp": 20,
+  "order": 1,
+  "titles": {
+    "nl": "Woorden van de wudu",
+    "en": "Words of wudu",
+    "fr": "Les mots du wudu",
+    "de": "Wörter des Wudu"
+  },
+  "data": {
+    "pairs": [
+      {
+        "id": "m1",
+        "left": "الْيَدُ",
+        "right": {
+          "nl": "de hand",
+          "en": "the hand",
+          "fr": "la main",
+          "de": "die Hand"
+        },
+        "audioUrl": "/audio/2026-09-wudu/m1.mp3"
+      },
+      {
+        "id": "m2",
+        "left": "الْفَمُ",
+        "right": {
+          "nl": "de mond",
+          "en": "the mouth",
+          "fr": "la bouche",
+          "de": "der Mund"
+        },
+        "audioUrl": "/audio/2026-09-wudu/m2.mp3"
+      },
+      {
+        "id": "m3",
+        "left": "الْأَنْفُ",
+        "right": {
+          "nl": "de neus",
+          "en": "the nose",
+          "fr": "le nez",
+          "de": "die Nase"
+        },
+        "audioUrl": "/audio/2026-09-wudu/m3.mp3"
+      },
+      {
+        "id": "m4",
+        "left": "الْوَجْهُ",
+        "right": {
+          "nl": "het gezicht",
+          "en": "the face",
+          "fr": "le visage",
+          "de": "das Gesicht"
+        },
+        "audioUrl": "/audio/2026-09-wudu/m4.mp3"
+      },
+      {
+        "id": "m5",
+        "left": "الرَّأْسُ",
+        "right": {
+          "nl": "het hoofd",
+          "en": "the head",
+          "fr": "la tête",
+          "de": "der Kopf"
+        },
+        "audioUrl": "/audio/2026-09-wudu/m5.mp3"
+      },
+      {
+        "id": "m6",
+        "left": "الرِّجْلُ",
+        "right": {
+          "nl": "de voet",
+          "en": "the foot",
+          "fr": "le pied",
+          "de": "der Fuß"
+        },
+        "audioUrl": "/audio/2026-09-wudu/m6.mp3"
+      }
+    ]
+  }
+}

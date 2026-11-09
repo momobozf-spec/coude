@@ -44,6 +44,24 @@ export const fr: Messages = {
       'de votre logement et votre bail.',
     noAccountYet: 'Pas encore de compte ?',
     alreadyHaveAccount: 'Vous avez déjà un compte ?',
+    forgotPassword: 'Mot de passe oublié ?',
+    forgotTitle: 'Réinitialiser le mot de passe',
+    forgotIntro:
+      'Indiquez l’adresse e-mail de votre compte. Vous recevrez un lien pour ' +
+      'choisir un nouveau mot de passe.',
+    sendResetLink: 'Envoyer le lien',
+    resetLinkSent:
+      'Si un compte existe avec cette adresse, vous recevrez un e-mail avec un ' +
+      'lien dans quelques minutes. Vérifiez aussi vos spams.',
+    resetTitle: 'Choisissez un nouveau mot de passe',
+    newPassword: 'Nouveau mot de passe',
+    confirmPassword: 'Répétez le nouveau mot de passe',
+    savePassword: 'Enregistrer le mot de passe',
+    resetLinkInvalid:
+      'Ce lien a expiré ou a déjà été utilisé. Demandez un nouveau lien.',
+    termsNotice:
+      'En créant un compte, vous acceptez les conditions générales et prenez ' +
+      'connaissance de la déclaration de confidentialité.',
     errors: {
       INVALID_INPUT: 'Vérifiez les données saisies.',
       INVALID_CREDENTIALS: 'Cette adresse e-mail et ce mot de passe ne correspondent pas.',
@@ -51,6 +69,9 @@ export const fr: Messages = {
       WEAK_PASSWORD: 'Choisissez un mot de passe plus long ou plus robuste.',
       RATE_LIMITED: 'Trop de tentatives. Réessayez dans quelques minutes.',
       UNKNOWN: 'Une erreur est survenue. Réessayez.',
+      PASSWORDS_DO_NOT_MATCH: 'Les deux mots de passe ne sont pas identiques.',
+      SESSION_EXPIRED:
+        'Votre lien de réinitialisation a expiré. Demandez un nouveau lien.',
     },
   },
 
@@ -315,13 +336,14 @@ export const fr: Messages = {
       deposit_recovery: {
         name: 'Deposit Recovery',
         description:
-          'Analyse de sortie, dossier de garantie complet et mise en demeure ' +
-          'pour un logement.',
+          'État des lieux de sortie, comparaison IA entrée/sortie et rapport ' +
+          'comparatif pour un logement.',
       },
       relocation_pass: {
         name: 'All-in Relocation Pass',
         description:
-          'Entrée, sortie et audit du bail pour un déménagement.',
+          'États des lieux d’entrée et de sortie avec comparaison IA pour un ' +
+          'logement, même si votre dossier d’entrée gratuit est déjà utilisé.',
       },
     },
     shippingCostNotice:

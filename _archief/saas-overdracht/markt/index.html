@@ -1,0 +1,531 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>SaaS Overdracht Markt</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky bar with four views; the offer reads like a ledger of deal sheets (price, revenue, profit, multiple), forms are single calm cards. */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --sunk:#eceef3; --ink:#161a24; --muted:#5b6274; --line:#d9dce5;
+  --accent:#2a49c4; --accent-ink:#ffffff; --accent-soft:#e5eafb;
+  --good:#1f7a4d; --good-soft:#e1f2e8; --warn:#9a5b00; --warn-soft:#fbefd9; --bad:#b3261e; --bad-soft:#fbe4e2;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11141b; --surface:#191d27; --sunk:#222736; --ink:#e8eaf0; --muted:#a2a8b8; --line:#2f3546;
+  --accent:#8ea2ff; --accent-ink:#0d1020; --accent-soft:#25305a;
+  --good:#6fd39f; --good-soft:#163a28; --warn:#f0b75c; --warn-soft:#3d2c10; --bad:#ff8a80; --bad-soft:#47201d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11141b; --surface:#191d27; --sunk:#222736; --ink:#e8eaf0; --muted:#a2a8b8; --line:#2f3546;
+  --accent:#8ea2ff; --accent-ink:#0d1020; --accent-soft:#25305a;
+  --good:#6fd39f; --good-soft:#163a28; --warn:#f0b75c; --warn-soft:#3d2c10; --bad:#ff8a80; --bad-soft:#47201d; color-scheme:dark}
+
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top, 0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1040px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+p{margin:0}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.bar{position:sticky;top:env(safe-area-inset-top, 0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap;padding-block:12px}
+.brand{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:-.01em}
+.brand small{font-family:var(--mono);font-weight:400;font-size:11px;color:var(--muted);margin-left:6px;letter-spacing:.04em}
+.tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:10px;margin-left:auto;flex-wrap:wrap}
+.tabs button{border:0;background:transparent;padding:6px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-weight:500}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.banner{width:100%;font-size:12.5px;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 10px}
+
+.head{padding-block:32px 16px;display:grid;gap:8px;max-width:720px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.head h1{font-size:clamp(26px,4.4vw,38px);font-weight:700;letter-spacing:-.02em}
+.head p{color:var(--muted);max-width:64ch}
+
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;padding-block:8px 16px}
+.filters .field{min-width:150px;flex:1 1 150px}
+.field{display:grid;gap:6px;min-width:0}
+.field.full{grid-column:1/-1}
+label{font-weight:500;font-size:14px}
+.hint{font-size:12.5px;color:var(--muted)}
+input[type=text],input[type=email],input[type=number],select,textarea{width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+textarea{min-height:84px;resize:vertical}
+.check{display:grid;grid-template-columns:20px 1fr;gap:10px;align-items:start;font-size:14px;font-weight:400}
+.check input{margin-top:3px;width:16px;height:16px;accent-color:var(--accent)}
+
+.listings{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:12px;align-content:start;min-width:0}
+.card h3{font-size:19px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font-size:12px;font-weight:500;padding:2px 9px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.chip.type{background:var(--accent-soft);color:var(--accent)}
+.chip.demo{background:var(--warn-soft);color:var(--warn)}
+.chip.st-actief{background:var(--good-soft);color:var(--good)}
+.chip.st-bod{background:var(--warn-soft);color:var(--warn)}
+.chip.st-verkocht{background:var(--bad-soft);color:var(--bad)}
+.nums{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 16px;border-top:1px solid var(--line);padding-top:12px}
+.nums div{display:grid;gap:0}
+.nums span{font-size:12px;color:var(--muted)}
+.nums b{font-family:var(--mono);font-weight:500;font-size:15px;font-variant-numeric:tabular-nums}
+.nums .price b{font-family:var(--display);font-weight:700;font-size:20px}
+.card .desc{color:var(--muted);font-size:14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:9px;padding:9px 16px;font-weight:600;cursor:pointer;border:1px solid var(--accent);text-decoration:none;background:transparent;color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:5px 11px;font-size:13px}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.empty{border:1px dashed var(--line);border-radius:14px;padding:28px;color:var(--muted);display:grid;gap:6px;text-align:left}
+.empty strong{color:var(--ink);font-family:var(--display);font-size:18px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;display:grid;gap:18px;margin-block:16px}
+.panel h2{font-size:24px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 20px}
+.detail-grid div{display:grid}
+.detail-grid span{font-size:12px;color:var(--muted)}
+.detail-grid b{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums}
+.prose{max-width:68ch;white-space:pre-wrap}
+.msg{font-size:14px;border-radius:10px;padding:10px 12px}
+.msg.ok{background:var(--good-soft);color:var(--good)}
+.msg.err{background:var(--bad-soft);color:var(--bad)}
+.msg.info{background:var(--sunk);color:var(--muted)}
+.rules{background:var(--sunk);border-radius:12px;padding:16px 18px;display:grid;gap:6px;font-size:14px}
+.rules strong{font-family:var(--display);font-size:16px}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+.mono{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
+.sub{display:block;font-size:12.5px;color:var(--muted)}
+h2.sec{font-size:20px;margin-block:28px 10px}
+</style>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="brand">SaaS Overdracht Markt<small>DEMO</small></div>
+    <nav class="tabs" role="tablist" aria-label="Weergave">
+      <button id="tab-aanbod" role="tab" aria-selected="true" data-view="aanbod">Aanbod</button>
+      <button id="tab-verkopen" role="tab" aria-selected="false" data-view="verkopen">Verkopen</button>
+      <button id="tab-mijn" role="tab" aria-selected="false" data-view="mijn">Mijn activiteit</button>
+      <button id="tab-beheer" role="tab" aria-selected="false" data-view="beheer" hidden>Beheer</button>
+    </nav>
+    <p class="banner">Demo-marktplaats. Geen betalingen, geen escrow, geen advies. Cijfers in een aanbieding zijn opgegeven door de verkoper en niet gecontroleerd. Aanbiedingen met het label "voorbeeld" zijn fictief.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="msg info" id="status-msg" hidden></p>
+
+  <!-- AANBOD -->
+  <section id="view-aanbod" data-panel="aanbod">
+    <div class="head">
+      <p class="eyebrow">Online bedrijven te koop · België en Nederland</p>
+      <h1>SaaS, websites, apps en online diensten die een nieuwe eigenaar zoeken</h1>
+      <p>Bekijk het aanbod en toon interesse. Je contactgegevens gaan alleen naar de beheerder, die het contact met de verkoper legt.</p>
+    </div>
+    <div class="filters">
+      <div class="field"><label for="flt-type">Type</label>
+        <select id="flt-type"><option value="">Alle types</option><option>SaaS</option><option>Website</option><option>App</option><option>E-commerce</option><option>Online dienst</option></select></div>
+      <div class="field"><label for="flt-land">Land</label>
+        <select id="flt-land"><option value="">België en Nederland</option><option value="BE">België</option><option value="NL">Nederland</option></select></div>
+      <div class="field"><label for="flt-max">Max. vraagprijs</label>
+        <select id="flt-max"><option value="">Geen maximum</option><option value="50000">€50.000</option><option value="150000">€150.000</option><option value="500000">€500.000</option><option value="1000000">€1.000.000</option></select></div>
+      <div class="field"><label for="flt-sort">Sorteren</label>
+        <select id="flt-sort"><option value="new">Nieuwste eerst</option><option value="price-asc">Prijs laag – hoog</option><option value="price-desc">Prijs hoog – laag</option><option value="mult-asc">Laagste multiple</option></select></div>
+    </div>
+    <div id="listings" class="listings"></div>
+    <div id="listings-empty" class="empty" hidden>
+      <strong>Nog geen aanbiedingen</strong>
+      <p>Zodra een verkoper een aanbieding indient en de beheerder ze publiceert, verschijnt ze hier. Wil je zelf iets verkopen? Ga naar Verkopen.</p>
+    </div>
+
+    <div id="detail" class="panel" hidden>
+      <div class="row" style="justify-content:space-between">
+        <div class="meta" id="d-meta"></div>
+        <button class="btn small" type="button" id="d-close">Terug naar het aanbod</button>
+      </div>
+      <h2 id="d-titel"></h2>
+      <div class="detail-grid" id="d-nums"></div>
+      <div style="display:grid;gap:10px">
+        <p class="prose" id="d-beschrijving"></p>
+        <p class="hint" id="d-extra"></p>
+      </div>
+      <form id="interest" style="display:grid;gap:14px;border-top:1px solid var(--line);padding-top:18px" novalidate>
+        <h3 style="font-size:19px">Interesse tonen</h3>
+        <div class="fields">
+          <div class="field full"><label for="i-bericht">Wie ben je en wat wil je weten?</label>
+            <textarea id="i-bericht" placeholder="Bijvoorbeeld: ik ben ondernemer in dezelfde sector en wil graag de churn en de klantconcentratie zien."></textarea></div>
+          <div class="field"><label for="i-email">E-mailadres voor contact</label><input id="i-email" type="email" autocomplete="email"></div>
+          <div class="field"><label for="i-budget">Budget <span class="hint">(optioneel)</span></label>
+            <select id="i-budget"><option value="">Zeg ik liever niet</option><option>Tot €50.000</option><option>€50.000 – €150.000</option><option>€150.000 – €500.000</option><option>Meer dan €500.000</option></select></div>
+          <div class="field full" style="gap:10px">
+            <label class="check" for="i-c1"><input id="i-c1" type="checkbox"><span>Ik behandel informatie die ik over dit bedrijf krijg vertrouwelijk.</span></label>
+            <label class="check" for="i-c2"><input id="i-c2" type="checkbox"><span>De beheerder mag mijn bericht en e-mailadres doorgeven aan de verkoper van deze aanbieding.</span></label>
+          </div>
+        </div>
+        <p class="msg" id="i-msg" hidden></p>
+        <div><button class="btn primary" type="submit" id="i-submit">Interesse versturen</button></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- VERKOPEN -->
+  <section id="view-verkopen" data-panel="verkopen" hidden>
+    <div class="head">
+      <p class="eyebrow">Voor verkopers</p>
+      <h1>Bied je online bedrijf aan</h1>
+      <p>Je aanbieding wordt eerst gecontroleerd en pas daarna gepubliceerd. Je naam en e-mailadres worden nooit publiek getoond.</p>
+    </div>
+    <div class="rules">
+      <strong>Wat dit platform doet en niet doet</strong>
+      <p>Het brengt kopers en verkopers met elkaar in contact. Het geeft geen waardering, prijs-, juridisch of fiscaal advies, regelt geen betalingen en onderhandelt niet. Sluit een verkoop altijd met je eigen accountant en advocaat.</p>
+    </div>
+    <form id="sell" class="panel" novalidate>
+      <h2>Nieuwe aanbieding</h2>
+      <div class="fields">
+        <div class="field full"><label for="s-titel">Korte omschrijving</label><input id="s-titel" type="text" placeholder="Bijvoorbeeld: Planningstool voor schoonmaakbedrijven"></div>
+        <div class="field"><label for="s-type">Type</label>
+          <select id="s-type"><option value="">Kies…</option><option>SaaS</option><option>Website</option><option>App</option><option>E-commerce</option><option>Online dienst</option></select></div>
+        <div class="field"><label for="s-land">Land</label>
+          <select id="s-land"><option value="">Kies…</option><option value="BE">België</option><option value="NL">Nederland</option></select></div>
+        <div class="field"><label for="s-jaar">Gestart in (jaar)</label><input id="s-jaar" type="number" min="1995" max="2026" placeholder="2021"></div>
+        <div class="field"><label for="s-prijs">Vraagprijs (€)</label><input id="s-prijs" type="number" min="0" step="1000"></div>
+        <div class="field"><label for="s-omzet">Omzet laatste 12 maanden (€)</label><input id="s-omzet" type="number" min="0" step="100"></div>
+        <div class="field"><label for="s-winst">Nettowinst laatste 12 maanden (€)</label><input id="s-winst" type="number" step="100"></div>
+        <div class="field"><label for="s-klanten">Aantal betalende klanten</label><input id="s-klanten" type="number" min="0"></div>
+        <div class="field"><label for="s-stack">Technologie <span class="hint">(optioneel)</span></label><input id="s-stack" type="text" placeholder="Bijvoorbeeld: Laravel, MySQL, Azure"></div>
+        <div class="field full"><label for="s-reden">Waarom verkoop je?</label><input id="s-reden" type="text"></div>
+        <div class="field full"><label for="s-beschrijving">Beschrijving</label><textarea id="s-beschrijving" placeholder="Wat doet het product, voor wie, hoe komen klanten binnen, wat gaat mee bij de verkoop?"></textarea></div>
+        <div class="field"><label for="s-contact">E-mailadres voor contact <span class="hint">(niet publiek)</span></label><input id="s-contact" type="email" autocomplete="email"></div>
+        <div class="field full" style="gap:10px">
+          <label class="check" for="s-c1"><input id="s-c1" type="checkbox"><span>De cijfers kloppen naar mijn beste weten en ik kan ze bij interesse onderbouwen.</span></label>
+          <label class="check" for="s-c2"><input id="s-c2" type="checkbox"><span>De beheerder mag deze aanbieding na controle publiceren, zonder mijn naam en e-mailadres.</span></label>
+        </div>
+      </div>
+      <p class="msg" id="s-msg" hidden></p>
+      <div><button class="btn primary" type="submit" id="s-submit">Aanbieding indienen</button></div>
+    </form>
+  </section>
+
+  <!-- MIJN -->
+  <section id="view-mijn" data-panel="mijn" hidden>
+    <div class="head">
+      <p class="eyebrow">Alleen voor jou zichtbaar</p>
+      <h1>Mijn activiteit</h1>
+      <p>Je ingediende aanbiedingen en de interesse die je toonde. Andere bezoekers zien dit niet.</p>
+    </div>
+    <h2 class="sec">Mijn aanbiedingen</h2>
+    <div id="my-subs"></div>
+    <h2 class="sec">Mijn interesse</h2>
+    <div id="my-ints"></div>
+  </section>
+
+  <!-- BEHEER -->
+  <section id="view-beheer" data-panel="beheer" hidden>
+    <div class="head">
+      <p class="eyebrow">Beheer</p>
+      <h1>Controle, publicatie en contactaanvragen</h1>
+      <p>Publiceer pas na controle van de cijfers. Geef contactgegevens alleen door met de toestemming die de koper aanvinkte.</p>
+    </div>
+    <h2 class="sec">Ingediende aanbiedingen</h2>
+    <div id="adm-subs"></div>
+    <h2 class="sec">Gepubliceerde aanbiedingen</h2>
+    <div id="adm-listings"></div>
+    <h2 class="sec">Interesse van kopers</h2>
+    <div id="adm-ints"></div>
+  </section>
+</main>
+
+<script>
+(function(){
+  var db = null, user = null, uid = null, isAdmin = false;
+  var listings = [], mySubs = {}, myInts = {}, allSubs = [], allInts = [];
+  var current = null;
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
+  function eur(n){ var v = Number(n); return isFinite(v) ? "€" + Math.round(v).toLocaleString("nl-BE") : "—"; }
+  function mult(l){ var p = Number(l.prijs), w = Number(l.winst); return (w > 0 && p > 0) ? p / w : null; }
+  function fmtMult(l){ var m = mult(l); return m == null ? "—" : m.toLocaleString("nl-BE",{maximumFractionDigits:1}) + "× winst"; }
+  function landNaam(c){ return c === "BE" ? "België" : (c === "NL" ? "Nederland" : "—"); }
+  function stClass(s){ return s === "Verkocht" ? "st-verkocht" : (s === "Onder bod" ? "st-bod" : "st-actief"); }
+  function nowIso(){ return new Date().toISOString(); }
+  function dateNl(iso){ if(!iso) return "—"; return iso.slice(8,10) + "-" + iso.slice(5,7) + "-" + iso.slice(0,4); }
+  function newId(){ return "a" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  function showMsg(el, kind, text){ el.className = "msg " + kind; el.textContent = text; el.hidden = false; }
+  function setStatus(text){ var el = $("status-msg"); if(text){ el.textContent = text; el.hidden = false; } else { el.hidden = true; } }
+
+  /* views */
+  function show(view){
+    if(view === "beheer" && !isAdmin) view = "aanbod";
+    ["aanbod","verkopen","mijn","beheer"].forEach(function(v){
+      $("view-" + v).hidden = v !== view;
+      $("tab-" + v).setAttribute("aria-selected", v === view ? "true" : "false");
+    });
+    window.scrollTo(0,0);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".tabs button"), function(b){
+    b.addEventListener("click", function(){ show(b.getAttribute("data-view")); });
+  });
+
+  /* ---------- aanbod ---------- */
+  function filtered(){
+    var t = $("flt-type").value, land = $("flt-land").value, max = Number($("flt-max").value) || Infinity, sort = $("flt-sort").value;
+    var arr = listings.filter(function(l){
+      return (!t || l.type === t) && (!land || l.land === land) && Number(l.prijs) <= max;
+    });
+    arr.sort(function(a,b){
+      if(sort === "price-asc") return Number(a.prijs) - Number(b.prijs);
+      if(sort === "price-desc") return Number(b.prijs) - Number(a.prijs);
+      if(sort === "mult-asc"){ var ma = mult(a), mb = mult(b); return (ma == null ? 1e9 : ma) - (mb == null ? 1e9 : mb); }
+      return String(b.publishedAt || "").localeCompare(String(a.publishedAt || ""));
+    });
+    return arr;
+  }
+  function chips(l){
+    return '<span class="chip type">' + esc(l.type) + '</span>' +
+      '<span class="chip">' + esc(landNaam(l.land)) + '</span>' +
+      '<span class="chip ' + stClass(l.status) + '">' + esc(l.status || "Actief") + '</span>' +
+      (l.demo ? '<span class="chip demo">voorbeeld</span>' : '');
+  }
+  function renderListings(){
+    var arr = filtered();
+    $("listings-empty").hidden = arr.length > 0;
+    if(!listings.length){ $("listings-empty").querySelector("strong").textContent = "Nog geen aanbiedingen"; }
+    else if(!arr.length){ $("listings-empty").querySelector("strong").textContent = "Geen aanbiedingen voor deze filters"; }
+    $("listings").innerHTML = arr.map(function(l){
+      return '<article class="card">' +
+        '<div class="meta">' + chips(l) + '</div>' +
+        '<h3>' + esc(l.titel) + '</h3>' +
+        '<p class="desc">' + esc(l.beschrijving) + '</p>' +
+        '<div class="nums">' +
+          '<div class="price"><span>Vraagprijs</span><b>' + eur(l.prijs) + '</b></div>' +
+          '<div><span>Multiple</span><b>' + fmtMult(l) + '</b></div>' +
+          '<div><span>Omzet 12 mnd</span><b>' + eur(l.omzet) + '</b></div>' +
+          '<div><span>Winst 12 mnd</span><b>' + eur(l.winst) + '</b></div>' +
+        '</div>' +
+        '<div><button class="btn small" type="button" data-open="' + esc(l._id) + '">Bekijk details</button></div>' +
+      '</article>';
+    }).join("");
+    if(current && $("detail").hidden === false){
+      var still = listings.filter(function(x){ return x._id === current; })[0];
+      if(still) fillDetail(still);
+    }
+  }
+  ["flt-type","flt-land","flt-max","flt-sort"].forEach(function(id){ $(id).addEventListener("change", renderListings); });
+  $("listings").addEventListener("click", function(e){
+    var b = e.target.closest("[data-open]"); if(!b) return;
+    var l = listings.filter(function(x){ return x._id === b.getAttribute("data-open"); })[0];
+    if(!l) return;
+    current = l._id; fillDetail(l);
+    $("i-msg").hidden = true;
+    $("detail").hidden = false; $("listings").hidden = true; $("listings-empty").hidden = true;
+    document.querySelector(".filters").hidden = true;
+    window.scrollTo(0, $("detail").getBoundingClientRect().top + window.scrollY - 80);
+  });
+  $("d-close").addEventListener("click", function(){
+    current = null; $("detail").hidden = true; $("listings").hidden = false; document.querySelector(".filters").hidden = false; renderListings();
+  });
+  function fillDetail(l){
+    $("d-meta").innerHTML = chips(l);
+    $("d-titel").textContent = l.titel;
+    var age = Number(l.jaar) ? (2026 - Number(l.jaar)) : null;
+    $("d-nums").innerHTML = [
+      ["Vraagprijs", eur(l.prijs)], ["Omzet 12 mnd", eur(l.omzet)], ["Nettowinst 12 mnd", eur(l.winst)],
+      ["Multiple", fmtMult(l)], ["Betalende klanten", l.klanten != null && l.klanten !== "" ? Number(l.klanten).toLocaleString("nl-BE") : "—"],
+      ["Gestart", l.jaar ? esc(l.jaar) + (age != null ? " (" + age + " jaar)" : "") : "—"]
+    ].map(function(r){ return '<div><span>' + r[0] + '</span><b>' + r[1] + '</b></div>'; }).join("");
+    $("d-beschrijving").textContent = l.beschrijving || "";
+    $("d-extra").textContent = [l.reden ? "Reden van verkoop: " + l.reden : "", l.stack ? "Technologie: " + l.stack : "", "Gepubliceerd op " + dateNl(l.publishedAt)].filter(Boolean).join(" · ");
+    var done = myInts[l._id];
+    $("i-submit").disabled = !!done || l.status === "Verkocht";
+    if(done) showMsg($("i-msg"), "ok", "Je toonde interesse op " + dateNl(done.at) + ". De beheerder neemt contact op.");
+    else if(l.status === "Verkocht") showMsg($("i-msg"), "info", "Deze aanbieding is verkocht.");
+  }
+
+  /* interest */
+  $("interest").addEventListener("submit", function(e){
+    e.preventDefault();
+    var m = $("i-msg");
+    if(!db || !uid){ showMsg(m, "err", "Meld je aan via claude.ai om interesse te tonen."); return; }
+    if(!current){ return; }
+    var bericht = $("i-bericht").value.trim(), email = $("i-email").value.trim();
+    if(bericht.length < 10){ showMsg(m, "err", "Schrijf minstens één zin over wie je bent en wat je wilt weten."); return; }
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showMsg(m, "err", "Vul een geldig e-mailadres in."); return; }
+    if(!$("i-c1").checked || !$("i-c2").checked){ showMsg(m, "err", "Vink beide vakjes aan om je interesse te versturen."); return; }
+    var l = listings.filter(function(x){ return x._id === current; })[0];
+    var item = {listingId: current, titel: l ? l.titel : "", bericht: bericht, email: email, budget: $("i-budget").value, at: nowIso(), status: "Nieuw"};
+    var patch = {items:{}}; patch.items[current] = item; patch.updatedAt = nowIso();
+    $("i-submit").disabled = true;
+    writeOwn("interests", patch).then(function(){
+      showMsg(m, "ok", "Verstuurd. De beheerder bekijkt je bericht en legt het contact met de verkoper.");
+      $("i-bericht").value = ""; $("i-c1").checked = false; $("i-c2").checked = false;
+    }).catch(function(err){
+      $("i-submit").disabled = false;
+      showMsg(m, "err", writeError(err));
+    });
+  });
+
+  function writeError(err){
+    var c = err && err.code;
+    if(c === "invalid_argument") return "Je hebt geen schrijfrechten op deze pagina. Vraag de eigenaar om je als Contributor toe te voegen.";
+    if(c === "quota_exceeded") return "De opslag van deze demo is vol. Laat de beheerder oude gegevens verwijderen.";
+    if(c === "resource_exhausted") return "Even te veel tegelijk. Probeer het over een minuut opnieuw.";
+    return "Opslaan lukte niet. Probeer het opnieuw.";
+  }
+  function writeOwn(coll, patch){
+    var ref = db.doc(coll + "/" + uid);
+    return ref.get().then(function(s){ return s.exists ? ref.update(patch) : ref.set(patch); });
+  }
+
+  /* ---------- verkopen ---------- */
+  $("sell").addEventListener("submit", function(e){
+    e.preventDefault();
+    var m = $("s-msg");
+    if(!db || !uid){ showMsg(m, "err", "Meld je aan via claude.ai om een aanbieding in te dienen."); return; }
+    var v = function(id){ return $(id).value.trim(); };
+    var miss = [];
+    if(v("s-titel").length < 5) miss.push("korte omschrijving");
+    if(!v("s-type")) miss.push("type");
+    if(!v("s-land")) miss.push("land");
+    if(!(Number(v("s-prijs")) > 0)) miss.push("vraagprijs");
+    if(v("s-omzet") === "") miss.push("omzet");
+    if(v("s-winst") === "") miss.push("nettowinst");
+    if(v("s-beschrijving").length < 20) miss.push("beschrijving (minstens 20 tekens)");
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("s-contact"))) miss.push("geldig e-mailadres");
+    if(miss.length){ showMsg(m, "err", "Vul nog in: " + miss.join(", ") + "."); return; }
+    if(!$("s-c1").checked || !$("s-c2").checked){ showMsg(m, "err", "Vink beide vakjes aan om je aanbieding in te dienen."); return; }
+    var id = newId();
+    var item = {titel:v("s-titel"), type:v("s-type"), land:v("s-land"), jaar:v("s-jaar"), prijs:Number(v("s-prijs")), omzet:Number(v("s-omzet")),
+      winst:Number(v("s-winst")), klanten:v("s-klanten") === "" ? "" : Number(v("s-klanten")), stack:v("s-stack"), reden:v("s-reden"),
+      beschrijving:v("s-beschrijving"), contact:v("s-contact"), at:nowIso(), status:"Ingediend"};
+    var patch = {items:{}, updatedAt: nowIso()}; patch.items[id] = item;
+    $("s-submit").disabled = true;
+    writeOwn("submissions", patch).then(function(){
+      showMsg(m, "ok", "Ingediend. Je ziet de status onder Mijn activiteit. Na controle wordt je aanbieding gepubliceerd.");
+      $("sell").reset(); $("s-submit").disabled = false;
+    }).catch(function(err){ $("s-submit").disabled = false; showMsg(m, "err", writeError(err)); });
+  });
+
+  /* ---------- mijn ---------- */
+  function renderMine(){
+    var subs = Object.keys(mySubs).map(function(k){ var x = mySubs[k]; return {id:k, d:x}; })
+      .sort(function(a,b){ return String(b.d.at).localeCompare(String(a.d.at)); });
+    $("my-subs").innerHTML = subs.length ? '<div class="tablewrap"><table><thead><tr><th>Aanbieding</th><th>Vraagprijs</th><th>Ingediend</th><th>Status</th></tr></thead><tbody>' +
+      subs.map(function(s){ return '<tr><td>' + esc(s.d.titel) + '<span class="sub">' + esc(s.d.type) + ' · ' + esc(landNaam(s.d.land)) + '</span></td><td class="mono">' + eur(s.d.prijs) + '</td><td class="mono">' + dateNl(s.d.at) + '</td><td>' + esc(s.d.status) + '</td></tr>'; }).join("") +
+      '</tbody></table></div>' : '<div class="empty"><strong>Nog geen aanbiedingen</strong><p>Dien er een in via Verkopen.</p></div>';
+    var ints = Object.keys(myInts).map(function(k){ return myInts[k]; }).sort(function(a,b){ return String(b.at).localeCompare(String(a.at)); });
+    $("my-ints").innerHTML = ints.length ? '<div class="tablewrap"><table><thead><tr><th>Aanbieding</th><th>Verstuurd</th><th>Status</th></tr></thead><tbody>' +
+      ints.map(function(i){ return '<tr><td>' + esc(i.titel) + '</td><td class="mono">' + dateNl(i.at) + '</td><td>' + esc(i.status || "Nieuw") + '</td></tr>'; }).join("") +
+      '</tbody></table></div>' : '<div class="empty"><strong>Nog geen interesse getoond</strong><p>Open een aanbieding in het aanbod en klik op Interesse versturen.</p></div>';
+  }
+
+  /* ---------- beheer ---------- */
+  function renderAdmin(){
+    if(!isAdmin) return;
+    var ids = allSubs.map(function(s){ return s.uid; }).concat(allInts.map(function(s){ return s.uid; }));
+    var nameP = user && ids.length ? user.profiles(ids) : Promise.resolve({});
+    nameP.then(function(ps){
+      var nm = function(id){ return (ps[id] && ps[id].name) || "Onbekende gebruiker"; };
+      var subs = [];
+      allSubs.forEach(function(s){ Object.keys(s.items || {}).forEach(function(k){ subs.push({uid:s.uid, id:k, d:s.items[k]}); }); });
+      subs.sort(function(a,b){ return String(b.d.at).localeCompare(String(a.d.at)); });
+      $("adm-subs").innerHTML = subs.length ? '<div class="tablewrap"><table><thead><tr><th>Aanbieding</th><th>Cijfers</th><th>Verkoper</th><th>Status</th><th>Actie</th></tr></thead><tbody>' +
+        subs.map(function(s){
+          var d = s.d;
+          return '<tr><td>' + esc(d.titel) + '<span class="sub">' + esc(d.type) + ' · ' + esc(landNaam(d.land)) + ' · ' + dateNl(d.at) + '</span><span class="sub">' + esc(String(d.beschrijving || "").slice(0,140)) + '</span></td>' +
+            '<td class="mono">' + eur(d.prijs) + '<span class="sub">omzet ' + eur(d.omzet) + '</span><span class="sub">winst ' + eur(d.winst) + '</span></td>' +
+            '<td>' + esc(nm(s.uid)) + '<span class="sub">' + esc(d.contact) + '</span></td>' +
+            '<td>' + esc(d.status) + '</td>' +
+            '<td><div class="row">' + (d.status === "Ingediend" ? '<button class="btn small primary" data-pub="' + esc(s.uid) + '|' + esc(s.id) + '">Publiceren</button><button class="btn small danger" data-rej="' + esc(s.uid) + '|' + esc(s.id) + '">Afwijzen</button>' : '<span class="sub">—</span>') + '</div></td></tr>';
+        }).join("") + '</tbody></table></div>' : '<div class="empty"><strong>Geen ingediende aanbiedingen</strong><p>Wat verkopers indienen, verschijnt hier ter controle.</p></div>';
+
+      $("adm-listings").innerHTML = listings.length ? '<div class="tablewrap"><table><thead><tr><th>Aanbieding</th><th>Vraagprijs</th><th>Interesse</th><th>Status</th><th>Actie</th></tr></thead><tbody>' +
+        listings.slice().sort(function(a,b){ return String(b.publishedAt || "").localeCompare(String(a.publishedAt || "")); }).map(function(l){
+          var n = 0; allInts.forEach(function(s){ if(s.items && s.items[l._id]) n++; });
+          var opts = ["Actief","Onder bod","Verkocht"].map(function(o){ return '<option' + (o === (l.status || "Actief") ? ' selected' : '') + '>' + o + '</option>'; }).join("");
+          return '<tr><td>' + esc(l.titel) + (l.demo ? ' <span class="chip demo">voorbeeld</span>' : '') + '<span class="sub">' + esc(l.type) + ' · ' + esc(landNaam(l.land)) + '</span></td><td class="mono">' + eur(l.prijs) + '</td><td class="mono">' + n + '</td>' +
+            '<td><select aria-label="Status van ' + esc(l.titel) + '" data-lst="' + esc(l._id) + '" id="lst-' + esc(l._id) + '">' + opts + '</select></td>' +
+            '<td><button class="btn small danger" data-del="' + esc(l._id) + '">Verwijderen</button></td></tr>';
+        }).join("") + '</tbody></table></div>' : '<div class="empty"><strong>Nog niets gepubliceerd</strong><p>Publiceer een ingediende aanbieding om ze in het aanbod te tonen.</p></div>';
+
+      var ints = [];
+      allInts.forEach(function(s){ Object.keys(s.items || {}).forEach(function(k){ ints.push({uid:s.uid, d:s.items[k]}); }); });
+      ints.sort(function(a,b){ return String(b.d.at).localeCompare(String(a.d.at)); });
+      $("adm-ints").innerHTML = ints.length ? '<div class="tablewrap"><table><thead><tr><th>Aanbieding</th><th>Koper</th><th>Bericht</th><th>Budget</th><th>Datum</th></tr></thead><tbody>' +
+        ints.map(function(i){ return '<tr><td>' + esc(i.d.titel) + '</td><td>' + esc(nm(i.uid)) + '<span class="sub">' + esc(i.d.email) + '</span></td><td>' + esc(i.d.bericht) + '</td><td>' + esc(i.d.budget || "—") + '</td><td class="mono">' + dateNl(i.d.at) + '</td></tr>'; }).join("") +
+        '</tbody></table></div>' : '<div class="empty"><strong>Nog geen interesse</strong><p>Wanneer een koper interesse toont, zie je hier het bericht en het e-mailadres.</p></div>';
+    });
+  }
+
+  $("view-beheer").addEventListener("click", function(e){
+    var t = e.target;
+    var pub = t.getAttribute && t.getAttribute("data-pub"), rej = t.getAttribute && t.getAttribute("data-rej"), del = t.getAttribute && t.getAttribute("data-del");
+    if(pub || rej){
+      var parts = (pub || rej).split("|"), suid = parts[0], sid = parts[1];
+      var s = allSubs.filter(function(x){ return x.uid === suid; })[0]; if(!s || !s.items[sid]) return;
+      t.disabled = true;
+      var d = s.items[sid];
+      var patch = {items:{}}; patch.items[sid] = {status: pub ? "Gepubliceerd" : "Afgewezen"};
+      var step = pub ? db.doc("listings/" + sid).set({titel:d.titel, type:d.type, land:d.land, jaar:d.jaar, prijs:d.prijs, omzet:d.omzet, winst:d.winst,
+        klanten:d.klanten, stack:d.stack, reden:d.reden, beschrijving:d.beschrijving, status:"Actief", demo:false, publishedAt:nowIso()}) : Promise.resolve();
+      step.then(function(){ return db.doc("submissions/" + suid).update(patch); })
+        .catch(function(err){ t.disabled = false; setStatus(writeError(err)); });
+    }
+    if(del){
+      if(t.getAttribute("data-confirm") !== "1"){ t.setAttribute("data-confirm","1"); t.textContent = "Zeker? Klik opnieuw"; return; }
+      t.disabled = true;
+      db.doc("listings/" + del).delete().catch(function(err){ t.disabled = false; setStatus(writeError(err)); });
+    }
+  });
+  $("view-beheer").addEventListener("change", function(e){
+    var id = e.target.getAttribute && e.target.getAttribute("data-lst"); if(!id) return;
+    db.doc("listings/" + id).update({status: e.target.value}).catch(function(err){ setStatus(writeError(err)); });
+  });
+
+  /* ---------- start ---------- */
+  renderListings(); renderMine();
+  function start(){
+    if(!window.claude || !window.claude.use){ setStatus("Open deze pagina via claude.ai om het aanbod te laden."); return; }
+    Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function(r){
+      db = r[0]; user = r[1];
+      if(!db){ setStatus("Het aanbod kan hier niet geladen worden. Meld je aan via claude.ai en open de pagina opnieuw."); return; }
+      return Promise.all([user ? user.id() : null, user ? user.canEdit() : false]).then(function(x){
+        uid = x[0]; isAdmin = !!x[1];
+        $("tab-beheer").hidden = !isAdmin;
+        if(!uid) setStatus("Je bent niet aangemeld met een account dat deze pagina herkent. Je kunt het aanbod bekijken, maar niets indienen.");
+        db.collection("listings").onSnapshot(function(snap){
+          listings = snap.docs.map(function(d){ var o = Object.assign({}, d.data()); o._id = d.id; return o; });
+          renderListings(); renderAdmin();
+        }, function(){ setStatus("Het aanbod kon niet geladen worden. Herlaad de pagina."); });
+        if(uid){
+          db.doc("submissions/" + uid).onSnapshot(function(s){ mySubs = (s.exists && s.data().items) || {}; renderMine(); }, function(){});
+          db.doc("interests/" + uid).onSnapshot(function(s){ myInts = (s.exists && s.data().items) || {}; renderMine(); if(current) renderListings(); }, function(){});
+        }
+        if(isAdmin){
+          db.collection("submissions").onSnapshot(function(snap){
+            allSubs = snap.docs.map(function(d){ return {uid:d.id, items:(d.data() || {}).items || {}}; }); renderAdmin();
+          }, function(){});
+          db.collection("interests").onSnapshot(function(snap){
+            allInts = snap.docs.map(function(d){ return {uid:d.id, items:(d.data() || {}).items || {}}; }); renderAdmin();
+          }, function(){});
+        }
+        if(location.hash === "#beheer" && isAdmin) show("beheer");
+      });
+    }).catch(function(){ setStatus("Het aanbod kon niet geladen worden. Herlaad de pagina."); });
+  }
+  if(location.hash === "#verkopen") show("verkopen");
+  else if(location.hash === "#mijn") show("mijn");
+  setTimeout(start, 0);
+})();
+</script>
+
+</body></html>

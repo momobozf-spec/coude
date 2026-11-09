@@ -13,21 +13,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/login",
   },
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      allowDangerousEmailAccountLinking: true,
-    }),
-    Apple({
-      clientId: process.env.APPLE_CLIENT_ID,
-      clientSecret: process.env.APPLE_CLIENT_SECRET,
-      allowDangerousEmailAccountLinking: true,
-    }),
-    MicrosoftEntraId({
-      clientId: process.env.MICROSOFT_CLIENT_ID,
-      clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
-      allowDangerousEmailAccountLinking: true,
-    }),
+    // OAuth providers are only registered when configured. No automatic account linking
+    // by e-mail (allowDangerousEmailAccountLinking) — linking is handled in signIn() below
+    // and only for providers that assert a verified e-mail address.
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [Google({ clientId: process.env.GOOGLE_CLIENT_ID, clientSecret: process.env.GOOGLE_CLIENT_SECRET })]
+      : []),
+    ...(process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_SECRET
+      ? [Apple({ clientId: process.env.APPLE_CLIENT_ID, clientSecret: process.env.APPLE_CLIENT_SECRET })]
+      : []),
+    ...(process.env.MICROSOFT_CLIENT_ID && process.env.MICROSOFT_CLIENT_SECRET
+      ? [MicrosoftEntraId({ clientId: process.env.MICROSOFT_CLIENT_ID, clientSecret: process.env.MICROSOFT_CLIENT_SECRET })]
+      : []),
     Credentials({
       name: "credentials",
       credentials: {
@@ -57,15 +54,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
       // For OAuth providers: create or link user in our database
       if (account && account.provider !== "credentials") {
-        const email = user.email;
+        const email = user.email?.trim().toLowerCase();
         if (!email) return false;
 
         let dbUser = await prisma.user.findUnique({
           where: { email },
         });
+
+        const existingLink = await prisma.account.findUnique({
+          where: {
+            provider_providerAccountId: {
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+            },
+          },
+          select: { userId: true },
+        });
+
+        // Linking an OAuth identity to an EXISTING account by e-mail is only safe when the
+        // provider asserts that the e-mail is verified (Google, Apple). Microsoft Entra
+        // multi-tenant tokens don't guarantee that → refuse instead of risking takeover.
+        if (dbUser && !existingLink) {
+          const ev: unknown = profile?.email_verified;
+          const verified = ev === true || ev === "true";
+          if (!verified) return "/login?error=OAuthAccountNotLinked";
+        }
+        if (existingLink && dbUser && existingLink.userId !== dbUser.id) return false;
 
         if (!dbUser) {
           // Create new user from OAuth
@@ -75,6 +92,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               email,
               image: user.image,
               password: "", // No password for OAuth users
+              // Consent text is shown next to the OAuth buttons on the register page.
+              termsAcceptedAt: new Date(),
             },
           });
         } else if (user.image && !dbUser.image) {
@@ -85,17 +104,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           });
         }
 
-        // Store/update the OAuth account link
-        const existingAccount = await prisma.account.findUnique({
-          where: {
-            provider_providerAccountId: {
-              provider: account.provider,
-              providerAccountId: account.providerAccountId,
-            },
-          },
-        });
-
-        if (!existingAccount) {
+        // Store the OAuth account link
+        if (!existingLink) {
           await prisma.account.create({
             data: {
               userId: dbUser.id,

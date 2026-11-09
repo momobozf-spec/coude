@@ -13,6 +13,7 @@ export default function BadgePopup({ badge, levelUp, onClose }: Props) {
 
   useEffect(() => {
     if (badge || levelUp) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- show the popup when a new badge arrives
       setShow(true);
       const timer = setTimeout(() => { setShow(false); setTimeout(onClose, 300); }, 4000);
       return () => clearTimeout(timer);

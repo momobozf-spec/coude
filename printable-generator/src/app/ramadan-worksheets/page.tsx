@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const faqs = [
   { q: "When should I start Ramadan activities with my kids?", a: "Start 2-3 weeks before Ramadan to build excitement. Use our countdown coloring pages and Ramadan vocabulary word searches to introduce concepts like fasting, iftar, and suhoor." },
   { q: "Are these appropriate for non-fasting children?", a: "Absolutely! These worksheets focus on the joy and community aspects of Ramadan — lanterns, moon sighting, iftar meals, charity, and Quran reading — making them perfect for children too young to fast." },
-  { q: "Can I use these for my Islamic school's Ramadan program?", a: "Yes! Our School plan gives 25 teacher accounts unlimited worksheets. Many Islamic schools use our Ramadan activity packs for daily classroom activities throughout the month." },
+  { q: "Can I use these for my Islamic school's Ramadan program?", a: "Yes! The School plan gives unlimited worksheets for use in your classes throughout the month." },
 ];
 
 export default function RamadanWorksheets() {
@@ -36,7 +36,7 @@ export default function RamadanWorksheets() {
           { heading: "Ramadan Themes Available", text: "Our Ramadan worksheet collection covers every aspect of the holy month: Ramadan Mubarak greetings, iftar tables with dates and water, Ramadan lanterns (fanous), crescent moon sighting, Taraweeh prayer, Quran reading, Laylat al-Qadr, charity and giving, suhoor meals, and Eid al-Fitr celebrations. Each theme generates unique worksheets, so you can create a fresh activity for every day of Ramadan — that's 30 unique coloring pages, mazes, and word searches!" },
           { heading: "Daily Ramadan Activity Routine", text: "Many parents create a daily Ramadan routine with our worksheets: a coloring page after suhoor for early risers, a maze puzzle during afternoon quiet time, and a word search before iftar. Teachers use them as classroom warm-ups during the school day. Our digital coloring feature is perfect for car rides to Taraweeh — kids can color on a tablet while parents drive. The results can be saved and shared with family on WhatsApp." },
           { heading: "Ramadan Countdown Activities", text: "Start building excitement weeks before Ramadan begins! Create a Ramadan countdown with a new coloring page each day. Use our Islamic vocabulary word searches to teach Ramadan-related words: Sawm, Iftar, Suhoor, Taraweeh, Quran, Laylat al-Qadr, Zakat al-Fitr. By the time Ramadan arrives, your children will be prepared and excited." },
-          { heading: "From Free to Unlimited Ramadan Fun", text: "Try 3 worksheets free — no credit card needed. When you're ready for unlimited Ramadan activities, upgrade to Pro ($12/month or $97/year). During Ramadan, we often run special promotions — use code RAMADAN50 at checkout for 50% off your first month. School accounts ($49/month) get bulk generation for entire classroom sets." },
+          { heading: "From Free to Unlimited Ramadan Fun", text: "Try 3 worksheets free — no credit card needed. When you're ready for unlimited Ramadan activities, upgrade to Pro. Schools can choose the School plan." },
         ]}
         faqs={faqs}
       />

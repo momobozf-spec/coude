@@ -17,6 +17,7 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loading flag for the fetch started in this effect
     setLoading(true);
     fetch(`/api/games/leaderboard?game=${game}&limit=20`)
       .then(r => r.json())

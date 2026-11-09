@@ -1,0 +1,47 @@
+/**
+ * De vaste namen voor gestructureerde logregels.
+ *
+ * Waarom een enum en geen losse strings: hier op kun je later monitoring
+ * bouwen. Een dashboard dat telt hoe vaak `NOTIFICATION_FAILED` voorkomt, breekt
+ * zodra iemand ergens "notification_failed" typt. Met deze constanten is dat
+ * een compilerfout.
+ *
+ * Elke logregel krijgt `{ event: LogEvent, ... }` mee, zodat filteren op
+ * `event` altijd werkt ongeacht de vrije tekst erachter.
+ */
+export const LogEvent = {
+  SEARCH_STARTED: "SEARCH_STARTED",
+  SEARCH_COMPLETED: "SEARCH_COMPLETED",
+  SEARCH_FAILED: "SEARCH_FAILED",
+  SEARCH_SKIPPED_LOCKED: "SEARCH_SKIPPED_LOCKED",
+  SEARCH_LOCK_TAKEOVER: "SEARCH_LOCK_TAKEOVER",
+
+  SOURCE_STARTED: "SOURCE_STARTED",
+  SOURCE_COMPLETED: "SOURCE_COMPLETED",
+  SOURCE_FAILED: "SOURCE_FAILED",
+  SOURCE_BLOCKED: "SOURCE_BLOCKED",
+  SOURCE_SKIPPED: "SOURCE_SKIPPED",
+  ROBOTS_DISALLOWED: "ROBOTS_DISALLOWED",
+
+  PROPERTY_FOUND: "PROPERTY_FOUND",
+  PROPERTY_NEW: "PROPERTY_NEW",
+  PROPERTY_UPDATED: "PROPERTY_UPDATED",
+  PROPERTY_DUPLICATE: "PROPERTY_DUPLICATE",
+  PROPERTY_NORMALIZE_FAILED: "PROPERTY_NORMALIZE_FAILED",
+
+  MATCH_FOUND: "MATCH_FOUND",
+  MATCH_REJECTED: "MATCH_REJECTED",
+
+  AI_PARSE_STARTED: "AI_PARSE_STARTED",
+  AI_PARSE_COMPLETED: "AI_PARSE_COMPLETED",
+  AI_PARSE_FAILED: "AI_PARSE_FAILED",
+  AI_PARSE_RETRIED: "AI_PARSE_RETRIED",
+  AI_SUMMARY_GENERATED: "AI_SUMMARY_GENERATED",
+  AI_SUMMARY_FAILED: "AI_SUMMARY_FAILED",
+
+  NOTIFICATION_SENT: "NOTIFICATION_SENT",
+  NOTIFICATION_FAILED: "NOTIFICATION_FAILED",
+  NOTIFICATION_SKIPPED: "NOTIFICATION_SKIPPED",
+} as const;
+
+export type LogEvent = (typeof LogEvent)[keyof typeof LogEvent];

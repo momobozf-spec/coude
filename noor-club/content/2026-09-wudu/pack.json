@@ -1,0 +1,66 @@
+{
+  "slug": "2026-09-wudu",
+  "month": 9,
+  "year": 2026,
+  "isFree": false,
+  "coverUrl": "/covers/2026-09-wudu.svg",
+  "titles": {
+    "nl": "Wudu: schoon voor het gebed",
+    "en": "Wudu: clean before prayer",
+    "fr": "Le wudu : propre avant la prière",
+    "de": "Wudu: sauber vor dem Gebet"
+  },
+  "descriptions": {
+    "nl": "Deze maand ontdekken kinderen de wudu: de stappen op volgorde, de Arabische woorden voor gezicht, handen en voeten, en waarom we ons wassen voor het gebed. Vijf spellen, een werkblad, een verhaal en een gids voor ouders.",
+    "en": "This month children discover wudu: the steps in order, the Arabic words for face, hands and feet, and why we wash before we pray. Five games, a worksheet, a story and a guide for parents.",
+    "fr": "Ce mois-ci, les enfants découvrent le wudu : les étapes dans l’ordre, les mots arabes pour le visage, les mains et les pieds, et pourquoi on se lave avant la prière. Cinq jeux, une fiche, une histoire et un guide pour les parents.",
+    "de": "Diesen Monat entdecken Kinder das Wudu: die Schritte der Reihe nach, die arabischen Wörter für Gesicht, Hände und Füße, und warum wir uns vor dem Gebet waschen. Fünf Spiele, ein Arbeitsblatt, eine Geschichte und ein Leitfaden für Eltern."
+  },
+  "assets": [
+    {
+      "kind": "WORKSHEET",
+      "titles": {
+        "nl": "Werkblad: de stappen van wudu",
+        "en": "Worksheet: the steps of wudu",
+        "fr": "Fiche : les étapes du wudu",
+        "de": "Arbeitsblatt: die Schritte des Wudu"
+      },
+      "fileUrl": "2026-09-wudu/wudu-steps-worksheet.pdf",
+      "ageBand": "4-6"
+    },
+    {
+      "kind": "STORY",
+      "titles": {
+        "nl": "Verhaal: Amina en de glinsterende druppels",
+        "en": "Story: Amina and the shining droplets",
+        "fr": "Histoire : Amina et les gouttes scintillantes",
+        "de": "Geschichte: Amina und die glitzernden Tropfen"
+      },
+      "fileUrl": "2026-09-wudu/amina-and-the-shining-droplets.pdf",
+      "ageBand": "4-9"
+    },
+    {
+      "kind": "PARENT_GUIDE",
+      "titles": {
+        "nl": "Oudergids: wudu thuis oefenen",
+        "en": "Parent guide: practising wudu at home",
+        "fr": "Guide des parents : pratiquer le wudu à la maison",
+        "de": "Elternratgeber: Wudu zu Hause üben"
+      },
+      "fileUrl": "2026-09-wudu/wudu-parent-guide.pdf",
+      "ageBand": "4-9"
+    }
+  ],
+  "badges": [
+    {
+      "slug": "2026-09-wudu-badge",
+      "titles": {
+        "nl": "Wudu-held",
+        "en": "Wudu hero",
+        "fr": "Héros du wudu",
+        "de": "Wudu-Held"
+      },
+      "iconUrl": "/badges/2026-09-wudu-badge.svg"
+    }
+  ]
+}

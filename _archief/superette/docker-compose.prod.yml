@@ -1,0 +1,125 @@
+# Productie-achtige opstelling: API, werker, app en een eenmalige migratiejob.
+#
+#   docker compose -f docker-compose.prod.yml --env-file .env.production build
+#   docker compose -f docker-compose.prod.yml --env-file .env.production run --rm migrate
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d api worker web
+#
+# De database staat hier bewust NIET in: gebruik een beheerde PostgreSQL
+# (SSL, back-ups, point-in-time recovery) en zet DATABASE_URL in het env-bestand.
+# Zie docs/DATABASE.md en docs/DEPLOYMENT.md. Geen geheimen in dit bestand.
+#
+# Een reverse proxy (Caddy, nginx, Traefik of die van de hostingprovider) zet
+# TLS af en stuurt door:  https://superette.be → web:3001,
+#                         https://api.superette.be → api:4000.
+# De API en de app moeten op dezelfde *site* staan (cookies).
+
+x-api-env: &api-env
+  NODE_ENV: production
+  LOG_FORMAT: json
+  TRUST_PROXY: "1"
+  DATABASE_URL: ${DATABASE_URL:?DATABASE_URL ontbreekt}
+  JWT_SECRET: ${JWT_SECRET:?JWT_SECRET ontbreekt}
+  GATE_SIGNING_PRIVATE_JWK: ${GATE_SIGNING_PRIVATE_JWK:?ontbreekt}
+  GATE_SIGNING_PUBLIC_JWK: ${GATE_SIGNING_PUBLIC_JWK:?ontbreekt}
+  MOLLIE_API_KEY: ${MOLLIE_API_KEY:?ontbreekt}
+  MOLLIE_WEBHOOK_URL: ${MOLLIE_WEBHOOK_URL:-}
+  MQTT_URL: ${MQTT_URL:-mqtt://localhost:1883}
+  MQTT_ENABLED: ${MQTT_ENABLED:-false}
+  APP_URL: ${APP_URL:?APP_URL ontbreekt}
+  SUPERETTE_WEB_URL: ${SUPERETTE_WEB_URL:?SUPERETTE_WEB_URL ontbreekt}
+  CORS_ORIGINS: ${CORS_ORIGINS:-}
+  COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
+  COMPARE_JOB_KEY: ${COMPARE_JOB_KEY:?COMPARE_JOB_KEY ontbreekt}
+  COMPARE_JOB_KEY_PREVIOUS: ${COMPARE_JOB_KEY_PREVIOUS:-}
+  COMPARE_FEED_DIR: /app/apps/api/data/feeds
+  COMPARE_PRICE_FRESH_HOURS: ${COMPARE_PRICE_FRESH_HOURS:-48}
+  EMAIL_PROVIDER: ${EMAIL_PROVIDER:-none}
+  EMAIL_FROM: ${EMAIL_FROM:-}
+  EMAIL_HTTP_URL: ${EMAIL_HTTP_URL:-}
+  EMAIL_API_KEY: ${EMAIL_API_KEY:-}
+  NOTIFY_EMAIL_ENABLED: ${NOTIFY_EMAIL_ENABLED:-false}
+  ERROR_REPORTING_DSN: ${ERROR_REPORTING_DSN:-}
+  APP_VERSION: ${APP_VERSION:-unknown}
+
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: migrate
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL ontbreekt}
+    profiles: ["migrate"]
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: superette-api:${APP_VERSION:-latest}
+    environment:
+      <<: *api-env
+      COMPARE_SYNC_INTERVAL_MINUTES: "0"   # de werker synchroniseert, niet de API
+    ports:
+      - "127.0.0.1:4000:4000"
+    volumes:
+      - feeds:/app/apps/api/data/feeds:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  worker:
+    image: superette-api:${APP_VERSION:-latest}
+    command: ["node", "dist/compare/cli/worker.cli.js"]
+    environment:
+      <<: *api-env
+      COMPARE_SYNC_INTERVAL_MINUTES: ${COMPARE_SYNC_INTERVAL_MINUTES:-60}
+    volumes:
+      - feeds:/app/apps/api/data/feeds:ro
+      - outbox:/app/apps/api/data/outbox
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 120s
+    restart: unless-stopped
+    depends_on:
+      - api
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/superette-web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?NEXT_PUBLIC_API_URL ontbreekt}
+        NEXT_PUBLIC_IMAGE_HOSTS: ${NEXT_PUBLIC_IMAGE_HOSTS:-}
+        NEXT_PUBLIC_ANALYTICS_ORIGIN: ${NEXT_PUBLIC_ANALYTICS_ORIGIN:-}
+    image: superette-web:${APP_VERSION:-latest}
+    ports:
+      - "127.0.0.1:3001:3001"
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/apps/superette-web/.next/cache
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 15s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+volumes:
+  feeds:
+  outbox:

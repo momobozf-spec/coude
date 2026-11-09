@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum SubStatus {
+  NONE
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum GameEngine {
+  MATCH
+  SEQUENCE
+  QUIZ
+  LISTEN
+  WORDBUILD
+}
+
+enum AssetKind {
+  WORKSHEET
+  STORY
+  PARENT_GUIDE
+  POSTER
+}
+
+model User {
+  id                   String     @id @default(cuid())
+  email                String     @unique
+  name                 String
+  passwordHash         String
+  locale               String     @default("nl")
+
+  subStatus            SubStatus  @default(NONE)
+  stripeCustomerId     String?    @unique
+  stripeSubscriptionId String?    @unique
+  currentPeriodEnd     DateTime?
+
+  /// Einde van de proefperiode, lokaal bijgehouden zodat de herinneringsmail
+  /// niet afhangt van of Stripe op dat moment bereikbaar is.
+  trialEndsAt            DateTime?
+  /// Eén herinnering per proefperiode; maakt de cron idempotent.
+  renewalReminderSentAt  DateTime?
+
+  emailVerifiedAt        DateTime?
+
+  /// Expliciete afstand van het herroepingsrecht, vastgelegd bij het afrekenen.
+  withdrawalWaivedAt     DateTime?
+
+  /// De installatiekaart wordt één keer per ouder getoond en daarna nooit meer.
+  installHintSeen      Boolean    @default(false)
+
+  children           Child[]
+  passwordResets     PasswordReset[]
+  emailVerifications EmailVerification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Wachtwoordherstel. Alleen de hash van het token wordt bewaard, nooit het
+/// token zelf — met leestoegang tot de database mag je geen account kunnen
+/// overnemen.
+model PasswordReset {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// E-mailverificatie, zelfde vorm en zelfde reden als PasswordReset.
+model EmailVerification {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// Tellers voor rate limiting. In de database en niet in het geheugen, zodat de
+/// limiet ook klopt met meerdere serverless instances.
+model RateLimit {
+  id        String   @id @default(cuid())
+  /// Gehasht, dus nooit een leesbaar e-mailadres of IP.
+  key       String   @unique
+  count     Int      @default(1)
+  windowEnd DateTime
+
+  @@index([windowEnd])
+}
+
+model Child {
+  id        String @id @default(cuid())
+  name      String
+  avatar    String @default("fox")   // fox | cat | owl | lion | bee | star
+  ageBand   String @default("4-6")   // "4-6" | "7-9"
+  xp        Int    @default(0)
+  streak    Int    @default(0)
+  lastPlay  DateTime?
+  userId    String
+
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plays     GamePlay[]
+  badges    ChildBadge[]
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Eén maandpakket. releaseAt bepaalt zichtbaarheid.
+model Pack {
+  id          String   @id @default(cuid())
+  slug        String   @unique          // "2026-09-wudu"
+  month       Int                        // 1-12
+  year        Int
+  releaseAt   DateTime
+  isFree      Boolean  @default(false)  // proefpakket, zichtbaar zonder abonnement
+
+  titles      Json                       // { nl: "...", en: "...", fr: "...", de: "..." }
+  descriptions Json
+  coverUrl    String
+
+  assets      Asset[]
+  games       Game[]
+  badges      Badge[]
+
+  createdAt   DateTime @default(now())
+
+  @@unique([year, month])
+  @@index([releaseAt])
+}
+
+model Asset {
+  id     String    @id @default(cuid())
+  kind   AssetKind
+  titles Json
+  fileUrl String
+  ageBand String   @default("4-9")
+  packId String
+
+  pack Pack @relation(fields: [packId], references: [id], onDelete: Cascade)
+
+  @@index([packId])
+}
+
+/// Een spel = engine + JSON-payload. Nieuwe content = nieuwe rij, geen nieuwe code.
+model Game {
+  id      String     @id @default(cuid())
+  slug    String     @unique            // "2026-09-wudu-sequence"
+  engine  GameEngine
+  titles  Json
+  ageBand String     @default("4-6")
+  xp      Int        @default(20)
+  order   Int        @default(0)
+  data    Json                          // engine-specifieke payload, zie sectie 5
+  packId  String
+
+  pack  Pack       @relation(fields: [packId], references: [id], onDelete: Cascade)
+  plays GamePlay[]
+
+  @@index([packId, order])
+}
+
+model GamePlay {
+  id          String   @id @default(cuid())
+  score       Int                       // 0-100
+  completed   Boolean  @default(false)
+  durationSec Int      @default(0)
+  childId     String
+  gameId      String
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  game  Game  @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([childId, gameId])
+  @@index([childId, createdAt])
+}
+
+model Badge {
+  id     String @id @default(cuid())
+  slug   String @unique
+  titles Json
+  iconUrl String
+  packId String?
+
+  pack     Pack?        @relation(fields: [packId], references: [id], onDelete: SetNull)
+  children ChildBadge[]
+}
+
+model ChildBadge {
+  id       String   @id @default(cuid())
+  childId  String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, badgeId])
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@superette/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gedeelde Zod-schema's en types tussen API en PWA",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@superette/pricing": "*",
+    "@superette/vat": "*",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

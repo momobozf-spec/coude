@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy-950: #061630;
+  --color-navy-900: #0b2545;
+  --color-navy-800: #13315c;
+  --color-navy-700: #1d4271;
+  --color-navy-600: #2a5a92;
+  --color-navy-100: #e3eaf3;
+  --color-navy-50: #f1f5fa;
+  --color-canvas: #f6f8fb;
+  --color-line: #dbe2ea;
+  --color-ink: #0f172a;
+  --color-muted: #526072;
+
+  /* Statuskleuren: altijd samen met een tekstlabel gebruikt */
+  --color-ok-50: #ecfdf3;
+  --color-ok-700: #166534;
+  --color-warn-50: #fffbeb;
+  --color-warn-700: #92400e;
+  --color-bad-50: #fef2f2;
+  --color-bad-700: #b91c1c;
+  --color-info-50: #eff6ff;
+  --color-info-700: #1d4ed8;
+  --color-neutral-50: #f1f5f9;
+  --color-neutral-700: #475569;
+
+  --font-sans: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-navy-600);
+  outline-offset: 2px;
+}
+
+.prose-tk p + p {
+  margin-top: 0.6rem;
+}
+
+table.tk {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+table.tk th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-navy-50);
+}
+table.tk td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--color-line);
+  vertical-align: top;
+}
+table.tk tr:last-child td {
+  border-bottom: 0;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="url"],
+input[type="number"],
+input[type="date"],
+input[type="file"],
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--color-line);
+  border-radius: 6px;
+  padding: 7px 10px;
+  background: #fff;
+  font-size: 14px;
+}
+textarea {
+  min-height: 80px;
+}
+label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-navy-900);
+}

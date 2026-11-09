@@ -5,6 +5,7 @@ import { getMessages } from '@/i18n';
 import { isLocale } from '@/i18n/config';
 import { AuthForm } from '@/components/auth/auth-form';
 import { Card } from '@/components/ui/surface';
+import { SiteFooter } from '@/components/legal/site-footer';
 import { DisclaimerNotice } from '@/components/legal/legal-notices';
 import { registerAction } from '@/app/[locale]/(auth)/actions';
 
@@ -41,6 +42,17 @@ export default async function RegisterPage({
         />
       </Card>
 
+      <p className="mt-4 text-xs text-slate-600">
+        {t.auth.termsNotice}{' '}
+        <Link href={`/${locale}/legal/terms`} className="underline underline-offset-2">
+          {locale === 'nl' ? 'Voorwaarden' : 'Conditions'}
+        </Link>
+        {' · '}
+        <Link href={`/${locale}/legal/privacy`} className="underline underline-offset-2">
+          {locale === 'nl' ? 'Privacy' : 'Confidentialité'}
+        </Link>
+      </p>
+
       <p className="mt-5 text-sm text-slate-700">
         {t.auth.alreadyHaveAccount}{' '}
         <Link
@@ -54,6 +66,7 @@ export default async function RegisterPage({
       <div className="mt-6">
         <DisclaimerNotice locale={locale} />
       </div>
+      <SiteFooter locale={locale} />
     </main>
   );
 }

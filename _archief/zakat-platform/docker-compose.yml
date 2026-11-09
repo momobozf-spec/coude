@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: barakah-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: barakah
+      POSTGRES_PASSWORD: barakah
+      POSTGRES_DB: barakah
+    ports:
+      - '5432:5432'
+    volumes:
+      - barakah-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U barakah -d barakah']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Only started with `docker compose --profile app up`. Day-to-day development
+  # runs `npm run dev` on the host against the database above.
+  app:
+    profiles: ['app']
+    build: .
+    container_name: barakah-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://barakah:barakah@db:5432/barakah?schema=public
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      AUTH_URL: http://localhost:3000
+      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET in your environment}
+      NODE_ENV: production
+    ports:
+      - '3000:3000'
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  barakah-db:

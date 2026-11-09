@@ -1,0 +1,63 @@
+{
+  "slug": "2026-08-eerste-stappen-sequence",
+  "engine": "SEQUENCE",
+  "ageBand": "4-6",
+  "xp": 20,
+  "order": 2,
+  "titles": {
+    "nl": "Zet de stappen op volgorde",
+    "en": "Put the Steps in Order",
+    "fr": "Remets les étapes dans l’ordre",
+    "de": "Bringe die Schritte in die richtige Reihenfolge"
+  },
+  "data": {
+    "prompt": {
+      "nl": "Zo eet je zoals de Profeet ﷺ het ons leerde. Zet de vier stappen op volgorde.",
+      "en": "This is how we eat, the way the Prophet ﷺ taught us. Put the four steps in order.",
+      "fr": "Voilà comment on mange, comme le Prophète ﷺ nous l’a appris. Remets les quatre étapes dans l’ordre.",
+      "de": "So essen wir, wie der Prophet ﷺ es uns gelehrt hat. Bringe die vier Schritte in die richtige Reihenfolge."
+    },
+    "items": [
+      {
+        "id": "seq-bismillah",
+        "label": {
+          "nl": "Zeg: bismillah.",
+          "en": "Say: bismillah.",
+          "fr": "Dis : bismillah.",
+          "de": "Sag: Bismillah."
+        },
+        "order": 2
+      },
+      {
+        "id": "seq-alhamdulillah",
+        "label": {
+          "nl": "Zeg na het eten: alhamdulillah.",
+          "en": "When you are finished, say: alhamdulillah.",
+          "fr": "Quand tu as fini, dis : alhamdoulillah.",
+          "de": "Wenn du fertig bist, sag: Alhamdulillah."
+        },
+        "order": 4
+      },
+      {
+        "id": "seq-handen-wassen",
+        "label": {
+          "nl": "Was eerst je handen.",
+          "en": "First wash your hands.",
+          "fr": "Lave-toi d’abord les mains.",
+          "de": "Wasch dir zuerst die Hände."
+        },
+        "order": 1
+      },
+      {
+        "id": "seq-rechterhand",
+        "label": {
+          "nl": "Eet met je rechterhand.",
+          "en": "Eat with your right hand.",
+          "fr": "Mange avec ta main droite.",
+          "de": "Iss mit deiner rechten Hand."
+        },
+        "order": 3
+      }
+    ]
+  }
+}

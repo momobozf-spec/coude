@@ -1,0 +1,40 @@
+# Vangnet voor gemiste Mollie-webhooks (zie src/app/api/cron/reconcile).
+# Kopieer dit bestand naar .github/workflows/cron.yml.
+#
+# Nodig in GitHub → repository → Settings → Secrets and variables → Actions:
+#   APP_URL      bv. https://layali-test.onrender.com (zonder / op het einde)
+#   CRON_SECRET  de waarde van CRON_SECRET bij layali-test in Render
+
+name: cron
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: App wakker maken
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+        run: |
+          for i in $(seq 1 12); do
+            if curl -fsS --max-time 20 "$APP_URL/api/ready"; then echo; exit 0; fi
+            sleep 15
+          done
+          echo "App niet bereikbaar"; exit 1
+
+      - name: Openstaande betalingen controleren
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -fsS --max-time 300 -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$APP_URL/api/cron/reconcile"
+          echo

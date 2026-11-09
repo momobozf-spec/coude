@@ -1,0 +1,50 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      FS_ENV: production
+    volumes:
+      - ./data:/data
+    expose:
+      - "8000"
+
+  # Dagelijkse taken om 03:15 UTC: wissen na bewaartermijn, mails opnieuw proberen, seintjes, back-up.
+  jobs:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      FS_ENV: production
+    volumes:
+      - ./data:/data
+    depends_on:
+      - app
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          now=$$(date -u +%s); next=$$(date -u -d "tomorrow 03:15" +%s)
+          sleep $$((next - now))
+          python -m app.jobs || echo "dagelijkse job mislukt"
+        done
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      FS_DOMAIN: ${FS_DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  caddy_data:
+  caddy_config:

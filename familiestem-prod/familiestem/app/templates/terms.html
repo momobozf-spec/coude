@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="banner">ONTWERPTEKST — nog na te kijken door een jurist vóór publicatie.</div>
+<h1>Voorwaarden en privacy</h1>
+<h2>Wie</h2>
+<p>Familiestem is een dienst van Marhaba Cooperation BV (ondernemingsnummer BE1037222285). Contact: {{ cfg.SUPPORT_EMAIL or '[e-mailadres invullen]' }}.</p>
+<h2>Wat je koopt</h2>
+<p>Eén pakket voor één verteller: tot {{ cfg.MAX_STORIES }} verhalen, maximaal 10 minuten per opname en 5 uur in totaal, {{ cfg.MAX_PHOTOS_PER_STORY }} foto's per verhaal, tot {{ cfg.MAX_FAMILY }} uitgenodigde lezers. Verzamelen kan {{ cfg.COLLECT_DAYS }} dagen vanaf de toestemming van de verteller, eenmaal gratis verlengbaar met {{ cfg.EXTENSION_DAYS }} dagen. Daarna blijft alles {{ cfg.HOSTING_YEARS }} jaar online; vóór het einde krijg je een bericht om alles te downloaden. Prijs: €{{ '%.2f'|format(cfg.PRICE_EUR_INCL_VAT) }} incl. 21% btw, eenmalig, geen abonnement.</p>
+<h2>Geld terug</h2>
+<p>Je kan binnen 14 dagen na aankoop zonder reden annuleren. Daarnaast: is er 60 dagen na aankoop niets opgenomen, of ben je niet tevreden binnen 30 dagen na de eerste opname, dan betalen we het volledige bedrag terug.</p>
+<h2>Wie beslist</h2>
+<p>De verteller geeft zelf toestemming, keurt teksten goed of duidt iemand aan die dat mag, beslist wie meeleest en kan alles wissen. De koper beheert vragen en uitnodigingen, maar ziet enkel verhalen die de verteller deelt.</p>
+<h2>Privacy</h2>
+<ul>
+<li><strong>Verwerkingsverantwoordelijke:</strong> Marhaba Cooperation BV.</li>
+<li><strong>Grond:</strong> uitvoering van de overeenkomst en de uitdrukkelijke toestemming van de verteller. We gebruiken stemopnames niet om iemand te identificeren of om een stem na te bootsen.</li>
+<li><strong>Verwerkers:</strong> Hetzner Online GmbH (hosting en opslag, Duitsland); OpenAI (spraakherkenning en tekstverwerking via een EU-project met verwerking in Europa, zonder bewaring of training op je gegevens); Brevo / Sendinblue SAS (e-mail, Frankrijk); Stripe (betalingen). Met elk geldt een verwerkersovereenkomst.</li>
+<li><strong>Bewaring:</strong> zoals hierboven; na de termijn wissen we opnames, teksten en foto's. Betaalgegevens bewaren we zolang de boekhoudwet dat vereist. Back-ups worden na 14 dagen overschreven; gewiste gegevens verdwijnen dus ook uit de back-ups binnen 14 dagen.</li>
+<li><strong>Je rechten:</strong> inzage, verbetering, wissen, overdraagbaarheid (download), bezwaar. Klachten: Gegevensbeschermingsautoriteit.</li>
+<li><strong>Beveiliging:</strong> persoonlijke links met lange willekeurige sleutels, optionele pincode, versleutelde verbindingen, foto's ontdaan van locatiegegevens.</li>
+</ul>
+{% endblock %}

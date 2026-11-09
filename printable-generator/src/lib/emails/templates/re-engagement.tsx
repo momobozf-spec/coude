@@ -52,7 +52,7 @@ export function ReEngagementEmail({ name, daysSinceActive, plan, appUrl }: Props
           </Text>
           <Section style={{ textAlign: "center" as const }}>
             <GoldButton href={`${appUrl}/dashboard`}>
-              Upgrade to Pro — $8/month &#8594;
+              Upgrade to Pro &#8594;
             </GoldButton>
           </Section>
         </>

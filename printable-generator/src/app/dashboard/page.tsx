@@ -8,6 +8,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import Link from "next/link";
 import { trackEvent } from "@/lib/analytics";
 import { PLANS } from "@/lib/plans";
+import { PRICES, formatPrice, tbcSuffix } from "@/lib/pricing";
 
 interface UserData {
   id: string;
@@ -40,7 +41,7 @@ function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [referral, setReferral] = useState<ReferralData | null>(null);
   const [activityType, setActivityType] = useState<ActivityType>("coloring");
@@ -73,6 +74,7 @@ function DashboardContent() {
 
   useEffect(() => {
     if (session?.user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch data on mount / when the session becomes available
       fetchUser();
       fetchReferral();
     }
@@ -81,6 +83,7 @@ function DashboardContent() {
   useEffect(() => {
     const upgraded = searchParams.get("upgraded");
     if (upgraded) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- react once to the ?upgraded query parameter
       setSuccess(`Upgraded to ${upgraded === "school" ? "School" : "Pro"}! Unlimited sheets unlocked.`);
       trackEvent("checkout_complete", { plan: upgraded });
       fetchUser();
@@ -219,7 +222,7 @@ function DashboardContent() {
           <div className="rounded-xl p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3" style={{ background: "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)" }}>
             <div className="text-white">
               <p className="font-bold">Unlock unlimited Islamic printables</p>
-              <p className="text-sm text-teal-100">Pro plan from $8/mo &middot; School plan from $33/mo</p>
+              <p className="text-sm text-teal-100">Pro: {formatPrice(PRICES.pro.monthly, locale)}/{t("pricing.month")} &middot; School: {formatPrice(PRICES.school.monthly, locale)}/{t("pricing.month")} {t("pricing.vat")}{tbcSuffix(locale)}</p>
             </div>
             <button onClick={() => handleUpgrade("pro_yearly")} disabled={upgradeLoading} className="bg-white font-bold px-6 py-2 rounded-lg text-sm whitespace-nowrap" style={{ color: "#0d9488" }}>
               {upgradeLoading ? "..." : "Upgrade Now"}
@@ -408,10 +411,10 @@ function DashboardContent() {
 
             <div className="space-y-3 mb-6">
               <button onClick={() => handleUpgrade("pro_yearly")} className="btn-primary w-full py-3">
-                Get Pro &mdash; $8/mo (billed yearly)
+                Get Pro &mdash; {formatPrice(PRICES.pro.yearly, locale)}/{t("pricing.year")}{tbcSuffix(locale)}
               </button>
               <button onClick={() => handleUpgrade("school_yearly")} className="btn-gold w-full py-3">
-                Get School &mdash; $33/mo (25 teachers)
+                Get School &mdash; {formatPrice(PRICES.school.yearly, locale)}/{t("pricing.year")}{tbcSuffix(locale)}
               </button>
             </div>
 

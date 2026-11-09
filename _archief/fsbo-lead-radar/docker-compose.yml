@@ -1,0 +1,83 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: fsbo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fsbo
+      POSTGRES_PASSWORD: fsbo
+      POSTGRES_DB: fsbo
+      # UTF8 afdwingen. Alertberichten beginnen met een emoji; een cluster dat
+      # op een ANSI-codepagina staat weigert die met een encoding-fout.
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --lc-collate=C --lc-ctype=C'
+    ports:
+      - '5432:5432'
+    volumes:
+      - fsbo-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U fsbo -d fsbo']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Alleen met `docker compose --profile app up`. Dagelijkse ontwikkeling draait
+  # `npm run dev` op de host tegen de database hierboven.
+  app:
+    profiles: ['app']
+    build:
+      context: .
+      target: web
+    container_name: fsbo-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://fsbo:fsbo@db:5432/fsbo?schema=public
+      NODE_ENV: production
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?zet ADMIN_PASSWORD in je omgeving}
+      SESSION_SECRET: ${SESSION_SECRET:?zet SESSION_SECRET in je omgeving}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      COLLECTOR_ENABLED_SOURCES: ${COLLECTOR_ENABLED_SOURCES:-fixture-be,demo-be}
+    ports:
+      - '3000:3000'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # De collectors draaien in een eigen container.
+  #
+  # Waarom apart van `app`: het dashboard mag herstart of geschaald worden
+  # zonder dat er een collector-run halverwege afbreekt, en een collector die
+  # vastloopt mag geen webrequest ophouden. Ze delen alleen de database.
+  #
+  # Meerdere replicas mag: de scheduler claimt bronnen atomair, dus twee workers
+  # halen nooit dezelfde bron tegelijk op.
+  worker:
+    profiles: ['app']
+    build:
+      context: .
+      target: worker
+    container_name: fsbo-worker
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://fsbo:fsbo@db:5432/fsbo?schema=public
+      NODE_ENV: production
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?zet ADMIN_PASSWORD in je omgeving}
+      SESSION_SECRET: ${SESSION_SECRET:?zet SESSION_SECRET in je omgeving}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      COLLECTOR_ENABLED_SOURCES: ${COLLECTOR_ENABLED_SOURCES:-fixture-be,demo-be}
+
+volumes:
+  fsbo-db:

@@ -51,6 +51,7 @@ function MazeGame({ level, difficulty, onComplete }: { level: number; difficulty
   const [done, setDone] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset the game board when level/difficulty changes
     setMaze(generateMaze(mazeSize, mazeSize, level * 1000 + mazeSize));
     setPlayerPos([0, 0]); setStars(0); setTimer(timeLimit); setMoves(0); setDone(false);
   }, [level, difficulty, mazeSize, timeLimit]);
@@ -58,6 +59,7 @@ function MazeGame({ level, difficulty, onComplete }: { level: number; difficulty
   // Timer
   useEffect(() => {
     if (done || timeLimit === 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- time is up: end the game
     if (timer <= 0) { setDone(true); onComplete({ level, difficulty, score: stars * 10, stars: 1, timeSeconds: timeLimit, xpEarned: XP_PER_DIFFICULTY[difficulty] }); return; }
     const t = setTimeout(() => setTimer(s => s - 1), 1000);
     return () => clearTimeout(t);

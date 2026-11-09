@@ -1,0 +1,239 @@
+{
+  "slug": "2026-09-wudu-quiz",
+  "engine": "QUIZ",
+  "ageBand": "7-9",
+  "xp": 25,
+  "order": 3,
+  "titles": {
+    "nl": "Wudu-quiz",
+    "en": "Wudu quiz",
+    "fr": "Quiz du wudu",
+    "de": "Wudu-Quiz"
+  },
+  "data": {
+    "questions": [
+      {
+        "id": "q1",
+        "question": {
+          "nl": "Waarmee begin je de wudu?",
+          "en": "How do you begin wudu?",
+          "fr": "Par quoi commences-tu le wudu ?",
+          "de": "Womit beginnst du das Wudu?"
+        },
+        "options": [
+          {
+            "nl": "Met de niyyah in je hart en bismillah",
+            "en": "With the niyyah in your heart and bismillah",
+            "fr": "Par la niyyah dans ton cœur et bismillah",
+            "de": "Mit der Niyyah im Herzen und Bismillah"
+          },
+          {
+            "nl": "Met je schoenen poetsen",
+            "en": "By polishing your shoes",
+            "fr": "En cirant tes chaussures",
+            "de": "Mit dem Schuheputzen"
+          },
+          {
+            "nl": "Met je haar kammen",
+            "en": "By combing your hair",
+            "fr": "En te coiffant",
+            "de": "Mit dem Haarekämmen"
+          }
+        ],
+        "correctIndex": 0,
+        "explanation": {
+          "nl": "De wudu begint in je hart: je bedoelt dat je je wast voor Allah. Daarna zeg je bismillah en was je je handen.",
+          "en": "Wudu begins in your heart: you intend to wash for Allah. Then you say bismillah and wash your hands.",
+          "fr": "Le wudu commence dans ton cœur : tu as l’intention de te laver pour Allah. Ensuite tu dis bismillah et tu laves tes mains.",
+          "de": "Das Wudu beginnt im Herzen: Du hast die Absicht, dich für Allah zu waschen. Danach sagst du Bismillah und wäschst deine Hände."
+        }
+      },
+      {
+        "id": "q2",
+        "question": {
+          "nl": "Hoe vaak was je je gezicht bij de wudu, als sunnah?",
+          "en": "How many times do you wash your face in wudu, as the sunnah?",
+          "fr": "Combien de fois laves-tu ton visage pendant le wudu, selon la sunnah ?",
+          "de": "Wie oft wäschst du beim Wudu dein Gesicht, gemäß der Sunnah?"
+        },
+        "options": [
+          {
+            "nl": "Eén keer",
+            "en": "Once",
+            "fr": "Une fois",
+            "de": "Einmal"
+          },
+          {
+            "nl": "Twee keer",
+            "en": "Twice",
+            "fr": "Deux fois",
+            "de": "Zweimal"
+          },
+          {
+            "nl": "Drie keer",
+            "en": "Three times",
+            "fr": "Trois fois",
+            "de": "Dreimal"
+          }
+        ],
+        "correctIndex": 2,
+        "explanation": {
+          "nl": "Drie keer wassen is de sunnah, de mooie gewoonte. Eén keer goed wassen is al genoeg.",
+          "en": "Washing three times is the sunnah, the beautiful habit. Washing once properly is already enough.",
+          "fr": "Se laver trois fois est la sunnah, la belle habitude. Une seule fois, bien faite, suffit déjà.",
+          "de": "Dreimal waschen ist die Sunnah, die schöne Gewohnheit. Einmal gründlich waschen genügt schon."
+        }
+      },
+      {
+        "id": "q3",
+        "question": {
+          "nl": "Welk deel was je NIET bij de wudu?",
+          "en": "Which part do you NOT wash in wudu?",
+          "fr": "Quelle partie ne laves-tu PAS pendant le wudu ?",
+          "de": "Welchen Körperteil wäschst du beim Wudu NICHT?"
+        },
+        "options": [
+          {
+            "nl": "Je gezicht",
+            "en": "Your face",
+            "fr": "Ton visage",
+            "de": "Dein Gesicht"
+          },
+          {
+            "nl": "Je buik",
+            "en": "Your tummy",
+            "fr": "Ton ventre",
+            "de": "Deinen Bauch"
+          },
+          {
+            "nl": "Je handen",
+            "en": "Your hands",
+            "fr": "Tes mains",
+            "de": "Deine Hände"
+          },
+          {
+            "nl": "Je voeten",
+            "en": "Your feet",
+            "fr": "Tes pieds",
+            "de": "Deine Füße"
+          }
+        ],
+        "correctIndex": 1,
+        "explanation": {
+          "nl": "Bij de wudu was je je handen, mond, neus, gezicht, armen en voeten, en je veegt over je hoofd. Je buik hoort er niet bij.",
+          "en": "In wudu you wash your hands, mouth, nose, face, arms and feet, and you wipe over your head. Your tummy is not part of it.",
+          "fr": "Pendant le wudu, tu laves tes mains, ta bouche, ton nez, ton visage, tes bras et tes pieds, et tu passes tes mains mouillées sur ta tête. Le ventre n’en fait pas partie.",
+          "de": "Beim Wudu wäschst du Hände, Mund, Nase, Gesicht, Arme und Füße und streichst über den Kopf. Der Bauch gehört nicht dazu."
+        }
+      },
+      {
+        "id": "q4",
+        "question": {
+          "nl": "Wat doe je met je hoofd bij de wudu?",
+          "en": "What do you do with your head in wudu?",
+          "fr": "Que fais-tu avec ta tête pendant le wudu ?",
+          "de": "Was machst du beim Wudu mit deinem Kopf?"
+        },
+        "options": [
+          {
+            "nl": "Je veegt er met natte handen overheen",
+            "en": "You wipe over it with wet hands",
+            "fr": "Tu passes tes mains mouillées dessus",
+            "de": "Du streichst mit nassen Händen darüber"
+          },
+          {
+            "nl": "Je giet er een emmer water over",
+            "en": "You pour a bucket of water over it",
+            "fr": "Tu verses un seau d’eau dessus",
+            "de": "Du gießt einen Eimer Wasser darüber"
+          },
+          {
+            "nl": "Je doet er niets mee",
+            "en": "You do nothing with it",
+            "fr": "Tu ne fais rien avec",
+            "de": "Du machst nichts damit"
+          }
+        ],
+        "correctIndex": 0,
+        "explanation": {
+          "nl": "Over je hoofd vegen heet masah: je maakt je handen nat en strijkt zachtjes van voor naar achter over je haar.",
+          "en": "Wiping over your head is called masah: you wet your hands and gently stroke from front to back over your hair.",
+          "fr": "Passer les mains sur la tête s’appelle le masah : tu mouilles tes mains et tu caresses doucement tes cheveux d’avant en arrière.",
+          "de": "Das Streichen über den Kopf heißt Masah: Du machst deine Hände nass und streichst sanft von vorn nach hinten über dein Haar."
+        }
+      },
+      {
+        "id": "q5",
+        "question": {
+          "nl": "Wat zeg je als je met de wudu begint?",
+          "en": "What do you say when you start wudu?",
+          "fr": "Que dis-tu quand tu commences le wudu ?",
+          "de": "Was sagst du, wenn du mit dem Wudu beginnst?"
+        },
+        "options": [
+          {
+            "nl": "Bismillah",
+            "en": "Bismillah",
+            "fr": "Bismillah",
+            "de": "Bismillah"
+          },
+          {
+            "nl": "Alhamdulillah",
+            "en": "Alhamdulillah",
+            "fr": "Alhamdulillah",
+            "de": "Alhamdulillah"
+          },
+          {
+            "nl": "Subhanallah",
+            "en": "Subhanallah",
+            "fr": "Subhanallah",
+            "de": "Subhanallah"
+          }
+        ],
+        "correctIndex": 0,
+        "explanation": {
+          "nl": "Je begint met bismillah, dat betekent ‘in de naam van Allah’. Zo wordt het wassen iets moois.",
+          "en": "You begin with bismillah, which means ‘in the name of Allah’. That turns washing into something beautiful.",
+          "fr": "Tu commences par bismillah, qui veut dire ‘au nom d’Allah’. Ainsi, se laver devient un beau moment.",
+          "de": "Du beginnst mit Bismillah, das heißt ‘im Namen Allahs’. So wird das Waschen zu etwas Schönem."
+        }
+      },
+      {
+        "id": "q6",
+        "question": {
+          "nl": "Wanneer maak je opnieuw wudu?",
+          "en": "When do you make wudu again?",
+          "fr": "Quand refais-tu le wudu ?",
+          "de": "Wann machst du das Wudu erneut?"
+        },
+        "options": [
+          {
+            "nl": "Nadat je naar het toilet bent geweest",
+            "en": "After you have been to the toilet",
+            "fr": "Après être allé aux toilettes",
+            "de": "Nachdem du auf der Toilette warst"
+          },
+          {
+            "nl": "Nadat je een boek hebt gelezen",
+            "en": "After you have read a book",
+            "fr": "Après avoir lu un livre",
+            "de": "Nachdem du ein Buch gelesen hast"
+          },
+          {
+            "nl": "Nadat je met je vriend hebt gelachen",
+            "en": "After you have laughed with your friend",
+            "fr": "Après avoir ri avec ton ami",
+            "de": "Nachdem du mit deinem Freund gelacht hast"
+          }
+        ],
+        "correctIndex": 0,
+        "explanation": {
+          "nl": "Na het toilet is je wudu weg en maak je hem opnieuw. Lezen of lachen verbreekt je wudu niet.",
+          "en": "After the toilet your wudu is gone and you make it again. Reading or laughing does not break your wudu.",
+          "fr": "Après les toilettes, ton wudu n’est plus valable et tu le refais. Lire ou rire ne casse pas ton wudu.",
+          "de": "Nach der Toilette ist dein Wudu ungültig und du machst es neu. Lesen oder Lachen bricht dein Wudu nicht."
+        }
+      }
+    ]
+  }
+}

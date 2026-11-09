@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block nav %}{% endblock %}
+{% block content %}
+<h1>Je pincode</h1>
+{% if fout %}<div class="banner">Die pincode klopt niet. Probeer opnieuw.</div>{% endif %}
+<form class="card" method="post" action="/v/{{ token }}/pincode">
+  <label for="pin">Pincode</label>
+  <input id="pin" type="password" inputmode="numeric" name="pin" maxlength="6" autofocus autocomplete="current-password">
+  <p><button class="btn" type="submit">Openen</button></p>
+  <p class="small">Pincode vergeten? Mail {{ cfg.SUPPORT_EMAIL or 'ons' }}; we helpen je na een korte controle.</p>
+</form>
+{% endblock %}

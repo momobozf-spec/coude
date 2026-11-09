@@ -4,6 +4,14 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 
+// Deterministic "random" star positions (pure render, identical on server and client).
+const STARS = Array.from({ length: 20 }, (_, i) => ({
+  size: 2 + ((i * 7) % 4),
+  left: (i * 37 + 11) % 100,
+  top: (i * 53 + 29) % 100,
+  delay: ((i * 13) % 30) / 10,
+}));
+
 export default function RamadanChallengePage() {
   const { data: session } = useSession();
   const [childName, setChildName] = useState("");
@@ -76,11 +84,11 @@ export default function RamadanChallengePage() {
       {/* Hero with stars */}
       <section className="relative px-4 pt-16 pb-20 text-center overflow-hidden">
         {/* CSS stars */}
-        {Array.from({ length: 20 }).map((_, i) => (
+        {STARS.map((st, i) => (
           <div key={i} className="star" style={{
-            width: 2 + Math.random() * 3, height: 2 + Math.random() * 3,
-            left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`,
-            backgroundColor: "#f5c842", animationDelay: `${Math.random() * 3}s`,
+            width: st.size, height: st.size,
+            left: `${st.left}%`, top: `${st.top}%`,
+            backgroundColor: "#f5c842", animationDelay: `${st.delay}s`,
           }} />
         ))}
 
@@ -134,7 +142,7 @@ export default function RamadanChallengePage() {
               style={{ backgroundColor: "#f5c842", color: "#0f172a" }}>
               {enrolling ? "Loading..." : `Join Now — ${price}`}
             </button>
-            <p className="text-xs text-white/30 mt-2">2,847 families joined &middot; 1 purchase = whole family</p>
+            <p className="text-xs text-white/30 mt-2">1 purchase = whole family</p>
           </div>
         </div>
       </section>
@@ -201,26 +209,6 @@ export default function RamadanChallengePage() {
             ))}
           </div>
           <p className="text-center text-white/30 text-sm mt-4">+ 27 more days of Islamic activities...</p>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="px-4 py-16">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">What Families Say</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              { quote: "My daughter asks every morning: what's today's activity?", name: "Fatima", city: "Rotterdam" },
-              { quote: "Finally something Islamic for my son's age!", name: "Ahmed", city: "Brussels" },
-              { quote: "We printed every sheet, now it's a Ramadan memory book!", name: "Sara", city: "Amsterdam" },
-            ].map((t, i) => (
-              <div key={i} className="rounded-xl p-4" style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
-                <div className="flex gap-1 mb-2 text-sm" style={{ color: "#f5c842" }}>&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                <p className="text-sm text-white/80 italic mb-2">&ldquo;{t.quote}&rdquo;</p>
-                <p className="text-xs text-white/40">{t.name}, {t.city}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 

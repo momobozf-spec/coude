@@ -62,6 +62,7 @@ function WordSearchGame({ level, difficulty, onComplete }: { level: number; diff
 
   useEffect(() => {
     const { grid: g, placed } = createGrid(gridSize, themeWords);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- time is up: end the game
     setGrid(g); setWords(placed); setFound(new Set()); setTimer(timeLimit); setScore(0); setDone(false); setSelecting([]);
   }, [level, difficulty, gridSize, timeLimit]);
 

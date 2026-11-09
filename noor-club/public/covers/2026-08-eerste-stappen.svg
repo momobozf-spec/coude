@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="Eerste stappen">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a6b4a"/>
+      <stop offset="1" stop-color="#125037"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="400" fill="url(#g)"/>
+  <circle cx="545" cy="70" r="120" fill="#c9920a" opacity="0.16"/>
+  <circle cx="90" cy="350" r="90" fill="#e8f2ed" opacity="0.12"/>
+  <text x="48" y="188" font-family="Nunito, sans-serif" font-size="42" font-weight="800" fill="#ffffff">Eerste stappen</text>
+  <text x="48" y="232" font-family="Nunito, sans-serif" font-size="20" fill="#e8f2ed">Het allereerste pakket: je kind leert groeten met salaam, bismil</text>
+  <text x="48" y="342" font-family="Nunito, sans-serif" font-size="16" fill="#c9920a" font-weight="700">Noor Club</text>
+</svg>

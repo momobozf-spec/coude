@@ -26,12 +26,14 @@ export default function LearnPage({ params }: { params: Promise<{ slug: string }
     setCourse(d.course); setLessons(d.lessons || []); setIsEnrolled(d.isEnrolled); setLoading(false);
   }, [slug]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch data on mount / when the session becomes available
   useEffect(() => { fetchData(); }, [fetchData]);
 
   useEffect(() => {
     // Set initial lesson from URL param
     const params = new URLSearchParams(window.location.search);
     const lessonParam = params.get("lesson");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- read ?lesson from the URL after mount
     if (lessonParam) setCurrentIdx(parseInt(lessonParam));
   }, []);
 

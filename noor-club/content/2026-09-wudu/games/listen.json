@@ -1,0 +1,47 @@
+{
+  "slug": "2026-09-wudu-listen",
+  "engine": "LISTEN",
+  "ageBand": "4-6",
+  "xp": 20,
+  "order": 4,
+  "titles": {
+    "nl": "Luister en kies",
+    "en": "Listen and choose",
+    "fr": "Écoute et choisis",
+    "de": "Hör zu und wähle"
+  },
+  "data": {
+    "rounds": [
+      {
+        "id": "l1",
+        "audioUrl": "/audio/2026-09-wudu/l1.mp3",
+        "options": ["الْمَاءُ", "الْيَدُ", "الْفَمُ"],
+        "correctIndex": 0
+      },
+      {
+        "id": "l2",
+        "audioUrl": "/audio/2026-09-wudu/l2.mp3",
+        "options": ["الرِّجْلُ", "الْوَجْهُ", "الْأَنْفُ"],
+        "correctIndex": 1
+      },
+      {
+        "id": "l3",
+        "audioUrl": "/audio/2026-09-wudu/l3.mp3",
+        "options": ["الْيَدُ", "الْمَاءُ", "الرَّأْسُ"],
+        "correctIndex": 2
+      },
+      {
+        "id": "l4",
+        "audioUrl": "/audio/2026-09-wudu/l4.mp3",
+        "options": ["الْوُضُوءُ", "الصَّلَاةُ", "الْمَسْجِدُ"],
+        "correctIndex": 0
+      },
+      {
+        "id": "l5",
+        "audioUrl": "/audio/2026-09-wudu/l5.mp3",
+        "options": ["الْفَمُ", "الْأَنْفُ", "الْيَدُ"],
+        "correctIndex": 1
+      }
+    ]
+  }
+}

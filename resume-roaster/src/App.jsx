@@ -2,6 +2,8 @@ import { useState } from 'react'
 import ResumeInput from './components/ResumeInput'
 import RoastResult from './components/RoastResult'
 import LoadingState from './components/LoadingState'
+import LegalPage from './components/LegalPage'
+import { LEGAL } from './legal/config'
 
 const FEATURES = [
   { icon: '🎯', title: 'Section Scores', desc: 'Detailed breakdown of every resume section' },
@@ -10,16 +12,13 @@ const FEATURES = [
   { icon: '💚', title: 'Real Compliment', desc: "We'll find something nice to say. Probably." },
 ]
 
-const STATS = [
-  { value: '10K+', label: 'Resumes Roasted' },
-  { value: '< 15s', label: 'Average Response' },
-  { value: '4.8/5', label: 'User Rating' },
-]
+const LEGAL_PAGES = { '/privacy': 'privacy', '/terms': 'terms' }
 
 export default function App() {
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const legalPage = LEGAL_PAGES[window.location.pathname.replace(/\/+$/, '')] || null
 
   async function handleSubmit(text, file) {
     setLoading(true)
@@ -40,7 +39,12 @@ export default function App() {
         })
       }
 
-      const data = await res.json()
+      let data
+      try {
+        data = await res.json()
+      } catch {
+        throw new Error(res.status === 413 ? 'File or text too large.' : 'Something went wrong')
+      }
       if (!res.ok) throw new Error(data.error || 'Something went wrong')
       setResult(data)
       window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -87,20 +91,14 @@ export default function App() {
                 New roast
               </button>
             )}
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener"
-              className="text-zinc-500 hover:text-white transition-colors"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.08 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6.02 0c2.3-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
-            </a>
           </nav>
         </div>
       </header>
 
       <main className="flex-1 relative z-10">
-        {!result && !loading && (
+        {legalPage && <LegalPage page={legalPage} />}
+
+        {!legalPage && !result && !loading && (
           <>
             {/* Hero Section */}
             <section className="max-w-6xl mx-auto px-6 pt-20 pb-16">
@@ -125,15 +123,9 @@ export default function App() {
                   savage roasts, and the fixes that actually matter.
                 </p>
 
-                {/* Social proof */}
-                <div className="flex items-center justify-center gap-8 sm:gap-12 mb-16 fade-in stagger-3">
-                  {STATS.map(s => (
-                    <div key={s.label} className="text-center">
-                      <div className="text-2xl font-extrabold text-white">{s.value}</div>
-                      <div className="text-xs text-zinc-500 mt-0.5">{s.label}</div>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-xs text-zinc-500 mb-12 fade-in stagger-3">
+                  Feedback is AI-generated and may be wrong. For self-review only.
+                </p>
               </div>
 
               {/* Input Card */}
@@ -199,10 +191,15 @@ export default function App() {
             <span>🔥</span>
             <span>Resume Roaster</span>
             <span className="text-zinc-700">·</span>
-            <span>Your data is never stored</span>
+            <span>We don&apos;t store your resume</span>
           </div>
-          <div className="text-sm text-zinc-600">
-            Built with Claude AI by passionate developers
+          <nav className="flex items-center gap-4 text-sm text-zinc-500">
+            <a href="/privacy" className="hover:text-white">Privacy</a>
+            <a href="/terms" className="hover:text-white">Terms</a>
+            <a href={`mailto:${LEGAL.email}`} className="hover:text-white">Contact</a>
+          </nav>
+          <div className="text-xs text-zinc-600 text-center sm:text-right">
+            &copy; {new Date().getFullYear()} {LEGAL.name} &middot; {LEGAL.companyNumber}
           </div>
         </div>
       </footer>

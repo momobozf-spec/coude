@@ -1,0 +1,617 @@
+// Orbit - databaseschema
+// Zie ../../../docs/DATA-MODEL.md voor de motivatie achter dit model.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums - identiek aan de `as const`-objecten in @orbit/types
+// ---------------------------------------------------------------------------
+
+enum ItemType {
+  TASK
+  NOTE
+  IDEA
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum Priority {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum IdeaStatus {
+  NEW
+  EXPLORING
+  INTERESTING
+  LATER
+  DEVELOPING
+  CONVERTED
+  REJECTED
+  ARCHIVED
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  ARCHIVED
+}
+
+enum CaptureSource {
+  MANUAL
+  QUICK
+  NLP
+  IMPORT
+  AI
+}
+
+enum ReminderChannel {
+  PUSH
+  LOCAL
+  EMAIL
+}
+
+enum ReminderStatus {
+  SCHEDULED
+  SENT
+  DISMISSED
+  FAILED
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum AuthProvider {
+  GOOGLE
+  APPLE
+  MICROSOFT
+}
+
+enum Platform {
+  IOS
+  ANDROID
+  WEB
+}
+
+enum LinkKind {
+  RELATED
+  BLOCKS
+  DERIVED_FROM
+  MENTIONS
+}
+
+enum ActivityAction {
+  CREATED
+  UPDATED
+  DELETED
+  RESTORED
+  COMPLETED
+  REOPENED
+  CONVERTED
+  ARCHIVED
+  MOVED
+  CONFLICT_RESOLVED
+  LOGGED_IN
+  LOGGED_OUT
+  EXPORTED
+}
+
+enum EntityType {
+  ITEM
+  PROJECT
+  TAG
+  REMINDER
+  ATTACHMENT
+  CHECKLIST_ITEM
+  NOTE_FOLDER
+  USER
+  WORKSPACE
+}
+
+enum ThemePreference {
+  SYSTEM
+  LIGHT
+  DARK
+}
+
+// ---------------------------------------------------------------------------
+// Account en toegang
+// ---------------------------------------------------------------------------
+
+model User {
+  id              String    @id @db.Char(26)
+  email           String    @unique @db.VarChar(254)
+  // Null voor gebruikers die alleen via Google/Apple/Microsoft inloggen.
+  passwordHash    String?   @map("password_hash") @db.VarChar(255)
+  name            String    @db.VarChar(120)
+  avatarUrl       String?   @map("avatar_url") @db.VarChar(2048)
+  locale          String    @default("nl") @db.VarChar(10)
+  timeZone        String    @default("Europe/Brussels") @map("time_zone") @db.VarChar(64)
+  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz(3)
+  lastSeenAt      DateTime? @map("last_seen_at") @db.Timestamptz(3)
+  preferences     Json      @default("{}")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  identities      AuthIdentity[]
+  sessions        Session[]
+  devices         Device[]
+  memberships     Membership[]
+  ownedWorkspaces Workspace[]      @relation("WorkspaceOwner")
+  createdItems    Item[]           @relation("ItemCreator")
+  activities      Activity[]
+  attachments     Attachment[]
+  passwordResets  PasswordReset[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model AuthIdentity {
+  id                String       @id @db.Char(26)
+  userId            String       @map("user_id") @db.Char(26)
+  provider          AuthProvider
+  providerAccountId String       @map("provider_account_id") @db.VarChar(255)
+  email             String?      @db.VarChar(254)
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("auth_identities")
+}
+
+/// Refresh-tokensessies met rotatie. Een hergebruikte token verraadt diefstal;
+/// dan wordt de hele `familyId` ingetrokken.
+model Session {
+  id               String    @id @db.Char(26)
+  userId           String    @map("user_id") @db.Char(26)
+  refreshTokenHash String    @unique @map("refresh_token_hash") @db.VarChar(255)
+  familyId         String    @map("family_id") @db.Char(26)
+  parentId         String?   @map("parent_id") @db.Char(26)
+  deviceId         String?   @map("device_id") @db.Char(26)
+  userAgent        String?   @map("user_agent") @db.VarChar(512)
+  ipAddress        String?   @map("ip_address") @db.VarChar(64)
+  expiresAt        DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt        DateTime? @map("revoked_at") @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  lastUsedAt       DateTime? @map("last_used_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@index([familyId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model PasswordReset {
+  id        String    @id @db.Char(26)
+  userId    String    @map("user_id") @db.Char(26)
+  tokenHash String    @unique @map("token_hash") @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_resets")
+}
+
+model Device {
+  id          String   @id @db.Char(26)
+  userId      String   @map("user_id") @db.Char(26)
+  platform    Platform
+  name        String   @default("") @db.VarChar(120)
+  pushToken   String?  @map("push_token") @db.VarChar(500)
+  lastSyncSeq BigInt   @default(0) @map("last_sync_seq")
+  lastSeenAt  DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([pushToken])
+  @@map("devices")
+}
+
+model Workspace {
+  id        String    @id @db.Char(26)
+  name      String    @db.VarChar(120)
+  slug      String    @unique @db.VarChar(80)
+  ownerId   String    @map("owner_id") @db.Char(26)
+  personal  Boolean   @default(true)
+  settings  Json      @default("{}")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  owner       User            @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  memberships Membership[]
+  projects    Project[]
+  items       Item[]
+  tags        Tag[]
+  folders     NoteFolder[]
+  reminders   Reminder[]
+  attachments Attachment[]
+  links       ItemLink[]
+  itemTags    ItemTag[]
+  activities  Activity[]
+  operations  SyncOperationLog[]
+
+  @@index([ownerId])
+  @@map("workspaces")
+}
+
+model Membership {
+  workspaceId String     @map("workspace_id") @db.Char(26)
+  userId      String     @map("user_id") @db.Char(26)
+  role        MemberRole @default(OWNER)
+  joinedAt    DateTime   @default(now()) @map("joined_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([workspaceId, userId])
+  @@index([userId])
+  @@map("memberships")
+}
+
+// ---------------------------------------------------------------------------
+// Inhoud
+// ---------------------------------------------------------------------------
+
+model Project {
+  id          String        @id @db.Char(26)
+  workspaceId String        @map("workspace_id") @db.Char(26)
+  name        String        @db.VarChar(120)
+  description String?       @db.Text
+  color       String        @default("#4f46e5") @db.VarChar(9)
+  icon        String?       @db.VarChar(32)
+  status      ProjectStatus @default(ACTIVE)
+  priority    Priority      @default(NONE)
+  startDate   DateTime?     @map("start_date") @db.Date
+  endDate     DateTime?     @map("end_date") @db.Date
+  sortKey     String        @map("sort_key") @db.VarChar(200)
+  favorite    Boolean       @default(false)
+  archivedAt  DateTime?     @map("archived_at") @db.Timestamptz(3)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+  serverSeq BigInt    @default(0) @map("server_seq")
+  revision  Int       @default(1)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  items     Item[]
+  ideas     IdeaDetail[] @relation("IdeaConvertedProject")
+
+  @@index([workspaceId, serverSeq])
+  @@index([workspaceId, status, sortKey])
+  @@index([workspaceId, favorite])
+  @@map("projects")
+}
+
+/// De gedeelde kern van taken, notities en ideeen. Zie ARCHITECTURE.md par. 2.
+model Item {
+  id          String        @id @db.Char(26)
+  workspaceId String        @map("workspace_id") @db.Char(26)
+  type        ItemType
+  title       String        @db.VarChar(500)
+  preview     String        @default("") @db.VarChar(500)
+  projectId   String?       @map("project_id") @db.Char(26)
+  inInbox     Boolean       @default(true) @map("in_inbox")
+  favorite    Boolean       @default(false)
+  archivedAt  DateTime?     @map("archived_at") @db.Timestamptz(3)
+  sortKey     String        @map("sort_key") @db.VarChar(200)
+  capturedVia CaptureSource @default(MANUAL) @map("captured_via")
+  createdById String        @map("created_by_id") @db.Char(26)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+  serverSeq BigInt    @default(0) @map("server_seq")
+  revision  Int       @default(1)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project   Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdBy User      @relation("ItemCreator", fields: [createdById], references: [id])
+
+  task      TaskDetail?
+  note      NoteDetail?
+  idea      IdeaDetail?
+  checklist ChecklistItem[]
+  tags      ItemTag[]
+  reminders Reminder[]
+  files     Attachment[]
+  linksFrom ItemLink[]      @relation("LinkFrom")
+  linksTo   ItemLink[]      @relation("LinkTo")
+
+  @@index([workspaceId, serverSeq])
+  @@index([workspaceId, type, deletedAt])
+  @@index([workspaceId, inInbox, createdAt(sort: Desc)])
+  @@index([workspaceId, projectId, type, sortKey])
+  @@index([workspaceId, favorite, updatedAt(sort: Desc)])
+  @@index([workspaceId, updatedAt(sort: Desc)])
+  @@map("items")
+}
+
+model TaskDetail {
+  itemId             String     @id @map("item_id") @db.Char(26)
+  workspaceId        String     @map("workspace_id") @db.Char(26)
+  description        String?    @db.Text
+  status             TaskStatus @default(TODO)
+  priority           Priority   @default(NONE)
+  dueDate            DateTime?  @map("due_date") @db.Date
+  dueTime            String?    @map("due_time") @db.VarChar(5)
+  startDate          DateTime?  @map("start_date") @db.Date
+  completedAt        DateTime?  @map("completed_at") @db.Timestamptz(3)
+  estimateMinutes    Int?       @map("estimate_minutes")
+  recurrence         Json?
+  recurrenceParentId String?    @map("recurrence_parent_id") @db.Char(26)
+  parentTaskId       String?    @map("parent_task_id") @db.Char(26)
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  // De index die alle datumweergaven bedient: Vandaag, Achterstallig, Komend.
+  @@index([workspaceId, status, dueDate])
+  @@index([workspaceId, priority, dueDate])
+  @@index([parentTaskId])
+  @@index([recurrenceParentId])
+  @@map("task_details")
+}
+
+model NoteDetail {
+  itemId       String   @id @map("item_id") @db.Char(26)
+  workspaceId  String   @map("workspace_id") @db.Char(26)
+  content      Json     @default("[]")
+  plainText    String   @default("") @map("plain_text") @db.Text
+  folderId     String?  @map("folder_id") @db.Char(26)
+  pinned       Boolean  @default(false)
+  lastEditedAt DateTime @default(now()) @map("last_edited_at") @db.Timestamptz(3)
+
+  item   Item        @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  folder NoteFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, folderId])
+  @@index([workspaceId, pinned])
+  @@map("note_details")
+}
+
+model IdeaDetail {
+  itemId               String     @id @map("item_id") @db.Char(26)
+  workspaceId          String     @map("workspace_id") @db.Char(26)
+  description          String?    @db.Text
+  category             String?    @db.VarChar(80)
+  status               IdeaStatus @default(NEW)
+  impact               Int?
+  effort               Int?
+  convertedToProjectId String?    @map("converted_to_project_id") @db.Char(26)
+  sourceUrl            String?    @map("source_url") @db.VarChar(2048)
+
+  item             Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  convertedProject Project? @relation("IdeaConvertedProject", fields: [convertedToProjectId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, status])
+  @@index([workspaceId, category])
+  @@map("idea_details")
+}
+
+model ChecklistItem {
+  id          String    @id @db.Char(26)
+  workspaceId String    @map("workspace_id") @db.Char(26)
+  itemId      String    @map("item_id") @db.Char(26)
+  text        String    @db.VarChar(500)
+  done        Boolean   @default(false)
+  doneAt      DateTime? @map("done_at") @db.Timestamptz(3)
+  sortKey     String    @map("sort_key") @db.VarChar(200)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+  serverSeq BigInt    @default(0) @map("server_seq")
+  revision  Int       @default(1)
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, serverSeq])
+  @@index([itemId, sortKey])
+  @@map("checklist_items")
+}
+
+model Tag {
+  id          String @id @db.Char(26)
+  workspaceId String @map("workspace_id") @db.Char(26)
+  name        String @db.VarChar(50)
+  slug        String @db.VarChar(64)
+  color       String @default("#64748b") @db.VarChar(9)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+  serverSeq BigInt    @default(0) @map("server_seq")
+  revision  Int       @default(1)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  items     ItemTag[]
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId, serverSeq])
+  @@map("tags")
+}
+
+model ItemTag {
+  itemId      String   @map("item_id") @db.Char(26)
+  tagId       String   @map("tag_id") @db.Char(26)
+  workspaceId String   @map("workspace_id") @db.Char(26)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(3)
+  serverSeq   BigInt   @default(0) @map("server_seq")
+
+  item      Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tag       Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, tagId])
+  @@index([workspaceId, tagId, itemId])
+  @@index([workspaceId, serverSeq])
+  @@map("item_tags")
+}
+
+model NoteFolder {
+  id          String  @id @db.Char(26)
+  workspaceId String  @map("workspace_id") @db.Char(26)
+  name        String  @db.VarChar(120)
+  parentId    String? @map("parent_id") @db.Char(26)
+  icon        String? @db.VarChar(32)
+  color       String? @db.VarChar(9)
+  sortKey     String  @map("sort_key") @db.VarChar(200)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+  serverSeq BigInt    @default(0) @map("server_seq")
+  revision  Int       @default(1)
+
+  workspace Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parent    NoteFolder?  @relation("FolderTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children  NoteFolder[] @relation("FolderTree")
+  notes     NoteDetail[]
+
+  @@index([workspaceId, serverSeq])
+  @@index([workspaceId, parentId, sortKey])
+  @@map("note_folders")
+}
+
+model Reminder {
+  id            String          @id @db.Char(26)
+  workspaceId   String          @map("workspace_id") @db.Char(26)
+  itemId        String          @map("item_id") @db.Char(26)
+  remindAt      DateTime        @map("remind_at") @db.Timestamptz(3)
+  offsetMinutes Int?            @map("offset_minutes")
+  channel       ReminderChannel @default(PUSH)
+  status        ReminderStatus  @default(SCHEDULED)
+  sentAt        DateTime?       @map("sent_at") @db.Timestamptz(3)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+  serverSeq BigInt    @default(0) @map("server_seq")
+  revision  Int       @default(1)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  item      Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  // De scheduler-query: alleen wat nog moet afgaan.
+  @@index([status, remindAt])
+  @@index([workspaceId, serverSeq])
+  @@index([itemId])
+  @@map("reminders")
+}
+
+model Attachment {
+  id           String  @id @db.Char(26)
+  workspaceId  String  @map("workspace_id") @db.Char(26)
+  itemId       String  @map("item_id") @db.Char(26)
+  fileName     String  @map("file_name") @db.VarChar(255)
+  mimeType     String  @map("mime_type") @db.VarChar(127)
+  sizeBytes    Int     @map("size_bytes")
+  storageKey   String  @unique @map("storage_key") @db.VarChar(512)
+  checksum     String  @db.VarChar(64)
+  width        Int?
+  height       Int?
+  uploadedById String  @map("uploaded_by_id") @db.Char(26)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+  serverSeq BigInt    @default(0) @map("server_seq")
+  revision  Int       @default(1)
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  item       Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  uploadedBy User      @relation(fields: [uploadedById], references: [id])
+
+  @@index([workspaceId, serverSeq])
+  @@index([itemId])
+  @@map("attachments")
+}
+
+model ItemLink {
+  fromItemId  String    @map("from_item_id") @db.Char(26)
+  toItemId    String    @map("to_item_id") @db.Char(26)
+  workspaceId String    @map("workspace_id") @db.Char(26)
+  kind        LinkKind  @default(RELATED)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(3)
+  serverSeq   BigInt    @default(0) @map("server_seq")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  from      Item      @relation("LinkFrom", fields: [fromItemId], references: [id], onDelete: Cascade)
+  to        Item      @relation("LinkTo", fields: [toItemId], references: [id], onDelete: Cascade)
+
+  @@id([fromItemId, toItemId, kind])
+  @@index([workspaceId, serverSeq])
+  @@index([toItemId])
+  @@map("item_links")
+}
+
+/// Audit log en activiteitenfeed in een.
+model Activity {
+  id          String         @id @db.Char(26)
+  workspaceId String         @map("workspace_id") @db.Char(26)
+  actorId     String?        @map("actor_id") @db.Char(26)
+  entityType  EntityType     @map("entity_type")
+  entityId    String         @map("entity_id") @db.Char(26)
+  action      ActivityAction
+  payload     Json?
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actor     User?     @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@index([entityType, entityId])
+  @@map("activities")
+}
+
+/// Maakt sync-push idempotent: dezelfde operationId wordt nooit twee keer toegepast.
+model SyncOperationLog {
+  operationId String   @id @map("operation_id") @db.Char(26)
+  workspaceId String   @map("workspace_id") @db.Char(26)
+  deviceId    String   @map("device_id") @db.Char(26)
+  entity      String   @db.VarChar(40)
+  entityId    String   @map("entity_id") @db.Char(26)
+  outcome     String   @db.VarChar(20)
+  appliedAt   DateTime @default(now()) @map("applied_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, appliedAt])
+  @@map("sync_operations")
+}

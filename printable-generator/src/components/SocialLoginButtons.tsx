@@ -8,6 +8,13 @@ interface Props {
   callbackUrl?: string;
 }
 
+// Only providers that are configured on the server should be shown.
+// NEXT_PUBLIC_OAUTH_PROVIDERS = comma-separated list: google,microsoft,apple
+const enabled = (process.env.NEXT_PUBLIC_OAUTH_PROVIDERS || "")
+  .split(",")
+  .map((p) => p.trim().toLowerCase())
+  .filter(Boolean);
+
 export default function SocialLoginButtons({ callbackUrl = "/dashboard" }: Props) {
   const { t } = useI18n();
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
@@ -17,9 +24,12 @@ export default function SocialLoginButtons({ callbackUrl = "/dashboard" }: Props
     await signIn(provider, { callbackUrl });
   }
 
+  if (enabled.length === 0) return null;
+
   return (
     <div className="space-y-2.5">
       {/* Google */}
+      {enabled.includes("google") && (
       <button
         onClick={() => handleSocialLogin("google")}
         disabled={!!loadingProvider}
@@ -33,8 +43,10 @@ export default function SocialLoginButtons({ callbackUrl = "/dashboard" }: Props
         </svg>
         {loadingProvider === "google" ? "..." : t("auth.social.google")}
       </button>
+      )}
 
       {/* Microsoft */}
+      {enabled.includes("microsoft") && (
       <button
         onClick={() => handleSocialLogin("microsoft-entra-id")}
         disabled={!!loadingProvider}
@@ -48,8 +60,10 @@ export default function SocialLoginButtons({ callbackUrl = "/dashboard" }: Props
         </svg>
         {loadingProvider === "microsoft-entra-id" ? "..." : t("auth.social.microsoft")}
       </button>
+      )}
 
       {/* Apple */}
+      {enabled.includes("apple") && (
       <button
         onClick={() => handleSocialLogin("apple")}
         disabled={!!loadingProvider}
@@ -60,6 +74,7 @@ export default function SocialLoginButtons({ callbackUrl = "/dashboard" }: Props
         </svg>
         {loadingProvider === "apple" ? "..." : t("auth.social.apple")}
       </button>
+      )}
     </div>
   );
 }

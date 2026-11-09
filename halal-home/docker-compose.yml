@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: halalhome-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: halalhome
+      POSTGRES_PASSWORD: halalhome
+      POSTGRES_DB: halalhome
+    ports:
+      # 5433 naar buiten, zodat een lokaal geïnstalleerde Postgres op 5432 niet
+      # in de weg zit. Dit is het adres dat in .env.example staat.
+      - '5433:5432'
+    volumes:
+      - halalhome-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U halalhome -d halalhome']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: halalhome-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Binnen het compose-netwerk praat de app met de container op 5432.
+      DATABASE_URL: postgresql://halalhome:halalhome@db:5432/halalhome?schema=public
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      AUTH_SECRET: ${AUTH_SECRET:?zet AUTH_SECRET in je .env}
+      AUTH_TRUST_HOST: 'true'
+      STORAGE_PROVIDER: local
+      STORAGE_LOCAL_DIR: /app/.storage
+      STORAGE_SIGNING_SECRET: ${STORAGE_SIGNING_SECRET:?zet STORAGE_SIGNING_SECRET in je .env}
+      AI_ENABLED: ${AI_ENABLED:-false}
+      AI_PROVIDER: ${AI_PROVIDER:-anthropic}
+      AI_MODEL: ${AI_MODEL:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      PLACES_PROVIDER: ${PLACES_PROVIDER:-fixture}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - '3000:3000'
+    volumes:
+      # Documenten overleven een herstart van de container. In productie hoort
+      # hier object storage; zie STORAGE_PROVIDER=s3.
+      - halalhome-storage:/app/.storage
+
+volumes:
+  halalhome-db-data:
+  halalhome-storage:

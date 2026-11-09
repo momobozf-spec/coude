@@ -53,6 +53,7 @@ function SudokuGame({ level, difficulty, onComplete }: { level: number; difficul
 
   useEffect(() => {
     const { puzzle, solution: sol } = generateSudoku(givenCount, level * 100 + givenCount);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset the game board when level/difficulty changes
     setGrid(puzzle.map(r => [...r]));
     setSolution(sol);
     setOriginal(puzzle.map(r => r.map(c => c !== 0)));

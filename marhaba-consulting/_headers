@@ -1,0 +1,12 @@
+# Security headers voor Cloudflare Pages / Netlify (zelfde syntax).
+# Formulier-endpoint ingesteld in config.js? Voeg de origin toe aan connect-src en form-action.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; form-action 'self' mailto:; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  X-Frame-Options: DENY
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -1,0 +1,13 @@
+{
+  // tsconfig.json is de build-config (alleen src/, met rootDir en outDir).
+  // Deze breidt hem uit tot alles wat we willen typechecken: tests, seed en de
+  // configbestanden in de root. Zonder deze splitsing zou `tsc --noEmit` de
+  // tests missen, of zou de build proberen tests te compileren.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts", "prisma/**/*.ts", "*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

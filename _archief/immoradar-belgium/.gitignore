@@ -1,0 +1,21 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Lokale ontwikkeldatabase (npm run dev:db)
+.devdb/
+
+.env
+.env.local
+.env.*.local
+
+*.tsbuildinfo
+coverage/
+.DS_Store
+Thumbs.db
+
+# Ontwikkelrommel
+.tmp/
+*.log

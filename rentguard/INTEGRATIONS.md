@@ -107,21 +107,38 @@ bij staan. Zie `docs/decisions/0003-bewijswaarde-framing.md`.
 
 ---
 
-## Stripe — CONFIGURATION REQUIRED
+## Stripe — CONFIGURATION REQUIRED (code klaar)
+
+Checkout (`src/app/[locale]/(app)/billing/actions.ts`) en de gesigneerde,
+idempotente webhook (`src/app/api/stripe/webhook/route.ts`,
+logica in `src/lib/billing/webhook.ts`, getest in `webhook.test.ts`) zijn
+gebouwd. Zie README §Betalingen voor de exacte stappen.
 
 **Wat je moet doen**
 
-1. Zet `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` en
-   `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`.
-2. Activeer **Bancontact** naast kaart in het Stripe-dashboard. In België is
-   Bancontact voor veel gebruikers het enige betaalmiddel dat ze gewend zijn.
-3. Maak de prijzen aan en zet de price-id's in de tabel `pricing_config`.
-   Bedragen zijn admin-configureerbaar; ze staan niet in de code.
+1. Zet `STRIPE_SECRET_KEY` en `STRIPE_WEBHOOK_SECRET`
+   (`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is niet nodig: Checkout is hosted).
+2. Activeer **Bancontact** naast kaart in het Stripe-dashboard.
+3. Maak per formule een product + prijs aan en zet de Price-ID's in
+   `STRIPE_PRICE_DEPOSIT_RECOVERY`, `STRIPE_PRICE_RELOCATION_PASS` (en
+   `STRIPE_PRICE_TENANT_PROTECT` als het abonnement ooit aan gaat).
 
-**Formules** (bedragen in `pricing_config`, aanpasbaar via de admin)
+**Formules** — bedragen zoals in de migratie `20260829000003_reference_data.sql`.
+**Te bevestigen** door de eigenaar; de app toont het bedrag uit
+`pricing_config`, Stripe rekent af met de Price-ID. Houd ze gelijk.
 
-| plan_key | Soort | Bedrag |
-|---|---|---|
+| plan_key | Soort | Bedrag (te bevestigen) | Te koop |
+|---|---|---|---|
+| `deposit_recovery` | eenmalig, per woning | € 29,99 | ja, als Price-ID gezet |
+| `relocation_pass` | eenmalig, per woning | € 49,99 | ja, als Price-ID gezet |
+| `tenant_protect` | abonnement | € 4,99 / maand | nee — achter `FEATURE_TENANT_PROTECT_SUBSCRIPTION` (de functies die het ontgrendelt bestaan nog niet) |
+| `free_checkin` | gratis | € 0 | automatisch |
+
+Toegangsrechten worden uitsluitend server-side toegekend, in `entitlements`. De
+client kan ze lezen, niet schrijven. Webhooks controleren de handtekening en
+worden idempotent verwerkt via `stripe_events`.
+
+---|---|---|
 | `tenant_protect` | abonnement | € 4,99 / maand |
 | `deposit_recovery` | eenmalig | € 29,99 |
 | `relocation_pass` | eenmalig | € 49,99 |

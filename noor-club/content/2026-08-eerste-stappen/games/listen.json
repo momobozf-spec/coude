@@ -1,0 +1,41 @@
+{
+  "slug": "2026-08-eerste-stappen-listen",
+  "engine": "LISTEN",
+  "ageBand": "4-6",
+  "xp": 20,
+  "order": 4,
+  "titles": {
+    "nl": "Luister en wijs de letter aan",
+    "en": "Listen and Pick the Letter",
+    "fr": "Écoute et choisis la lettre",
+    "de": "Hör zu und wähle den Buchstaben"
+  },
+  "data": {
+    "rounds": [
+      {
+        "id": "listen-alif",
+        "audioUrl": "/audio/2026-08-eerste-stappen/listen-alif.mp3",
+        "options": ["ا", "ب", "ت"],
+        "correctIndex": 0
+      },
+      {
+        "id": "listen-ba",
+        "audioUrl": "/audio/2026-08-eerste-stappen/listen-ba.mp3",
+        "options": ["ت", "ب", "ث"],
+        "correctIndex": 1
+      },
+      {
+        "id": "listen-ta",
+        "audioUrl": "/audio/2026-08-eerste-stappen/listen-ta.mp3",
+        "options": ["ن", "ث", "ت"],
+        "correctIndex": 2
+      },
+      {
+        "id": "listen-jim",
+        "audioUrl": "/audio/2026-08-eerste-stappen/listen-jim.mp3",
+        "options": ["ح", "ج", "خ"],
+        "correctIndex": 1
+      }
+    ]
+  }
+}

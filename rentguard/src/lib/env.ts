@@ -9,6 +9,12 @@ import { z } from 'zod';
  * alsof de functie werkt. Zie INTEGRATIONS.md.
  */
 
+/** "true"/"1" = aan; al de rest (ook ontbrekend) = uit. */
+const booleanFlag = z
+  .string()
+  .optional()
+  .transform((value) => value === 'true' || value === '1');
+
 const serverSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
@@ -31,6 +37,24 @@ const serverSchema = z.object({
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1).optional(),
+  // Stripe Price-ID's (price_...). Bedragen staan in Stripe, niet in de code.
+  STRIPE_PRICE_DEPOSIT_RECOVERY: z.string().startsWith('price_').optional(),
+  STRIPE_PRICE_RELOCATION_PASS: z.string().startsWith('price_').optional(),
+  STRIPE_PRICE_TENANT_PROTECT: z.string().startsWith('price_').optional(),
+  // Alleen voor een staging-omgeving: laat sk_test_-sleutels toe in productie.
+  ALLOW_STRIPE_TEST_KEYS_IN_PRODUCTION: booleanFlag,
+
+  // Feature-flags. Standaard UIT; zet expliciet op "true" om in te schakelen.
+  // Waarborgbrieven (ingebrekestelling) blijven uit tot na juridische review.
+  FEATURE_DEPOSIT_LETTERS: booleanFlag,
+  // Het abonnement ontgrendelt functies (assistent, contractscan, audits) die
+  // nog niet gebouwd zijn; daarom standaard niet te koop.
+  FEATURE_TENANT_PROTECT_SUBSCRIPTION: booleanFlag,
+
+  // Uitbater (wettelijke vermeldingen, privacyverklaring, voorwaarden).
+  // Straat + huisnummer is (nog) onbekend: verplicht in te vullen vóór lancering.
+  LEGAL_ENTITY_ADDRESS: z.string().trim().min(1).optional(),
+  LEGAL_CONTACT_EMAIL: z.string().email().optional(),
 
   REGISTERED_MAIL_PROVIDER: z
     .enum(['digiconnect', 'none'])

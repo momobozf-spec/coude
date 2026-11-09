@@ -28,6 +28,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const saved = localStorage.getItem("noor-locale") as Locale | null;
     if (saved && translations[saved]) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync locale from localStorage after mount (not available during SSR)
       setLocaleState(saved);
     } else {
       // Auto-detect from browser

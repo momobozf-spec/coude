@@ -178,7 +178,7 @@ export async function getCommunityStats(): Promise<{
   upcomingEvents: number;
 }> {
   if (!isConfigured()) {
-    return { totalMembers: 847, totalPosts: 234, upcomingEvents: 2 }; // Demo data
+    return { totalMembers: 0, totalPosts: 0, upcomingEvents: 0 }; // Circle not configured: no numbers
   }
 
   try {

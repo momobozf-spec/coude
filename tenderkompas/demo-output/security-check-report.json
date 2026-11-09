@@ -1,0 +1,98 @@
+{
+  "ranAt": "2026-10-23T01:34:34.015Z",
+  "base": "http://localhost:3000",
+  "passed": 18,
+  "failed": 0,
+  "results": [
+    {
+      "check": "anoniem: document B",
+      "ok": true,
+      "detail": "verwacht 401"
+    },
+    {
+      "check": "anoniem: kansdetail → login",
+      "ok": true,
+      "detail": "http://localhost:3000/login"
+    },
+    {
+      "check": "A ziet eigen kans",
+      "ok": true,
+      "detail": "verwacht 200"
+    },
+    {
+      "check": "A: kans van B (geldig id, andere org)",
+      "ok": true,
+      "detail": "verwacht 404"
+    },
+    {
+      "check": "A: niet-gepubliceerde kans",
+      "ok": true,
+      "detail": "verwacht 404"
+    },
+    {
+      "check": "A: verzonnen uuid",
+      "ok": true,
+      "detail": "verwacht 404"
+    },
+    {
+      "check": "A: ongeldig id (injectie)",
+      "ok": true,
+      "detail": "verwacht 404"
+    },
+    {
+      "check": "A: document van B",
+      "ok": true,
+      "detail": "verwacht 404"
+    },
+    {
+      "check": "A: digest-export van B",
+      "ok": true,
+      "detail": "verwacht 404"
+    },
+    {
+      "check": "A: beheer-beoordeling van B",
+      "ok": true,
+      "detail": "verwacht 404"
+    },
+    {
+      "check": "A: beheer-klantpagina B",
+      "ok": true,
+      "detail": "verwacht 404"
+    },
+    {
+      "check": "ingetrokken kans niet bij open kansen",
+      "ok": true,
+      "detail": "open-tab vs. afgesloten-tab"
+    },
+    {
+      "check": "geldige kans wel bij open kansen",
+      "ok": true,
+      "detail": "open-tab"
+    },
+    {
+      "check": "vervalste feedback op kans van B geweigerd",
+      "ok": true,
+      "detail": "http://localhost:3000/portal/kansen/7c5a5c51-85a0-4648-8c33-a3b1bd3bd944?fout=Geen+toegang+tot+deze+kans."
+    },
+    {
+      "check": "vervalst volgen van kans B geweigerd",
+      "ok": true,
+      "detail": "0 rijen"
+    },
+    {
+      "check": "profiel B niet wijzigbaar via geïnjecteerd organizationId",
+      "ok": true,
+      "detail": "B=DEMO B A=GEHACKT"
+    },
+    {
+      "check": "admin-actie (goedkeuren) door klant met vervalste request",
+      "ok": true,
+      "detail": "HTTP 409, status nu to_review"
+    },
+    {
+      "check": "admin-actie door anonieme request",
+      "ok": true,
+      "detail": "HTTP 409, status nu to_review"
+    }
+  ]
+}

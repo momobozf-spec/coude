@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <title>Instapklare woning met tuin — 9100 Sint-Niklaas</title>
+    <!--
+      Momentopname van hoe een vastgoedadvertentie er gestructureerd uitziet
+      wanneer een site schema.org-data meelevert. Verzonnen inhoud; dient om de
+      JSON-LD-parser te testen zonder een echte site aan te raken.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "RealEstateListing",
+        "url": "https://fixtures.local/te-koop/9100/instapklare-woning-met-tuin",
+        "name": "Instapklare woning met tuin",
+        "description": "Wij verkopen onze woning zonder makelaar. Drie slaapkamers, 132 m² bewoonbare oppervlakte, zuidgerichte tuin en garage. Alles instapklaar. Bel mij op 0472 33 44 55.",
+        "datePosted": "2026-08-16T07:12:00+02:00",
+        "identifier": "SNK-77120",
+        "offers": {
+          "@type": "Offer",
+          "price": "312000",
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "businessFunction": "http://purl.org/goodrelations/v1#Sell"
+        },
+        "about": {
+          "@type": "SingleFamilyResidence",
+          "numberOfBedrooms": 3,
+          "floorSize": { "@type": "QuantitativeValue", "value": 132, "unitCode": "MTK" },
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Klapperbeekstraat 91",
+            "postalCode": "9100",
+            "addressLocality": "Sint-Niklaas",
+            "addressCountry": "BE"
+          }
+        },
+        "seller": {
+          "@type": "Person",
+          "name": "Bart Willems",
+          "telephone": "+32472334455"
+        }
+      }
+    </script>
+    <!-- Een tweede, kapot blok: de parser hoort dit over te slaan en door te gaan. -->
+    <script type="application/ld+json">
+      { "@type": "BreadcrumbList", "itemListElement": [ }
+    </script>
+  </head>
+  <body>
+    <h1>Instapklare woning met tuin</h1>
+    <p class="price">&euro; 312.000</p>
+    <p class="location">9100 Sint-Niklaas</p>
+  </body>
+</html>

@@ -1,0 +1,59 @@
+# docker compose -f docker-compose.alfred.yml up -d
+# API with embedded workers + scheduler, backed by PostgreSQL. Put a TLS-terminating reverse proxy
+# (Caddy, nginx, Traefik) in front of port 8787 and set ALFRED_PUBLIC_URL to the https URL, or give
+# the api container ALFRED_TLS_CERT / ALFRED_TLS_KEY. For separate processes set
+# ALFRED_EMBEDDED_WORKERS=0 on `api` and enable the `worker` / `scheduler` services.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: alfred
+      POSTGRES_USER: alfred
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    volumes:
+      - alfred-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alfred -d alfred"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.alfred
+    env_file: .env.alfred
+    environment:
+      DATABASE_URL: postgres://alfred:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/alfred
+      ALFRED_EMBEDDED_WORKERS: "1"
+      ALFRED_LOG_FORMAT: json
+      ALFRED_TRUST_PROXY: "1"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8787:8787"
+    restart: unless-stopped
+
+  # worker:
+  #   build: { context: ., dockerfile: Dockerfile.alfred }
+  #   env_file: .env.alfred
+  #   environment:
+  #     DATABASE_URL: postgres://alfred:${POSTGRES_PASSWORD}@db:5432/alfred
+  #   depends_on: { db: { condition: service_healthy } }
+  #   command: ["npx", "tsx", "server/worker.ts"]
+  #   restart: unless-stopped
+  #
+  # scheduler:
+  #   build: { context: ., dockerfile: Dockerfile.alfred }
+  #   env_file: .env.alfred
+  #   environment:
+  #     DATABASE_URL: postgres://alfred:${POSTGRES_PASSWORD}@db:5432/alfred
+  #   depends_on: { db: { condition: service_healthy } }
+  #   command: ["npx", "tsx", "server/scheduler.ts"]
+  #   restart: unless-stopped
+
+volumes:
+  alfred-pg:

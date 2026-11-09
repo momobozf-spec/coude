@@ -1,0 +1,205 @@
+{
+ "sheets": {
+  "Leads": [
+   [
+    "id",
+    "ontvangen",
+    "status",
+    "lang",
+    "postcode",
+    "gemeente",
+    "brandstof",
+    "merk",
+    "leeftijd",
+    "situatie",
+    "offerte",
+    "offerte_bedrag",
+    "termijn",
+    "eigenaar",
+    "naam",
+    "telefoon",
+    "email",
+    "opmerking",
+    "pagina",
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_term",
+    "gclid",
+    "pogingen",
+    "huidige_partner",
+    "geaccepteerd_door",
+    "geaccepteerd_op",
+    "prijs",
+    "credit_reden",
+    "factuurmaand",
+    "notities"
+   ]
+  ],
+  "Partners": [
+   [
+    "partner_id",
+    "bedrijf",
+    "contactpersoon",
+    "email",
+    "telefoon",
+    "kbo",
+    "btw_nummer",
+    "erkenning_bron",
+    "erkenningsnrs",
+    "erkenning_gecontroleerd_op",
+    "postcodes",
+    "diensten",
+    "status",
+    "max_per_week",
+    "prijs_per_aanvraag",
+    "pilot_getekend_op",
+    "notities"
+   ],
+   [
+    "P1",
+    "DEMO Verwarming Noord (fictief)",
+    "Demo Ann",
+    "partner1@ketelcheck.lokaal",
+    "+3220000001",
+    "0000.000.001",
+    "BE0000000001",
+    "demo",
+    "DEMO-1",
+    "2026-10-23",
+    "1000-1299;1500-1999",
+    "vervanging_gas",
+    "open",
+    5,
+    80,
+    "2026-10-23",
+    "demo"
+   ],
+   [
+    "P2",
+    "DEMO Thermo Rand (fictief)",
+    "Demo Bert",
+    "partner2@ketelcheck.lokaal",
+    "+3220000002",
+    "0000.000.002",
+    "BE0000000002",
+    "demo",
+    "DEMO-2",
+    "2026-10-23",
+    "1000-1299;1500-1999",
+    "vervanging_gas",
+    "open",
+    5,
+    80,
+    "2026-10-23",
+    "demo"
+   ]
+  ],
+  "Toewijzingen": [
+   [
+    "token",
+    "lead_id",
+    "partner_id",
+    "verstuurd_op",
+    "vervalt_op",
+    "resultaat",
+    "resultaat_op",
+    "prijs"
+   ]
+  ],
+  "Factuurvoorstel": [
+   [
+    "maand",
+    "partner_id",
+    "bedrijf",
+    "btw_nummer",
+    "aantal",
+    "bedrag_excl_btw",
+    "btw_21",
+    "totaal_incl_btw",
+    "lead_ids",
+    "OPMERKING"
+   ]
+  ],
+  "Fouten": [
+   [
+    "tijdstip",
+    "context",
+    "fout"
+   ]
+  ],
+  "Config": [
+   [
+    "sleutel",
+    "waarde",
+    "uitleg"
+   ],
+   [
+    "BRAND",
+    "KetelCheck",
+    "Merknaam in e-mails"
+   ],
+   [
+    "ADMIN_EMAIL",
+    "beheer@ketelcheck.lokaal",
+    "Jouw e-mail voor meldingen (bevatten GEEN contactgegevens van aanvragers)"
+   ],
+   [
+    "REPLY_TO",
+    "beheer@ketelcheck.lokaal",
+    "Reply-to adres in mails naar aanvragers/partners"
+   ],
+   [
+    "WEB_APP_URL",
+    "http://localhost:4300/exec",
+    "URL van deze web app (eindigt op /exec) — nodig voor de partnerlinks"
+   ],
+   [
+    "ACCEPT_HOURS",
+    24,
+    "Uren dat een partnerlink geldig is om te aanvaarden/weigeren"
+   ],
+   [
+    "CREDIT_HOURS",
+    72,
+    "Uren na aanvaarden waarin een partner credit kan vragen"
+   ],
+   [
+    "MAX_PARTNERS",
+    2,
+    "Maximaal aantal partners per aanvraag (na elkaar, nooit tegelijk)"
+   ],
+   [
+    "DUP_DAYS",
+    90,
+    "Dagen waarin dezelfde telefoon/e-mail als duplicaat telt"
+   ],
+   [
+    "MAX_SUBMISSIONS_PER_HOUR",
+    30,
+    "Noodrem tegen spam: meer formulieren per uur worden geweigerd"
+   ],
+   [
+    "MIN_FORM_SECONDS",
+    4,
+    "Formulier sneller ingevuld dan dit = bot (stil genegeerd)"
+   ],
+   [
+    "MAIL_RESERVE",
+    10,
+    "Hou zoveel dagelijkse mails in reserve; daaronder geen doorsturen"
+   ],
+   [
+    "RETENTION_UNACCEPTED_DAYS",
+    183,
+    "Na zoveel dagen contactgegevens wissen van niet-aanvaarde aanvragen"
+   ],
+   [
+    "RETENTION_ACCEPTED_DAYS",
+    730,
+    "Na zoveel dagen contactgegevens wissen van aanvaarde aanvragen"
+   ]
+  ]
+ },
+ "mails": []
+}

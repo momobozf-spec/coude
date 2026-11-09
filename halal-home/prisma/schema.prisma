@@ -1,0 +1,1690 @@
+// Halal Home — datamodel.
+//
+// Zeven regels die het hele schema sturen. Ze staan hier omdat elke afwijking
+// later een migratie op gevulde tabellen kost.
+//
+//  1. GELDBEDRAGEN ZIJN ALTIJD `Int`, NOOIT `Float`. Float geeft drift zodra we
+//     prijshistoriek diffen (450000.0 != 449999.99999) of maandlasten optellen
+//     over 300 maanden.
+//
+//     Er zijn twee eenheden, en de veldnaam zegt altijd welke:
+//
+//       `...Cents`      — eurocent. Alles wat de gebruiker invoert of wat wij
+//                         uitrekenen: budget, eigen middelen, maandlast, totaal.
+//       zonder achtervoegsel — hele euro's. Vastgoedprijzen (advertenties
+//                         noteren geen centen) en fiscale grondslagen
+//                         (registratierechten rekenen op hele euro's).
+//
+//     Omzetten gebeurt uitsluitend via src/lib/money.ts. Twee eenheden door
+//     elkaar halen is een fout van precies factor honderd, en een budget van
+//     4.500 € dat als 450.000 € gelezen wordt is geen afrondingsverschil maar
+//     een verkeerd huis.
+//
+//  2. `Property` IS GLOBAAL, NIET PER GEBRUIKER. Eén woning bestaat één keer,
+//     ongeacht hoeveel gebruikers hem vinden. De per-gebruiker-relatie zit in
+//     `SavedProperty` en `PropertyMatch`.
+//
+//  3. ALLES VAN EEN GEBRUIKER HANGT AAN EEN `userId`. Ook waar een journeyId al
+//     impliciet de gebruiker bepaalt: user isolation moet één WHERE-clausule
+//     zijn, niet een join die iemand ooit vergeet.
+//
+//  4. JSON ALLEEN VOOR DOCUMENTEN, NOOIT VOOR RELATIES OF FILTERVELDEN.
+//     `PropertySearch.criteria`, `CostRule.configuration` en
+//     `PropertyMatch.reasons` zijn versioneerbare documenten die we nooit
+//     relationeel bevragen. Alles waarop we filteren of sorteren staat in een
+//     kolom.
+//
+//  5. FISCALE EN JURIDISCHE REGELS STAAN IN DATA, NIET IN CODE. Registratie-
+//     rechten, notariskosten en documentchecklists wijzigen per gewest en per
+//     jaar. Ze zitten in `CostRule` en `ChecklistTemplate` met een geldigheids-
+//     venster, zodat een wetswijziging een INSERT is en geen release.
+//
+//  6. ELKE RELIGIEUZE OF FISCALE BEWERING DRAAGT ZIJN HERKOMST MEE. Overal waar
+//     het platform iets beweert over shariah-conformiteit of belastingtarieven
+//     staan `sourceUrl` en `lastVerifiedAt` verplicht naast de bewering. Zonder
+//     bron mag de UI het niet als feit tonen.
+//
+//  7. GEEN HARDE DELETES OP GEBRUIKERSDATA MET HISTORIEK. Documenten en panden
+//     krijgen een status of een `deletedAt`; een favoriet die van de markt is
+//     moet zichtbaar blijven.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Enums
+// ═════════════════════════════════════════════════════════════════════════════
+
+// ── Journey ──────────────────────────────────────────────────────────────────
+
+/// De fasen van een aankooptraject, in volgorde. De volgorde ÍS de betekenis:
+/// de progressieberekening en de "mag ik vooruit"-check leiden af uit de index
+/// in deze lijst (zie src/modules/journey/domain/stages.ts).
+enum JourneyStage {
+  ORIENTATION
+  BUDGET
+  FINANCING
+  PROPERTY_SEARCH
+  VIEWINGS
+  OFFER
+  AGREEMENT
+  NOTARY
+  INSURANCE_ADMIN
+  MOVING
+  COMPLETED
+}
+
+enum JourneyStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ABANDONED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+/// Hoe hard een taakafhankelijkheid is.
+///
+/// ─── WAAROM DIT ONDERSCHEID BESTAAT ──────────────────────────────────────────
+///
+/// Niet elke volgorde is even belangrijk. "Bied niet zonder financieringsbewijs"
+/// beschermt tegen een schadevergoeding van tienduizenden euro's. "Vergelijk pas
+/// financieringsvormen nadat je je behoefte formeel vastlegde" is een nuttige
+/// volgorde, maar niemand loopt schade op door het andersom te doen.
+///
+///   BLOCKING — de latere taak kan niet afgerond worden zolang deze open staat.
+///              Alleen voor gevallen waar de omgekeerde volgorde echt schadelijk
+///              is.
+///   ADVISORY — bepaalt de volgorde in de interface, maar houdt niets tegen.
+///
+/// Alles blokkerend maken klinkt veiliger maar is het niet: dan raakt een taak
+/// die aantoonbaar gedaan is toch niet afgevinkt, en leert de gebruiker dat de
+/// vinkjes niet kloppen.
+enum TaskDependencyType {
+  BLOCKING
+  ADVISORY
+}
+
+enum JourneyEventType {
+  VIEWING
+  FINANCING_APPOINTMENT
+  NOTARY_APPOINTMENT
+  DOCUMENT_DEADLINE
+  MOVING
+  CUSTOM
+}
+
+/// Wat de gebruiker koopt. Bepaalt mede welke checklists gelden: bij nieuwbouw
+/// gelden andere attesten en een ander btw-regime dan bij een bestaande woning.
+enum PurchaseType {
+  EXISTING
+  NEW_BUILD
+  LAND
+  RENOVATION
+}
+
+/// Hoe hard de tijdsdruk is. Voedt de standaard-streefdatum en de urgentie van
+/// aanbevelingen.
+enum PurchaseTimeline {
+  ASAP
+  WITHIN_3_MONTHS
+  WITHIN_6_MONTHS
+  WITHIN_12_MONTHS
+  NO_DEADLINE
+}
+
+/// Waar de gebruiker staat wanneer hij binnenkomt. Bepaalt de startfase van het
+/// traject: wie al een woning gevonden heeft, hoort niet bij "oriëntatie" te
+/// beginnen en negen fasen te moeten doorklikken.
+enum OnboardingGoal {
+  ORIENTING
+  READY_TO_BUY
+  FOUND_PROPERTY
+}
+
+/// Waar een gebruiker staat met een financieringsproduct.
+///
+/// `SELECTED` betekent uitdrukkelijk NIET dat de financiering is goedgekeurd —
+/// alleen dat dit de optie is waar de gebruiker mee verder wil. De aanbieder
+/// beslist over goedkeuring, niet dit platform.
+enum FinancingQuoteStatus {
+  DRAFT
+  INTERESTED
+  SHORTLISTED
+  SELECTED
+  REJECTED
+}
+
+/// Hoe belangrijk een checklist-item is.
+///
+/// Bewust drie niveaus en geen `required: boolean`: het verschil tussen "de
+/// notaris kan zonder dit niet verder" en "dit is verstandig" is precies wat een
+/// checklist bruikbaar maakt. Alleen REQUIRED telt mee voor het afronden van een
+/// fase.
+enum ChecklistImportance {
+  REQUIRED
+  RECOMMENDED
+  OPTIONAL
+}
+
+/// Productevents. Bewust een enum en geen vrije string: zo kan er geen
+/// eventnaam ontstaan die niemand meer terugvindt, en is de lijst van wat we
+/// meten leesbaar op één plek.
+enum AnalyticsEventType {
+  ONBOARDING_STARTED
+  ONBOARDING_STEP_COMPLETED
+  ONBOARDING_COMPLETED
+  JOURNEY_CREATED
+  STAGE_OPENED
+  STAGE_COMPLETED
+  TASK_COMPLETED
+  TASK_REOPENED
+  TASK_SKIPPED
+  CHECKLIST_ITEM_COMPLETED
+  CHECKLIST_ITEM_REOPENED
+  RECOMMENDATION_OPENED
+  FINANCING_OPENED
+  FINANCING_PRODUCT_OPENED
+  FINANCING_COMPARISON_CREATED
+  FINANCING_CALCULATION_COMPLETED
+  FINANCING_QUOTE_SAVED
+  DOCUMENT_UPLOADED
+  DOCUMENT_DELETED
+  DOCUMENT_EXPLANATION_REQUESTED
+  NOTARY_OPENED
+}
+
+// ── Zoeken & panden ──────────────────────────────────────────────────────────
+
+enum TransactionType {
+  BUY
+  RENT
+}
+
+enum SearchFrequency {
+  MANUAL
+  DAILY
+  EVERY_6_HOURS
+  HOURLY
+}
+
+enum RunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+/// Levenscyclus van een woning binnen één aankooptraject. Bewust rijker dan
+/// "favoriet/afgewezen": het aankoopproces zelf is de reden dat dit platform
+/// bestaat, dus de fase van een pand moet erin passen.
+enum SavedPropertyStatus {
+  SAVED
+  SHORTLISTED
+  VIEWING_PLANNED
+  VISITED
+  OFFER_CONSIDERED
+  OFFERED
+  REJECTED
+  PURCHASED
+  ARCHIVED
+}
+
+// ── Financiering ─────────────────────────────────────────────────────────────
+
+/// De constructies die aanbieders in de markt zetten. Dit enum beschrijft de
+/// VORM van het contract, niet het religieuze oordeel — dat staat los in
+/// `ShariahAssessmentStatus`.
+enum FinancingType {
+  MURABAHA
+  IJARA
+  DIMINISHING_MUSHARAKA
+  ISTISNA
+  QARD_HASAN
+  CONVENTIONAL_MORTGAGE
+  OTHER
+}
+
+/// Hoe hard de onderbouwing is dat een product als shariah-conform geldt.
+///
+/// Het platform velt zelf GEEN religieus oordeel. Deze status zegt uitsluitend
+/// iets over de herkomst van de bewering:
+///
+///   CERTIFIED        — een genoemd shariah-orgaan certificeert het product;
+///                      `certificationBody` + `certificationUrl` zijn verplicht.
+///   PROVIDER_CLAIMED — enkel de aanbieder zelf beweert het; geen derde partij.
+///   REVIEWED         — een redacteur van dit platform heeft de publieke
+///                      documentatie gelezen en samengevat. Geen fatwa.
+///   UNVERIFIED       — bron bekend, maar niet nagelezen.
+///   UNKNOWN          — geen informatie. Standaard: het veilige antwoord.
+enum ShariahAssessmentStatus {
+  CERTIFIED
+  PROVIDER_CLAIMED
+  REVIEWED
+  UNVERIFIED
+  UNKNOWN
+}
+
+// ── Documenten ───────────────────────────────────────────────────────────────
+
+enum DocumentCategory {
+  IDENTITY
+  INCOME
+  BANK
+  FINANCING
+  PROPERTY
+  OFFER
+  PURCHASE_AGREEMENT
+  NOTARY
+  INSURANCE
+  TAX
+  OTHER
+}
+
+/// De levenscyclus van een document.
+///
+/// ─── WAAROM PENDING BESTAAT ──────────────────────────────────────────────────
+///
+/// Een databaserij en een bestand in object storage kunnen niet in één
+/// transactie. Er is dus altijd een moment waarop de rij bestaat en het bestand
+/// nog niet. Zonder `PENDING` zou zo'n rij er uitzien als een beschikbaar
+/// document, en dan krijgt de gebruiker een downloadknop die niets oplevert.
+///
+///   PENDING    — rij aangemaakt, bestand nog niet (of niet meer) bevestigd.
+///   AVAILABLE  — het bestand staat in de opslag en is opvraagbaar.
+///   FAILED     — de upload is mislukt. Er is geen bruikbaar bestand.
+///   EXPIRED    — `expiresAt` is verstreken; het bestand kan er nog zijn.
+///   DELETED    — de gebruiker verwijderde het; het bestand is gewist
+///                (`purgedAt`), de rij blijft voor de audittrail.
+enum DocumentStatus {
+  PENDING
+  AVAILABLE
+  FAILED
+  EXPIRED
+  DELETED
+}
+
+/// Waar een AI-uitleg vandaan komt.
+///
+/// `FIXTURE` is geen tweederangs variant: hij bestaat zodat de hele flow zonder
+/// credentials te draaien en te testen is, en hij is als zodanig zichtbaar in
+/// de UI. Een uitleg die met een fixture is gemaakt, mag nooit doorgaan voor
+/// een uitleg van een taalmodel.
+enum ExplanationSource {
+  FIXTURE
+  AI
+}
+
+// ── Checklists & begrippen ───────────────────────────────────────────────────
+
+enum ChecklistScope {
+  JOURNEY
+  DOCUMENTS
+  NOTARY
+  MOVING
+  INSURANCE
+}
+
+enum TermCategory {
+  REAL_ESTATE
+  FINANCING
+  NOTARY
+  TAX
+  INSURANCE
+  LEGAL
+  ENERGY
+}
+
+// ── Buurt ────────────────────────────────────────────────────────────────────
+
+enum PlaceCategory {
+  MOSQUE
+  SCHOOL
+  HALAL_BUTCHER
+  HALAL_SUPERMARKET
+  HALAL_RESTAURANT
+  HALAL_BAKERY
+  SUPERMARKET
+  PUBLIC_TRANSPORT
+  HOSPITAL
+  PHARMACY
+  PARK
+}
+
+/// Hoe zeker is het dat een zaak daadwerkelijk halal is? Het onderscheid is
+/// hetzelfde principe als bij financiering: het platform beweert niets zelf.
+enum HalalVerification {
+  DECLARED
+  COMMUNITY_TAGGED
+  UNKNOWN
+}
+
+// ── Diensten ─────────────────────────────────────────────────────────────────
+
+enum ServiceCategory {
+  NOTARY
+  MOVING
+  INSURANCE
+  ENERGY
+  INTERNET
+  RENOVATION
+  INSPECTION
+  FINANCING
+}
+
+// ── Notificaties ─────────────────────────────────────────────────────────────
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  PUSH
+  TELEGRAM
+}
+
+enum NotificationType {
+  NEW_PROPERTY_MATCH
+  PRICE_DROP
+  UPCOMING_VIEWING
+  MISSING_DOCUMENT
+  DEADLINE_APPROACHING
+  DOCUMENT_EXPIRING
+  JOURNEY_NEXT_STEP
+  SYSTEM
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+}
+
+// ── Account & AI ─────────────────────────────────────────────────────────────
+
+enum UserRole {
+  USER
+  EDITOR
+  ADMIN
+}
+
+/// Abonnementen bestaan als enum vanaf dag één zodat feature-gating een
+/// vergelijking is en geen migratie. Betalingen zijn nog niet geïmplementeerd.
+enum SubscriptionPlan {
+  FREE
+  PLUS
+  PREMIUM
+}
+
+enum AiConversationKind {
+  JOURNEY_ASSISTANT
+  DOCUMENT_EXPLANATION
+  PROPERTY_SUMMARY
+  TERM_EXPLANATION
+}
+
+enum AiRole {
+  SYSTEM
+  USER
+  ASSISTANT
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Account
+// ═════════════════════════════════════════════════════════════════════════════
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  /// Nullable: OAuth-gebruikers hebben er geen. Credentials-login eist hem wel.
+  passwordHash  String?
+  name          String?
+  image         String?
+
+  role UserRole         @default(USER)
+  plan SubscriptionPlan @default(FREE)
+
+  locale   String @default("nl")
+  timezone String @default("Europe/Brussels")
+  country  String @default("BE")
+
+  /// De antwoorden die tot nu toe gegeven zijn, per stap.
+  ///
+  /// Bewust JSON en geen kolommen: dit is een concept dat pas betekenis krijgt
+  /// wanneer het compleet is. Zodra de onboarding klaar is, landen de velden
+  /// waarop we filteren (budget, locatie, timing) als kolom in
+  /// `HomeBuyingJourney`; dit blijft staan als bron voor "hervat waar je
+  /// gebleven was" en om later te kunnen herinterpreteren.
+  ///
+  /// Gevalideerd met Zod bij elke lees- en schrijfactie
+  /// (src/modules/onboarding/schema.ts).
+  onboarding          Json?
+  /// De laatst voltooide stap, 0 = nog niet begonnen. Maakt de wizard
+  /// hervatbaar zonder de JSON te hoeven interpreteren.
+  onboardingStep      Int     @default(0)
+  onboardingCompleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts               Account[]
+  sessions               Session[]
+  journeys               HomeBuyingJourney[]
+  searches               PropertySearch[]
+  savedProperties        SavedProperty[]
+  matches                PropertyMatch[]
+  documents              Document[]
+  quotes                 FinancingQuote[]
+  checklistItems         UserChecklistItem[]
+  notifications          Notification[]
+  notificationPrefs      NotificationPreference[]
+  neighborhoodPreference NeighborhoodPreference?
+  conversations          AiConversation[]
+  auditLogs              AuditLog[]
+  analyticsEvents        AnalyticsEvent[]
+}
+
+/// Auth.js-tabellen. Vorm is voorgeschreven door @auth/prisma-adapter.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Journey — het hart van het platform
+// ═════════════════════════════════════════════════════════════════════════════
+
+model HomeBuyingJourney {
+  id     String @id @default(cuid())
+  userId String
+  name   String
+
+  currentStage       JourneyStage  @default(ORIENTATION)
+  status             JourneyStatus @default(ACTIVE)
+  /// 0-100. Afgeleid van voltooide taken (zie journey/domain/progress.ts) en
+  /// gedenormaliseerd opgeslagen, zodat het dashboard geen taken hoeft te
+  /// tellen over alle journeys heen.
+  progressPercentage Int           @default(0)
+
+  // Bedragen in EUROCENT (Int). Zie src/lib/money.ts: alles wat de gebruiker
+  // invoert wordt in centen bewaard, vastgoedprijzen en fiscale grondslagen in
+  // hele euro's. De `Cents`-achtervoegsels zijn niet cosmetisch — ze zijn de
+  // enige plek waar de eenheid zichtbaar is op de plaats van gebruik.
+  targetBudgetCents    Int?
+  ownContributionCents Int?
+  /// Heeft de gebruiker aangegeven financiering nodig te hebben? Null =
+  /// onzeker; dat is een geldig antwoord in de onboarding en iets anders dan
+  /// "nee".
+  needsFinancing       Boolean?
+
+  targetLocation   String?
+  targetPostalCode String?
+  searchRadiusKm   Int?
+  /// Land/gewest bepalen welke CostRules en ChecklistTemplates gelden.
+  country          String            @default("BE")
+  region           String?
+  purchaseType     PurchaseType      @default(EXISTING)
+  /// Streefdatum van de akte; voedt de deadlineberekening.
+  targetDate       DateTime?
+  timeline         PurchaseTimeline?
+  firstHome        Boolean           @default(true)
+
+  /// Welke versie van de takenblauwdruk dit traject gebruikt.
+  ///
+  /// Een gebruiker die vandaag begint, mag over drie maanden geen taken zien
+  /// verdwijnen omdat wij de blauwdruk hebben herzien. Nieuwe trajecten krijgen
+  /// de nieuwste versie; bestaande blijven op de hunne staan tot iemand
+  /// bewust migreert. Zie src/modules/journey/domain/blueprint.ts.
+  blueprintVersion Int @default(1)
+
+  /// Zet vlak vóór het aanmaken van de blauwdruktaken en daarna nooit meer.
+  /// Samen met de unique constraint op (journeyId, templateKey) maakt dit het
+  /// initialiseren idempotent: twee keer op "afronden" klikken levert geen
+  /// dubbele takenlijst op.
+  initializedAt DateTime?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks           JourneyTask[]
+  events          JourneyEvent[]
+  savedProperties SavedProperty[]
+  documents       Document[]
+  quotes          FinancingQuote[]
+  checklistItems  UserChecklistItem[]
+  searches        PropertySearch[]
+  conversations   AiConversation[]
+
+  @@unique([userId, name])
+  @@index([userId, status])
+}
+
+model JourneyTask {
+  id        String @id @default(cuid())
+  journeyId String
+  /// Gedenormaliseerd vanaf de journey: "al mijn openstaande taken" over
+  /// meerdere trajecten heen moet één index-scan zijn.
+  userId    String
+
+  stage JourneyStage
+
+  title       String
+  description String?
+
+  status   TaskStatus   @default(TODO)
+  priority TaskPriority @default(NORMAL)
+
+  /// Positie binnen een fase. Bepaalt de volgorde in de UI; laat ruimte om
+  /// taken ertussen te schuiven zonder alles te hernummeren.
+  sortOrder Int @default(0)
+
+  /// De stabiele identifier uit de blauwdruk, bijv. `FINANCING_COMPARE_OPTIONS`.
+  ///
+  /// Dit is de sleutel waarop migraties, analytics, aanbevelingen en
+  /// blauwdruk-upgrades naar dezelfde taak verwijzen. Een database-id kan dat
+  /// niet: die verschilt per gebruiker. Uniek per traject, dus opnieuw toepassen
+  /// van de blauwdruk maakt geen duplicaten.
+  templateKey String?
+  /// Systeemtaken komen uit de fase-blauwdruk; de gebruiker mag ze niet
+  /// verwijderen, wel afvinken of overslaan.
+  system      Boolean @default(false)
+
+  /// Optionele taken blokkeren het afronden van een fase niet en tellen
+  /// lichter mee in de voortgang. Zie src/modules/journey/domain/progress.ts.
+  optional Boolean @default(false)
+
+  dueDate     DateTime?
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  journey      HomeBuyingJourney @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  /// Expliciete self-relatie in plaats van een array van id's: zo dwingt de
+  /// database af dat een afhankelijkheid naar een bestaande taak wijst.
+  dependencies TaskDependency[]  @relation("DependentTask")
+  dependents   TaskDependency[]  @relation("BlockingTask")
+
+  @@unique([journeyId, templateKey])
+  @@index([journeyId, stage, sortOrder])
+  @@index([userId, status, dueDate])
+}
+
+/// "Taak A kan pas als taak B klaar is." Een aparte tabel en geen m-n op
+/// JourneyTask zelf, omdat we later een `type` willen kunnen toevoegen
+/// (blokkerend vs. adviserend) zonder migratie van een impliciete jointabel.
+model TaskDependency {
+  id String @id @default(cuid())
+
+  /// De taak die wacht.
+  taskId      String
+  /// De taak waarop gewacht wordt.
+  dependsOnId String
+
+  type TaskDependencyType @default(ADVISORY)
+
+  task      JourneyTask @relation("DependentTask", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOn JourneyTask @relation("BlockingTask", fields: [dependsOnId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, dependsOnId])
+  @@index([dependsOnId])
+}
+
+model JourneyEvent {
+  id        String @id @default(cuid())
+  journeyId String
+  userId    String
+
+  type        JourneyEventType
+  title       String
+  description String?
+  location    String?
+
+  startsAt DateTime?
+  endsAt   DateTime?
+  dueAt    DateTime?
+
+  propertyId String?
+
+  completedAt      DateTime?
+  /// Hoeveel dagen vooraf we willen herinneren. Null = geen herinnering.
+  remindDaysBefore Int?
+  reminderSentAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  journey  HomeBuyingJourney @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  property Property?         @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  @@index([journeyId, startsAt])
+  @@index([userId, dueAt])
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Zoekopdrachten
+// ═════════════════════════════════════════════════════════════════════════════
+
+model PropertySearch {
+  id        String  @id @default(cuid())
+  userId    String
+  journeyId String?
+
+  name            String
+  /// De originele vrije tekst. Bewaard zodat we later kunnen herparsen met een
+  /// beter model zonder de gebruiker opnieuw te laten typen.
+  originalQuery   String
+  /// Gevalideerd tegen searchCriteriaSchema bij élke lees- en schrijfactie.
+  criteria        Json
+  /// Versie van het criteria-schema waarmee dit document geschreven is; maakt
+  /// een migratie van oude documenten mogelijk zonder gokwerk.
+  criteriaVersion Int    @default(1)
+
+  active        Boolean         @default(true)
+  frequency     SearchFrequency @default(DAILY)
+  alertsEnabled Boolean         @default(true)
+
+  lastRunAt DateTime?
+  nextRunAt DateTime  @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  journey HomeBuyingJourney? @relation(fields: [journeyId], references: [id], onDelete: SetNull)
+  runs    SearchRun[]
+  matches PropertyMatch[]
+
+  @@unique([userId, name])
+  @@index([active, nextRunAt])
+  @@index([userId, createdAt])
+}
+
+/// Audittrail per uitvoering: wat draaide wanneer, wat kwam eruit, welke fout.
+model SearchRun {
+  id       String    @id @default(cuid())
+  searchId String
+  status   RunStatus @default(RUNNING)
+
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  fetchedCount     Int @default(0)
+  newPropertyCount Int @default(0)
+  matchCount       Int @default(0)
+  notifiedCount    Int @default(0)
+
+  /// Per bron: status, aantal, duur, eventuele blokkade.
+  sourceStats Json?
+  error       String?
+
+  search PropertySearch @relation(fields: [searchId], references: [id], onDelete: Cascade)
+
+  @@index([searchId, startedAt])
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Panden
+// ═════════════════════════════════════════════════════════════════════════════
+
+model Property {
+  id String @id @default(cuid())
+
+  // Ontdubbeling op drie niveaus:
+  //  1. (source, externalId) — primair, hardst
+  //  2. urlNormalized        — zelfde pand via een andere ingang
+  //  3. fingerprint          — zelfde pand op een andere site
+  source        String
+  externalId    String
+  url           String
+  urlNormalized String
+  /// sha256 van adres + postcode + prijs + oppervlakte + type. Bewust géén
+  /// unique constraint: twee identieke nieuwbouwappartementen in hetzelfde
+  /// gebouw zijn een legitiem duplicaat-ogend paar. Wel geïndexeerd, zodat de
+  /// service een kandidaat kan voorstellen in plaats van blind te mergen.
+  fingerprint   String
+
+  title       String
+  description String?
+
+  address    String?
+  postalCode String?
+  city       String?
+  region     String?
+  country    String  @default("BE")
+  latitude   Float?
+  longitude  Float?
+
+  propertyType    String?
+  transactionType TransactionType @default(BUY)
+
+  price        Int?
+  bedrooms     Int?
+  bathrooms    Int?
+  livingAreaM2 Int?
+  landAreaM2   Int?
+  epcLabel     String?
+  /// kWh/m²/jaar wanneer de advertentie het vermeldt. Los van het label omdat
+  /// labelgrenzen per gewest verschillen.
+  epcValue     Int?
+  buildYear    Int?
+  features     String[] @default([])
+  imageUrl     String?
+
+  /// Genormaliseerde ruwe velden van de bron, voor het debuggen van providers.
+  /// Niet de volledige HTML — dat hoort niet in een database.
+  raw Json?
+
+  publishedAt  DateTime?
+  discoveredAt DateTime  @default(now())
+  lastSeenAt   DateTime  @default(now())
+  /// Gezet wanneer de bron het pand niet meer toont. Nooit verwijderen: een
+  /// gebruiker wil kunnen zien dat een favoriet van de markt is.
+  delistedAt   DateTime?
+  updatedAt    DateTime  @updatedAt
+
+  history      PropertyHistory[]
+  savedBy      SavedProperty[]
+  matches      PropertyMatch[]
+  events       JourneyEvent[]
+  nearbyPlaces NearbyPlaceCache[]
+  quotes       FinancingQuote[]
+  documents    Document[]
+
+  @@unique([source, externalId])
+  @@unique([urlNormalized])
+  @@index([fingerprint])
+  @@index([city, transactionType, price])
+  @@index([discoveredAt])
+}
+
+/// Eén rij per gewijzigd veld, niet per snapshot. De enige vraag die we stellen
+/// is "is de prijs gedaald sinds de vorige run", en die is met
+/// (propertyId, field='price') een index-lookup in plaats van een diff van twee
+/// JSON-blobs.
+model PropertyHistory {
+  id         String   @id @default(cuid())
+  propertyId String
+  field      String
+  oldValue   String?
+  newValue   String?
+  changedAt  DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId, field, changedAt])
+}
+
+/// Wat een zoekopdracht heeft gevonden, met de onderbouwing van de score.
+/// Losstaand van `SavedProperty`: een match is wat het systeem voorstelt, een
+/// SavedProperty is wat de gebruiker kiest.
+model PropertyMatch {
+  id         String @id @default(cuid())
+  searchId   String
+  propertyId String
+  userId     String
+
+  /// 0-100. Aandeel gehaalde voorkeuren; onbekende velden tellen niet mee in de
+  /// noemer, zodat een advertentie zonder EPC niet gestraft wordt.
+  score    Int
+  /// Alle harde eisen gehaald. Bij false wordt er niet gemeld.
+  hardPass Boolean
+  /// MatchReason[] — per criterium: field, verdict (pass/fail/unknown), detail.
+  /// Dit is wat de melding toont én de enige feitelijke input die de AI krijgt
+  /// voor een samenvatting.
+  reasons  Json
+
+  aiSummary     String?
+  aiGeneratedAt DateTime?
+
+  seenAt     DateTime?
+  notifiedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  search   PropertySearch @relation(fields: [searchId], references: [id], onDelete: Cascade)
+  property Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([searchId, propertyId])
+  @@index([userId, createdAt])
+  @@index([searchId, notifiedAt])
+}
+
+model SavedProperty {
+  id         String  @id @default(cuid())
+  userId     String
+  propertyId String
+  journeyId  String?
+
+  status SavedPropertyStatus @default(SAVED)
+  notes  String?
+  /// Persoonlijke waardering, 1-5. Los van de berekende matchscore.
+  rating Int?
+
+  /// Snapshot van de prijs op het moment van opslaan, zodat "€12.000 gedaald
+  /// sinds jij hem bewaarde" geen historiek-query nodig heeft.
+  priceAtSave Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  journey  HomeBuyingJourney? @relation(fields: [journeyId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, propertyId])
+  @@index([journeyId, status])
+  @@index([userId, status, updatedAt])
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Financiering
+// ═════════════════════════════════════════════════════════════════════════════
+
+model FinancingProvider {
+  id      String @id @default(cuid())
+  slug    String @unique
+  name    String
+  country String @default("BE")
+
+  website     String?
+  description String?
+  logoUrl     String?
+
+  /// `verified` betekent: een redacteur heeft bestaan en contactgegevens van de
+  /// aanbieder gecontroleerd. Het zegt niets over shariah-conformiteit — dat
+  /// staat per product in `shariahAssessmentStatus`.
+  verified Boolean @default(false)
+  active   Boolean @default(true)
+
+  /// Verzonnen aanbieder voor de ontwikkelomgeving.
+  ///
+  /// Bewust een aparte kolom en niet afgeleid uit `verified`: "niet
+  /// geverifieerd" en "bestaat niet" zijn twee verschillende dingen, en een
+  /// echte aanbieder die nog niet nagekeken is mag nooit met een verzonnen
+  /// aanbieder op één hoop belanden. De UI kan hierdoor niet vergeten dat data
+  /// demo is, en `assertDemoNeverVerified()` bewaakt dat de combinatie
+  /// isDemo + verified nooit bestaat.
+  isDemo Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products FinancingProduct[]
+
+  @@index([country, active])
+}
+
+model FinancingProduct {
+  id         String @id @default(cuid())
+  providerId String
+  slug       String @unique
+
+  name          String
+  financingType FinancingType
+  country       String        @default("BE")
+
+  description          String
+  /// Hoe de constructie werkt, in gewone taal. Redactionele tekst, geen AI-
+  /// output: dit is wat de gebruiker leest om te beslissen.
+  structureExplanation String?
+
+  minAmount                    Int?
+  maxAmount                    Int?
+  minOwnContributionPercentage Int?
+  termMinMonths                Int?
+  termMaxMonths                Int?
+
+  /// Het tarief waarmee de calculator rekent, in basispunten (1 % = 100 bp).
+  /// Int, want een Float-rente geeft afrondingsdrift over 300 maanden. Bij
+  /// murabaha is dit de winstmarge, bij ijara de huurcomponent — de betekenis
+  /// hangt af van `financingType` en staat in `rateBasisDescription`.
+  profitRateBasisPoints Int?
+  rateBasisDescription  String?
+
+  feesDescription String?
+  /// Eenmalige dossierkosten in hele euro's, wanneer de aanbieder ze publiceert.
+  setupFeeAmount  Int?
+
+  // ── Herkomst van de shariah-bewering ──────────────────────────────────────
+  // Deze vier velden horen bij elkaar. De UI toont de status nooit zonder de
+  // bron erbij; zie src/modules/financing/domain/shariah.ts voor de regels die
+  // afdwingen welke combinaties geldig zijn.
+  shariahAssessmentStatus ShariahAssessmentStatus @default(UNKNOWN)
+  certificationBody       String?
+  certificationUrl        String?
+  /// Verplicht in de praktijk: zonder bron mag een product niet gepubliceerd
+  /// worden. Nullable in de database omdat een concept-rij mag bestaan.
+  sourceUrl               String?
+  lastVerifiedAt          DateTime?
+  /// Extra voorbehoud dat onder dit specifieke product hoort.
+  disclaimer              String?
+
+  /// Munteenheid als ISO-4217-code. De rekenlogica kent geen valutasymbool;
+  /// alleen de formatter in src/lib/money.ts vertaalt naar "€".
+  currency String @default("EUR")
+
+  active Boolean @default(true)
+  /// Zie `FinancingProvider.isDemo`. Gedupliceerd op productniveau zodat een
+  /// query op producten alleen niet per ongeluk de demo-markering verliest.
+  isDemo Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  provider FinancingProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  quotes   FinancingQuote[]
+
+  @@index([country, active, financingType])
+  @@index([providerId])
+}
+
+/// Een bewaarde berekening. Bewust een snapshot: de invoer én de uitkomst én de
+/// aannames worden opgeslagen, zodat een gebruiker over drie maanden nog ziet
+/// waarop hij zich baseerde, ook als het product intussen wijzigde.
+/// Een bewaarde berekening.
+///
+/// ─── EEN QUOTE IS EEN SNAPSHOT, GEEN VERWIJZING ─────────────────────────────
+///
+/// Alles wat nodig is om de berekening te begrijpen staat IN deze rij: de naam
+/// van de aanbieder, de naam van het product, het gehanteerde tarief, de
+/// shariah-status met haar bron, en de versie van de rekenmethode.
+///
+/// Dat is bewust redundant. Een quote van 7 augustus moet over een jaar nog
+/// exact hetzelfde tonen, ook als de aanbieder intussen zijn marge verhoogde,
+/// het product is ingetrokken, of wij de formule herzagen. Een quote die stil
+/// meeverandert met het product waarnaar hij verwijst, is geen bewaarde
+/// berekening maar een levende query — en daar kan niemand een aankoop van
+/// honderdduizenden euro's op baseren.
+///
+/// `productId` blijft bestaan om terug te kunnen linken, maar met `SetNull`:
+/// verdwijnt het product, dan blijft de quote leesbaar.
+model FinancingQuote {
+  id         String  @id @default(cuid())
+  userId     String
+  journeyId  String?
+  productId  String?
+  /// Gezet wanneer de berekening vanuit een concrete woning is gestart.
+  propertyId String?
+
+  status FinancingQuoteStatus @default(DRAFT)
+
+  // ── Invoer ────────────────────────────────────────────────────────────────
+  // Hele euro's; zie de kop van dit bestand, regel 1.
+  purchasePrice   Int
+  ownContribution Int
+  amountFinanced  Int
+  termMonths      Int
+  currency        String @default("EUR")
+
+  // ── Uitkomsten in eurocent ────────────────────────────────────────────────
+  // Een periodieke betaling ís een bedrag met centen, en Int in cent voorkomt
+  // dat 12 × afronding een euro verschil geeft over de looptijd.
+  monthlyPaymentCents Int
+  totalPaymentCents   Int
+  totalCostCents      Int
+  feesCents           Int @default(0)
+
+  // ── Snapshot van het product op het moment van berekenen ──────────────────
+  providerName            String?
+  productName             String?
+  financingType           FinancingType?
+  profitRateBasisPoints   Int?
+  rateBasisDescription    String?
+  shariahAssessmentStatus ShariahAssessmentStatus?
+  certificationBody       String?
+  sourceUrl               String?
+  /// De verificatiedatum zoals die gold bij het berekenen — niet de huidige.
+  sourceLastVerifiedAt    DateTime?
+  productWasDemo          Boolean                  @default(false)
+
+  /// Welke rekenmotor dit getal produceerde, bijv. `financing-engine@1`.
+  /// Zonder deze waarde is een oude quote niet reproduceerbaar.
+  calculatorVersion String
+
+  /// De aannames waarmee gerekend is. Bewust JSON — een snapshot van een
+  /// berekening is een document, geen entiteit die we bevragen.
+  assumptions Json
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  journey   HomeBuyingJourney? @relation(fields: [journeyId], references: [id], onDelete: SetNull)
+  product   FinancingProduct?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  property  Property?          @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  documents Document[]
+
+  @@index([userId, createdAt])
+  @@index([journeyId])
+  @@index([userId, status])
+  @@index([propertyId])
+}
+
+/// Fiscale en notariële regels als data. Registratierechten in Vlaanderen zijn
+/// in vijf jaar drie keer gewijzigd; die percentages horen niet in een release.
+model CostRule {
+  id      String  @id @default(cuid())
+  country String  @default("BE")
+  region  String?
+
+  /// Bijv. REGISTRATION_DUTY, NOTARY_FEE, MORTGAGE_REGISTRATION, VAT_NEW_BUILD.
+  ruleType String
+
+  validFrom  DateTime
+  validUntil DateTime?
+
+  /// Vorm hangt af van `ruleType` en wordt met Zod gevalideerd bij het inlezen
+  /// (src/modules/financing/domain/costRules.ts). Bijvoorbeeld een schijven-
+  /// tabel, een vast percentage, of een percentage met aftrek voor een eerste
+  /// eigen woning.
+  configuration Json
+
+  /// Verplicht in de praktijk: een tarief zonder vindplaats mag de UI niet
+  /// tonen als feit.
+  sourceUrl      String?
+  lastVerifiedAt DateTime?
+  notes          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([country, region, ruleType, validFrom])
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Documenten
+// ═════════════════════════════════════════════════════════════════════════════
+
+model Document {
+  id               String  @id @default(cuid())
+  userId           String
+  journeyId        String?
+  /// De woning waar dit document bij hoort, wanneer die er is.
+  propertyId       String?
+  /// De financieringsberekening waar dit document bij hoort.
+  financingQuoteId String?
+
+  category DocumentCategory
+
+  /// De naam zoals de gebruiker die aanleverde. Alleen voor weergave en voor de
+  /// Content-Disposition-header, en dáár opgeschoond met `sanitizeFileName`.
+  /// NOOIT gebruikt als pad of sleutel: een bestandsnaam is onbetrouwbare
+  /// invoer.
+  originalFilename String
+  /// Een naam die de gebruiker zelf mag kiezen. Valt terug op de bestandsnaam.
+  displayName      String?
+  description      String?
+
+  /// Sleutel bij de storage provider: `documents/<userId>/<categorie>/<uuid>`.
+  /// Bevat een willekeurige UUID en nooit de bestandsnaam, zodat de sleutel
+  /// zelf niets prijsgeeft en niet raadbaar is.
+  storageKey String @unique
+  mimeType   String
+  /// Bytes.
+  sizeBytes  Int
+
+  /// sha256 van de inhoud, hex. Legt vast wélke versie is opgeslagen, koppelt
+  /// een AI-uitleg aan die versie, en detecteert een dubbele upload.
+  ///
+  /// GEEN bewijs van juridische authenticiteit: het zegt alleen dat de bytes
+  /// niet gewijzigd zijn sinds wij ze ontvingen.
+  checksum String?
+
+  /// Door de client meegestuurde sleutel die één uploadpoging identificeert.
+  ///
+  /// Dit — en NIET de checksum — is wat een dubbele upload voorkomt. Een
+  /// checksum zegt "dezelfde bytes"; dat is iets anders dan "dezelfde
+  /// handeling". Twee loonfiches van dezelfde maand zijn byte-identiek en
+  /// mogen allebei bestaan; één keer klikken en twee keer verzonden krijgen
+  /// door een haperend netwerk mag maar één document opleveren.
+  ///
+  /// Optioneel: PostgreSQL beschouwt NULL-waarden als onderling verschillend,
+  /// dus uploads zonder sleutel botsen nooit met elkaar. Een client die geen
+  /// sleutel stuurt, verliest alleen de bescherming — hij wordt niet geweigerd.
+  idempotencyKey String?
+
+  status        DocumentStatus @default(PENDING)
+  /// Waarom de upload mislukte. Nooit inhoud, alleen een reden.
+  failureReason String?
+
+  /// Waar de checklist naar kijkt om te bepalen of een vereist document er is.
+  checklistItemKey String?
+
+  /// Verzonnen document voor de ontwikkelomgeving. Zie
+  /// src/modules/documents/domain/demo.ts.
+  isDemo Boolean @default(false)
+
+  uploadedAt DateTime  @default(now())
+  expiresAt  DateTime?
+  /// Wanneer de gebruiker op verwijderen klikte.
+  deletedAt  DateTime?
+  /// Wanneer het bestand daadwerkelijk uit de opslag verdween.
+  ///
+  /// Apart van `deletedAt` omdat het wissen kan mislukken. Een rij met
+  /// `deletedAt` maar zonder `purgedAt` is een opruimtaak, en `purgeOrphans()`
+  /// pakt hem later opnieuw op. Zonder dit onderscheid denkt de gebruiker dat
+  /// zijn loonfiche weg is terwijl hij in de opslag blijft staan.
+  purgedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user           User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  journey        HomeBuyingJourney?    @relation(fields: [journeyId], references: [id], onDelete: SetNull)
+  property       Property?             @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  financingQuote FinancingQuote?       @relation(fields: [financingQuoteId], references: [id], onDelete: SetNull)
+  checklistItems UserChecklistItem[]
+  explanations   DocumentExplanation[]
+
+  /// De databasegarantie achter de idempotentie. Twee gelijktijdige verzoeken
+  /// met dezelfde sleutel kunnen allebei de bestaanscontrole passeren; deze
+  /// constraint laat er daarna precies één winnen, en de verliezer geeft het
+  /// document van de winnaar terug.
+  @@unique([userId, idempotencyKey])
+  @@index([userId, category, status])
+  @@index([journeyId, category])
+  @@index([propertyId])
+  @@index([expiresAt])
+  @@index([deletedAt, purgedAt])
+}
+
+/// Een gegenereerde uitleg bij een document.
+///
+/// ─── DE UITLEG STAAT NAAST HET DOCUMENT, NOOIT EROVERHEEN ────────────────────
+///
+/// Vier dingen blijven strikt gescheiden: het originele bestand (opslag), de
+/// geëxtraheerde tekst, deze uitleg, en de notities van de gebruiker. Een AI
+/// mag niets van de eerste twee wijzigen.
+///
+/// Elke uitleg is een nieuwe rij, nooit een update. Zo is altijd zichtbaar dát
+/// er opnieuw gegenereerd is, met welk model, en op welke versie van het
+/// bestand — `sourceChecksum` bevriest dat laatste. Wijkt de checksum af van
+/// het document, dan hoort de UI te zeggen dat de uitleg bij een oudere versie
+/// hoort.
+model DocumentExplanation {
+  id         String @id @default(cuid())
+  documentId String
+  /// Gedenormaliseerd zodat autorisatie één WHERE-clausule blijft.
+  userId     String
+
+  source   ExplanationSource
+  /// Welk model dit schreef. Nooit hardcoded in de logica; komt uit AI_MODEL.
+  model    String?
+  provider String?
+  /// Versie van het uitlegcontract, zodat oude uitleg herkenbaar blijft.
+  version  Int               @default(1)
+
+  /// De checksum van het bestand waarop deze uitleg gebaseerd is.
+  sourceChecksum String?
+
+  summary                  String   @db.Text
+  keyPoints                String[] @default([])
+  attentionPoints          String[] @default([])
+  questionsForProfessional String[] @default([])
+  /// Structureel onderdeel van het resultaat, niet een voetnoot in de UI.
+  disclaimer               String   @db.Text
+
+  createdAt DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, createdAt])
+  @@index([userId, createdAt])
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Checklists — data-driven, nooit hardcoded in componenten
+// ═════════════════════════════════════════════════════════════════════════════
+
+model ChecklistTemplate {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  name        String
+  description String?
+
+  scope ChecklistScope
+
+  // Waarop deze template van toepassing is. Null = geldt altijd. Zo kan
+  // hetzelfde platform later Nederland bedienen zonder codewijziging.
+  country       String         @default("BE")
+  region        String?
+  stage         JourneyStage?
+  purchaseType  PurchaseType?
+  financingType FinancingType?
+  firstHomeOnly Boolean        @default(false)
+
+  sortOrder Int     @default(0)
+  active    Boolean @default(true)
+
+  // ── Herkomst en geldigheid ────────────────────────────────────────────────
+  // Checklists raken aan wettelijke vereisten, en die wijzigen. Zonder deze
+  // velden kan een gebruiker in 2027 een lijst afwerken die in 2025 klopte,
+  // zonder dat iets dat verraadt. Dezelfde redenering als bij CostRule.
+  version        Int       @default(1)
+  validFrom      DateTime?
+  validUntil     DateTime?
+  sourceUrl      String?
+  lastVerifiedAt DateTime?
+  /// Voorbehoud dat onder déze lijst hoort, naast de algemene disclaimer.
+  disclaimer     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items ChecklistItem[]
+
+  @@index([scope, country, active])
+  @@index([stage, country, active])
+}
+
+model ChecklistItem {
+  id         String @id @default(cuid())
+  templateId String
+  /// Stabiele sleutel binnen de template. Hierop matchen we een geüpload
+  /// document (`Document.checklistItemKey`) en de voortgang van de gebruiker,
+  /// zodat het hernoemen van een label geen data breekt.
+  key        String
+
+  title       String
+  description String?
+
+  /// Groepskop in de UI ("Financiering", "Voor afspraak", "Na akte").
+  section    String?
+  /// REQUIRED blokkeert het afronden van een fase; RECOMMENDED en OPTIONAL niet.
+  importance ChecklistImportance @default(REQUIRED)
+
+  /// Als dit item om een document vraagt: welke categorie. Null = geen upload
+  /// nodig, alleen afvinken.
+  documentCategory DocumentCategory?
+
+  sortOrder Int @default(0)
+
+  helpText String?
+  termSlug String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  template  ChecklistTemplate   @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  userItems UserChecklistItem[]
+
+  @@unique([templateId, key])
+  @@index([templateId, sortOrder])
+}
+
+/// De voortgang van één gebruiker op één checklist-item, binnen één journey.
+model UserChecklistItem {
+  id        String @id @default(cuid())
+  userId    String
+  journeyId String
+  itemId    String
+
+  completed     Boolean   @default(false)
+  completedAt   DateTime?
+  /// "Niet van toepassing op mijn dossier." Anders dan `completed`: de
+  /// gebruiker heeft niets gedaan, maar het item hoeft ook niets meer te doen.
+  notApplicable Boolean   @default(false)
+  notes         String?
+
+  /// Het document dat dit item invult. Voorbereid op fase 5: zodra de
+  /// documentkluis er is, vinkt een upload het item automatisch af.
+  /// SetNull en niet Cascade: het verwijderen van een document mag de
+  /// checklistvoortgang niet uit de geschiedenis wissen.
+  documentId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  journey  HomeBuyingJourney @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  item     ChecklistItem     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  document Document?         @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@unique([journeyId, itemId])
+  @@index([userId, completed])
+  @@index([documentId])
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Begrippenbibliotheek
+// ═════════════════════════════════════════════════════════════════════════════
+
+/// Redactionele inhoud, geen AI-output. De AI mag deze teksten citeren en
+/// vereenvoudigen; hij mag ze niet vervangen door verzonnen definities.
+model PropertyTerm {
+  id       String       @id @default(cuid())
+  slug     String       @unique
+  term     String
+  category TermCategory
+
+  simpleExplanation   String
+  detailedExplanation String?
+
+  country String  @default("BE")
+  region  String?
+
+  /// Synoniemen en anderstalige varianten ("compromis", "onderhandse akte").
+  /// Waar de zoekfunctie op matcht.
+  aliases String[] @default([])
+
+  sourceUrl      String?
+  lastVerifiedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category, country])
+  @@index([country, term])
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Diensten
+// ═════════════════════════════════════════════════════════════════════════════
+
+model ServiceProvider {
+  id       String          @id @default(cuid())
+  category ServiceCategory
+
+  name        String
+  description String?
+
+  country    String  @default("BE")
+  city       String?
+  postalCode String?
+  address    String?
+
+  website String?
+  phone   String?
+  email   String?
+
+  /// `partner` betekent: er is een commerciële relatie. De UI moet dit tonen en
+  /// partners nooit ongemarkeerd tussen neutrale aanbevelingen zetten.
+  partner  Boolean @default(false)
+  verified Boolean @default(false)
+  active   Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category, country, city])
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Buurt
+// ═════════════════════════════════════════════════════════════════════════════
+
+/// Antwoorden van de places provider, per pand en categorie gecachet. Externe
+/// geo-API's zijn traag en betaald; een woningpagina mag ze niet bij elke
+/// paginaweergave aanroepen.
+model NearbyPlaceCache {
+  id         String @id @default(cuid())
+  propertyId String
+
+  category     PlaceCategory
+  /// Straal waarmee gezocht is. Onderdeel van de cachesleutel: een resultaat
+  /// voor 2 km is geen antwoord op een vraag over 5 km.
+  radiusMeters Int
+
+  /// NearbyPlace[] — naam, adres, coördinaten, afstand, halalVerification.
+  /// JSON omdat dit een cache-payload is die we in zijn geheel teruggeven en
+  /// nooit relationeel bevragen.
+  places Json
+
+  provider  String
+  fetchedAt DateTime @default(now())
+  expiresAt DateTime
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, category, radiusMeters])
+  @@index([expiresAt])
+}
+
+/// Hoe zwaar deze gebruiker elke voorziening laat wegen. Er is bewust geen
+/// universele buurtscore: "dichtbij een moskee" is voor de ene gebruiker
+/// doorslaggevend en voor de andere irrelevant.
+model NeighborhoodPreference {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  /// Gewichten 0-4 (irrelevant → zeer belangrijk).
+  mosqueWeight          Int @default(3)
+  schoolWeight          Int @default(3)
+  halalShopWeight       Int @default(3)
+  supermarketWeight     Int @default(2)
+  publicTransportWeight Int @default(2)
+  healthcareWeight      Int @default(2)
+  parkWeight            Int @default(1)
+
+  /// Vanaf welke afstand een voorziening niet meer meetelt.
+  maxRelevantDistanceM Int @default(3000)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Notificaties
+// ═════════════════════════════════════════════════════════════════════════════
+
+model Notification {
+  id     String @id @default(cuid())
+  userId String
+
+  type    NotificationType
+  channel NotificationChannel
+
+  title String
+  body  String
+  /// Waar de melding heen linkt in de app.
+  link  String?
+
+  /// Context (propertyId, journeyId, taskId). Bewust JSON: per type anders, en
+  /// we filteren er nooit op.
+  data Json?
+
+  status    NotificationStatus @default(PENDING)
+  attempts  Int                @default(0)
+  lastError String?
+  sentAt    DateTime?
+  readAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, createdAt])
+  @@index([status, createdAt])
+}
+
+model NotificationPreference {
+  id     String @id @default(cuid())
+  userId String
+
+  type    NotificationType
+  channel NotificationChannel
+  enabled Boolean             @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, channel])
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// AI
+// ═════════════════════════════════════════════════════════════════════════════
+
+model AiConversation {
+  id        String  @id @default(cuid())
+  userId    String
+  journeyId String?
+
+  kind  AiConversationKind @default(JOURNEY_ASSISTANT)
+  title String?
+
+  /// Waar het gesprek over gaat (documentId, propertyId, termSlug). Los van de
+  /// berichten zodat we een gesprek kunnen terugvinden bij een entiteit.
+  subjectType String?
+  subjectId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  journey  HomeBuyingJourney? @relation(fields: [journeyId], references: [id], onDelete: SetNull)
+  messages AiMessage[]
+
+  @@index([userId, updatedAt])
+  @@index([subjectType, subjectId])
+}
+
+model AiMessage {
+  id             String @id @default(cuid())
+  conversationId String
+
+  role    AiRole
+  content String @db.Text
+
+  /// Welk model dit antwoord schreef. Nodig om achteraf te kunnen zien met
+  /// welke versie een uitleg gegenereerd is; nooit hardcoded in de logica.
+  model        String?
+  promptTokens Int?
+  outputTokens Int?
+
+  /// De platformdata die als context meegegeven is (id's, geen inhoud), plus
+  /// verwijzingen naar gebruikte PropertyTerms. Zo is achteraf controleerbaar
+  /// waarop een antwoord gebaseerd was.
+  context Json?
+
+  createdAt DateTime @default(now())
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Audit
+// ═════════════════════════════════════════════════════════════════════════════
+
+/// Productgebruik, voor het verbeteren van de flow.
+///
+/// STRIKT GESCHEIDEN VAN AUDITLOG. Een auditregel legt vast wie wat deed met
+/// welk document en moet bewaard blijven; een analytics-event zegt alleen dát
+/// er ergens een stap is afgerond en mag weg.
+///
+/// WAT ER NOOIT IN MAG: bedragen, adressen, postcodes, bestandsnamen,
+/// e-mailadressen, taaktitels die de gebruiker zelf typte. Alleen enum-waarden,
+/// stabiele blauwdruksleutels en tellingen. `recordEvent()` in
+/// src/modules/analytics/service.ts dwingt dat af met een whitelist.
+model AnalyticsEvent {
+  id     String  @id @default(cuid())
+  userId String?
+
+  type AnalyticsEventType
+
+  /// De fase waarin dit gebeurde, wanneer relevant.
+  stage     JourneyStage?
+  /// Stabiele blauwdruk- of checklistsleutel, bijv. `FINANCING_COMPARE_OPTIONS`.
+  /// Geen vrije tekst van de gebruiker.
+  entityKey String?
+
+  /// Alleen niet-gevoelige waarden: tellingen, enum-namen, booleans.
+  /// Gefilterd door de whitelist in de analytics-service.
+  properties Json?
+
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([type, createdAt])
+  @@index([userId, createdAt])
+}
+
+/// Wie deed wat met welke gevoelige entiteit. Bevat nooit documentinhoud,
+/// bestandsnamen van gebruikers, of secrets — alleen id's en actietypes.
+model AuditLog {
+  id     String  @id @default(cuid())
+  userId String?
+
+  action     String
+  entityType String
+  entityId   String?
+
+  /// Alleen niet-gevoelige context: mimeType, grootte, oude/nieuwe status.
+  metadata Json?
+
+  ipHash    String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId, createdAt])
+  @@index([action, createdAt])
+}

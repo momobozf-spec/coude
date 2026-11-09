@@ -1,0 +1,39 @@
+{
+  "name": "Halal Home",
+  "short_name": "Halal Home",
+  "description": "Van eerste zoekopdracht tot de sleutel van je nieuwe woning.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbfaf7",
+  "theme_color": "#fbfaf7",
+  "lang": "nl-BE",
+  "dir": "ltr",
+  "categories": ["finance", "lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Mijn traject", "url": "/journey" },
+    { "name": "Documenten", "url": "/documents" },
+    { "name": "Zoeken", "url": "/search" }
+  ]
+}

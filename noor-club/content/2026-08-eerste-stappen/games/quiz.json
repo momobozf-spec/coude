@@ -1,0 +1,161 @@
+{
+  "slug": "2026-08-eerste-stappen-quiz",
+  "engine": "QUIZ",
+  "ageBand": "4-6",
+  "xp": 20,
+  "order": 3,
+  "titles": {
+    "nl": "Wat zeg je dan?",
+    "en": "What Do You Say?",
+    "fr": "Que dis-tu ?",
+    "de": "Was sagst du?"
+  },
+  "data": {
+    "questions": [
+      {
+        "id": "quiz-groet",
+        "question": {
+          "nl": "Je komt binnen bij oma. Hoe groet je haar?",
+          "en": "You walk in to see your grandma. How do you greet her?",
+          "fr": "Tu arrives chez ta grand-mère. Comment la salues-tu ?",
+          "de": "Du kommst bei deiner Oma an. Wie begrüßt du sie?"
+        },
+        "options": [
+          {
+            "nl": "As-salaamoe ʿalaykoem (السَّلَامُ عَلَيْكُمْ)",
+            "en": "As-salamu ʿalaykum (السَّلَامُ عَلَيْكُمْ)",
+            "fr": "As-salamou ʿalaykoum (السَّلَامُ عَلَيْكُمْ)",
+            "de": "As-salamu ʿalaikum (السَّلَامُ عَلَيْكُمْ)"
+          },
+          {
+            "nl": "Bismillah (بِسْمِ اللَّهِ)",
+            "en": "Bismillah (بِسْمِ اللَّهِ)",
+            "fr": "Bismillah (بِسْمِ اللَّهِ)",
+            "de": "Bismillah (بِسْمِ اللَّهِ)"
+          },
+          {
+            "nl": "Alhamdoelillah (الْحَمْدُ لِلَّهِ)",
+            "en": "Alhamdulillah (الْحَمْدُ لِلَّهِ)",
+            "fr": "Alhamdoulillah (الْحَمْدُ لِلَّهِ)",
+            "de": "Alhamdulillah (الْحَمْدُ لِلَّهِ)"
+          }
+        ],
+        "correctIndex": 0,
+        "explanation": {
+          "nl": "De groet van moslims is as-salaamoe ʿalaykoem: vrede zij met jullie. Wat een mooie manier om binnen te komen.",
+          "en": "The greeting of the Muslims is as-salamu ʿalaykum: peace be upon you. What a lovely way to walk in.",
+          "fr": "La salutation des musulmans est as-salamou ʿalaykoum : que la paix soit sur vous. Quelle belle façon d’entrer.",
+          "de": "Der Gruß der Muslime lautet as-salamu ʿalaikum: Friede sei mit euch. Was für eine schöne Art hereinzukommen."
+        }
+      },
+      {
+        "id": "quiz-bismillah",
+        "question": {
+          "nl": "Het eten staat klaar. Wat zeg je vóór je begint?",
+          "en": "The food is ready. What do you say before you start?",
+          "fr": "Le repas est prêt. Que dis-tu avant de commencer ?",
+          "de": "Das Essen steht bereit. Was sagst du, bevor du anfängst?"
+        },
+        "options": [
+          {
+            "nl": "Alhamdoelillah (الْحَمْدُ لِلَّهِ)",
+            "en": "Alhamdulillah (الْحَمْدُ لِلَّهِ)",
+            "fr": "Alhamdoulillah (الْحَمْدُ لِلَّهِ)",
+            "de": "Alhamdulillah (الْحَمْدُ لِلَّهِ)"
+          },
+          {
+            "nl": "As-salaamoe ʿalaykoem (السَّلَامُ عَلَيْكُمْ)",
+            "en": "As-salamu ʿalaykum (السَّلَامُ عَلَيْكُمْ)",
+            "fr": "As-salamou ʿalaykoum (السَّلَامُ عَلَيْكُمْ)",
+            "de": "As-salamu ʿalaikum (السَّلَامُ عَلَيْكُمْ)"
+          },
+          {
+            "nl": "Bismillah (بِسْمِ اللَّهِ)",
+            "en": "Bismillah (بِسْمِ اللَّهِ)",
+            "fr": "Bismillah (بِسْمِ اللَّهِ)",
+            "de": "Bismillah (بِسْمِ اللَّهِ)"
+          }
+        ],
+        "correctIndex": 2,
+        "explanation": {
+          "nl": "Bismillah betekent: in de naam van Allah. Dat zeg je als je aan iets begint, ook bij het eten.",
+          "en": "Bismillah means: in the name of Allah. You say it whenever you begin something, and that includes eating.",
+          "fr": "Bismillah signifie : au nom d’Allah. On le dit quand on commence quelque chose, et donc aussi avant de manger.",
+          "de": "Bismillah bedeutet: im Namen Allahs. Das sagst du, wenn du etwas beginnst, also auch vor dem Essen."
+        }
+      },
+      {
+        "id": "quiz-alhamdulillah",
+        "question": {
+          "nl": "Je bord is leeg en je buik is vol. Waarmee bedank je Allah?",
+          "en": "Your plate is empty and your tummy is full. How do you thank Allah?",
+          "fr": "Ton assiette est vide et ton ventre est plein. Comment remercies-tu Allah ?",
+          "de": "Dein Teller ist leer und dein Bauch ist voll. Womit dankst du Allah?"
+        },
+        "options": [
+          {
+            "nl": "Bismillah (بِسْمِ اللَّهِ)",
+            "en": "Bismillah (بِسْمِ اللَّهِ)",
+            "fr": "Bismillah (بِسْمِ اللَّهِ)",
+            "de": "Bismillah (بِسْمِ اللَّهِ)"
+          },
+          {
+            "nl": "Alhamdoelillah (الْحَمْدُ لِلَّهِ)",
+            "en": "Alhamdulillah (الْحَمْدُ لِلَّهِ)",
+            "fr": "Alhamdoulillah (الْحَمْدُ لِلَّهِ)",
+            "de": "Alhamdulillah (الْحَمْدُ لِلَّهِ)"
+          },
+          {
+            "nl": "As-salaamoe ʿalaykoem (السَّلَامُ عَلَيْكُمْ)",
+            "en": "As-salamu ʿalaykum (السَّلَامُ عَلَيْكُمْ)",
+            "fr": "As-salamou ʿalaykoum (السَّلَامُ عَلَيْكُمْ)",
+            "de": "As-salamu ʿalaikum (السَّلَامُ عَلَيْكُمْ)"
+          }
+        ],
+        "correctIndex": 1,
+        "explanation": {
+          "nl": "Alhamdoelillah betekent: alle lof is voor Allah. Je zegt het als je blij en dankbaar bent.",
+          "en": "Alhamdulillah means: all praise is for Allah. You say it when you are happy and grateful.",
+          "fr": "Alhamdoulillah signifie : toute louange est à Allah. On le dit quand on est heureux et reconnaissant.",
+          "de": "Alhamdulillah bedeutet: Alles Lob gebührt Allah. Das sagst du, wenn du froh und dankbar bist."
+        }
+      },
+      {
+        "id": "quiz-alif",
+        "question": {
+          "nl": "Met welke letter begint het Arabische alfabet?",
+          "en": "Which letter does the Arabic alphabet begin with?",
+          "fr": "Par quelle lettre commence l’alphabet arabe ?",
+          "de": "Mit welchem Buchstaben beginnt das arabische Alphabet?"
+        },
+        "options": [
+          {
+            "nl": "ب (baa)",
+            "en": "ب (ba)",
+            "fr": "ب (ba)",
+            "de": "ب (Ba)"
+          },
+          {
+            "nl": "ت (taa)",
+            "en": "ت (ta)",
+            "fr": "ت (ta)",
+            "de": "ت (Ta)"
+          },
+          {
+            "nl": "ا (alif)",
+            "en": "ا (alif)",
+            "fr": "ا (alif)",
+            "de": "ا (Alif)"
+          }
+        ],
+        "correctIndex": 2,
+        "explanation": {
+          "nl": "Het Arabische alfabet begint met alif: ا. Daarna komen baa ب en taa ت.",
+          "en": "The Arabic alphabet begins with alif: ا. After that come ba ب and ta ت.",
+          "fr": "L’alphabet arabe commence par alif : ا. Ensuite viennent ba ب et ta ت.",
+          "de": "Das arabische Alphabet beginnt mit Alif: ا. Danach kommen Ba ب und Ta ت."
+        }
+      }
+    ]
+  }
+}

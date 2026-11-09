@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   const prayerKeys = ["fajr", "dhuhr", "asr", "maghrib", "isha"] as const;
   const alarmMinutes = [15, 15, 15, 5, 15]; // reminder minutes before
 
-  let ics = [
+  const ics = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//Noor Printables//Prayer Times//EN",

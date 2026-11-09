@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Wudu-held">
+  <circle cx="80" cy="80" r="72" fill="#fdf6e3" stroke="#c9920a" stroke-width="8"/>
+  <path d="M80 34l11.6 23.5 25.9 3.8-18.8 18.3 4.5 25.8L80 93.2 56.8 105.4l4.5-25.8-18.8-18.3 25.9-3.8z" fill="#c9920a"/>
+  <circle cx="80" cy="126" r="10" fill="#1a6b4a"/>
+</svg>

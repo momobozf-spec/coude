@@ -1,0 +1,102 @@
+@import 'tailwindcss';
+
+/**
+ * Halal Home — design tokens.
+ *
+ * De opdracht was: warm, rustig, betrouwbaar. Niet als een bankapp, en zonder
+ * overdreven islamitische decoratie.
+ *
+ * Vertaald naar keuzes:
+ *   - een gedempt groen als accent (rust, groei) in plaats van bankblauw;
+ *   - een warme zandtint als achtergrond in plaats van klinisch wit;
+ *   - één accentkleur, niet drie. Elke extra kleur maakt een scherm drukker en
+ *     dit platform begeleidt mensen door iets dat al spannend genoeg is.
+ *
+ * Het islamitische karakter zit in de functionaliteit (halal-financiering met
+ * bronvermelding, moskeeën, transparantie), niet in ornament.
+ */
+
+@theme {
+  /* Basis */
+  --color-sand-50: oklch(0.99 0.005 85);
+  --color-sand-100: oklch(0.975 0.008 85);
+  --color-sand-200: oklch(0.94 0.012 85);
+  --color-sand-300: oklch(0.89 0.014 85);
+
+  --color-ink-400: oklch(0.62 0.012 250);
+  --color-ink-600: oklch(0.45 0.015 250);
+  --color-ink-800: oklch(0.28 0.018 250);
+  --color-ink-900: oklch(0.19 0.02 250);
+
+  /* Accent: gedempt groen */
+  --color-olive-50: oklch(0.96 0.02 155);
+  --color-olive-100: oklch(0.92 0.04 155);
+  --color-olive-300: oklch(0.78 0.08 155);
+  --color-olive-500: oklch(0.58 0.09 155);
+  --color-olive-600: oklch(0.5 0.09 155);
+  --color-olive-700: oklch(0.42 0.08 155);
+
+  /* Statuskleuren: alleen voor status, nooit decoratief */
+  --color-amber-soft: oklch(0.85 0.09 75);
+  --color-amber-deep: oklch(0.55 0.11 65);
+  --color-rust-soft: oklch(0.88 0.06 30);
+  --color-rust-deep: oklch(0.52 0.14 28);
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+
+  --radius-card: 1rem;
+}
+
+:root {
+  --background: var(--color-sand-50);
+  --foreground: var(--color-ink-900);
+  --muted: var(--color-ink-600);
+  --border: var(--color-sand-300);
+  --surface: white;
+  --accent: var(--color-olive-600);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: oklch(0.18 0.012 250);
+    --foreground: oklch(0.95 0.006 85);
+    --muted: oklch(0.72 0.012 250);
+    --border: oklch(0.3 0.014 250);
+    --surface: oklch(0.23 0.014 250);
+    --accent: var(--color-olive-300);
+  }
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  /* Ruimte onderaan zodat de bottom navigation nooit inhoud afdekt. */
+  padding-bottom: env(safe-area-inset-bottom);
+  -webkit-font-smoothing: antialiased;
+}
+
+/**
+ * Zichtbare focus. Verwijder dit niet: toetsenbordgebruikers en
+ * schermlezergebruikers navigeren hierop, en dit platform vraagt om het
+ * uploaden van identiteitsdocumenten — dat moet zonder muis kunnen.
+ */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

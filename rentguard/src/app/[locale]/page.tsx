@@ -7,12 +7,17 @@ import { Alert, Card } from '@/components/ui/surface';
 import { DisclaimerNotice } from '@/components/legal/legal-notices';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { isFeatureEnabled } from '@/lib/features';
+import { SiteFooter } from '@/components/legal/site-footer';
 
 const COPY: Record<
   Locale,
   {
     lead: string;
     pillars: { title: string; body: string }[];
+    lettersPillar: { title: string; body: string };
+    upcomingTitle: string;
+    upcoming: string[];
     honesty: { title: string; body: string };
     cta: string;
     ctaSecondary: string;
@@ -20,36 +25,41 @@ const COPY: Record<
 > = {
   nl: {
     lead:
-      'Documenteer uw woning bij intrek en vertrek, bewaak de termijn waarbinnen ' +
-      'uw huurwaarborg moet worden vrijgegeven, en controleer of uw huurprijs en ' +
-      'indexatie kloppen.',
+      'Documenteer uw woning bij intrek en vertrek met foto’s die een ' +
+      'gegevensvingerafdruk en servertijdstempel krijgen, en vergelijk beide ' +
+      'dossiers wanneer u vertrekt.',
     pillars: [
       {
         title: 'Plaatsbeschrijving met bewijsintegriteit',
         body:
           'Kamer per kamer een geleide fotochecklist. Elke foto krijgt bij ' +
           'ontvangst een gegevensvingerafdruk (SHA-256) en een tijdstempel van ' +
-          'onze server. Beide staan in het rapport.',
+          'onze server. Beide staan in het PDF-rapport.',
       },
       {
-        title: 'Waarborg-terugeis',
+        title: 'Vergelijking intrek — vertrek',
         body:
-          'Wij berekenen de wettelijke termijn uit de Brusselse regelgeving, ' +
-          'sturen u herinneringen, en stellen een ingebrekestelling op uit een ' +
-          'vaste template met bronvermelding.',
+          'Bij vertrek zetten wij elke foto naast de intrekfoto. Een AI-analyse ' +
+          'stelt slijtage of schade voor; u bevestigt of corrigeert elk oordeel.',
       },
       {
-        title: 'Huurprijs en indexatie',
+        title: 'Medeondertekening door de verhuurder',
         body:
-          'Vergelijk uw huurprijs met het indicatieve Brusselse huurrooster en ' +
-          'controleer of een indexatie correct berekend is.',
+          'Stuur uw verhuurder een persoonlijke link om het dossier te bekijken ' +
+          'en mee te ondertekenen.',
       },
-      {
-        title: 'Contract en gebreken',
-        body:
-          'Een scan van uw huurcontract tegen een checklist van clausules die ' +
-          'nazicht verdienen, plus kant-en-klare brieven om een gebrek te melden.',
-      },
+    ],
+    lettersPillar: {
+      title: 'Waarborg-terugeis',
+      body:
+        'Wij berekenen de termijn uit de Brusselse regelgeving en stellen een ' +
+        'ingebrekestelling op uit een vaste template met bronvermelding.',
+    },
+    upcomingTitle: 'In voorbereiding',
+    upcoming: [
+      'Opvolging van de waarborgtermijn en brieven (na juridische nalezing)',
+      'Controle van huurprijs en indexatie',
+      'Scan van het huurcontract',
     ],
     honesty: {
       title: 'Wat wij niet zijn',
@@ -64,37 +74,43 @@ const COPY: Record<
   },
   fr: {
     lead:
-      "Documentez votre logement à l'entrée et à la sortie, surveillez le délai " +
-      'dans lequel votre garantie locative doit être libérée, et vérifiez que ' +
-      'votre loyer et son indexation sont corrects.',
+      "Documentez votre logement à l'entrée et à la sortie avec des photos " +
+      'dotées d’une empreinte numérique et d’un horodatage serveur, et comparez ' +
+      'les deux dossiers à votre départ.',
     pillars: [
       {
         title: "État des lieux avec intégrité de preuve",
         body:
           'Une liste de photos guidée, pièce par pièce. Chaque photo reçoit à la ' +
           "réception une empreinte numérique (SHA-256) et un horodatage de notre " +
-          'serveur. Les deux figurent dans le rapport.',
+          'serveur. Les deux figurent dans le rapport PDF.',
       },
       {
-        title: 'Récupération de la garantie',
+        title: 'Comparaison entrée — sortie',
         body:
-          'Nous calculons le délai légal à partir de la réglementation ' +
-          'bruxelloise, vous envoyons des rappels, et rédigeons une mise en ' +
-          'demeure à partir d’un modèle fixe avec indication des sources.',
+          'À la sortie, nous plaçons chaque photo à côté de la photo d’entrée. ' +
+          'Une analyse IA propose usure normale ou dégât ; vous confirmez ou ' +
+          'corrigez chaque avis.',
       },
       {
-        title: 'Loyer et indexation',
+        title: 'Contresignature par le bailleur',
         body:
-          'Comparez votre loyer à la grille indicative bruxelloise et vérifiez ' +
-          "qu'une indexation a été correctement calculée.",
+          'Envoyez à votre bailleur un lien personnel pour consulter le dossier ' +
+          'et le contresigner.',
       },
-      {
-        title: 'Bail et défauts',
-        body:
-          'Une analyse de votre bail au regard d’une liste de clauses qui ' +
-          'méritent vérification, ainsi que des courriers prêts à l’emploi pour ' +
-          'signaler un défaut.',
-      },
+    ],
+    lettersPillar: {
+      title: 'Récupération de la garantie',
+      body:
+        'Nous calculons le délai à partir de la réglementation bruxelloise et ' +
+        'rédigeons une mise en demeure à partir d’un modèle fixe avec ' +
+        'indication des sources.',
+    },
+    upcomingTitle: 'En préparation',
+    upcoming: [
+      'Suivi du délai de libération de la garantie et courriers (après relecture juridique)',
+      'Contrôle du loyer et de l’indexation',
+      'Analyse du bail',
     ],
     honesty: {
       title: 'Ce que nous ne sommes pas',
@@ -119,6 +135,12 @@ export default async function LandingPage({
 
   const t = getMessages(locale);
   const copy = COPY[locale];
+  const lettersEnabled = isFeatureEnabled('depositLetters', {
+    FEATURE_DEPOSIT_LETTERS: process.env.FEATURE_DEPOSIT_LETTERS === 'true',
+    FEATURE_TENANT_PROTECT_SUBSCRIPTION: false,
+  });
+  const pillars = lettersEnabled ? [...copy.pillars, copy.lettersPillar] : copy.pillars;
+  const upcoming = lettersEnabled ? copy.upcoming.slice(1) : copy.upcoming;
 
   return (
     <main className="mx-auto max-w-3xl px-5 py-10 sm:py-16">
@@ -152,7 +174,7 @@ export default async function LandingPage({
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2">
-        {copy.pillars.map((pillar) => (
+        {pillars.map((pillar) => (
           <Card key={pillar.title}>
             <h2 className="mb-2 text-base font-semibold text-slate-900">
               {pillar.title}
@@ -162,6 +184,19 @@ export default async function LandingPage({
         ))}
       </section>
 
+      {upcoming.length > 0 ? (
+        <section className="mt-6">
+          <h2 className="mb-2 text-sm font-semibold text-slate-900">
+            {copy.upcomingTitle}
+          </h2>
+          <ul className="list-disc space-y-1 pl-5 text-sm text-slate-600">
+            {upcoming.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <section className="mt-8 space-y-4">
         <Alert tone="warning" title={copy.honesty.title}>
           <p>{copy.honesty.body}</p>
@@ -169,7 +204,7 @@ export default async function LandingPage({
         <DisclaimerNotice locale={locale} />
       </section>
 
-      <footer className="mt-10 flex items-center justify-between border-t border-slate-200 pt-6 text-sm text-slate-600">
+      <div className="mt-10 flex items-center justify-between border-t border-slate-200 pt-6 text-sm text-slate-600">
         <span>{t.common.tagline}</span>
         <Link
           href={`/${locale === 'nl' ? 'fr' : 'nl'}`}
@@ -178,7 +213,8 @@ export default async function LandingPage({
         >
           {locale === 'nl' ? 'Français' : 'Nederlands'}
         </Link>
-      </footer>
+      </div>
+      <SiteFooter locale={locale} />
     </main>
   );
 }

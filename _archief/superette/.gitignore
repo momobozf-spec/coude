@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.env.local
+*.tsbuildinfo
+coverage/
+.next/
+# Datadirectory van de lokale embedded Postgres (scripts/dev-db.mjs)
+.pgdata/

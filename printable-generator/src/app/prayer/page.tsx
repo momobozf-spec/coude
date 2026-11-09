@@ -58,6 +58,7 @@ export default function PrayerPage() {
         { enableHighAccuracy: true }
       );
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- geolocation is not supported: show error once
       setError("Geolocation not supported");
       setLoading(false);
     }

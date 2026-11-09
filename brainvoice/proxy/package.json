@@ -1,0 +1,17 @@
+{
+  "name": "brainvoice-proxy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Tiny proxy that holds the Anthropic API key for the BrainVoice app.",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.80.0"
+  }
+}

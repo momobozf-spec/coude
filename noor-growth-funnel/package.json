@@ -1,0 +1,10 @@
+{
+  "name": "noor-growth-funnel",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check app.js && node --check funnel.js && node --check config.js && node --check legal.js",
+    "test": "node --test test/*.test.mjs"
+  }
+}

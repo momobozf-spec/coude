@@ -1,0 +1,9 @@
+1. Profiel opgeslagen voor Marhaba Data & AI Agent BV (TESTPROFIEL) (onbekende velden blijven onbekend).
+2. Echte bron ingevoerd: Provision of services in the areas of Data Engineering, Business Intelligence, and Data Integration (status open).
+2b. Echte Belgische bron: Zorgband Leie & Schelde — Data project framework agreement: advies=not_suitable, relevantiescore=43, blokkades=Alle bekende deadlines zijn verstreken., ontbrekend=7
+3. Analyse v1: advies=not_suitable, relevantiescore=70, blokkades=Alle bekende deadlines zijn verstreken.
+4. Review: goedgekeurd en gepubliceerd (advies not_suitable).
+5. Klantweergave: zichtbaar=true, open=false, reden=expired, wijziging-in-controle=false
+6. Digest: 0 kans(en) → "TenderKompas: deze week geen geschikte kansen (16 okt 2026 – 23 okt 2026)" · verzending: niet ingesteld (1 ontvanger(s), niets verzonden). Preview: demo-output/digest-echte-bron.html
+7. Feedback geregistreerd: niet relevant (met reden), enkel zichtbaar voor deze organisatie.
++  Fictieve demo-digest: 2 kans(en). Preview: demo-output/digest-demo-fictief.html

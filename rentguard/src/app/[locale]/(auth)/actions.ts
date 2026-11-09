@@ -21,12 +21,16 @@ export type AuthErrorCode =
   | 'EMAIL_TAKEN'
   | 'WEAK_PASSWORD'
   | 'RATE_LIMITED'
-  | 'UNKNOWN';
+  | 'UNKNOWN'
+  | 'PASSWORDS_DO_NOT_MATCH'
+  | 'SESSION_EXPIRED';
 
 export interface AuthState {
   error: AuthErrorCode | null;
   /** Gezet na registratie: de gebruiker moet zijn e-mail bevestigen. */
   awaitingConfirmation?: boolean;
+  /** Gezet na een herstelaanvraag (altijd, ook voor onbekende adressen). */
+  resetRequested?: boolean;
   /** Veldfouten, per veldnaam. */
   fieldErrors?: Record<string, string[]>;
 }
@@ -128,4 +132,78 @@ export async function signOutAction(formData: FormData): Promise<void> {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
   redirect(`/${locale}`);
+}
+
+const forgotSchema = z.object({ email: z.string().trim().email() });
+
+/**
+ * Vraagt een herstellink aan.
+ *
+ * Antwoordt altijd hetzelfde, ook als het adres onbekend is: anders kan
+ * iemand via dit formulier nagaan wie een account heeft. De link verwijst naar
+ * `APP_URL` (nooit naar de Origin-header van het verzoek).
+ */
+export async function requestPasswordResetAction(
+  _prev: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const locale = resolveLocale(formData.get('locale')?.toString());
+  const parsed = forgotSchema.safeParse({ email: formData.get('email') });
+  if (!parsed.success) {
+    return {
+      error: 'INVALID_INPUT',
+      fieldErrors: z.flattenError(parsed.error).fieldErrors,
+    };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const next = encodeURIComponent(`/${locale}/reset-password`);
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${getEnv().APP_URL}/auth/callback?locale=${locale}&next=${next}`,
+  });
+
+  if (error && (error.status === 429 || error.message.toLowerCase().includes('rate limit'))) {
+    return { error: 'RATE_LIMITED' };
+  }
+  return { error: null, resetRequested: true };
+}
+
+const updatePasswordSchema = z.object({
+  password: z.string().min(10).max(200),
+  confirm: z.string(),
+});
+
+/** Bewaart het nieuwe wachtwoord binnen de herstelsessie. */
+export async function updatePasswordAction(
+  _prev: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const locale = resolveLocale(formData.get('locale')?.toString());
+  const parsed = updatePasswordSchema.safeParse({
+    password: formData.get('password'),
+    confirm: formData.get('confirm'),
+  });
+  if (!parsed.success) {
+    return {
+      error: 'INVALID_INPUT',
+      fieldErrors: z.flattenError(parsed.error).fieldErrors,
+    };
+  }
+  if (parsed.data.password !== parsed.data.confirm) {
+    return { error: 'PASSWORDS_DO_NOT_MATCH' };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: 'SESSION_EXPIRED' };
+
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) return { error: mapError(error.message, error.status) };
+
+  // Wie zijn wachtwoord herstelt, vermoedt vaak misbruik: sluit andere sessies.
+  await supabase.auth.signOut({ scope: 'others' });
+
+  redirect(`/${locale}/dashboard`);
 }

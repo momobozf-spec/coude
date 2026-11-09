@@ -1,0 +1,38 @@
+{
+  "name": "@orbit/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "doctor": "expo install --check",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
+    "@orbit/api-client": "*",
+    "@orbit/core": "*",
+    "@orbit/types": "*",
+    "@orbit/ui": "*",
+    "@orbit/utils": "*",
+    "@orbit/validation": "*",
+    "@tanstack/react-query": "^5.62.11",
+    "expo": "^57.0.18",
+    "expo-constants": "~57.0.16",
+    "expo-linking": "~57.0.8",
+    "expo-router": "~57.0.17",
+    "expo-secure-store": "~57.0.2",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-gesture-handler": "~2.32.0",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

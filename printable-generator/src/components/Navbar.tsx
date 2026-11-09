@@ -4,15 +4,18 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { getFeatures, type FeatureName } from "@/lib/features";
 
-const navLinks = [
+const allNavLinks: { href: string; label: string; emoji: string; feature?: FeatureName }[] = [
   { href: "/dashboard", label: "Werkbladen", emoji: "📄" },
-  { href: "/games", label: "Spelletjes", emoji: "🎮" },
-  { href: "/academy", label: "Academy", emoji: "🎓" },
-  { href: "/books", label: "Kleurboek", emoji: "🎨" },
-  { href: "/marketplace", label: "Marktplaats", emoji: "🛒" },
+  { href: "/games", label: "Spelletjes", emoji: "🎮", feature: "games" },
+  { href: "/academy", label: "Academy", emoji: "🎓", feature: "academy" },
+  { href: "/books", label: "Kleurboek", emoji: "🎨", feature: "books" },
+  { href: "/marketplace", label: "Marktplaats", emoji: "🛒", feature: "marketplace" },
   { href: "/prayer", label: "Gebed", emoji: "🕌" },
 ];
+const enabledFeatures = getFeatures();
+const navLinks = allNavLinks.filter((l) => !l.feature || enabledFeatures[l.feature]);
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -26,10 +29,12 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  // Close mobile menu on route change
-  useEffect(() => {
+  // Close mobile menu on route change (state adjustment during render, no effect needed)
+  const [lastPath, setLastPath] = useState(pathname);
+  if (pathname !== lastPath) {
+    setLastPath(pathname);
     setIsMobileOpen(false);
-  }, [pathname]);
+  }
 
   return (
     <header

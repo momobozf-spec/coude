@@ -1,0 +1,24 @@
+# Alfred server (API + workers + scheduler). Build from the brainvoice folder:
+#   docker build -f Dockerfile.alfred -t alfred-server .
+FROM node:24-alpine
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps --ignore-scripts
+
+COPY tsconfig.json ./
+COPY src ./src
+COPY server ./server
+
+RUN mkdir -p /app/data
+VOLUME ["/app/data"]
+
+ENV ALFRED_DB_PATH=/app/data/alfred.db
+ENV ALFRED_PORT=8787
+EXPOSE 8787
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD wget -qO- http://127.0.0.1:8787/api/health || exit 1
+
+CMD ["npx", "tsx", "server/index.ts"]

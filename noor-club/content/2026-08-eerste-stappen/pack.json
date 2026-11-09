@@ -1,0 +1,55 @@
+{
+  "slug": "2026-08-eerste-stappen",
+  "month": 8,
+  "year": 2026,
+  "isFree": true,
+  "coverUrl": "/covers/2026-08-eerste-stappen.svg",
+  "titles": {
+    "nl": "Eerste stappen",
+    "en": "First Steps",
+    "fr": "Premiers pas",
+    "de": "Erste Schritte"
+  },
+  "descriptions": {
+    "nl": "Het allereerste pakket: je kind leert groeten met salaam, bismillah zeggen voor het eten en alhamdulillah als dank. Daarbij komen de eerste letters van het Arabische alfabet en een paar makkelijke woorden.",
+    "en": "The very first pack: your child learns to greet with salam, to say bismillah before eating and alhamdulillah to give thanks. Along the way come the first letters of the Arabic alphabet and a few easy words.",
+    "fr": "Le tout premier pack : votre enfant apprend à saluer avec le salam, à dire bismillah avant de manger et alhamdoulillah pour remercier. Il découvre aussi les premières lettres de l’alphabet arabe et quelques mots faciles.",
+    "de": "Das allererste Paket: Dein Kind lernt, mit Salam zu grüßen, vor dem Essen Bismillah zu sagen und mit Alhamdulillah zu danken. Dazu kommen die ersten Buchstaben des arabischen Alphabets und ein paar einfache Wörter."
+  },
+  "assets": [
+    {
+      "kind": "WORKSHEET",
+      "titles": {
+        "nl": "Werkblad: mijn eerste letters",
+        "en": "Worksheet: My First Letters",
+        "fr": "Fiche : mes premières lettres",
+        "de": "Arbeitsblatt: Meine ersten Buchstaben"
+      },
+      "fileUrl": "2026-08-eerste-stappen/mijn-eerste-letters-werkblad.pdf",
+      "ageBand": "4-6"
+    },
+    {
+      "kind": "PARENT_GUIDE",
+      "titles": {
+        "nl": "Ouderwijzer: samen beginnen",
+        "en": "Parent Guide: Starting Together",
+        "fr": "Guide parents : commencer ensemble",
+        "de": "Elternratgeber: Gemeinsam anfangen"
+      },
+      "fileUrl": "2026-08-eerste-stappen/ouderwijzer-samen-beginnen.pdf",
+      "ageBand": "4-6"
+    }
+  ],
+  "badges": [
+    {
+      "slug": "2026-08-eerste-stappen-badge",
+      "titles": {
+        "nl": "Kleine beginner",
+        "en": "Little Beginner",
+        "fr": "Petit débutant",
+        "de": "Kleiner Anfänger"
+      },
+      "iconUrl": "/badges/2026-08-eerste-stappen-badge.svg"
+    }
+  ]
+}

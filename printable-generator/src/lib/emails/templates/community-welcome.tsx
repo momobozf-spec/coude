@@ -29,7 +29,7 @@ export function CommunityWelcomeEmail({ name, plan, communityUrl }: Props) {
 
       <Section style={{ backgroundColor: "#e8f5ec", borderRadius: 8, padding: 16, textAlign: "center" as const, marginBottom: 16 }}>
         <Text style={{ fontSize: 16, fontWeight: 700, color: "#1a6b4a", margin: "0 0 4px" }}>
-          Join 847 Muslim Families
+          Join the Noor Families community
         </Text>
         <Text style={{ fontSize: 13, color: "#555", margin: 0 }}>
           No new password needed — click below to enter automatically

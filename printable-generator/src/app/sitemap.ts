@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { disabledFeatureForPath } from "@/lib/features";
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL || "https://noorprintables.com";
 
@@ -28,7 +29,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/sell`, changeFrequency: "monthly" as const, priority: 0.7 },
     { url: `${BASE}/white-label`, changeFrequency: "monthly" as const, priority: 0.8 },
     { url: `${BASE}/books`, changeFrequency: "weekly" as const, priority: 0.8 },
-  ];
+    { url: `${BASE}/privacy`, changeFrequency: "yearly" as const, priority: 0.2 },
+    { url: `${BASE}/terms`, changeFrequency: "yearly" as const, priority: 0.2 },
+    { url: `${BASE}/cookies`, changeFrequency: "yearly" as const, priority: 0.2 },
+  ].filter((p) => !disabledFeatureForPath(new URL(p.url).pathname));
 
   const blogPages = BLOG_POSTS.map((post) => ({
     url: `${BASE}/blog/${post.slug}`,

@@ -1,0 +1,76 @@
+# Render Blueprint — TenderKompas IT (Blueprint path: tenderkompas/render.yaml). Alles in de EU (Frankfurt).
+# Web (Docker) + PostgreSQL + dagelijkse cron voor de TED-import. Geheimen: sync:false → invullen in het Render-dashboard.
+services:
+  - type: web
+    name: tenderkompas
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    rootDir: tenderkompas
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    preDeployCommand: npm run db:migrate:prod
+    disk:
+      name: tenderkompas-storage
+      mountPath: /app/storage
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tenderkompas-db
+          property: connectionString
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: BETTER_AUTH_URL
+        sync: false # https://<jouw-domein>
+      - key: LEGAL_ENTITY_ADDRESS
+        sync: false # straat + nr + postcode zetel
+      - key: STORAGE_DIR
+        value: /app/storage
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false # TenderKompas IT <digest@jouw-domein.be>
+      - key: SMTP_REQUIRE_TLS
+        value: "true"
+      - key: ANTHROPIC_API_KEY
+        sync: false # optioneel
+      - key: TED_API_BASE
+        value: https://api.ted.europa.eu
+
+  - type: cron
+    name: tenderkompas-ted-import
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    rootDir: tenderkompas
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    schedule: "15 4 * * *" # dagelijks 04:15 UTC (05:15/06:15 Brussel)
+    dockerCommand: npm run ted:import
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tenderkompas-db
+          property: connectionString
+      - key: TED_API_BASE
+        value: https://api.ted.europa.eu
+
+databases:
+  - name: tenderkompas-db
+    region: frankfurt
+    plan: basic-256mb
+    databaseName: tenderkompas
+    postgresMajorVersion: "16"
+    ipAllowList: [] # enkel bereikbaar vanuit Render-services

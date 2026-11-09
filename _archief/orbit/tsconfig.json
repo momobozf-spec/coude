@@ -1,0 +1,29 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["node"],
+    "paths": {
+      "@orbit/types": ["packages/types/src/index.ts"],
+      "@orbit/types/*": ["packages/types/src/*"],
+      "@orbit/validation": ["packages/validation/src/index.ts"],
+      "@orbit/validation/*": ["packages/validation/src/*"],
+      "@orbit/utils": ["packages/utils/src/index.ts"],
+      "@orbit/utils/*": ["packages/utils/src/*"],
+      "@orbit/core": ["packages/core/src/index.ts"],
+      "@orbit/core/*": ["packages/core/src/*"],
+      "@orbit/ui": ["packages/ui/src/index.ts"],
+      "@orbit/ui/*": ["packages/ui/src/*"],
+      "@orbit/db": ["packages/db/src/index.ts"],
+      "@orbit/db/*": ["packages/db/src/*"],
+      "@orbit/auth": ["packages/auth/src/index.ts"],
+      "@orbit/auth/*": ["packages/auth/src/*"],
+      "@orbit/api-core": ["packages/api-core/src/index.ts"],
+      "@orbit/api-core/*": ["packages/api-core/src/*"],
+      "@orbit/api-client": ["packages/api-client/src/index.ts"],
+      "@orbit/api-client/*": ["packages/api-client/src/*"]
+    }
+  },
+  "include": ["packages/*/src/**/*.ts", "packages/*/tests/**/*.ts", "*.config.ts"],
+  "exclude": ["node_modules", "**/dist", "**/.next", "**/node_modules"]
+}

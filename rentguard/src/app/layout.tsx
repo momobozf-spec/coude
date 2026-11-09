@@ -8,8 +8,8 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'RentGuard Brussels',
   description:
-    'Documenteer uw huurwoning, bewaak uw waarborgtermijn en controleer uw ' +
-    'huurprijs. Voor huurders in het Brussels Hoofdstedelijk Gewest.',
+    'Documenteer uw huurwoning bij intrek en vertrek, met fotobewijs en ' +
+    'vergelijkend rapport. Voor huurders in het Brussels Hoofdstedelijk Gewest.',
   applicationName: 'RentGuard Brussels',
   manifest: '/manifest.webmanifest',
 };

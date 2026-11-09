@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "chain": {
+    "slug": "voorbeeld",
+    "name": "Voorbeeldketen",
+    "websiteUrl": "https://www.example.be",
+    "loyaltyCardName": null
+  },
+  "source": {
+    "kind": "IMPORT_FILE",
+    "label": "Handmatig importbestand voorbeeld.json",
+    "termsReviewed": true,
+    "notes": "Prijzen handmatig overgenomen uit de wekelijkse folder van een deelnemende handelaar."
+  },
+  "observedAt": "2026-10-04T08:00:00+02:00",
+  "locations": [
+    {
+      "externalId": "vb-antwerpen",
+      "name": "Voorbeeldketen Antwerpen",
+      "address": "Meir 1",
+      "postalCode": "2000",
+      "city": "Antwerpen",
+      "latitude": 51.2186,
+      "longitude": 4.4079
+    }
+  ],
+  "products": [
+    {
+      "externalId": "sku-1001",
+      "name": "Coca-Cola Zero 1,5 l",
+      "brand": "Coca-Cola",
+      "barcode": "5449000131805",
+      "categorySlug": "dranken",
+      "packageQuantity": 1.5,
+      "packageUnit": "L",
+      "packCount": 1
+    },
+    {
+      "externalId": "sku-1002",
+      "name": "Halfvolle melk 1 l",
+      "brand": "Voorbeeldketen",
+      "brandType": "STORE_BRAND",
+      "categorySlug": "zuivel",
+      "packageQuantity": 1,
+      "packageUnit": "L"
+    }
+  ],
+  "offers": [
+    {
+      "productExternalId": "sku-1001",
+      "sourceReference": "sku-1001:regular",
+      "priceCents": 199,
+      "promotionType": "NONE",
+      "availability": "IN_STOCK"
+    },
+    {
+      "productExternalId": "sku-1001",
+      "sourceReference": "sku-1001:promo-2026w40",
+      "priceCents": 199,
+      "promotionType": "MULTIBUY",
+      "promotionText": "2 voor €3",
+      "promotionRule": { "kind": "MULTIBUY", "quantity": 2, "totalCents": 300 },
+      "minimumQuantity": 2,
+      "startsAt": "2026-10-01T00:00:00+02:00",
+      "endsAt": "2026-10-07T23:59:59+02:00"
+    },
+    {
+      "productExternalId": "sku-1002",
+      "locationExternalId": "vb-antwerpen",
+      "sourceReference": "sku-1002:vb-antwerpen",
+      "priceCents": 95,
+      "promotionType": "NONE"
+    }
+  ]
+}

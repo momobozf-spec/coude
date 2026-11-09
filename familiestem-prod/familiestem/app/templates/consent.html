@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block nav %}{% endblock %}
+{% block content %}
+{% if order.is_demo %}<div class="banner">VOORBEELD MET FICTIEVE GEGEVENS</div>{% endif %}
+<h1>Dag {{ order.storyteller_name }}.</h1>
+<p class="lead">{{ order.buyer_name }} wil graag jouw verhalen horen en bewaren, in je eigen stem.</p>
+{% if order.gift_message %}<div class="card"><em>“{{ order.gift_message }}”</em></div>{% endif %}
+<div class="card">
+<h3>Wat er gebeurt</h3>
+<ul>
+<li>Je krijgt telkens één vraag. Je drukt op de knop en vertelt. Overslaan mag altijd.</li>
+<li>Je opname wordt bewaard en uitgeschreven. Wij voegen niets toe aan wat je zegt.</li>
+<li><strong>Jij</strong> leest na en keurt goed. Pas daarna kan je familie het lezen en beluisteren.</li>
+<li>Jij beslist welke familieleden meelezen. Ook {{ order.buyer_name }} ziet enkel wat jij deelt.</li>
+<li>Je kan op elk moment alles downloaden of alles laten wissen.</li>
+</ul>
+<p class="small">Bewaring: {{ cfg.COLLECT_DAYS }} dagen om te vertellen (eenmaal verlengbaar), daarna {{ cfg.HOSTING_YEARS }} jaar online. Voor het uitschrijven sturen we je opname naar een spraakdienst die in de EU verwerkt en je opnames niet bewaart of gebruikt om te leren. Meer in de <a href="/voorwaarden">voorwaarden</a>.</p>
+</div>
+<form class="card" method="post" action="/v/{{ token }}/akkoord">
+  <div class="check"><input type="checkbox" id="c1" name="consent_record" value="1" required><label for="c1" style="margin:0;font-weight:400">Ik ben {{ order.storyteller_name }} en ik wil mijn verhalen laten opnemen en bewaren.</label></div>
+  <div class="check"><input type="checkbox" id="c2" name="consent_processing" value="1" required><label for="c2" style="margin:0;font-weight:400">Ik ga akkoord dat mijn opnames worden uitgeschreven zoals hierboven beschreven.</label></div>
+  <label for="pin">Pincode (optioneel, 4 tot 6 cijfers)</label>
+  <input id="pin" type="password" inputmode="numeric" name="pin" maxlength="6" autocomplete="new-password">
+  <p class="small">Met een pincode kan enkel jij je verhalen openen en goedkeuren, ook als iemand anders je link heeft. Zonder pincode werkt alles gewoon via je link.</p>
+  <p><button class="btn" type="submit">Beginnen</button></p>
+  <p class="small">Liever niet? Dan hoef je niets te doen. Er wordt niets opgenomen.</p>
+</form>
+{% endblock %}

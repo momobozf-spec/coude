@@ -1,0 +1,341 @@
+// AI Huiszoeker — datamodel.
+//
+// Vier regels die het hele schema sturen:
+//
+//  1. PRIJZEN ZIJN `Int` IN HELE EURO'S. Geen Float, geen centen. Vastgoed-
+//     advertenties noteren nooit centen, en Float geeft drift zodra we prijs-
+//     historiek diffen (450000.0 != 449999.99999) of matchscores berekenen.
+//
+//  2. `Property` IS GLOBAAL, NIET PER GEBRUIKER. Eén woning bestaat één keer,
+//     ongeacht hoeveel gebruikers hem vinden. De per-gebruiker-relatie zit in
+//     `SearchMatch`. Zo scrapen 500 gebruikers met dezelfde zoekopdracht niet
+//     500x dezelfde pagina en slaan we niet 500x dezelfde rij op.
+//
+//  3. ALLES HANGT AAN EEN `userId`. Multi-tenant filtering achteraf inbouwen
+//     betekent elke query aanraken; nu kost het niets.
+//
+//  4. JSON ALLEEN VOOR DOCUMENTEN, NIET VOOR RELATIES. `Search.criteria` en
+//     `SearchMatch.reasons` zijn versioneerbare documenten die we nooit
+//     relationeel bevragen. Alles waarop we filteren staat in kolommen.
+
+// Prisma 7: de connectie-URL staat niet meer hier maar in prisma.config.ts, en
+// de client krijgt een driver-adapter mee (src/db/prisma.ts). De generator
+// schrijft naar src/generated/prisma — dat pad staat al in de .gitignore van
+// deze repo.
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum TransactionType {
+  BUY
+  RENT
+}
+
+enum SearchFrequency {
+  HOURLY
+  EVERY_6_HOURS
+  DAILY
+}
+
+enum RunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+/// Levenscyclus van een match vanuit het perspectief van de gebruiker.
+/// Bestaat vanaf dag één zodat "favorieten" en "afwijzen" later alleen een
+/// endpoint zijn, geen migratie.
+enum MatchStatus {
+  NEW
+  SEEN
+  FAVOURITE
+  REJECTED
+}
+
+enum NotificationChannelType {
+  TELEGRAM
+  EMAIL
+  WEBHOOK
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Gebruiker & notificatiekanalen
+// ─────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  /// Nog niet gebruikt in v1 (één seed-gebruiker), maar de kolom bestaat zodat
+  /// auth later geen migratie op een gevulde tabel is.
+  passwordHash String?
+  name         String?
+  locale       String   @default("nl")
+  timezone     String   @default("Europe/Brussels")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  searches      Search[]
+  channels      NotificationChannel[]
+  matches       SearchMatch[]
+  notifications Notification[]
+}
+
+/// Waar een melding heen gaat, per gebruiker. Alleen bestemmingen (chat-id,
+/// e-mailadres, webhook-URL) staan hier; provider-secrets (bot-token, API-key)
+/// blijven in env, want die horen bij de installatie en niet bij de gebruiker.
+model NotificationChannel {
+  id        String                  @id @default(cuid())
+  userId    String
+  type      NotificationChannelType
+  /// Vorm hangt af van `type`; gevalideerd met Zod in notifierFactory.
+  config    Json
+  active    Boolean                 @default(true)
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  @@index([userId, active])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Zoekopdrachten
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Search {
+  id            String          @id @default(cuid())
+  userId        String
+  name          String
+  /// De originele vrije tekst. Bewaard zodat we later kunnen herparsen met een
+  /// beter model zonder de gebruiker opnieuw te laten typen.
+  originalQuery String
+  /// Gevalideerd tegen searchCriteriaSchema bij elke lees- en schrijfactie.
+  criteria      Json
+  /// Versie van het criteria-schema waarmee dit document geschreven is.
+  /// Maakt een migratie van oude documenten mogelijk zonder gokwerk.
+  criteriaVersion Int           @default(1)
+  /// Welke parser dit gemaakt heeft, bv. "anthropic:claude-opus-5@v1".
+  /// Leeg wanneer de criteria rechtstreeks via de API zijn aangeleverd.
+  /// Hiermee kunnen we later gericht zoekopdrachten herparsen die door een
+  /// oudere parser zijn gegaan, zonder alles opnieuw te doen.
+  parsedBy      String?
+  active        Boolean         @default(true)
+  frequency     SearchFrequency @default(DAILY)
+
+  lastRunAt DateTime?
+  nextRunAt DateTime  @default(now())
+
+  /// Het slot. Een voorwaardelijke `updateMany` hierop is atomair in één
+  /// statement en werkt over meerdere instanties. Een lock ouder dan
+  /// SEARCH_LOCK_TTL_MINUTES wordt overgenomen, dus een gecrashte worker
+  /// blokkeert een zoekopdracht niet voor eeuwig.
+  lockedAt  DateTime?
+  lockedBy  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matches SearchMatch[]
+  runs    SearchRun[]
+
+  @@unique([userId, name])
+  @@index([active, nextRunAt])
+  @@index([userId, createdAt])
+}
+
+/// Audittrail: wat draaide wanneer, wat kwam eruit, welke fout. Niet het slot
+/// zelf — dat is `Search.lockedAt`.
+model SearchRun {
+  id         String    @id @default(cuid())
+  searchId   String
+  status     RunStatus @default(RUNNING)
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  scrapedCount    Int @default(0)
+  newPropertyCount Int @default(0)
+  matchCount      Int @default(0)
+  notifiedCount   Int @default(0)
+
+  /// Per bron: status, aantal, duur, eventuele blokkade.
+  sourceStats Json?
+  error       String?
+
+  search Search @relation(fields: [searchId], references: [id], onDelete: Cascade)
+
+  @@index([searchId, startedAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Panden
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Property {
+  id String @id @default(cuid())
+
+  // Ontdubbeling, drie niveaus (zie propertyService):
+  //  1. (source, externalId)  — primair, hardst
+  //  2. urlNormalized         — zelfde pand via een andere ingang
+  //  3. fingerprint           — zelfde pand op een andere site
+  source        String
+  externalId    String
+  url           String
+  urlNormalized String
+  /// sha256 van adres + postcode + prijs + oppervlakte + type. Bewust géén
+  /// unique constraint: twee identieke nieuwbouwappartementen in hetzelfde
+  /// gebouw zijn een legitiem duplicaat-ogend paar. Wel geïndexeerd, zodat
+  /// de service een kandidaat kan voorstellen in plaats van blind te mergen.
+  fingerprint   String
+
+  title       String
+  description String?
+
+  address    String?
+  postalCode String?
+  city       String?
+  region     String?
+  latitude   Float?
+  longitude  Float?
+
+  propertyType    String?
+  transactionType TransactionType @default(BUY)
+
+  price         Int?
+  bedrooms      Int?
+  bathrooms     Int?
+  livingAreaM2  Int?
+  landAreaM2    Int?
+  epcLabel      String?
+  /// kWh/m²/jaar wanneer de advertentie het vermeldt. Los van het label omdat
+  /// labelgrenzen per gewest verschillen.
+  epcValue      Int?
+  features      String[] @default([])
+  imageUrl      String?
+
+  /// Ruwe genormaliseerde velden van de bron, voor debugging van scrapers.
+  /// Niet de volledige HTML — dat hoort niet in een database.
+  raw Json?
+
+  publishedAt  DateTime?
+  discoveredAt DateTime  @default(now())
+  lastSeenAt   DateTime  @default(now())
+  /// Gezet wanneer de bron het pand niet meer toont. Nooit verwijderen: een
+  /// gebruiker wil kunnen zien dat een favoriet van de markt is.
+  delistedAt   DateTime?
+  updatedAt    DateTime  @updatedAt
+
+  matches SearchMatch[]
+  history PropertyHistory[]
+
+  @@unique([source, externalId])
+  @@unique([urlNormalized])
+  @@index([fingerprint])
+  @@index([city, transactionType, price])
+  @@index([discoveredAt])
+}
+
+/// Eén rij per gewijzigd veld, niet per snapshot. Reden: de enige vraag die we
+/// stellen is "is de prijs gedaald sinds vorige run", en die is met
+/// (propertyId, field='price') een index-lookup in plaats van een diff van
+/// twee JSON-blobs.
+model PropertyHistory {
+  id         String   @id @default(cuid())
+  propertyId String
+  field      String
+  oldValue   String?
+  newValue   String?
+  changedAt  DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId, changedAt])
+  @@index([propertyId, field, changedAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Matches
+// ─────────────────────────────────────────────────────────────────────────────
+
+model SearchMatch {
+  id         String @id @default(cuid())
+  searchId   String
+  propertyId String
+  /// Gedenormaliseerd vanaf Search.userId, zodat "toon mijn favorieten" over
+  /// alle zoekopdrachten heen één index-scan is in plaats van een join.
+  userId     String
+
+  /// 0-100. Aandeel gehaalde voorkeuren; onbekende velden tellen niet mee in
+  /// de noemer (zie ARCHITECTURE.md §6).
+  score     Int
+  /// Alle harde eisen gehaald. Bij false wordt er niet gemeld.
+  hardPass  Boolean
+  /// MatchReason[] — per criterium: field, verdict (pass/fail/unknown), detail.
+  /// Dit is wat de melding toont én de enige input die de AI krijgt.
+  reasons   Json
+
+  aiSummary      String?
+  aiGeneratedAt  DateTime?
+
+  status     MatchStatus @default(NEW)
+  notifiedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  search        Search         @relation(fields: [searchId], references: [id], onDelete: Cascade)
+  property      Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications Notification[] @relation("NotificationMatches")
+
+  @@unique([searchId, propertyId])
+  @@index([userId, status, createdAt])
+  @@index([searchId, notifiedAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Meldingen
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String                  @id @default(cuid())
+  userId    String
+  channelId String
+  channel   NotificationChannelType
+
+  status   NotificationStatus @default(PENDING)
+  /// Het samengestelde bericht (titel, body, per-match-blokken). Bewaard zodat
+  /// een retry exact hetzelfde verstuurt en niet opnieuw AI-tekst genereert.
+  payload  Json
+  attempts Int                @default(0)
+  lastError String?
+  sentAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notificationChannel NotificationChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  /// Impliciete m-n: één digest kan meerdere matches bevatten.
+  matches            SearchMatch[]       @relation("NotificationMatches")
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}

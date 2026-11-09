@@ -1,0 +1,53 @@
+{
+  "slug": "2026-08-eerste-stappen-wordbuild",
+  "engine": "WORDBUILD",
+  "ageBand": "4-6",
+  "xp": 20,
+  "order": 5,
+  "titles": {
+    "nl": "Bouw het woord",
+    "en": "Build the Word",
+    "fr": "Construis le mot",
+    "de": "Baue das Wort"
+  },
+  "data": {
+    "words": [
+      {
+        "id": "word-bayt",
+        "word": "بيت",
+        "letters": ["ت", "ن", "ب", "ث", "ي", "ج"],
+        "meaning": {
+          "nl": "huis (bayt)",
+          "en": "house (bayt)",
+          "fr": "maison (bayt)",
+          "de": "Haus (bayt)"
+        },
+        "audioUrl": "/audio/2026-08-eerste-stappen/word-bayt.mp3"
+      },
+      {
+        "id": "word-nur",
+        "word": "نور",
+        "letters": ["ر", "ز", "ن", "و", "د", "م"],
+        "meaning": {
+          "nl": "licht (noer)",
+          "en": "light (nur)",
+          "fr": "lumière (nour)",
+          "de": "Licht (nur)"
+        },
+        "audioUrl": "/audio/2026-08-eerste-stappen/word-nur.mp3"
+      },
+      {
+        "id": "word-qamar",
+        "word": "قمر",
+        "letters": ["م", "ف", "ق", "ر", "ن", "ل"],
+        "meaning": {
+          "nl": "maan (qamar)",
+          "en": "moon (qamar)",
+          "fr": "lune (qamar)",
+          "de": "Mond (qamar)"
+        },
+        "audioUrl": "/audio/2026-08-eerste-stappen/word-qamar.mp3"
+      }
+    ]
+  }
+}

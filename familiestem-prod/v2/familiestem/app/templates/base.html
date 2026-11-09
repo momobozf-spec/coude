@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+<title>{% block title %}Familiestem{% endblock %}</title>
+<link rel="preload" href="/static/fonts/gloock-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/static/fonts/figtree-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Gloock";src:url(/static/fonts/gloock-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/static/fonts/figtree-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/static/fonts/figtree-latin-600-normal.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Caveat";src:url(/static/fonts/caveat-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:swap}
+:root{
+  --paper:#fffbf7;      /* kaartpapier */
+  --blush:#f7e6df;      /* envelop */
+  --cranberry:#7d1f2c;  /* hoofdkleur: cadeau, feest */
+  --cranberry-deep:#5a141f;
+  --gold:#b48a3c;       /* folie-accent, spaarzaam */
+  --ink:#2a2220;
+  --muted:#6b5c56;
+  --line:#ecd9d0;
+  --focus:#c9952e;
+  --display:"Gloock",Georgia,serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --hand:"Caveat","Segoe Script",cursive;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 18px/1.6 var(--body)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.narrow{max-width:720px;margin:0 auto;padding:0 20px}
+header.top{padding:18px 0}
+header.top .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font:400 24px/1 var(--display);color:var(--cranberry);text-decoration:none;letter-spacing:.01em}
+.logo span{color:var(--gold)}
+h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.12;color:var(--ink);text-wrap:balance}
+h1{font-size:clamp(38px,6.4vw,68px);margin:.3em 0 .35em;letter-spacing:-.01em}
+h2{font-size:clamp(28px,4vw,40px);margin:0 0 .6em}
+h3{font-size:22px;margin:0 0 .4em}
+p{margin:0 0 1em;max-width:62ch}
+p.lead{font-size:20px;color:var(--muted)}
+a{color:var(--cranberry);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:6px}
+.btn{display:inline-block;background:var(--cranberry);color:#fff;border:0;border-radius:999px;padding:15px 28px;
+  font:600 17px/1.2 var(--body);text-decoration:none;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--cranberry-deep)}
+.btn.secondary{background:transparent;color:var(--cranberry);box-shadow:inset 0 0 0 2px var(--cranberry)}
+.btn.secondary:hover{background:var(--blush)}
+.btn.warn{background:#8f2a2a}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;margin:16px 0}
+label{display:block;font:600 15px var(--body);margin:16px 0 6px}
+input[type=text],input[type=email],input[type=password],textarea,select{width:100%;padding:13px 14px;border:1px solid #d9c3b8;
+  border-radius:10px;font:17px var(--body);background:#fff;color:var(--ink)}
+textarea{min-height:220px;line-height:1.55}
+.check{display:flex;gap:12px;align-items:flex-start;font:16px/1.45 var(--body);margin:14px 0}
+.check input{width:22px;height:22px;margin-top:1px;flex:none;accent-color:var(--cranberry)}
+.check label{margin:0;font-weight:400}
+.small{font:15px/1.5 var(--body);color:var(--muted)}
+.banner{background:#fff4dc;border:1px solid #e3c27c;color:#5e4300;padding:11px 14px;border-radius:10px;
+  font:600 14px/1.45 var(--body);margin:12px 0}
+.steps{list-style:none;padding:0;margin:0;counter-reset:s}
+.steps li{counter-increment:s;padding:14px 0 14px 56px;position:relative;border-bottom:1px solid var(--line)}
+.steps li::before{content:counter(s);position:absolute;left:0;top:12px;width:38px;height:38px;border-radius:50%;
+  background:#fff;box-shadow:inset 0 0 0 1.5px var(--gold);color:var(--cranberry);font:400 20px/38px var(--display);text-align:center}
+table{border-collapse:collapse;width:100%;font:16px/1.45 var(--body)}
+td,th{border-bottom:1px solid var(--line);padding:10px 6px;text-align:left;vertical-align:top}
+.pill{display:inline-block;font:600 12px var(--body);padding:3px 10px;border-radius:999px;background:#f1e1db;color:var(--cranberry)}
+.pill.grey{background:#efe8e3;color:var(--muted)}
+footer.site{margin:80px 0 0;padding:28px 0 40px;border-top:1px solid var(--line);font:14px var(--body);color:var(--muted)}
+u{text-decoration-color:var(--gold);text-decoration-thickness:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+{% block style %}{% endblock %}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="logo" href="/">Familie<span>stem</span></a>
+{% block nav %}<a href="/voorbeeld" class="small">Bekijk een voorbeeld</a>{% endblock %}</div></header>
+<main>
+{% if demo_payment and show_payment_banner %}<div class="wrap"><div class="banner">DEMO-MODUS: er is geen betaalkoppeling actief. Bestellingen worden niet echt betaald.</div></div>{% endif %}
+{% block page %}<div class="narrow">{% block content %}{% endblock %}</div>{% endblock %}
+</main>
+<footer class="site"><div class="wrap">Familiestem is een dienst van Marhaba Cooperation BV. <a href="/voorwaarden">Voorwaarden en privacy</a></div></footer>
+</body>
+</html>

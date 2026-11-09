@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block nav %}<span class="small">{{ n }}/{{ cfg.MAX_STORIES }} verhalen</span>{% endblock %}
+{% block content %}
+{% if order.is_demo %}<div class="banner">VOORBEELD MET FICTIEVE GEGEVENS</div>{% endif %}
+{% if demo_transcription %}<div class="banner">DEMO-MODUS: opnames worden bewaard, maar nog niet echt uitgeschreven (geen spraakdienst gekoppeld).</div>{% endif %}
+{% if ok %}<div class="banner" style="background:#e7efe9;border-color:#9cc0b0;color:#2f5d50">Bewaard.</div>{% endif %}
+
+{% if not collecting %}
+  <h1>De periode om te vertellen is voorbij.</h1>
+  <p>Je verhalen blijven bewaard. Vraag {{ order.buyer_name }} om eenmalig te verlengen als je nog wil vertellen.</p>
+{% elif full %}
+  <h1>Alle {{ cfg.MAX_STORIES }} verhalen zijn opgenomen.</h1>
+  <p>Lees ze hieronder na en keur ze goed.</p>
+{% elif q %}
+  <p class="small">Vraag {{ n + 1 }} van {{ cfg.MAX_STORIES }}</p>
+  <h1 id="vraag">{{ q.text }}</h1>
+  <div class="card" id="rec" style="text-align:center">
+    <button id="btn" class="btn" style="width:190px;height:190px;border-radius:50%;font-size:22px">Opnemen</button>
+    <p id="status" style="font:600 20px system-ui,sans-serif;margin:16px 0 4px">Druk op de knop en vertel.</p>
+    <p class="small" id="hint">Neem je tijd. Maximaal 10 minuten. Je kan het eerst terugbeluisteren.</p>
+    <audio id="player" controls style="display:none;width:100%;margin:12px 0"></audio>
+    <div id="review" style="display:none;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button id="send" class="btn">Bewaren</button>
+      <button id="again" class="btn secondary">Opnieuw opnemen</button>
+    </div>
+  </div>
+  {% if open_qs|length > 1 %}
+  <details class="card"><summary>Liever een andere vraag?</summary>
+    <ul>{% for oq in open_qs if oq.id != q.id %}<li><a href="/v/{{ token }}?vraag={{ oq.id }}">{{ oq.text }}</a></li>{% endfor %}</ul>
+  </details>
+  {% endif %}
+  <script>
+  (function(){
+    const btn=document.getElementById('btn'),status=document.getElementById('status'),hint=document.getElementById('hint'),
+      player=document.getElementById('player'),review=document.getElementById('review');
+    let rec=null,chunks=[],blob=null,t0=0,timer=null,stopAt=null;const MAX={{ cfg.MAX_SECONDS_PER_STORY }}*1000;
+    function fmt(ms){const s=Math.floor(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+    async function start(){
+      if(!navigator.mediaDevices||!window.MediaRecorder){status.textContent='Deze telefoon of browser kan niet opnemen. Probeer Chrome of Safari.';return}
+      let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){
+        status.textContent='Geef toestemming om de microfoon te gebruiken en probeer opnieuw.';return}
+      const type=['audio/webm;codecs=opus','audio/mp4','audio/webm'].find(t=>MediaRecorder.isTypeSupported(t))||'';
+      rec=new MediaRecorder(stream,type?{mimeType:type}:{});chunks=[];
+      rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+      rec.onstop=()=>{stream.getTracks().forEach(t=>t.stop());clearInterval(timer);clearTimeout(stopAt);
+        blob=new Blob(chunks,{type:rec.mimeType||'audio/webm'});player.src=URL.createObjectURL(blob);
+        player.style.display='block';review.style.display='flex';btn.style.display='none';
+        status.textContent='Luister even terug.';hint.textContent='Tevreden? Druk op Bewaren.'};
+      rec.start(1000);t0=Date.now();btn.textContent='Stoppen';btn.style.background='#9b2c2c';
+      status.textContent='Opname loopt… 0:00';timer=setInterval(()=>status.textContent='Opname loopt… '+fmt(Date.now()-t0),500);
+      stopAt=setTimeout(()=>rec.state==='recording'&&rec.stop(),MAX);
+    }
+    btn.onclick=()=>{if(rec&&rec.state==='recording'){rec.stop()}else{start()}};
+    document.getElementById('again').onclick=()=>{review.style.display='none';player.style.display='none';
+      btn.style.display='inline-block';btn.textContent='Opnemen';btn.style.background='';status.textContent='Druk op de knop en vertel.';blob=null};
+    document.getElementById('send').onclick=async()=>{
+      const send=document.getElementById('send');send.disabled=true;send.textContent='Bezig met bewaren…';
+      const fd=new FormData();fd.append('audio_file',blob,blob.type.includes('mp4')?'opname.mp4':'opname.webm');
+      try{const r=await fetch('/v/{{ token }}/opname/{{ q.id }}',{method:'POST',body:fd});
+        if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.detail||'Er ging iets mis.')}
+        status.textContent='Bewaard. Dank je wel!';review.style.display='none';
+        hint.innerHTML='<a class="btn" href="/v/{{ token }}">Volgende vraag</a>';
+      }catch(e){status.textContent=e.message+' Probeer opnieuw.';send.disabled=false;send.textContent='Bewaren'}
+    };
+  })();
+  </script>
+{% endif %}
+
+{% if stories %}
+<h2>Jouw verhalen</h2>
+<div class="card"><table>
+{% for s in stories %}<tr><td><a href="/v/{{ token }}/verhaal/{{ s.id }}">{{ s.question }}</a></td>
+<td>{% if s.status == 'approved' %}<span class="pill">goedgekeurd{% if s.shared %}, gedeeld{% endif %}</span>{% else %}<span class="pill grey">na te lezen</span>{% endif %}</td></tr>{% endfor %}
+</table></div>
+{% endif %}
+
+<h2>Instellingen</h2>
+<form class="card" method="post" action="/v/{{ token }}/goedkeurder">
+  <label for="ap">Wie mag de teksten nalezen en goedkeuren?</label>
+  <select id="ap" name="approver">
+    <option value="storyteller" {% if order.approver == 'storyteller' %}selected{% endif %}>Enkel ik</option>
+    <option value="buyer" {% if order.approver == 'buyer' %}selected{% endif %}>{{ order.buyer_name }} mag dat voor mij doen</option>
+  </select>
+  <p><button class="btn secondary" type="submit">Bewaren</button></p>
+</form>
+<div class="card">
+  <h3>Wie mag meelezen?</h3>
+  {% if not family %}<p class="small">Nog niemand uitgenodigd. {{ order.buyer_name }} kan familieleden uitnodigen; jij beslist of ze mogen meelezen.</p>{% endif %}
+  {% for f in family %}
+  <form method="post" action="/v/{{ token }}/familie/{{ f.id }}" style="border-bottom:1px solid var(--line);padding:8px 0">
+    <strong>{{ f.name }}</strong>
+    <div class="check"><input type="checkbox" id="fa{{ f.id }}" name="allow" value="1" {% if f.approved_by_storyteller %}checked{% endif %}><label for="fa{{ f.id }}" style="margin:0;font-weight:400">mag gedeelde verhalen lezen en beluisteren</label></div>
+    <div class="check"><input type="checkbox" id="fd{{ f.id }}" name="download" value="1" {% if f.can_download %}checked{% endif %}><label for="fd{{ f.id }}" style="margin:0;font-weight:400">mag het boek downloaden</label></div>
+    <button class="btn secondary" type="submit">Bewaren</button>
+  </form>
+  {% endfor %}
+</div>
+<div class="card">
+  <h3>Alles downloaden of wissen</h3>
+  <p><a class="btn secondary" href="/v/{{ token }}/boek.pdf">Boek (PDF)</a> <a class="btn secondary" href="/v/{{ token }}/export.zip">Alles (ZIP)</a></p>
+  <form method="post" action="/v/{{ token }}/verwijderen">
+    <label for="cf">Alles definitief wissen? Typ WISSEN</label>
+    <input id="cf" type="text" name="confirm" autocomplete="off">
+    <p><button class="btn warn" type="submit">Alles wissen</button></p>
+  </form>
+</div>
+{% endblock %}

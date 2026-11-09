@@ -15,6 +15,7 @@ function RegisterForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +30,7 @@ function RegisterForm() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, ref }),
+        body: JSON.stringify({ name, email, password, ref, acceptTerms }),
       });
 
       const data = await res.json();
@@ -77,6 +78,7 @@ function RegisterForm() {
 
         {/* Social Login */}
         <SocialLoginButtons />
+        <p className="text-xs text-gray-400 text-center -mt-2 mb-4">{t("auth.consent.social")}</p>
 
         {/* Divider */}
         <div className="flex items-center gap-3 my-5">
@@ -129,13 +131,29 @@ function RegisterForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={8}
               placeholder={t("auth.placeholder.password")}
               autoComplete="new-password"
             />
           </div>
 
-          <button type="submit" className="btn-primary w-full" disabled={loading}>
+          <label className="flex items-start gap-2 text-sm text-gray-600">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={acceptTerms}
+              onChange={(e) => setAcceptTerms(e.target.checked)}
+              required
+            />
+            <span>
+              {t("auth.consent.prefix")}{" "}
+              <Link href="/terms" target="_blank" className="underline" style={{ color: "#0d9488" }}>{t("legal.terms")}</Link>{" "}
+              {t("auth.consent.and")}{" "}
+              <Link href="/privacy" target="_blank" className="underline" style={{ color: "#0d9488" }}>{t("legal.privacy")}</Link>.
+            </span>
+          </label>
+
+          <button type="submit" className="btn-primary w-full" disabled={loading || !acceptTerms}>
             {loading ? t("auth.register.loading") : t("auth.register.submit")}
           </button>
         </form>

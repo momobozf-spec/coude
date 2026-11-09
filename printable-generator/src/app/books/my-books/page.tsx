@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 
 interface Book { id: string; title: string; childName: string; status: string; variant: string; pageCount: number; coverColor: string; createdAt: string; }
@@ -9,12 +9,8 @@ interface Book { id: string; title: string; childName: string; status: string; v
 export default function MyBooksPage() {
   const { data: session } = useSession();
   const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading] = useState(false); // TODO: load from API when this module is enabled
 
-  useEffect(() => {
-    // In production, fetch from /api/books/my-books
-    setLoading(false);
-  }, []);
 
   if (!session) return <div className="min-h-screen flex items-center justify-center"><Link href="/login" className="btn-primary">Log in</Link></div>;
 

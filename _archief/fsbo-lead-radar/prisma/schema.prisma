@@ -1,0 +1,475 @@
+// FSBO Lead Radar Belgium — datamodel
+//
+// Leidende principes:
+//
+//  1. Herkomst is altijd traceerbaar. Elke Listing weet uit welke bron hij komt,
+//     wanneer hij voor het eerst en voor het laatst gezien is, en op welke URL
+//     hij stond. Dat is geen extra: zonder die vier velden kan je een klacht
+//     over een lead niet beantwoorden.
+//  2. Persoonsgegevens staan bij elkaar. Naam en telefoon van een verkoper
+//     leven in `Seller`, niet verspreid over Listing-rijen, zodat één delete
+//     genoeg is (zie src/services/dataRetentionService.ts).
+//  3. Prijzen zijn hele euro's in een Int. Vastgoedadvertenties noteren geen
+//     centen, en een Float gaat driften zodra we prijswijzigingen diffen.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Hoe een bron benaderd wordt. De volgorde is de voorkeursvolgorde uit de
+/// architectuur: API boven feed boven JSON-LD boven HTML.
+enum SourceAccessMethod {
+  OFFICIAL_API
+  PUBLIC_FEED
+  STRUCTURED_DATA
+  PUBLIC_HTML
+  FIXTURE
+  SYNTHETIC
+}
+
+enum SourceHealth {
+  UNKNOWN
+  HEALTHY
+  DEGRADED
+  FAILING
+  BLOCKED
+  DISABLED
+}
+
+enum CollectorRunStatus {
+  RUNNING
+  SUCCESS
+  PARTIAL
+  FAILED
+  SKIPPED
+}
+
+enum ListingType {
+  SALE
+  RENT
+}
+
+enum SellerType {
+  PRIVATE
+  PROFESSIONAL
+  UNKNOWN
+}
+
+enum ListingStatus {
+  ACTIVE
+  DUPLICATE
+  ARCHIVED
+  REDACTED
+}
+
+enum TerritoryKind {
+  POSTAL_CODE
+  MUNICIPALITY
+  PROVINCE
+  RADIUS
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+enum AlertChannel {
+  TELEGRAM
+}
+
+enum AlertStatus {
+  PENDING
+  SENT
+  FAILED
+  SUPPRESSED_DRY_RUN
+}
+
+enum ListingChangeType {
+  CREATED
+  PRICE_CHANGED
+  FIELD_CHANGED
+  RELISTED
+  SELLER_RECLASSIFIED
+  MARKED_DUPLICATE
+  ARCHIVED
+  REDACTED
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Bronnen en collectorruns
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Source {
+  id   String @id @default(cuid())
+  /// Stabiele sleutel die de code gebruikt om een collector te vinden,
+  /// bv. "fixture-be". Verandert nooit; `name` mag wel wijzigen.
+  key  String @unique
+  name String
+
+  /// Staat de bron aan? Dit is de knop in het dashboard. De env-allowlist
+  /// COLLECTOR_ENABLED_SOURCES moet er *daarnaast* ook mee akkoord gaan.
+  enabled      Boolean            @default(false)
+  accessMethod SourceAccessMethod
+  baseUrl      String?
+
+  /// Planning en beleefdheid, per bron instelbaar.
+  pollIntervalSeconds Int @default(300)
+  rateLimitPerMinute  Int @default(20)
+  timeoutMs           Int @default(15000)
+  maxRetries          Int @default(3)
+
+  /// Gezondheid. Wordt door de scheduler bijgewerkt, niet met de hand.
+  health              SourceHealth @default(UNKNOWN)
+  consecutiveFailures Int          @default(0)
+  lastRunAt           DateTime?
+  lastSuccessAt       DateTime?
+  lastFailureAt       DateTime?
+  lastError           String?
+  /// Zolang dit in de toekomst ligt slaat de scheduler de bron over. Zo isoleert
+  /// één stukke bron zichzelf in plaats van de hele worker vol te lopen.
+  cooldownUntil       DateTime?
+  /// Claim van de scheduler; voorkomt dat twee workers dezelfde bron draaien.
+  lockedUntil         DateTime?
+  lockedBy            String?
+
+  /// Vrije notitie over juridische/technische toegang: op basis waarvan mag
+  /// deze bron opgehaald worden. Zichtbaar in het dashboard.
+  accessNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listings Listing[]
+  runs     CollectorRun[]
+
+  @@index([enabled, cooldownUntil])
+}
+
+model CollectorRun {
+  id       String @id @default(cuid())
+  sourceId String
+  source   Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  status     CollectorRunStatus @default(RUNNING)
+  attempt    Int                @default(1)
+  startedAt  DateTime           @default(now())
+  finishedAt DateTime?
+  durationMs Int?
+
+  itemsFetched   Int @default(0)
+  itemsNew       Int @default(0)
+  itemsUpdated   Int @default(0)
+  itemsUnchanged Int @default(0)
+  itemsDuplicate Int @default(0)
+  itemsRejected  Int @default(0)
+  leadsQualified Int @default(0)
+  alertsSent     Int @default(0)
+  /// Alerts die alle poorten passeerden maar niet verstuurd zijn: geen
+  /// bot-token (dry-run), of al eerder verstuurd. Apart geteld omdat een run
+  /// die 0 verzendt en 5 onderdrukt er anders uitziet alsof er niets gebeurde.
+  alertsSuppressed Int @default(0)
+
+  errorKind String?
+  error     String?
+
+  @@index([sourceId, startedAt(sort: Desc)])
+  @@index([startedAt(sort: Desc)])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Verkopers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Een verkoper zoals wij hem kennen uit publieke advertenties. Bewust mager:
+/// alleen wat nodig is om (a) particulier van professioneel te onderscheiden en
+/// (b) de makelaar contact te laten opnemen.
+model Seller {
+  id String @id @default(cuid())
+
+  displayName String?
+  /// Telefoon in E.164 (+32...). Genormaliseerd zodat hetzelfde nummer uit twee
+  /// bronnen tot één verkoper leidt.
+  phoneE164   String?
+
+  /// Uitkomst van de regelmotor, opgeslagen zodat het dashboard uitlegbaar is.
+  classification SellerType @default(UNKNOWN)
+  confidence     Float      @default(0)
+  reasons        String[]   @default([])
+
+  /// Hoeveel actieve advertenties we van deze verkoper zien. Het sterkste
+  /// signaal voor "professioneel" dat we zonder externe registers hebben.
+  activeListingCount Int @default(0)
+
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+
+  /// Gezet door de verwijderroutine: gegevens gewist, rij bewaard zodat
+  /// bestaande listings hun relatie niet verliezen.
+  redactedAt DateTime?
+
+  listings Listing[]
+
+  @@unique([phoneE164])
+  @@index([classification])
+  @@index([lastSeenAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Advertenties
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Listing {
+  id              String @id @default(cuid())
+  sourceId        String
+  source          Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  /// Het id dat de bron zelf aan de advertentie geeft. Samen met sourceId is
+  /// dit de identiteit van een advertentie binnen één bron.
+  sourceListingId String
+  /// De originele URL — verplicht, want zonder terugweg naar de bron is een
+  /// lead niet controleerbaar.
+  url             String
+
+  title       String?
+  description String?
+
+  price        Int?
+  currency     String       @default("EUR")
+  listingType  ListingType?
+  propertyType String?
+
+  postalCode String?
+  city       String?
+  address    String?
+  province   String?
+  latitude   Float?
+  longitude  Float?
+
+  bedrooms    Int?
+  surfaceArea Int?
+
+  sellerId       String?
+  seller         Seller?    @relation(fields: [sellerId], references: [id], onDelete: SetNull)
+  sellerTypeHint SellerType @default(UNKNOWN)
+
+  /// Uitkomst van de classificatie op deze advertentie. Staat naast de score op
+  /// Seller omdat een verkoper na een tweede advertentie kan omslaan, terwijl
+  /// we willen kunnen tonen waarop we destijds hebben verstuurd.
+  sellerClassification  SellerType @default(UNKNOWN)
+  sellerConfidence      Float      @default(0)
+  classificationReasons String[]   @default([])
+
+  leadScore          Int   @default(0)
+  leadScoreBreakdown Json?
+
+  status           ListingStatus @default(ACTIVE)
+  /// Wijst naar de advertentie die we als origineel beschouwen.
+  duplicateOfId    String?
+  duplicateOf      Listing?      @relation("ListingDuplicates", fields: [duplicateOfId], references: [id], onDelete: SetNull)
+  duplicates       Listing[]     @relation("ListingDuplicates")
+  duplicateScore   Float?
+  duplicateReasons String[]      @default([])
+
+  /// Genormaliseerde vingerafdruk voor snelle cross-source kandidaatselectie.
+  fingerprint String?
+  /// Hash over de inhoudelijke velden; verschilt hij, dan is er iets gewijzigd.
+  contentHash String
+
+  publishedAt DateTime?
+  firstSeenAt DateTime  @default(now())
+  lastSeenAt  DateTime  @default(now())
+  scrapedAt   DateTime  @default(now())
+
+  /// Ruwe bronpayload, alleen om parsingfouten te kunnen nakijken. Wordt door
+  /// de bewaartermijn-routine gewist (RETENTION_RAW_PAYLOAD_DAYS).
+  rawPayload Json?
+
+  redactedAt DateTime?
+
+  history ListingHistory[]
+  alerts  Alert[]
+
+  @@unique([sourceId, sourceListingId])
+  @@index([status, firstSeenAt(sort: Desc)])
+  @@index([sellerClassification, leadScore(sort: Desc)])
+  @@index([postalCode])
+  @@index([fingerprint])
+  @@index([sourceId, firstSeenAt(sort: Desc)])
+  @@index([lastSeenAt])
+}
+
+model ListingHistory {
+  id        String  @id @default(cuid())
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  changeType ListingChangeType
+  field      String?
+  oldValue   String?
+  newValue   String?
+  note       String?
+  createdAt  DateTime          @default(now())
+
+  @@index([listingId, createdAt(sort: Desc)])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Makelaars, gebieden, abonnementen
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Agency {
+  id             String  @id @default(cuid())
+  name           String
+  contactEmail   String?
+  /// Standaard-chat voor alerts. Een subscription mag een eigen chat opgeven.
+  telegramChatId String?
+  active         Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  territories   Territory[]
+  subscriptions Subscription[]
+  alerts        Alert[]
+
+  @@index([active])
+}
+
+model Territory {
+  id       String @id @default(cuid())
+  agencyId String
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  name String
+  kind TerritoryKind
+
+  /// Voor POSTAL_CODE. Belgische postcodes zijn viercijferig.
+  postalCodes    String[] @default([])
+  /// Voor MUNICIPALITY. Genormaliseerd opgeslagen (lowercase, zonder accenten).
+  municipalities String[] @default([])
+  /// Voor PROVINCE. Sleutels uit src/domain/geo/provinces.ts.
+  provinces      String[] @default([])
+
+  /// Voor RADIUS.
+  centerLat Float?
+  centerLng Float?
+  radiusKm  Float?
+
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions SubscriptionTerritory[]
+
+  @@index([agencyId, active])
+}
+
+model Subscription {
+  id       String @id @default(cuid())
+  agencyId String
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  name   String
+  status SubscriptionStatus @default(ACTIVE)
+
+  /// Filters. Leeg = geen beperking.
+  listingTypes  ListingType[] @default([])
+  propertyTypes String[]      @default([])
+  minPrice      Int?
+  maxPrice      Int?
+
+  /// Drempels; vallen terug op de env-waarden als ze niet gezet zijn.
+  minLeadScore         Int     @default(55)
+  minPrivateConfidence Float   @default(0.85)
+  requirePhone         Boolean @default(false)
+
+  /// Overschrijft Agency.telegramChatId voor dit abonnement.
+  telegramChatId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  territories SubscriptionTerritory[]
+  alerts      Alert[]
+
+  @@index([status])
+}
+
+/// Expliciete koppeltabel: een gebied kan in meerdere abonnementen zitten en
+/// een abonnement dekt meestal meerdere gebieden.
+model SubscriptionTerritory {
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  territoryId    String
+  territory      Territory    @relation(fields: [territoryId], references: [id], onDelete: Cascade)
+
+  @@id([subscriptionId, territoryId])
+  @@index([territoryId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Alerts
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Alert {
+  id             String       @id @default(cuid())
+  listingId      String
+  listing        Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  agencyId       String
+  agency         Agency       @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  channel AlertChannel @default(TELEGRAM)
+  status  AlertStatus  @default(PENDING)
+
+  /// De echte rem op dubbele alerts. De unique-index hieronder maakt een tweede
+  /// bericht voor dezelfde (abonnement, advertentie, reden) fysiek onmogelijk —
+  /// ook als twee workers tegelijk dezelfde lead verwerken.
+  dedupeKey String @unique
+
+  leadScore   Int
+  chatId      String
+  messageText String
+
+  attempts          Int       @default(0)
+  providerMessageId String?
+  error             String?
+  createdAt         DateTime  @default(now())
+  sentAt            DateTime?
+
+  @@index([agencyId, createdAt(sort: Desc)])
+  @@index([status, createdAt])
+  @@index([listingId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Audit
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Wie deed wat. Bewust apart van ListingHistory: dat gaat over data die
+/// verandert, dit gaat over mensen en systemen die handelen.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actor      String
+  action     String
+  entityType String?
+  entityId   String?
+  metadata   Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt(sort: Desc)])
+  @@index([entityType, entityId])
+}

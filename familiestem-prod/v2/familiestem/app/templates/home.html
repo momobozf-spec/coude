@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% set show_payment_banner = True %}
+{% block robots %}{% endblock %}
+{% block title %}Familiestem: hun verhalen, in hun eigen stem{% endblock %}
+{% block style %}
+.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center;padding-top:36px;padding-bottom:72px}
+.hero p.lead{max-width:34ch}
+.hero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+.price-note{margin-top:14px;font:15px var(--body);color:var(--muted)}
+
+/* De wenskaart: één blikvanger, opent eenmalig bij het laden */
+.greeting{position:relative;perspective:1600px;max-width:520px;justify-self:center;width:100%}
+.greeting .inside{display:grid;grid-template-columns:1fr 1fr;background:#fff;border-radius:6px;
+  box-shadow:0 1px 0 var(--line),0 24px 50px -18px rgba(90,20,31,.35);min-height:330px;position:relative}
+.greeting .inside::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;
+  background:linear-gradient(90deg,rgba(0,0,0,.08),rgba(0,0,0,0));}
+.panel{padding:30px 24px}
+.panel.left{border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between}
+.hand{font:500 30px/1.15 var(--hand);color:var(--cranberry)}
+.hand.sm{font-size:24px;color:var(--muted)}
+.voice{display:flex;flex-direction:column;justify-content:center;gap:16px;height:100%}
+.voice .who{font:600 14px var(--body);color:var(--muted)}
+.player{display:flex;align-items:center;gap:12px}
+.play{width:48px;height:48px;border-radius:50%;background:var(--cranberry);flex:none;position:relative}
+.play::after{content:"";position:absolute;left:19px;top:15px;border-left:14px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent}
+.wave{display:flex;align-items:center;gap:3px;height:44px;flex:1}
+.wave i{display:block;width:3px;border-radius:2px;background:var(--gold);opacity:.85}
+.voice .quote{font:400 17px/1.5 var(--display);color:var(--ink);margin:0}
+.cover{position:absolute;inset:0 0 0 50%;background:var(--cranberry);border-radius:0 6px 6px 0;transform-origin:left center;
+  display:flex;align-items:center;justify-content:center;backface-visibility:hidden;
+  animation:openCard 1.4s .5s cubic-bezier(.5,.05,.2,1) forwards}
+.cover span{font:400 30px/1.1 var(--display);color:#fff;text-align:center;padding:0 20px}
+.cover span em{display:block;font:500 22px var(--hand);color:#f0d9a6;font-style:normal;margin-top:10px}
+@keyframes openCard{to{transform:rotateY(-178deg);visibility:hidden}}
+@media (prefers-reduced-motion:reduce){.cover{display:none}}
+
+.band{background:var(--blush);padding:72px 0;margin-top:20px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.section{padding:72px 0}
+.facts td:first-child{color:var(--muted);width:42%}
+.honest{border-left:3px solid var(--gold);padding-left:20px}
+
+/* Bestelformulier als envelop met postzegel */
+.envelope{background:#fff;border:1px solid var(--line);border-radius:14px;padding:30px;position:relative;
+  box-shadow:0 18px 40px -26px rgba(90,20,31,.45)}
+.stamp{position:absolute;top:-18px;right:22px;background:var(--paper);border:2px dashed var(--gold);border-radius:4px;
+  padding:10px 14px;text-align:center;transform:rotate(4deg)}
+.stamp b{display:block;font:400 30px/1 var(--display);color:var(--cranberry)}
+.stamp s{font:14px var(--body);color:var(--muted)}
+.stamp small{font:13px var(--body);color:var(--muted)}
+.faq h3{font-size:20px;margin-top:28px}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:36px;padding-top:12px;padding-bottom:48px}
+  .split{grid-template-columns:1fr;gap:28px}
+  .greeting .inside{min-height:280px}
+  .panel{padding:22px 16px}
+  .hand{font-size:25px}
+}
+@media (max-width:420px){.greeting .inside{grid-template-columns:1fr}.panel.left{border-right:0;border-bottom:1px solid var(--line)}
+  .greeting .inside::after,.cover{display:none}}
+{% endblock %}
+
+{% block page %}
+<section class="wrap hero">
+  <div>
+    <h1>Hun verhalen, in hun eigen stem.</h1>
+    <p class="lead">Een cadeau voor je vader, moeder, opa of oma. Zij vertellen twintig verhalen uit hun leven. Jullie krijgen een familieboek, met hun stem erbij.</p>
+    <div class="actions">
+      <a class="btn" href="#bestellen">Geef het cadeau</a>
+      <a class="btn secondary" href="/voorbeeld">Bekijk een voorbeeld</a>
+    </div>
+    <p class="price-note">€49 eenmalig. Geen app, geen abonnement.</p>
+  </div>
+
+  <figure class="greeting" aria-label="Voorbeeld: een vraag op een kaart en het ingesproken antwoord">
+    <div class="inside">
+      <div class="panel left">
+        <p class="hand">Papa, hoe heb je mama leren kennen?</p>
+        <p class="hand sm">Vertel het maar, wij luisteren.</p>
+      </div>
+      <div class="panel">
+        <div class="voice">
+          <span class="who">Papa vertelt</span>
+          <div class="player" aria-hidden="true"><span class="play"></span>
+            <span class="wave">{% for h in [14,26,18,34,22,40,28,16,30,38,20,12,26,34,18,24,36,14,22,30] %}<i style="height:{{ h }}px"></i>{% endfor %}</span>
+          </div>
+          <p class="quote">“Het was op de kermis. Ik reed drie keer tegen haar botsauto…”</p>
+          <span class="small">Verzonnen voorbeeld. <a href="/voorbeeld">Beluister het</a></span>
+        </div>
+      </div>
+    </div>
+    <div class="cover" aria-hidden="true"><span>Voor papa<em>van ons allemaal</em></span></div>
+  </figure>
+</section>
+
+<section class="band">
+  <div class="wrap split">
+    <div>
+      <h2>Zo werkt het</h2>
+      <p class="small">Van cadeau tot familieboek, zonder dat iemand iets moet installeren.</p>
+    </div>
+    <ol class="steps">
+      <li><strong>Je bestelt en krijgt meteen een cadeaubon.</strong> Print hem of stuur hem door. Je kiest de vragen, of schrijft er zelf bij.</li>
+      <li><strong>Zij vertellen, wanneer het hen past.</strong> Eén vraag tegelijk, één grote knop. Of jullie nemen samen op: jij houdt de telefoon vast, zij vertellen.</li>
+      <li><strong>Wij schrijven het uit, zonder iets toe te voegen.</strong> De verteller leest na, verbetert en beslist wat de familie te zien krijgt.</li>
+      <li><strong>Het familieboek is klaar.</strong> Een verzorgde PDF met foto's, de originele opnames, en een privépagina waar de familie leest en luistert.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap split">
+    <div>
+      <h2>Wat je krijgt</h2>
+      <p>Eén pakket, één prijs. Alles wat verteld wordt, is daarna van jullie: je kan alles downloaden en bewaren.</p>
+      <div class="honest">
+        <h3>Wat het niet is</h3>
+        <p>Geen gedrukt boek (nog niet), geen biografie door een schrijver, en geen stemnabootsing. We bewaren wat er echt verteld is, in de woorden en de stem van de verteller.</p>
+      </div>
+    </div>
+    <table class="facts">
+      <tr><td>Verhalen</td><td>20, uit voorgestelde vragen of je eigen vragen</td></tr>
+      <tr><td>Opnemen</td><td>tot 10 minuten per verhaal, 5 uur in totaal</td></tr>
+      <tr><td>Tijd om te vertellen</td><td>90 dagen vanaf de eerste keer, één keer gratis te verlengen</td></tr>
+      <tr><td>Foto's</td><td>tot 3 per verhaal</td></tr>
+      <tr><td>Familie</td><td>tot 10 lezers, enkel wie de verteller toelaat</td></tr>
+      <tr><td>Download</td><td>PDF-boek, originele audio, teksten en foto's</td></tr>
+      <tr><td>Online bewaard</td><td>2 jaar na het verzamelen</td></tr>
+      <tr><td>Taal</td><td>Nederlands (Frans volgt na onze kwaliteitstest)</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap split">
+    <div>
+      <h2>En als er weinig verteld wordt?</h2>
+      <p>Dat gebeurt. Daarom kan je samen opnemen, en sturen we je een seintje als het stil blijft.</p>
+      <p>Is er 60 dagen na je bestelling nog niets opgenomen, of vind je de eerste opname niets, dan krijg je je geld terug.</p>
+    </div>
+    <div id="bestellen">
+      <form class="envelope" method="post" action="/bestellen">
+        <div class="stamp">{% if discount %}<s>€49</s><b>€{{ '%.0f'|format(cfg.PRICE_EUR_INCL_VAT - discount) }}</b>{% else %}<b>€49</b>{% endif %}<small>eenmalig</small></div>
+        <h2 style="font-size:30px;padding-right:90px">Geef het cadeau</h2>
+        {% if discount %}<div class="banner" style="background:#f4ece2;border-color:#d9bf8c;color:#5a3d12">Je bent doorverwezen: €{{ '%.0f'|format(discount) }} korting met code {{ ref_code }}.</div>{% endif %}
+        <input type="hidden" name="source" value="{{ source or 'direct' }}">
+        <input type="hidden" name="ref_code" value="{{ ref_code or '' }}">
+        <input type="hidden" name="language" value="nl">
+        <label for="bn">Jouw naam</label><input id="bn" type="text" name="buyer_name" required maxlength="120" autocomplete="name">
+        <label for="be">Jouw e-mailadres</label><input id="be" type="email" name="buyer_email" required maxlength="200" autocomplete="email">
+        <label for="sn">Voor wie is het?</label><input id="sn" type="text" name="storyteller_name" required maxlength="120" placeholder="bv. papa, oma Jeanne">
+        <label for="gm">Boodschap op de cadeaubon (mag leeg blijven)</label><textarea id="gm" name="gift_message" maxlength="600" style="min-height:90px"></textarea>
+        <div class="check"><input type="checkbox" id="pi" name="print_interest" value="1"><label for="pi">Ik zou later ook een <strong>gedrukt boek</strong> willen. Dat bestaat nog niet; je betaalt er nu niets voor.</label></div>
+        <div class="check"><input type="checkbox" id="at" name="accept_terms" value="1" required><label for="at">Ik aanvaard de <a href="/voorwaarden">voorwaarden</a>. De verteller geeft zelf toestemming en beslist wat gedeeld wordt.</label></div>
+        <p style="margin-top:20px"><button class="btn" type="submit">Betalen en cadeaubon ontvangen</button></p>
+        <p class="small">Met Bancontact of kaart. Prijs inclusief 21% btw.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="narrow faq">
+    <h2>Vragen</h2>
+    <h3>Wie kan de verhalen lezen?</h3>
+    <p>Enkel wie de verteller toelaat. Ook jij als koper ziet een verhaal pas als het goedgekeurd en gedeeld is.</p>
+    <h3>Mijn vader is niet zo handig met zijn telefoon.</h3>
+    <p>Hij krijgt een link, geen app en geen wachtwoord. Eén vraag, één grote knop. Of je neemt samen op, met jouw telefoon.</p>
+    <h3>Waar staan de opnames?</h3>
+    <p>Op servers in de EU. Voor het uitschrijven gebruiken we een spraakdienst die in Europa verwerkt en je opnames niet gebruikt om te leren.</p>
+    <h3>Kan alles gewist worden?</h3>
+    <p>Ja. De verteller kan op elk moment alles wissen.</p>
+  </div>
+</section>
+{% endblock %}

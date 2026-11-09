@@ -32,3 +32,22 @@ Thumbs.db
 
 # Generated Prisma client
 **/src/generated/prisma/
+
+# Lokale embedded databases & dev-storage (bevatten data, horen niet in Git)
+.pgdata/
+**/.pgdata/
+.devdb/
+**/.devdb/
+.storage-integration/
+**/.storage-integration/
+
+# Cookies / sessies
+cookies.txt
+**/cookies.txt
+
+# Build- en tool-caches
+*.tsbuildinfo
+**/.wrangler/
+**/.vinext/
+**/.turbo/
+**/coverage/

@@ -42,6 +42,24 @@ export const nl = {
       'huurcontract.',
     noAccountYet: 'Nog geen account?',
     alreadyHaveAccount: 'Al een account?',
+    forgotPassword: 'Wachtwoord vergeten?',
+    forgotTitle: 'Wachtwoord opnieuw instellen',
+    forgotIntro:
+      'Geef het e-mailadres van uw account. U krijgt een link om een nieuw ' +
+      'wachtwoord te kiezen.',
+    sendResetLink: 'Link versturen',
+    resetLinkSent:
+      'Als er een account met dit e-mailadres bestaat, ontvangt u binnen enkele ' +
+      'minuten een e-mail met een link. Kijk ook in uw spam.',
+    resetTitle: 'Kies een nieuw wachtwoord',
+    newPassword: 'Nieuw wachtwoord',
+    confirmPassword: 'Herhaal het nieuwe wachtwoord',
+    savePassword: 'Wachtwoord bewaren',
+    resetLinkInvalid:
+      'Deze link is verlopen of al gebruikt. Vraag een nieuwe link aan.',
+    termsNotice:
+      'Door een account aan te maken aanvaardt u de algemene voorwaarden en ' +
+      'neemt u kennis van de privacyverklaring.',
     errors: {
       INVALID_INPUT: 'Kijk de ingevulde gegevens na.',
       INVALID_CREDENTIALS: 'Dit e-mailadres en wachtwoord horen niet samen.',
@@ -49,6 +67,9 @@ export const nl = {
       WEAK_PASSWORD: 'Kies een langer of sterker wachtwoord.',
       RATE_LIMITED: 'Te veel pogingen. Probeer het over enkele minuten opnieuw.',
       UNKNOWN: 'Er ging iets mis. Probeer het opnieuw.',
+      PASSWORDS_DO_NOT_MATCH: 'De twee wachtwoorden zijn niet gelijk.',
+      SESSION_EXPIRED:
+        'Uw herstellink is verlopen. Vraag een nieuwe link aan.',
     },
   },
 
@@ -308,13 +329,14 @@ export const nl = {
       deposit_recovery: {
         name: 'Deposit Recovery',
         description:
-          'Vertrekanalyse, volledig waarborg-dossier en ingebrekestelling ' +
-          'voor één woning.',
+          'Vertrekdossier, AI-vergelijking intrek/vertrek en vergelijkend ' +
+          'rapport voor één woning.',
       },
       relocation_pass: {
         name: 'All-in Relocation Pass',
         description:
-          'Intrek, vertrek en contractaudit voor één verhuizing.',
+          'Intrek- en vertrekdossier met AI-vergelijking voor één woning, ook ' +
+          'als uw gratis intrekdossier al gebruikt is.',
       },
     },
     shippingCostNotice:

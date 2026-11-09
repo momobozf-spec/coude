@@ -1,0 +1,22 @@
+node_modules/
+.next/
+out/
+dist/
+build/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Lokale file-storage provider (uploads)
+.storage/
+
+# Test/coverage
+coverage/
+.vitest/
+
+# OS
+.DS_Store
+Thumbs.db
+*.log

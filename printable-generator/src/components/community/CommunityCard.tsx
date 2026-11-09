@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { trackEvent } from "@/lib/analytics";
+import { PRICES, formatPrice, tbcSuffix } from "@/lib/pricing";
 
 interface Props {
   plan: string;
@@ -38,9 +39,7 @@ export default function CommunityCard({ plan }: Props) {
         </div>
 
         <div className="flex gap-4 text-sm text-gray-500 mb-4">
-          <span>&#128101; 847 members</span>
-          <span>&#128221; 234 posts</span>
-          <span>&#128197; Next Q&A: Tuesday 8pm</span>
+          <span>&#128197; Live Q&amp;A sessions</span>
         </div>
 
         <button onClick={handleJoin} disabled={loading} className="btn-primary w-full" style={{ backgroundColor: "#1a6b4a" }}>
@@ -57,7 +56,7 @@ export default function CommunityCard({ plan }: Props) {
         <span className="text-xl">&#128274;</span>
         <div>
           <h3 className="font-bold text-gray-900">Noor Families Community</h3>
-          <p className="text-xs text-gray-500">Join 847 Muslim families</p>
+          <p className="text-xs text-gray-500">For Pro and School members</p>
         </div>
       </div>
 
@@ -70,7 +69,7 @@ export default function CommunityCard({ plan }: Props) {
       </ul>
 
       <a href="/dashboard" className="btn-gold w-full text-center block" style={{ padding: "10px", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none" }}>
-        Upgrade to Pro &mdash; $12/month &rarr;
+        Upgrade to Pro &mdash; {formatPrice(PRICES.pro.monthly, "en")}/month{tbcSuffix("en")} &rarr;
       </a>
     </div>
   );

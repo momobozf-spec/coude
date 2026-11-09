@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KetelCheck beheer (lokaal)</title>
+<style>
+  :root { --bg:#f5f6f4; --card:#fff; --ink:#1c2420; --muted:#5d6762; --line:#dde2de; --acc:#0f5c4a; --warn:#9a5b00; --warn-soft:#fbefd6; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 "Segoe UI", system-ui, sans-serif; }
+  header { background:var(--acc); color:#fff; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+  header a { color:#fff; }
+  main { max-width:1300px; margin:0 auto; padding:16px; }
+  .note { background:var(--warn-soft); color:var(--warn); padding:8px 12px; border-radius:8px; margin-bottom:12px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:14px; }
+  h2 { font-size:17px; margin:0 0 8px; }
+  .tabs { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:12px; }
+  .tabs button { border:1px solid var(--line); background:#fff; border-radius:8px; padding:6px 12px; cursor:pointer; font:inherit; }
+  .tabs button.on { background:var(--acc); color:#fff; border-color:var(--acc); }
+  .wrap { overflow-x:auto; }
+  table { border-collapse:collapse; font-size:12.5px; min-width:100%; }
+  th, td { border-bottom:1px solid var(--line); padding:5px 7px; text-align:left; white-space:nowrap; max-width:260px; overflow:hidden; text-overflow:ellipsis; vertical-align:top; }
+  th { background:#f0f2f0; position:sticky; top:0; }
+  button.a { font:inherit; font-size:12px; border:1px solid var(--acc); color:var(--acc); background:#fff; border-radius:6px; padding:2px 8px; cursor:pointer; margin:1px; }
+  button.p { background:var(--acc); color:#fff; }
+  .row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .mail { border-bottom:1px solid var(--line); padding:10px 0; }
+  .mail pre { white-space:pre-wrap; background:#f6f7f6; padding:8px; border-radius:6px; margin:6px 0 0; font-size:12.5px; }
+  .muted { color:var(--muted); } #msg { white-space:pre-wrap; }
+</style>
+</head>
+<body>
+<header><strong>KetelCheck · lokaal beheer</strong><span><a href="/" target="_blank">Formulier NL</a> · <a href="/fr/" target="_blank">FR</a></span></header>
+<main>
+  <p class="note">Lokale nabootsing van de Google Sheet + Apps Script. Mails gaan nergens heen: je ziet ze hieronder in de mailbox. Partners zijn fictief.</p>
+  <div class="card"><div class="row">
+    <button class="a" data-g="expire">Verlopen toewijzingen verwerken</button>
+    <button class="a" data-g="menuBuildInvoicesCurrent">Factuurvoorstel deze maand</button>
+    <button class="a" data-g="menuBuildInvoicesPrev">Factuurvoorstel vorige maand</button>
+    <button class="a" data-g="menuMarkInvoiced">Maand als gefactureerd…</button>
+    <button class="a" data-g="menuQuota">Mailquota</button>
+    <button class="a" data-g="reset" style="border-color:#b3261e;color:#b3261e">Alles wissen</button>
+  </div><p id="msg" class="muted"></p></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="card wrap" id="view"></div>
+</main>
+<script>
+(function () {
+  const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  let tab = "Leads", data = null;
+  try { tab = localStorage.getItem("kc-tab") || "Leads"; } catch (e) {}
+  async function load() { data = await (await fetch("/api/state")).json(); render(); }
+  async function act(action, leadId, prompt) {
+    const r = await (await fetch("/api/action", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, leadId, prompt }) })).json();
+    document.getElementById("msg").textContent = r.msg || "";
+    if (action !== "reset") load();
+  }
+  function render() {
+    const names = Object.keys(data.sheets).concat(["Mailbox"]);
+    document.getElementById("tabs").innerHTML = names.map((n) => `<button class="${n === tab ? "on" : ""}" data-t="${esc(n)}">${esc(n)}${n === "Mailbox" ? " (" + data.mails.length + ")" : n !== "Config" && data.sheets[n] ? " (" + Math.max(0, data.sheets[n].length - 1) + ")" : ""}</button>`).join("");
+    document.querySelectorAll("[data-t]").forEach((b) => (b.onclick = () => { tab = b.dataset.t; try { localStorage.setItem("kc-tab", tab); } catch (e) {} render(); }));
+    const v = document.getElementById("view");
+    if (tab === "Mailbox") {
+      v.innerHTML = data.mails.length ? data.mails.map((m) => `<div class="mail"><div><strong>${esc(m.subject)}</strong></div><div class="muted">aan ${esc(m.to)} · ${new Date(m.at).toLocaleString("nl-BE")}</div><pre>${esc(m.body).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>')}</pre></div>`).join("") : '<p class="muted">Nog geen mails.</p>';
+      return;
+    }
+    const rows = data.sheets[tab] || [];
+    if (!rows.length) { v.innerHTML = '<p class="muted">Leeg.</p>'; return; }
+    const H = rows[0], st = H.indexOf("status");
+    const actions = (r) => {
+      if (tab !== "Leads") return "";
+      const id = r[0], s = r[st];
+      const b = [];
+      if (s === "nieuw") b.push(`<button class="a p" data-a="controle" data-id="${esc(id)}">Gecontroleerd</button>`);
+      if (s === "gecontroleerd") b.push(`<button class="a p" data-a="menuForward" data-id="${esc(id)}">Doorsturen</button>`);
+      if (s === "doorgestuurd") b.push(`<button class="a" data-a="menuNextPartner" data-id="${esc(id)}">Volgende partner</button>`);
+      if (s === "credit_gevraagd") b.push(`<button class="a p" data-a="menuApproveCredit" data-id="${esc(id)}">Credit OK</button><button class="a" data-a="menuRejectCredit" data-id="${esc(id)}">Credit weigeren</button>`);
+      if (s === "gefactureerd") b.push(`<button class="a" data-a="menuMarkUncollectible" data-id="${esc(id)}">Oninbaar</button>`);
+      return b.join("");
+    };
+    v.innerHTML = `<table><tr>${tab === "Leads" ? "<th>actie</th>" : ""}${H.map((h) => `<th>${esc(h)}</th>`).join("")}</tr>${rows.slice(1).map((r) => `<tr>${tab === "Leads" ? `<td>${actions(r)}</td>` : ""}${H.map((_, i) => `<td title="${esc(r[i])}">${esc(r[i])}</td>`).join("")}</tr>`).join("")}</table>`;
+    v.querySelectorAll("[data-a]").forEach((b) => (b.onclick = () => act(b.dataset.a, b.dataset.id)));
+  }
+  document.querySelectorAll("[data-g]").forEach((b) => (b.onclick = () => {
+    const a = b.dataset.g;
+    if (a === "reset" && !confirm("Alle lokale KetelCheck-gegevens wissen?")) return;
+    const prompt = a === "menuMarkInvoiced" ? window.prompt("Welke maand? (YYYY-MM)", new Date().toISOString().slice(0, 7)) : undefined;
+    if (a === "menuMarkInvoiced" && !prompt) return;
+    act(a, undefined, prompt);
+  }));
+  load(); setInterval(load, 5000);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+
+/*
+ * Eén donker thema, geen schakelaar.
+ *
+ * Dit is een intern bedieningspaneel dat de hele dag openstaat naast andere
+ * vensters. Twee thema's onderhouden zou hier tijd kosten aan iets wat niemand
+ * vraagt; die tijd zit beter in de pijplijn.
+ */
+@theme {
+  --color-surface: #0f1115;
+  --color-panel: #171a21;
+  --color-panel-soft: #1e222b;
+  --color-line: #2a2f3a;
+  --color-ink: #e7e9ee;
+  --color-ink-soft: #9aa2b1;
+  --color-accent: #4c8dff;
+  --color-private: #34d399;
+  --color-professional: #fb923c;
+  --color-unknown: #94a3b8;
+  --color-danger: #f87171;
+}
+
+html,
+body {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+}
+
+body {
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Getallen in tabellen horen onder elkaar uit te lijnen; anders leest een
+   kolom met leadscores als een rommelige lijst in plaats van een rangschikking. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

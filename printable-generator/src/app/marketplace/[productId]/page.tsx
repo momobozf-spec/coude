@@ -15,13 +15,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
   const [seller, setSeller] = useState<SellerData | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [purchased, setPurchased] = useState(false);
+  const [purchaseId, setPurchaseId] = useState<string | null>(null);
+  const [downloadMsg, setDownloadMsg] = useState("");
   const [buying, setBuying] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`/api/marketplace/products/${productId}`).then(r => r.json()).then(d => {
       setProduct(d.product); setSeller(d.sellerProfile); setReviews(d.reviews || []);
-      setPurchased(d.purchased); setLoading(false);
+      setPurchased(d.purchased); setPurchaseId(d.purchaseId ?? null); setLoading(false);
     }).catch(() => setLoading(false));
   }, [productId]);
 
@@ -37,6 +39,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
     else if (data.free || data.purchased) setPurchased(true);
     setBuying(false);
   }
+
+  async function handleDownload() {
+    if (!purchaseId) { window.location.reload(); return; }
+    setDownloadMsg("");
+    const res = await fetch(`/api/marketplace/download/${purchaseId}`);
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.downloadUrl) window.location.href = data.downloadUrl;
+    else setDownloadMsg(data.error || "Download failed");
+  }
+
+  const money = (amount: number) =>
+    new Intl.NumberFormat("nl-BE", { style: "currency", currency: (product?.currency || "EUR").toUpperCase() }).format(amount);
 
   if (loading || !product) return <div className="min-h-screen flex items-center justify-center text-gray-400">Loading...</div>;
 
@@ -99,17 +113,20 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
           <div className="card sticky top-20">
             <div className="text-center mb-4">
               <div className="text-3xl font-extrabold" style={{ color: product.price === 0 ? "#1a6b4a" : "#c9920a" }}>
-                {product.price === 0 ? "Free" : `$${product.price.toFixed(2)}`}
+                {product.price === 0 ? "Free" : money(product.price)}
               </div>
             </div>
 
             {purchased ? (
-              <div className="text-center py-3 rounded-lg mb-3 font-bold" style={{ backgroundColor: "#e8f5ec", color: "#1a6b4a" }}>
-                &#10003; Purchased — Check your downloads
+              <div className="mb-3">
+                <button onClick={handleDownload} className="btn-primary w-full py-3" style={{ backgroundColor: "#1a6b4a" }}>
+                  &#10003; Purchased — Download PDF
+                </button>
+                {downloadMsg && <p className="text-xs text-red-500 mt-2 text-center">{downloadMsg}</p>}
               </div>
             ) : (
               <button onClick={handleBuy} disabled={buying} className="btn-primary w-full py-3 mb-3" style={{ backgroundColor: "#1a6b4a" }}>
-                {buying ? "..." : product.price === 0 ? "Get Free" : `Buy Now — $${product.price.toFixed(2)}`}
+                {buying ? "..." : product.price === 0 ? "Get Free" : `Buy Now — ${money(product.price)}`}
               </button>
             )}
 

@@ -105,7 +105,7 @@ export const BLOG_POSTS: BlogPost[] = [
 <p>If you're homeschooling children of different ages, use the same theme but different activity types. While your 4-year-old colors a mosque, your 7-year-old solves an Islamic vocabulary word search, and your 5-year-old works through a maze — all on the same topic. This allows you to teach one lesson while giving each child appropriate independent work.</p>
 
 <h2>Cost-Effective Approach</h2>
-<p>Instead of buying expensive Islamic curriculum packages, use Noor Printables as a flexible supplement. At $12/month for unlimited worksheets (or $97/year), it costs less than a single textbook — and provides fresh, unique content every day. Free accounts include 3 worksheets to try before committing.</p>
+<p>Instead of buying expensive Islamic curriculum packages, use Noor Printables as a flexible supplement. With unlimited worksheets on the Pro plan you get fresh, unique content every day. Free accounts include 3 worksheets to try before committing.</p>
 `,
   },
   {

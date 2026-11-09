@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations";
-import { generateReferralCode, REFERRAL_BONUS } from "@/lib/referral";
+import { applyReferral, generateReferralCode, REFERRAL_BONUS } from "@/lib/referral";
 import { sendWelcomeEmail, sendReferralBonusEmail } from "@/lib/emails";
 
 export async function POST(req: NextRequest) {
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { name, email, password } = parsed.data;
-    const referralCode = body.ref as string | undefined;
+    const referralCode = typeof body.ref === "string" && body.ref.trim() ? body.ref.trim() : undefined;
 
     const existing = await prisma.user.findUnique({
       where: { email },
@@ -37,36 +37,23 @@ export async function POST(req: NextRequest) {
         email,
         password: hashed,
         referralCode: generateReferralCode(email),
-        referredBy: referralCode || null,
+        termsAcceptedAt: new Date(),
       },
     });
 
     // Send welcome email (non-blocking)
     sendWelcomeEmail(email, name).catch(() => {});
 
-    // Credit the referrer with bonus generations
+    // Credit the referrer (once per user, idempotent — see applyReferral)
     if (referralCode) {
-      const referrer = await prisma.user.findFirst({
-        where: { referralCode },
-        select: { id: true, email: true, name: true, bonusGenerations: true },
-      });
-
-      if (referrer) {
-        await prisma.user.update({
-          where: { id: referrer.id },
-          data: {
-            referralCount: { increment: 1 },
-            bonusGenerations: { increment: REFERRAL_BONUS },
-          },
-        });
-
-        // Notify referrer (non-blocking)
+      const result = await applyReferral(user.id, referralCode).catch(() => null);
+      if (result?.status === "applied") {
         sendReferralBonusEmail(
-          referrer.email,
-          referrer.name,
+          result.referrer.email,
+          result.referrer.name,
           name,
           REFERRAL_BONUS,
-          referrer.bonusGenerations + REFERRAL_BONUS
+          result.referrer.bonusGenerations + REFERRAL_BONUS
         ).catch(() => {});
       }
     }
@@ -76,7 +63,7 @@ export async function POST(req: NextRequest) {
       user: { id: user.id, name: user.name, email: user.email },
     });
   } catch (error) {
-    console.error("Register error:", error);
+    console.error("Register error:", error instanceof Error ? error.message : "unknown");
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

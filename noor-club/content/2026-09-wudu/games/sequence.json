@@ -1,0 +1,18 @@
+{
+  "slug": "2026-09-wudu-sequence",
+  "engine": "SEQUENCE",
+  "ageBand": "4-6",
+  "xp": 20,
+  "order": 2,
+  "titles": { "nl": "De stappen van wudu", "en": "The steps of wudu", "fr": "Les étapes du wudu", "de": "Die Schritte des Wudu" },
+  "data": {
+    "prompt": { "nl": "Zet de stappen op volgorde", "en": "Put the steps in order", "fr": "Mets les étapes dans l’ordre", "de": "Bringe die Schritte in die richtige Reihenfolge" },
+    "items": [
+      { "id": "a", "order": 1, "label": { "nl": "Niyyah maken", "en": "Make niyyah", "fr": "Faire la niyyah", "de": "Niyyah machen" } },
+      { "id": "b", "order": 2, "label": { "nl": "Handen wassen", "en": "Wash hands", "fr": "Laver les mains", "de": "Hände waschen" } },
+      { "id": "c", "order": 3, "label": { "nl": "Mond spoelen", "en": "Rinse mouth", "fr": "Rincer la bouche", "de": "Mund ausspülen" } },
+      { "id": "d", "order": 4, "label": { "nl": "Neus spoelen", "en": "Rinse nose", "fr": "Rincer le nez", "de": "Nase spülen" } },
+      { "id": "e", "order": 5, "label": { "nl": "Gezicht wassen", "en": "Wash face", "fr": "Laver le visage", "de": "Gesicht waschen" } }
+    ]
+  }
+}
