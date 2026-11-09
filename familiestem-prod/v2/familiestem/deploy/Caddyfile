@@ -1,0 +1,15 @@
+{$FS_DOMAIN} {
+	encode zstd gzip
+	request_body {
+		max_size 30MB
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+	reverse_proxy app:8000
+}
+
+www.{$FS_DOMAIN} {
+	redir https://{$FS_DOMAIN}{uri} permanent
+}

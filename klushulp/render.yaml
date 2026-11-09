@@ -1,0 +1,49 @@
+# Render Blueprint — Klushulp (Blueprint path: klushulp/render.yaml). EU (Frankfurt).
+# Web (Docker) + PostgreSQL. Geheimen: sync:false → invullen in het Render-dashboard.
+services:
+  - type: web
+    name: klushulp
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    rootDir: klushulp
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    preDeployCommand: npm run db:migrate:prod && npm run db:seed-catalog
+    disk:
+      name: klushulp-storage
+      mountPath: /app/storage
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: klushulp-db
+          property: connectionString
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: BETTER_AUTH_URL
+        sync: false # https://<jouw-domein>
+      - key: STORAGE_DIR
+        value: /app/storage
+      - key: PLATFORM_FEE_BPS
+        value: "1000"
+      - key: PLATFORM_FEE_MIN_CENTS
+        value: "500"
+      - key: LEGAL_ENTITY_NAME
+        value: Marhaba Cooperation BV
+      - key: LEGAL_ENTITY_VAT
+        value: BE1037222285
+      - key: LEGAL_ENTITY_ADDRESS
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+databases:
+  - name: klushulp-db
+    region: frankfurt
+    plan: basic-256mb
+    postgresMajorVersion: "16"

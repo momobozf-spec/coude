@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block nav %}{% endblock %}
+{% block content %}
+{% if order.is_demo %}<div class="banner">VOORBEELD MET FICTIEVE GEGEVENS</div>{% endif %}
+<h1>De verhalen van {{ order.storyteller_name }}</h1>
+{% if not f.approved_by_storyteller %}
+<p class="lead">Dag {{ f.name }}. {{ order.storyteller_name }} moet je nog toelaten om mee te lezen.</p>
+{% elif not stories %}
+<p class="lead">Er zijn nog geen gedeelde verhalen. Kom later terug.</p>
+{% else %}
+{% for s in stories %}
+<div class="card"><h3>{{ s.question }}</h3>
+<audio controls src="/f/{{ token }}/audio/{{ s.id }}" style="width:100%"></audio>
+{% for p in s.final_text.split('\n\n') %}<p>{{ p }}</p>{% endfor %}
+{% for ph in s.photos %}<p><img src="/f/{{ token }}/foto/{{ ph.id }}" alt="" style="max-width:100%;border-radius:8px"><br><span class="small">{{ ph.caption }}</span></p>{% endfor %}
+</div>{% endfor %}
+{% if f.can_download %}<p><a class="btn secondary" href="/f/{{ token }}/boek.pdf">Boek downloaden (PDF)</a></p>{% endif %}
+{% endif %}
+{% if not order.is_demo %}
+<div class="card" style="margin-top:40px">
+  <h3>Wil je dit ook voor je eigen ouders of grootouders?</h3>
+  <p class="small">Twintig verhalen in hun eigen stem, als familieboek. Zij beslissen zelf wat gedeeld wordt.</p>
+  <p><a class="btn secondary" href="/?bron=familie">Meer weten</a></p>
+</div>
+{% endif %}
+{% endblock %}

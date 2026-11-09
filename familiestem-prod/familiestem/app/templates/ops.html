@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Meetpunten (zonder demo-bestellingen)</h1>
+<div class="card"><table>
+<tr><td>Bezoeken (paginaweergaven)</td><td>{{ counts.get('page_view', 0) }}</td></tr>
+<tr><td>Bestelformulier verstuurd</td><td>{{ counts.get('checkout_start', 0) }}</td></tr>
+<tr><td>Betaald</td><td>{{ stats.paid }}</td></tr>
+<tr><td>…waarvan interesse gedrukt boek</td><td>{{ stats.print_interest }}</td></tr>
+<tr><td>Verteller gestart (toestemming)</td><td>{{ stats.activated }}</td></tr>
+<tr><td>Eerste opname</td><td>{{ counts.get('first_recording', 0) }}</td></tr>
+<tr><td>5+ verhalen</td><td>{{ stats.five_plus }}</td></tr>
+<tr><td>Verhalen goedgekeurd</td><td>{{ counts.get('story_approved', 0) }}</td></tr>
+</table></div>
+<h2>Groeilussen</h2>
+<div class="card"><table>
+<tr><th>Bron</th><th>Betaalde bestellingen</th></tr>
+{% for r in by_source %}<tr><td>{{ r.source }}</td><td>{{ r.n }}</td></tr>{% endfor %}
+<tr><td><strong>Via familie of doorverwijzing</strong></td><td><strong>{{ loop_orders }}</strong>{% if stats.paid %} ({{ (100 * loop_orders / stats.paid)|round|int }}%){% endif %}</td></tr>
+<tr><td>Klikken op familie-oproep</td><td>{{ counts.get('family_cta_click', 0) }}</td></tr>
+</table></div>
+<h2>Beloningen doorverwijzers</h2>
+<div class="card"><table>
+{% for r in rewards %}<tr><td>bestelling #{{ r.id }} ({{ r.created_at[:10] }})</td><td>doorverwijzer #{{ r.referrer_id }} · {{ r.referrer_email }}</td><td>{{ 'nu terugbetalen' if r.payable else 'wacht 30 dagen' }}</td></tr>{% else %}<tr><td>Geen.</td></tr>{% endfor %}
+</table></div>
+
+<h2>10+ dagen stil (seintje sturen)</h2>
+<div class="card"><table>{% for q in quiet %}<tr><td>#{{ q.id }}</td><td>besteld {{ q.created_at[:10] }}</td><td>{{ 'gestart' if q.activated_at else 'niet gestart' }}</td><td>laatste opname {{ (q.last or '-')[:10] }}</td></tr>{% else %}<tr><td>Niemand.</td></tr>{% endfor %}</table></div>
+{% endblock %}

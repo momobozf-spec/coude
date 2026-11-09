@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block nav %}<span class="small">Beheer</span>{% endblock %}
+{% block content %}
+{% if order.is_demo or order.payment_mode == 'demo' %}<div class="banner">DEMO-BESTELLING</div>{% endif %}
+<h1>Het cadeau voor {{ order.storyteller_name }}</h1>
+<div class="card"><table>
+<tr><td>Status</td><td>{% if not order.activated_at %}Nog niet gestart door {{ order.storyteller_name }}{% elif collecting %}Bezig met vertellen tot {{ order.collect_until[:10] }}{% else %}Verzamelperiode voorbij{% endif %}</td></tr>
+<tr><td>Opgenomen</td><td>{{ n }} van {{ cfg.MAX_STORIES }} verhalen · {{ minutes }} min</td></tr>
+<tr><td>Gedeeld met familie</td><td>{{ shared|length }} verhalen</td></tr>
+</table>
+{% if order.activated_at and not order.extended %}<form method="post" action="/k/{{ token }}/verlengen"><button class="btn secondary" type="submit">Verzamelperiode eenmaal verlengen (+{{ cfg.EXTENSION_DAYS }} dagen)</button></form>{% endif %}
+</div>
+<p class="small">Samen opnemen? Open de link van {{ order.storyteller_name }} op jouw telefoon terwijl je samen zit. {{ order.storyteller_name }} geeft zelf toestemming op het scherm.</p>
+
+{% if to_review %}
+<h2>Na te lezen (je bent aangeduid als goedkeurder)</h2>
+{% for s in to_review %}
+<form class="card" method="post" action="/k/{{ token }}/verhaal/{{ s.id }}">
+  <h3>{{ s.question }}</h3>
+  <audio controls src="/k/{{ token }}/audio/{{ s.id }}" style="width:100%"></audio>
+  <textarea name="final_text">{{ s.final_text or '' }}</textarea>
+  <p><button class="btn" name="approve" value="1">Goedkeuren</button> <button class="btn secondary">Bewaren</button></p>
+</form>
+{% endfor %}
+{% endif %}
+
+<h2>Gedeelde verhalen</h2>
+{% if not shared %}<p class="small">Nog niets gedeeld. Je ziet hier enkel verhalen die {{ order.storyteller_name }} goedkeurt en deelt.</p>{% endif %}
+{% for s in shared %}
+<div class="card"><h3>{{ s.question }}</h3>
+<audio controls src="/k/{{ token }}/audio/{{ s.id }}" style="width:100%"></audio>
+{% for p in s.final_text.split('\n\n') %}<p>{{ p }}</p>{% endfor %}
+{% for ph in s.photos %}<p><img src="/k/{{ token }}/foto/{{ ph.id }}" alt="" style="max-width:100%;border-radius:8px"></p>{% endfor %}
+</div>
+{% endfor %}
+{% if shared %}<p><a class="btn secondary" href="/k/{{ token }}/boek.pdf">Boek (PDF)</a> <a class="btn secondary" href="/k/{{ token }}/export.zip">Alles gedeelde (ZIP)</a></p>{% endif %}
+
+<h2>Vragen</h2>
+<div class="card"><table>
+{% for q in questions %}<tr><td>{{ q.text }}{% if q.custom %} <span class="pill">eigen</span>{% endif %}</td>
+<td>{% if q.answered %}<span class="pill">beantwoord</span>{% else %}<form method="post" action="/k/{{ token }}/vraag/{{ q.id }}/verwijder"><button class="btn secondary" style="padding:6px 12px;font-size:14px">Weg</button></form>{% endif %}</td></tr>{% endfor %}
+</table>
+<form method="post" action="/k/{{ token }}/vraag"><label for="nq">Eigen vraag toevoegen</label><input id="nq" type="text" name="question" minlength="5" maxlength="300" required><p><button class="btn secondary">Toevoegen</button></p></form>
+</div>
+
+{% if share_link %}
+<h2>Ken je nog iemand voor wie dit iets is?</h2>
+<div class="card">
+  <p>Wie bestelt met jouw code krijgt €{{ '%.0f'|format(cfg.REFERRAL_DISCOUNT_EUR) }} korting. Jij krijgt €{{ '%.0f'|format(cfg.REFERRAL_REWARD_EUR) }} terug op je betaalkaart, 30 dagen na hun bestelling.</p>
+  <p><strong style="font:700 22px system-ui,sans-serif;letter-spacing:.12em">{{ order.referral_code }}</strong></p>
+  <input type="text" readonly value="{{ share_link }}" onclick="this.select()">
+  <p><a class="btn secondary" href="https://wa.me/?text={{ ('Ik gaf dit aan ' ~ order.storyteller_name ~ ': twintig verhalen in eigen stem, als familieboek. Met mijn code krijg je €10 korting: ' ~ share_link)|urlencode }}">Delen via WhatsApp</a></p>
+</div>
+{% endif %}
+
+<h2>Familie uitnodigen</h2>
+{% if new_family_link %}<div class="banner">Nieuwe uitnodigingslink (enkel nu zichtbaar, stuur hem door): <input type="text" readonly value="{{ new_family_link }}" onclick="this.select()"></div>{% endif %}
+<div class="card">
+{% for f in family %}<p>{{ f.name }} — {% if f.approved_by_storyteller %}<span class="pill">toegelaten</span>{% else %}<span class="pill grey">wacht op {{ order.storyteller_name }}</span>{% endif %}</p>{% endfor %}
+<form method="post" action="/k/{{ token }}/familie"><label for="fn">Naam</label><input id="fn" type="text" name="name" required maxlength="80"><p><button class="btn secondary">Link maken</button></p></form>
+<p class="small">{{ order.storyteller_name }} beslist zelf wie mag meelezen.</p>
+</div>
+{% endblock %}

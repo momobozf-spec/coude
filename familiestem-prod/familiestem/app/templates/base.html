@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{% block title %}Familiestem{% endblock %}</title>
+<style>
+:root{--paper:#f7f2ea;--ink:#2a2622;--muted:#6f655b;--accent:#2f5d50;--accent-2:#c8643b;--line:#e2d8ca;--card:#fffdf9}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.6 "Iowan Old Style","Palatino Linotype",Georgia,serif}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px}
+header.top{border-bottom:1px solid var(--line);padding:14px 0}
+header.top .wrap{display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:700;letter-spacing:.02em;color:var(--accent);text-decoration:none;font-size:20px}
+h1,h2,h3{line-height:1.2;font-weight:700}
+h1{font-size:clamp(30px,6vw,46px);margin:.6em 0 .3em}
+h2{font-size:26px;margin:1.8em 0 .5em}
+p.lead{font-size:21px;color:var(--muted)}
+a{color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin:16px 0}
+.btn{display:inline-block;background:var(--accent);color:#fff;border:0;border-radius:999px;padding:14px 26px;
+  font:600 18px/1.2 system-ui,sans-serif;text-decoration:none;cursor:pointer}
+.btn.secondary{background:transparent;color:var(--accent);border:2px solid var(--accent)}
+.btn.warn{background:#9b2c2c}
+label{display:block;font:600 15px system-ui,sans-serif;margin:14px 0 4px}
+input[type=text],input[type=email],input[type=password],textarea,select{width:100%;padding:12px;border:1px solid #cbbfae;
+  border-radius:10px;font:17px system-ui,sans-serif;background:#fff}
+textarea{min-height:220px;line-height:1.5}
+.check{display:flex;gap:10px;align-items:flex-start;font:16px/1.4 system-ui,sans-serif;margin:12px 0}
+.check input{width:22px;height:22px;margin-top:2px;flex:none}
+.small{font:14px/1.5 system-ui,sans-serif;color:var(--muted)}
+.banner{background:#fff1d6;border:1px solid #e5c27a;color:#6b4b00;padding:10px 14px;border-radius:10px;
+  font:600 14px/1.4 system-ui,sans-serif;margin:12px 0}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;padding:12px 0 12px 52px;position:relative;border-bottom:1px solid var(--line)}
+.steps li::before{content:counter(s);position:absolute;left:0;top:10px;width:36px;height:36px;border-radius:50%;
+  background:var(--accent);color:#fff;font:700 18px/36px system-ui,sans-serif;text-align:center}
+table{border-collapse:collapse;width:100%;font:16px/1.4 system-ui,sans-serif}
+td,th{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+.pill{display:inline-block;font:600 12px system-ui,sans-serif;padding:3px 9px;border-radius:999px;background:#e7efe9;color:var(--accent)}
+.pill.grey{background:#eee8df;color:var(--muted)}
+footer{margin:60px 0 30px;font:14px system-ui,sans-serif;color:var(--muted)}
+u{text-decoration-color:var(--accent-2);text-decoration-thickness:2px}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="logo" href="/">Familiestem</a>
+{% block nav %}<a href="/voorbeeld" class="small">Voorbeeld bekijken</a>{% endblock %}</div></header>
+<main class="wrap">
+{% if demo_payment and show_payment_banner %}<div class="banner">DEMO-MODUS: er is geen betaalkoppeling actief. Bestellingen worden niet echt betaald.</div>{% endif %}
+{% block content %}{% endblock %}
+</main>
+<footer class="wrap">Familiestem is een dienst van Marhaba Cooperation BV · <a href="/voorwaarden">Voorwaarden &amp; privacy</a></footer>
+</body>
+</html>

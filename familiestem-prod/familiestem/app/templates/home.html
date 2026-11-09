@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% set show_payment_banner = True %}
+{% block content %}
+<h1>Twintig verhalen, in hun eigen stem.</h1>
+<p class="lead">Een cadeau voor je vader, moeder, opa of oma. Zij vertellen, wij schrijven het uit. Binnen enkele weken heeft de familie een boek om te lezen én hun stem om te beluisteren.</p>
+<p><a class="btn" href="#bestellen">Geef het cadeau · €49</a> &nbsp; <a class="btn secondary" href="/voorbeeld">Bekijk een voorbeeld</a></p>
+
+<h2>Zo werkt het</h2>
+<ol class="steps">
+  <li><strong>Je bestelt en krijgt meteen een cadeaubon</strong> om te printen of door te sturen. Je kiest de vragen, of schrijft er zelf bij.</li>
+  <li><strong>Zij vertellen, wanneer het past.</strong> Eén vraag per keer, één grote knop. Geen app, geen wachtwoord. Je kan ook <em>samen</em> opnemen: jij houdt de telefoon vast, zij vertellen.</li>
+  <li><strong>Wij schrijven het uit</strong>, zonder iets toe te voegen. De verteller leest na, verbetert en beslist wat de familie te zien krijgt.</li>
+  <li><strong>Het familieboek</strong>: een verzorgde PDF met foto's, de originele opnames, en een privépagina waar familie leest en luistert.</li>
+</ol>
+
+<h2>Wat je krijgt</h2>
+<div class="card"><table>
+<tr><td>Verhalen</td><td>20, uit voorgestelde vragen of je eigen vragen</td></tr>
+<tr><td>Opnemen</td><td>tot 10 minuten per verhaal, 5 uur in totaal</td></tr>
+<tr><td>Tijd om te vertellen</td><td>90 dagen vanaf de eerste keer, eenmaal gratis te verlengen</td></tr>
+<tr><td>Foto's</td><td>tot 3 per verhaal</td></tr>
+<tr><td>Familie</td><td>tot 10 lezers, enkel wie de verteller toelaat</td></tr>
+<tr><td>Download</td><td>PDF-boek, originele audio, teksten en foto's in één bestand</td></tr>
+<tr><td>Online bewaard</td><td>2 jaar na het verzamelen; daarna heb je alles zelf in handen</td></tr>
+<tr><td>Taal</td><td>Nederlands (Frans volgt na onze kwaliteitstest)</td></tr>
+</table></div>
+
+<h2>Eerlijk over wat het niet is</h2>
+<p>Geen gedrukt boek (nog niet), geen biografie geschreven door een schrijver, en geen stemnabootsing. We bewaren wat er écht verteld is, in de woorden en de stem van de verteller.</p>
+
+<h2>En als er weinig verteld wordt?</h2>
+<p>Dat gebeurt. Daarom kan je samen opnemen, en sturen we je een seintje als het stil blijft. Is er 60 dagen na je bestelling nog niets opgenomen, of vind je de eerste opname niets, dan krijg je je geld terug.</p>
+
+<h2 id="bestellen">Bestellen · {% if discount %}<s>€49</s> €{{ '%.0f'|format(cfg.PRICE_EUR_INCL_VAT - discount) }}{% else %}€49{% endif %} eenmalig</h2>
+{% if discount %}<div class="banner" style="background:#e7efe9;border-color:#9cc0b0;color:#2f5d50">Je bent doorverwezen: €{{ '%.0f'|format(discount) }} korting met code {{ ref_code }}.</div>{% endif %}
+<form class="card" method="post" action="/bestellen">
+  <input type="hidden" name="source" value="{{ source or 'direct' }}">
+  <input type="hidden" name="ref_code" value="{{ ref_code or '' }}">
+  <label for="bn">Jouw naam</label><input id="bn" type="text" name="buyer_name" required maxlength="120">
+  <label for="be">Jouw e-mailadres</label><input id="be" type="email" name="buyer_email" required maxlength="200">
+  <label for="sn">Voor wie is het? (voornaam of hoe je hem/haar noemt)</label><input id="sn" type="text" name="storyteller_name" required maxlength="120" placeholder="bv. papa, oma Jeanne">
+  <input type="hidden" name="language" value="nl">
+  <label for="gm">Persoonlijke boodschap op de cadeaubon (optioneel)</label><textarea id="gm" name="gift_message" maxlength="600" style="min-height:90px"></textarea>
+  <div class="check"><input type="checkbox" id="pi" name="print_interest" value="1"><label for="pi" style="margin:0;font-weight:400">Ik zou later ook een <strong>gedrukt boek</strong> willen bestellen (bestaat nog niet; je betaalt er nu niets voor, we polsen enkel de interesse).</label></div>
+  <div class="check"><input type="checkbox" id="at" name="accept_terms" value="1" required><label for="at" style="margin:0;font-weight:400">Ik aanvaard de <a href="/voorwaarden">voorwaarden</a>. Ik begrijp dat de verteller zelf toestemming geeft en zelf beslist wat gedeeld wordt.</label></div>
+  <p><button class="btn" type="submit">Betalen en cadeaubon ontvangen</button></p>
+  <p class="small">Betalen met Bancontact of kaart. Prijs incl. 21% btw.</p>
+</form>
+
+<h2>Vragen</h2>
+<p><strong>Wie kan de verhalen lezen?</strong> Enkel wie de verteller toelaat. Ook jij als koper ziet een verhaal pas als het goedgekeurd en gedeeld is.</p>
+<p><strong>Waar staan de opnames?</strong> Op servers in de EU. Voor het uitschrijven gebruiken we een externe spraakdienst met verwerking in Europa; die gebruikt de opnames niet om modellen te trainen.</p>
+<p><strong>Kan alles gewist worden?</strong> Ja, de verteller kan op elk moment alles wissen.</p>
+{% endblock %}

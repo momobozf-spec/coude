@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block nav %}<a href="/v/{{ token }}" class="small">← Terug</a>{% endblock %}
+{% block content %}
+{% if order.is_demo %}<div class="banner">VOORBEELD MET FICTIEVE GEGEVENS</div>{% endif %}
+{% if s.transcript_source == 'demo' %}<div class="banner">DEMO-TRANSCRIPTIE: geen echte spraakherkenning. Typ of verbeter de tekst zelf.</div>{% endif %}
+<h1>{{ s.question }}</h1>
+<audio controls src="/v/{{ token }}/audio/{{ s.id }}" style="width:100%"></audio>
+<p class="small">Originele opname · {{ (s.audio_seconds // 60)|int }} min {{ (s.audio_seconds % 60)|int }} s</p>
+{% if s.status == 'recorded' %}
+<div class="card"><p>Je opname is bewaard. Het uitschrijven is nog bezig of mislukt; probeer later opnieuw.</p></div>
+{% else %}
+{% if flags %}<div class="banner">Deze woorden waren onzeker bij het uitschrijven. Luister even mee: {{ flags|join(', ') }}</div>{% endif %}
+{% if s.readable_ok == 0 %}<div class="banner">De leesbare versie voegde woorden toe die je niet zei. Daarom tonen we je eigen woorden.</div>{% endif %}
+<form class="card" method="post" action="/v/{{ token }}/verhaal/{{ s.id }}">
+  <label for="ft">Jouw verhaal (je mag alles aanpassen)</label>
+  <textarea id="ft" name="final_text">{{ s.final_text or '' }}</textarea>
+  <div class="check"><input type="checkbox" id="sh" name="shared" value="1" {% if s.shared or s.status != 'approved' %}checked{% endif %}><label for="sh" style="margin:0;font-weight:400">Mijn familie mag dit verhaal lezen en beluisteren</label></div>
+  <p><button class="btn" name="approve" value="1" type="submit">Goedkeuren</button>
+     <button class="btn secondary" type="submit">Enkel bewaren</button></p>
+</form>
+<details class="card"><summary>Letterlijke tekst bekijken</summary><p style="white-space:pre-wrap">{{ s.transcript }}</p></details>
+{% endif %}
+<div class="card">
+  <h3>Foto's ({{ s.photos|length }}/{{ cfg.MAX_PHOTOS_PER_STORY }})</h3>
+  {% for p in s.photos %}<p><img src="/v/{{ token }}/foto/{{ p.id }}" alt="" style="max-width:100%;border-radius:8px"><br><span class="small">{{ p.caption }}</span></p>{% endfor %}
+  {% if s.photos|length < cfg.MAX_PHOTOS_PER_STORY %}
+  <form method="post" action="/v/{{ token }}/verhaal/{{ s.id }}/foto" enctype="multipart/form-data">
+    <input type="file" name="photo" accept="image/*" required>
+    <label for="cap">Bijschrift (optioneel)</label><input id="cap" type="text" name="caption" maxlength="200">
+    <p><button class="btn secondary" type="submit">Foto toevoegen</button></p>
+  </form>{% endif %}
+</div>
+{% endblock %}
