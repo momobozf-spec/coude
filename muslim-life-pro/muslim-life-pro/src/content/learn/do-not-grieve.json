@@ -1,0 +1,167 @@
+{
+  "slug": "do-not-grieve",
+  "theme": "companions",
+  "audience": "adults",
+  "level": 1,
+  "order": 1,
+  "minutes": 4,
+  "review": {
+    "status": "draft",
+    "reviewedBy": "",
+    "reviewedAt": ""
+  },
+  "key": {
+    "arabic": "لَا تَحْزَنْ إِنَّ اللَّهَ مَعَنَا",
+    "reference": "Qur'an 9:40"
+  },
+  "sources": [
+    {
+      "kind": "quran",
+      "reference": "Qur'an 9:40 (At-Tawbah)"
+    },
+    {
+      "kind": "hadith",
+      "reference": "Sahih al-Bukhari 3653"
+    },
+    {
+      "kind": "hadith",
+      "reference": "Sahih al-Bukhari 3905"
+    }
+  ],
+  "text": {
+    "nl": {
+      "title": "Abu Bakr in de grot: treur niet",
+      "intro": "Tijdens de hidjra zat de Profeet ﷺ met één metgezel verborgen in een grot, terwijl zijn vijanden voor de ingang stonden.",
+      "body": [
+        "Toen de Profeet ﷺ van Mekka naar Medina trok, nam hij Abu Bakr as-Siddiq mee. Ze verborgen zich drie nachten in de grot van Thawr, met een ingehuurde gids klaar voor de rest van de reis (Bukhari 3905).",
+        "De achtervolgers kwamen zo dichtbij dat Abu Bakr zei: als iemand van hen naar zijn voeten kijkt, ziet hij ons. De Profeet ﷺ antwoordde: wat denk je van twee, van wie Allah de derde is? (Bukhari 3653)",
+        "De Koran legt dit moment vast in 9:40: hij zei tegen zijn metgezel: treur niet, Allah is met ons. Daarom wordt Abu Bakr vaak de tweede van twee genoemd.",
+        "Abu Bakr was niet bang voor zichzelf, maar voor de Profeet ﷺ. En hun vertrouwen op Allah ging samen met voorzorg: een schuilplaats, een gids en het juiste moment."
+      ],
+      "takeaway": "Tawakkul is geen passiviteit. Je doet wat je kunt, en je hart rust bij Allah."
+    },
+    "fr": {
+      "title": "Abu Bakr dans la grotte : ne t'afflige pas",
+      "intro": "Pendant l'hégire, le Prophète ﷺ s'est caché dans une grotte avec un seul compagnon, alors que ses ennemis se tenaient devant l'entrée.",
+      "body": [
+        "Quand le Prophète ﷺ quitta La Mecque pour Médine, il emmena Abu Bakr as-Siddiq. Ils se cachèrent trois nuits dans la grotte de Thawr, avec un guide engagé prêt pour la suite du voyage (Bukhari 3905).",
+        "Les poursuivants vinrent si près qu'Abu Bakr dit : si l'un d'eux regarde sous ses pieds, il nous verra. Le Prophète ﷺ répondit : que penses-tu de deux dont Allah est le troisième ? (Bukhari 3653)",
+        "Le Coran rapporte ce moment en 9:40 : il dit à son compagnon : ne t'afflige pas, Allah est avec nous. C'est pourquoi Abu Bakr est souvent appelé le second des deux.",
+        "Abu Bakr n'avait pas peur pour lui-même, mais pour le Prophète ﷺ. Et leur confiance en Allah allait de pair avec la prudence : un refuge, un guide et le bon moment."
+      ],
+      "takeaway": "Le tawakkul n'est pas de la passivité. Tu fais ce que tu peux, et ton cœur s'en remet à Allah."
+    },
+    "en": {
+      "title": "Abu Bakr in the cave: do not grieve",
+      "intro": "During the Hijrah, the Prophet ﷺ hid in a cave with a single companion while his enemies stood at the entrance.",
+      "body": [
+        "When the Prophet ﷺ left Makkah for Madinah, he took Abu Bakr as-Siddiq with him. They hid for three nights in the cave of Thawr, with a hired guide ready for the rest of the journey (Bukhari 3905).",
+        "The pursuers came so close that Abu Bakr said: if one of them looks down at his feet, he will see us. The Prophet ﷺ replied: what do you think of two, of whom Allah is the third? (Bukhari 3653)",
+        "The Qur'an records this moment in 9:40: he said to his companion, do not grieve, Allah is with us. That is why Abu Bakr is often called the second of the two.",
+        "Abu Bakr was not afraid for himself but for the Prophet ﷺ. And their trust in Allah went together with precaution: a hiding place, a guide and the right timing."
+      ],
+      "takeaway": "Tawakkul is not passivity. You do what you can, and your heart rests with Allah."
+    }
+  },
+  "exercises": [
+    {
+      "id": "words-in-cave",
+      "type": "choice",
+      "prompt": {
+        "nl": "Wat zei de Profeet ﷺ volgens 9:40 tegen Abu Bakr in de grot?",
+        "fr": "Selon 9:40, que dit le Prophète ﷺ à Abu Bakr dans la grotte ?",
+        "en": "According to 9:40, what did the Prophet ﷺ say to Abu Bakr in the cave?"
+      },
+      "options": [
+        {
+          "nl": "Treur niet, Allah is met ons",
+          "fr": "Ne t'afflige pas, Allah est avec nous",
+          "en": "Do not grieve, Allah is with us"
+        },
+        {
+          "nl": "Wees niet bang, de vijand is vertrokken",
+          "fr": "N'aie pas peur, l'ennemi est parti",
+          "en": "Do not fear, the enemy has left"
+        },
+        {
+          "nl": "Laten we terugkeren naar Mekka",
+          "fr": "Retournons à La Mecque",
+          "en": "Let us return to Makkah"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Het vers citeert letterlijk: treur niet, Allah is met ons (9:40).",
+        "fr": "Le verset cite littéralement : ne t'afflige pas, Allah est avec nous (9:40).",
+        "en": "The verse quotes it directly: do not grieve, Allah is with us (9:40)."
+      }
+    },
+    {
+      "id": "tawakkul-passive",
+      "type": "truefalse",
+      "prompt": {
+        "nl": "Tawakkul betekent dat je geen voorzorgen neemt en alles aan Allah overlaat.",
+        "fr": "Le tawakkul signifie ne prendre aucune précaution et tout laisser à Allah.",
+        "en": "Tawakkul means taking no precautions and leaving everything to Allah."
+      },
+      "answer": false,
+      "explanation": {
+        "nl": "De Profeet ﷺ en Abu Bakr bereidden de reis zorgvuldig voor: een schuilplaats, een gids, het juiste moment. Vertrouwen en voorbereiding gaan samen.",
+        "fr": "Le Prophète ﷺ et Abu Bakr ont soigneusement préparé le voyage : un refuge, un guide, le bon moment. Confiance et préparation vont ensemble.",
+        "en": "The Prophet ﷺ and Abu Bakr prepared the journey carefully: a hiding place, a guide, the right timing. Trust and preparation go together."
+      }
+    },
+    {
+      "id": "two-and-third",
+      "type": "choice",
+      "prompt": {
+        "nl": "Wat vroeg de Profeet ﷺ volgens Bukhari 3653 aan Abu Bakr?",
+        "fr": "Selon Bukhari 3653, que demanda le Prophète ﷺ à Abu Bakr ?",
+        "en": "According to Bukhari 3653, what did the Prophet ﷺ ask Abu Bakr?"
+      },
+      "options": [
+        {
+          "nl": "Wat denk je van twee, van wie Allah de derde is?",
+          "fr": "Que penses-tu de deux dont Allah est le troisième ?",
+          "en": "What do you think of two, of whom Allah is the third?"
+        },
+        {
+          "nl": "Heb je genoeg water meegenomen?",
+          "fr": "As-tu pris assez d'eau ?",
+          "en": "Did you bring enough water?"
+        },
+        {
+          "nl": "Wie heeft ons verraden?",
+          "fr": "Qui nous a trahis ?",
+          "en": "Who betrayed us?"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Met die vraag bracht hij Abu Bakr terug naar wat er echt toe deed: Allah was met hen.",
+        "fr": "Par cette question, il a ramené Abu Bakr à l'essentiel : Allah était avec eux.",
+        "en": "With that question he brought Abu Bakr back to what truly mattered: Allah was with them."
+      }
+    },
+    {
+      "id": "tawakkul-word",
+      "type": "wordbuild",
+      "prompt": {
+        "nl": "Bouw het woord voor vertrouwen op Allah.",
+        "fr": "Construis le mot pour la confiance en Allah.",
+        "en": "Build the word for trust in Allah."
+      },
+      "word": "TAWAKKUL",
+      "meaning": {
+        "nl": "Vertrouwen op Allah, nadat je zelf gedaan hebt wat je kon",
+        "fr": "La confiance en Allah, après avoir fait ce que tu pouvais",
+        "en": "Trust in Allah, after doing what you could yourself"
+      },
+      "explanation": {
+        "nl": "Tawakkul is het vertrouwen dat Abu Bakr en de Profeet ﷺ in de grot toonden, na een zorgvuldig voorbereide reis.",
+        "fr": "Le tawakkul est la confiance que montrèrent Abu Bakr et le Prophète ﷺ dans la grotte, après un voyage soigneusement préparé.",
+        "en": "Tawakkul is the trust Abu Bakr and the Prophet ﷺ showed in the cave, after a carefully prepared journey."
+      }
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "slug": "wudu-step-by-step",
+  "theme": "rulings",
+  "audience": "kids",
+  "level": 2,
+  "order": 101,
+  "minutes": 3,
+  "review": { "status": "draft", "reviewedBy": "", "reviewedAt": "" },
+  "key": {
+    "arabic": "إِذَا قُمْتُمْ إِلَى الصَّلَاةِ فَاغْسِلُوا وُجُوهَكُمْ",
+    "reference": "Qur'an 5:6"
+  },
+  "sources": [{ "kind": "quran", "reference": "Qur'an 5:6 (Al-Ma'idah)" }],
+  "text": {
+    "nl": {
+      "title": "Wudu: klaar voor het gebed",
+      "intro": "Voor we bidden, maken we ons klaar met de kleine wassing: de wudu.",
+      "body": [
+        "In de Koran staat welke delen je zeker wast als je wilt bidden (5:6): je gezicht, je handen en armen tot aan de ellebogen, je strijkt over je hoofd en je wast je voeten tot aan de enkels.",
+        "Er zijn nog meer stappen, zoals je mond en neus spoelen. Die leer je samen met je ouders of in de moskee."
+      ],
+      "takeaway": "Wudu maakt je fris en klaar om met Allah te praten in het gebed."
+    },
+    "fr": {
+      "title": "Le woudou : prêt pour la prière",
+      "intro": "Avant de prier, nous nous préparons avec la petite ablution : le woudou.",
+      "body": [
+        "Le Coran dit quelles parties tu laves à coup sûr quand tu veux prier (5:6) : ton visage, tes mains et tes bras jusqu'aux coudes, tu passes la main sur ta tête et tu laves tes pieds jusqu'aux chevilles.",
+        "Il y a encore d'autres étapes, comme rincer la bouche et le nez. Tu les apprends avec tes parents ou à la mosquée."
+      ],
+      "takeaway": "Le woudou te rend propre et prêt à parler à Allah dans la prière."
+    },
+    "en": {
+      "title": "Wudu: ready for prayer",
+      "intro": "Before we pray, we get ready with the small washing: wudu.",
+      "body": [
+        "The Qur'an says which parts you always wash when you want to pray (5:6): your face, your hands and arms up to the elbows, you wipe over your head, and you wash your feet up to the ankles.",
+        "There are more steps too, like rinsing your mouth and nose. You learn those with your parents or at the mosque."
+      ],
+      "takeaway": "Wudu makes you fresh and ready to talk to Allah in prayer."
+    }
+  },
+  "exercises": [
+    {
+      "id": "wudu-order",
+      "type": "order",
+      "prompt": {
+        "nl": "In welke volgorde noemt de Koran de delen?",
+        "fr": "Dans quel ordre le Coran cite-t-il les parties ?",
+        "en": "In what order does the Qur'an mention the parts?"
+      },
+      "items": [
+        { "nl": "Gezicht wassen", "fr": "Laver le visage", "en": "Wash the face" },
+        {
+          "nl": "Handen en armen tot de ellebogen wassen",
+          "fr": "Laver les mains et les bras jusqu'aux coudes",
+          "en": "Wash the hands and arms up to the elbows"
+        },
+        { "nl": "Over het hoofd strijken", "fr": "Passer la main sur la tête", "en": "Wipe over the head" },
+        {
+          "nl": "Voeten tot de enkels wassen",
+          "fr": "Laver les pieds jusqu'aux chevilles",
+          "en": "Wash the feet up to the ankles"
+        }
+      ],
+      "explanation": {
+        "nl": "Zo staat het in 5:6: gezicht, armen, hoofd en voeten.",
+        "fr": "C'est ainsi en 5:6 : visage, bras, tête et pieds.",
+        "en": "That is how 5:6 lists them: face, arms, head and feet."
+      }
+    },
+    {
+      "id": "wudu-word",
+      "type": "wordbuild",
+      "prompt": {
+        "nl": "Bouw het woord!",
+        "fr": "Construis le mot !",
+        "en": "Build the word!"
+      },
+      "word": "WUDU",
+      "meaning": {
+        "nl": "De kleine wassing voor het gebed",
+        "fr": "La petite ablution avant la prière",
+        "en": "The small washing before prayer"
+      },
+      "explanation": {
+        "nl": "Wudu is de kleine wassing die je doet voor het gebed.",
+        "fr": "Le woudou est la petite ablution que tu fais avant la prière.",
+        "en": "Wudu is the small washing you do before prayer."
+      }
+    },
+    {
+      "id": "wudu-before-prayer",
+      "type": "truefalse",
+      "prompt": {
+        "nl": "Je doet wudu voordat je gaat bidden.",
+        "fr": "Tu fais le woudou avant de prier.",
+        "en": "You do wudu before you pray."
+      },
+      "answer": true,
+      "explanation": {
+        "nl": "Juist! Als je wilt bidden, doe je eerst wudu (5:6).",
+        "fr": "Exact ! Quand tu veux prier, tu fais d'abord le woudou (5:6).",
+        "en": "That's right! When you want to pray, you do wudu first (5:6)."
+      }
+    }
+  ]
+}

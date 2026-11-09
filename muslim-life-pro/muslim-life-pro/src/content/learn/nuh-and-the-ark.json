@@ -1,0 +1,136 @@
+{
+  "slug": "nuh-and-the-ark",
+  "theme": "prophets",
+  "audience": "kids",
+  "level": 1,
+  "order": 101,
+  "minutes": 3,
+  "review": { "status": "draft", "reviewedBy": "", "reviewedAt": "" },
+  "key": {
+    "arabic": "وَاصْنَعِ الْفُلْكَ بِأَعْيُنِنَا وَوَحْيِنَا",
+    "reference": "Qur'an 11:37"
+  },
+  "sources": [
+    { "kind": "quran", "reference": "Qur'an 11:36–44 (Hud)" },
+    { "kind": "quran", "reference": "Qur'an 29:14 (Al-'Ankabut)" },
+    { "kind": "quran", "reference": "Qur'an 71 (Nuh)" }
+  ],
+  "text": {
+    "nl": {
+      "title": "Profeet Nuh en de ark",
+      "intro": "Profeet Nuh (vrede zij met hem) bleef heel lang geduldig, ook toen bijna niemand naar hem luisterde.",
+      "body": [
+        "Nuh vroeg zijn volk heel lang om alleen Allah te aanbidden: negenhonderdvijftig jaar (29:14). Maar bijna niemand luisterde.",
+        "Allah zei tegen Nuh: bouw de ark, onder Onze ogen (11:37). De mensen lachten hem uit, maar Nuh bleef bouwen.",
+        "Toen het water kwam, nam Nuh de gelovigen mee en van elk dier een paar (11:40). De ark kwam veilig aan op de berg al-Djoedi (11:44)."
+      ],
+      "takeaway": "Nuh gaf nooit op. Als je iets goeds doet en anderen lachen, blijf dan geduldig, net als Nuh."
+    },
+    "fr": {
+      "title": "Le prophète Nouh et l'arche",
+      "intro": "Le prophète Nouh (que la paix soit sur lui) est resté très longtemps patient, même quand presque personne ne l'écoutait.",
+      "body": [
+        "Nouh a demandé très longtemps à son peuple d'adorer Allah seul : neuf cent cinquante ans (29:14). Mais presque personne n'écoutait.",
+        "Allah dit à Nouh : construis l'arche sous Nos yeux (11:37). Les gens se moquaient de lui, mais Nouh continuait à construire.",
+        "Quand l'eau arriva, Nouh emmena les croyants et un couple de chaque animal (11:40). L'arche s'arrêta en sécurité sur le mont al-Joudi (11:44)."
+      ],
+      "takeaway": "Nouh n'a jamais abandonné. Si tu fais le bien et que d'autres se moquent, reste patient, comme Nouh."
+    },
+    "en": {
+      "title": "Prophet Nuh and the ark",
+      "intro": "Prophet Nuh (peace be upon him) stayed patient for a very long time, even when almost nobody listened to him.",
+      "body": [
+        "Nuh asked his people for a very long time to worship Allah alone: nine hundred and fifty years (29:14). But almost nobody listened.",
+        "Allah told Nuh: build the ark under Our eyes (11:37). People laughed at him, but Nuh kept building.",
+        "When the water came, Nuh took the believers and a pair of every animal (11:40). The ark came to rest safely on Mount al-Judi (11:44)."
+      ],
+      "takeaway": "Nuh never gave up. If you do something good and others laugh, stay patient, just like Nuh."
+    }
+  },
+  "exercises": [
+    {
+      "id": "what-did-nuh-build",
+      "type": "choice",
+      "prompt": {
+        "nl": "Wat bouwde Nuh?",
+        "fr": "Qu'a construit Nouh ?",
+        "en": "What did Nuh build?"
+      },
+      "options": [
+        { "nl": "Een ark", "fr": "Une arche", "en": "An ark" },
+        { "nl": "Een brug", "fr": "Un pont", "en": "A bridge" },
+        { "nl": "Een toren", "fr": "Une tour", "en": "A tower" }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Allah zei: bouw de ark (11:37).",
+        "fr": "Allah dit : construis l'arche (11:37).",
+        "en": "Allah said: build the ark (11:37)."
+      }
+    },
+    {
+      "id": "nuh-story-order",
+      "type": "order",
+      "prompt": {
+        "nl": "Zet het verhaal in de goede volgorde.",
+        "fr": "Remets l'histoire dans le bon ordre.",
+        "en": "Put the story in the right order."
+      },
+      "items": [
+        {
+          "nl": "Nuh vraagt zijn volk om Allah te aanbidden",
+          "fr": "Nouh demande à son peuple d'adorer Allah",
+          "en": "Nuh asks his people to worship Allah"
+        },
+        {
+          "nl": "Nuh bouwt de ark",
+          "fr": "Nouh construit l'arche",
+          "en": "Nuh builds the ark"
+        },
+        {
+          "nl": "De dieren gaan in paren mee",
+          "fr": "Les animaux montent par couples",
+          "en": "The animals come along in pairs"
+        },
+        {
+          "nl": "De ark komt aan op de berg",
+          "fr": "L'arche arrive sur la montagne",
+          "en": "The ark comes to rest on the mountain"
+        }
+      ],
+      "explanation": {
+        "nl": "Eerst roept Nuh zijn volk, dan bouwt hij de ark, dan komen de dieren mee, en tot slot komt de ark veilig aan.",
+        "fr": "D'abord Nouh appelle son peuple, puis il construit l'arche, ensuite les animaux montent, et enfin l'arche arrive en sécurité.",
+        "en": "First Nuh calls his people, then he builds the ark, then the animals come along, and finally the ark arrives safely."
+      }
+    },
+    {
+      "id": "nuh-memory",
+      "type": "match",
+      "prompt": {
+        "nl": "Zoek de paren!",
+        "fr": "Trouve les paires !",
+        "en": "Find the pairs!"
+      },
+      "pairs": [
+        {
+          "left": { "nl": "Nuh", "fr": "Nouh", "en": "Nuh" },
+          "right": { "nl": "bleef geduldig", "fr": "est resté patient", "en": "stayed patient" }
+        },
+        {
+          "left": { "nl": "De dieren", "fr": "Les animaux", "en": "The animals" },
+          "right": { "nl": "gingen in paren mee", "fr": "montaient par couples", "en": "came in pairs" }
+        },
+        {
+          "left": { "nl": "De ark", "fr": "L'arche", "en": "The ark" },
+          "right": { "nl": "kwam aan op al-Djoedi", "fr": "s'arrêta sur al-Joudi", "en": "rested on al-Judi" }
+        }
+      ],
+      "explanation": {
+        "nl": "Knap! Zo ken je het verhaal van Nuh.",
+        "fr": "Bravo ! Tu connais l'histoire de Nouh.",
+        "en": "Great! Now you know the story of Nuh."
+      }
+    }
+  ]
+}

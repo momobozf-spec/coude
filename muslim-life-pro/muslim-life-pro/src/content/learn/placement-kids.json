@@ -1,0 +1,165 @@
+{
+  "audience": "kids",
+  "questions": [
+    {
+      "id": "prayers",
+      "type": "choice",
+      "prompt": {
+        "nl": "Hoe vaak per dag bidden moslims het verplichte gebed?",
+        "fr": "Combien de fois par jour les musulmans font-ils la prière obligatoire ?",
+        "en": "How many times a day do Muslims pray the obligatory prayer?"
+      },
+      "options": [
+        {
+          "nl": "Vijf keer",
+          "fr": "Cinq fois",
+          "en": "Five times"
+        },
+        {
+          "nl": "Twee keer",
+          "fr": "Deux fois",
+          "en": "Twice"
+        },
+        {
+          "nl": "Tien keer",
+          "fr": "Dix fois",
+          "en": "Ten times"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Er zijn vijf verplichte gebeden per dag.",
+        "fr": "Il y a cinq prières obligatoires par jour.",
+        "en": "There are five obligatory prayers a day."
+      }
+    },
+    {
+      "id": "book",
+      "type": "choice",
+      "prompt": {
+        "nl": "Hoe heet het boek dat Allah aan de Profeet ﷺ gaf?",
+        "fr": "Comment s'appelle le livre qu'Allah a donné au Prophète ﷺ ?",
+        "en": "What is the book Allah gave the Prophet ﷺ called?"
+      },
+      "options": [
+        {
+          "nl": "De Koran",
+          "fr": "Le Coran",
+          "en": "The Qur'an"
+        },
+        {
+          "nl": "Het woordenboek",
+          "fr": "Le dictionnaire",
+          "en": "The dictionary"
+        },
+        {
+          "nl": "Het sprookjesboek",
+          "fr": "Le livre de contes",
+          "en": "The fairy-tale book"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "De Koran is het woord van Allah.",
+        "fr": "Le Coran est la parole d'Allah.",
+        "en": "The Qur'an is the word of Allah."
+      }
+    },
+    {
+      "id": "before-eating",
+      "type": "choice",
+      "prompt": {
+        "nl": "Wat zeg je voor je begint te eten?",
+        "fr": "Que dis-tu avant de commencer à manger ?",
+        "en": "What do you say before you start eating?"
+      },
+      "options": [
+        {
+          "nl": "Bismillah",
+          "fr": "Bismillah",
+          "en": "Bismillah"
+        },
+        {
+          "nl": "Salaam",
+          "fr": "Salam",
+          "en": "Salaam"
+        },
+        {
+          "nl": "Tot ziens",
+          "fr": "Au revoir",
+          "en": "Goodbye"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Je begint in de naam van Allah: bismillah.",
+        "fr": "On commence au nom d'Allah : bismillah.",
+        "en": "You begin in the name of Allah: bismillah."
+      }
+    },
+    {
+      "id": "ark",
+      "type": "choice",
+      "prompt": {
+        "nl": "Welke profeet bouwde een ark?",
+        "fr": "Quel prophète a construit une arche ?",
+        "en": "Which prophet built an ark?"
+      },
+      "options": [
+        {
+          "nl": "Nuh",
+          "fr": "Nouh",
+          "en": "Nuh"
+        },
+        {
+          "nl": "Yusuf",
+          "fr": "Youssouf",
+          "en": "Yusuf"
+        },
+        {
+          "nl": "Musa",
+          "fr": "Moussa",
+          "en": "Musa"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Profeet Nuh bouwde de ark (11:37).",
+        "fr": "Le prophète Nouh a construit l'arche (11:37).",
+        "en": "Prophet Nuh built the ark (11:37)."
+      }
+    },
+    {
+      "id": "fasting-month",
+      "type": "choice",
+      "prompt": {
+        "nl": "In welke maand vasten moslims?",
+        "fr": "Pendant quel mois les musulmans jeûnent-ils ?",
+        "en": "In which month do Muslims fast?"
+      },
+      "options": [
+        {
+          "nl": "Ramadan",
+          "fr": "Ramadan",
+          "en": "Ramadan"
+        },
+        {
+          "nl": "Shawwal",
+          "fr": "Chawwal",
+          "en": "Shawwal"
+        },
+        {
+          "nl": "Rajab",
+          "fr": "Rajab",
+          "en": "Rajab"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Moslims vasten in de maand Ramadan.",
+        "fr": "Les musulmans jeûnent pendant le mois de Ramadan.",
+        "en": "Muslims fast in the month of Ramadan."
+      }
+    }
+  ]
+}

@@ -1,0 +1,208 @@
+{
+  "slug": "worry-and-anxiety",
+  "theme": "modern",
+  "audience": "adults",
+  "level": 2,
+  "order": 1,
+  "minutes": 4,
+  "review": {
+    "status": "draft",
+    "reviewedBy": "",
+    "reviewedAt": ""
+  },
+  "key": {
+    "arabic": "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ",
+    "reference": "Qur'an 13:28"
+  },
+  "sources": [
+    {
+      "kind": "quran",
+      "reference": "Qur'an 13:28 (Ar-Ra'd)"
+    },
+    {
+      "kind": "quran",
+      "reference": "Qur'an 2:286 (Al-Baqarah)"
+    },
+    {
+      "kind": "hadith",
+      "reference": "Sahih al-Bukhari 6369"
+    },
+    {
+      "kind": "hadith",
+      "reference": "Sahih al-Bukhari 5678"
+    }
+  ],
+  "text": {
+    "nl": {
+      "title": "Zorgen en onrust",
+      "intro": "Werk, studie, familie en geloof tegelijk dragen: veel jonge moslims kennen dat gevoel. Wat zeggen de Koran en de Sunnah erover?",
+      "body": [
+        "Zorgen zijn geen teken van zwak geloof. De Profeet ﷺ zocht er zelf bescherming tegen. Hij zei vaak: o Allah, ik zoek bij U bescherming tegen zorgen en verdriet, onvermogen en luiheid, lafheid en gierigheid, de last van schulden en overheersing door mensen (Bukhari 6369).",
+        "De Koran geeft twee ankers. Voorwaar, in het gedenken van Allah vinden de harten rust (13:28). En: Allah belast geen ziel boven haar vermogen (2:286).",
+        "Hulp zoeken hoort er ook bij. De Profeet ﷺ zei dat Allah geen ziekte heeft neergezonden zonder er ook een genezing voor neer te zenden (Bukhari 5678).",
+        "Wie lang somber of angstig blijft, kan dus ook een arts of psycholoog raadplegen. Dat is geen gebrek aan geloof, maar het gebruiken van de middelen die Allah gegeven heeft."
+      ],
+      "takeaway": "Dhikr, dua en professionele hulp sluiten elkaar niet uit. Ze vullen elkaar aan."
+    },
+    "fr": {
+      "title": "Soucis et inquiétude",
+      "intro": "Porter à la fois le travail, les études, la famille et la foi : beaucoup de jeunes musulmans connaissent ce sentiment. Que disent le Coran et la Sunna ?",
+      "body": [
+        "Les soucis ne sont pas le signe d'une foi faible. Le Prophète ﷺ lui-même cherchait protection contre eux. Il disait souvent : ô Allah, je cherche refuge auprès de Toi contre le souci et la tristesse, l'incapacité et la paresse, la lâcheté et l'avarice, le poids des dettes et la domination des hommes (Bukhari 6369).",
+        "Le Coran donne deux ancres. N'est-ce point par l'évocation d'Allah que se tranquillisent les cœurs ? (13:28). Et : Allah n'impose à aucune âme une charge supérieure à sa capacité (2:286).",
+        "Chercher de l'aide en fait aussi partie. Le Prophète ﷺ a dit qu'Allah n'a fait descendre aucune maladie sans faire descendre aussi son remède (Bukhari 5678).",
+        "Celui qui reste longtemps triste ou anxieux peut donc aussi consulter un médecin ou un psychologue. Ce n'est pas un manque de foi, mais l'utilisation des moyens qu'Allah a donnés."
+      ],
+      "takeaway": "Le dhikr, la dua et l'aide professionnelle ne s'excluent pas. Ils se complètent."
+    },
+    "en": {
+      "title": "Worry and unrest",
+      "intro": "Carrying work, study, family and faith all at once: many young Muslims know that feeling. What do the Qur'an and the Sunnah say about it?",
+      "body": [
+        "Worry is not a sign of weak faith. The Prophet ﷺ himself sought protection from it. He often said: O Allah, I seek refuge in You from worry and grief, from incapacity and laziness, from cowardice and miserliness, from the burden of debt and from being overpowered by people (Bukhari 6369).",
+        "The Qur'an gives two anchors. Verily, in the remembrance of Allah do hearts find rest (13:28). And: Allah does not burden a soul beyond what it can bear (2:286).",
+        "Seeking help is part of it too. The Prophet ﷺ said that Allah has not sent down any disease without also sending down a cure for it (Bukhari 5678).",
+        "So someone who stays low or anxious for a long time can also see a doctor or a psychologist. That is not a lack of faith; it is using the means Allah has given."
+      ],
+      "takeaway": "Dhikr, dua and professional help do not exclude each other. They complete each other."
+    }
+  },
+  "exercises": [
+    {
+      "id": "worry-weak-faith",
+      "type": "truefalse",
+      "prompt": {
+        "nl": "Zorgen hebben betekent dat je geloof zwak is.",
+        "fr": "Avoir des soucis signifie que ta foi est faible.",
+        "en": "Having worries means your faith is weak."
+      },
+      "answer": false,
+      "explanation": {
+        "nl": "De Profeet ﷺ zocht zelf bescherming tegen zorgen en verdriet (Bukhari 6369). Zorgen zijn menselijk; wat telt, is waar je ermee naartoe gaat.",
+        "fr": "Le Prophète ﷺ cherchait lui-même protection contre le souci et la tristesse (Bukhari 6369). Les soucis sont humains ; ce qui compte, c'est vers qui tu te tournes.",
+        "en": "The Prophet ﷺ himself sought protection from worry and grief (Bukhari 6369). Worry is human; what matters is where you take it."
+      }
+    },
+    {
+      "id": "hearts-find-rest",
+      "type": "choice",
+      "prompt": {
+        "nl": "Waarin vinden de harten rust volgens 13:28?",
+        "fr": "Selon 13:28, dans quoi les cœurs trouvent-ils la tranquillité ?",
+        "en": "According to 13:28, in what do hearts find rest?"
+      },
+      "options": [
+        {
+          "nl": "In het gedenken van Allah",
+          "fr": "Dans l'évocation d'Allah",
+          "en": "In the remembrance of Allah"
+        },
+        {
+          "nl": "In rijkdom en bezit",
+          "fr": "Dans la richesse et les biens",
+          "en": "In wealth and possessions"
+        },
+        {
+          "nl": "In het vermijden van andere mensen",
+          "fr": "En évitant les autres",
+          "en": "In avoiding other people"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Voorwaar, in het gedenken van Allah vinden de harten rust (13:28).",
+        "fr": "N'est-ce point par l'évocation d'Allah que se tranquillisent les cœurs ? (13:28)",
+        "en": "Verily, in the remembrance of Allah do hearts find rest (13:28)."
+      }
+    },
+    {
+      "id": "cure",
+      "type": "choice",
+      "prompt": {
+        "nl": "Wat leert de hadith in Bukhari 5678?",
+        "fr": "Qu'enseigne le hadith de Bukhari 5678 ?",
+        "en": "What does the hadith in Bukhari 5678 teach?"
+      },
+      "options": [
+        {
+          "nl": "Allah zond geen ziekte neer zonder ook een genezing neer te zenden",
+          "fr": "Allah n'a fait descendre aucune maladie sans faire descendre son remède",
+          "en": "Allah sent down no disease without also sending down a cure"
+        },
+        {
+          "nl": "Ziekte is altijd een straf",
+          "fr": "La maladie est toujours une punition",
+          "en": "Illness is always a punishment"
+        },
+        {
+          "nl": "Medicijnen gebruiken gaat in tegen tawakkul",
+          "fr": "Prendre des médicaments va à l'encontre du tawakkul",
+          "en": "Taking medicine goes against tawakkul"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Behandeling zoeken past binnen het vertrouwen op Allah: de genezing komt van Hem, langs de middelen die Hij gaf.",
+        "fr": "Chercher un traitement s'inscrit dans la confiance en Allah : la guérison vient de Lui, par les moyens qu'Il a donnés.",
+        "en": "Seeking treatment fits within trust in Allah: the cure comes from Him, through the means He gave."
+      }
+    },
+    {
+      "id": "quick-round",
+      "type": "quickfire",
+      "prompt": {
+        "nl": "Snelle ronde: waar of niet waar?",
+        "fr": "Tour rapide : vrai ou faux ?",
+        "en": "Quick round: true or false?"
+      },
+      "seconds": 45,
+      "items": [
+        {
+          "statement": {
+            "nl": "De Profeet ﷺ zocht bescherming tegen zorgen en verdriet.",
+            "fr": "Le Prophète ﷺ cherchait protection contre le souci et la tristesse.",
+            "en": "The Prophet ﷺ sought protection from worry and grief."
+          },
+          "answer": true
+        },
+        {
+          "statement": {
+            "nl": "Volgens 2:286 belast Allah een ziel boven haar vermogen.",
+            "fr": "Selon 2:286, Allah impose à une âme une charge au-delà de sa capacité.",
+            "en": "According to 2:286, Allah burdens a soul beyond what it can bear."
+          },
+          "answer": false
+        },
+        {
+          "statement": {
+            "nl": "Volgens 13:28 vinden de harten rust in het gedenken van Allah.",
+            "fr": "Selon 13:28, les cœurs se tranquillisent par l'évocation d'Allah.",
+            "en": "According to 13:28, hearts find rest in the remembrance of Allah."
+          },
+          "answer": true
+        },
+        {
+          "statement": {
+            "nl": "Volgens deze les is een arts raadplegen een gebrek aan geloof.",
+            "fr": "Selon cette leçon, consulter un médecin est un manque de foi.",
+            "en": "According to this lesson, seeing a doctor is a lack of faith."
+          },
+          "answer": false
+        },
+        {
+          "statement": {
+            "nl": "Volgens Bukhari 5678 zond Allah bij elke ziekte ook een genezing neer.",
+            "fr": "Selon Bukhari 5678, Allah a fait descendre un remède pour chaque maladie.",
+            "en": "According to Bukhari 5678, Allah sent down a cure with every disease."
+          },
+          "answer": true
+        }
+      ],
+      "explanation": {
+        "nl": "Alle antwoorden staan in de les: zorgen zijn menselijk, Allah belast niemand boven zijn vermogen, en hulp zoeken hoort erbij.",
+        "fr": "Toutes les réponses sont dans la leçon : les soucis sont humains, Allah ne surcharge personne, et chercher de l'aide en fait partie.",
+        "en": "Every answer is in the lesson: worry is human, Allah burdens no one beyond their capacity, and seeking help is part of it."
+      }
+    }
+  ]
+}

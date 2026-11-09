@@ -1,0 +1,165 @@
+{
+  "audience": "teens",
+  "questions": [
+    {
+      "id": "pillars",
+      "type": "choice",
+      "prompt": {
+        "nl": "Op hoeveel zuilen is de islam gebouwd?",
+        "fr": "Sur combien de piliers l'islam est-il bâti ?",
+        "en": "How many pillars is Islam built on?"
+      },
+      "options": [
+        {
+          "nl": "Vijf",
+          "fr": "Cinq",
+          "en": "Five"
+        },
+        {
+          "nl": "Drie",
+          "fr": "Trois",
+          "en": "Three"
+        },
+        {
+          "nl": "Zeven",
+          "fr": "Sept",
+          "en": "Seven"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "De islam is gebouwd op vijf (Bukhari 8).",
+        "fr": "L'islam est bâti sur cinq (Bukhari 8).",
+        "en": "Islam is built on five (Bukhari 8)."
+      }
+    },
+    {
+      "id": "first-surah",
+      "type": "choice",
+      "prompt": {
+        "nl": "Welke soera staat als eerste in de Koran?",
+        "fr": "Quelle sourate est la première du Coran ?",
+        "en": "Which surah comes first in the Qur'an?"
+      },
+      "options": [
+        {
+          "nl": "Al-Fatiha",
+          "fr": "Al-Fatiha",
+          "en": "Al-Fatiha"
+        },
+        {
+          "nl": "Al-Baqarah",
+          "fr": "Al-Baqara",
+          "en": "Al-Baqarah"
+        },
+        {
+          "nl": "An-Nas",
+          "fr": "An-Nas",
+          "en": "An-Nas"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "De Koran opent met Al-Fatiha.",
+        "fr": "Le Coran s'ouvre par Al-Fatiha.",
+        "en": "The Qur'an opens with Al-Fatiha."
+      }
+    },
+    {
+      "id": "well",
+      "type": "choice",
+      "prompt": {
+        "nl": "Welke profeet werd door zijn broers in een put gegooid?",
+        "fr": "Quel prophète fut jeté dans un puits par ses frères ?",
+        "en": "Which prophet was thrown into a well by his brothers?"
+      },
+      "options": [
+        {
+          "nl": "Yusuf",
+          "fr": "Youssouf",
+          "en": "Yusuf"
+        },
+        {
+          "nl": "Ibrahim",
+          "fr": "Ibrahim",
+          "en": "Ibrahim"
+        },
+        {
+          "nl": "Isa",
+          "fr": "Issa",
+          "en": "Isa"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Het verhaal staat in soera Yusuf (12:15).",
+        "fr": "L'histoire est dans la sourate Youssouf (12:15).",
+        "en": "The story is in Surah Yusuf (12:15)."
+      }
+    },
+    {
+      "id": "tawakkul",
+      "type": "choice",
+      "prompt": {
+        "nl": "Wat betekent tawakkul?",
+        "fr": "Que signifie tawakkul ?",
+        "en": "What does tawakkul mean?"
+      },
+      "options": [
+        {
+          "nl": "Vertrouwen op Allah",
+          "fr": "La confiance en Allah",
+          "en": "Trust in Allah"
+        },
+        {
+          "nl": "Vasten",
+          "fr": "Le jeûne",
+          "en": "Fasting"
+        },
+        {
+          "nl": "Een reis",
+          "fr": "Un voyage",
+          "en": "A journey"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Tawakkul is vertrouwen op Allah, nadat je zelf doet wat je kunt.",
+        "fr": "Le tawakkul est la confiance en Allah, après avoir fait ce que tu peux.",
+        "en": "Tawakkul is trusting Allah after doing what you can."
+      }
+    },
+    {
+      "id": "hijra-city",
+      "type": "choice",
+      "prompt": {
+        "nl": "Naar welke stad trok de Profeet ﷺ bij de hidjra?",
+        "fr": "Vers quelle ville le Prophète ﷺ partit-il lors de l'hégire ?",
+        "en": "Which city did the Prophet ﷺ move to in the Hijrah?"
+      },
+      "options": [
+        {
+          "nl": "Medina",
+          "fr": "Médine",
+          "en": "Madinah"
+        },
+        {
+          "nl": "Jeruzalem",
+          "fr": "Jérusalem",
+          "en": "Jerusalem"
+        },
+        {
+          "nl": "Caïro",
+          "fr": "Le Caire",
+          "en": "Cairo"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Bij de hidjra trok de Profeet ﷺ van Mekka naar Medina.",
+        "fr": "Lors de l'hégire, le Prophète ﷺ partit de La Mecque vers Médine.",
+        "en": "In the Hijrah the Prophet ﷺ moved from Makkah to Madinah."
+      }
+    }
+  ]
+}

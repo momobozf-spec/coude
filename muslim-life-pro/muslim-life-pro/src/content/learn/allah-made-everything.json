@@ -1,0 +1,115 @@
+{
+  "slug": "allah-made-everything",
+  "theme": "evidences",
+  "audience": "kids",
+  "level": 1,
+  "order": 101,
+  "minutes": 3,
+  "review": { "status": "draft", "reviewedBy": "", "reviewedAt": "" },
+  "key": {
+    "arabic": "قُلْ هُوَ اللَّهُ أَحَدٌ",
+    "reference": "Qur'an 112:1"
+  },
+  "sources": [
+    { "kind": "quran", "reference": "Qur'an 112:1–4 (Al-Ikhlas)" },
+    { "kind": "quran", "reference": "Qur'an 6:101 (Al-An'am)" },
+    { "kind": "quran", "reference": "Qur'an 16:68–69 (An-Nahl)" }
+  ],
+  "text": {
+    "nl": {
+      "title": "Wie heeft alles gemaakt?",
+      "intro": "Kijk eens rond: de zon, de bomen, de dieren en jij. Wie heeft dat allemaal gemaakt?",
+      "body": [
+        "Allah heeft alles gemaakt: de hemel en de aarde, de zon en de maan, de bloemen en de dieren (6:101). En Hij heeft ook jou gemaakt.",
+        "Allah is Eén. In soera Al-Ikhlaas staat: zeg, Hij is Allah, de Ene (112:1). Er is niemand zoals Hij.",
+        "Zelfs de kleine bij heeft Allah geleerd hoe ze honing moet maken (16:68–69). Alles wat je ziet, vertelt je iets over Allah."
+      ],
+      "takeaway": "Allah is Eén en Hij heeft alles gemaakt. Daarom zeggen we: alhamdoelillah, alle lof is voor Allah."
+    },
+    "fr": {
+      "title": "Qui a tout créé ?",
+      "intro": "Regarde autour de toi : le soleil, les arbres, les animaux et toi. Qui a créé tout cela ?",
+      "body": [
+        "Allah a tout créé : le ciel et la terre, le soleil et la lune, les fleurs et les animaux (6:101). Et Il t'a créé toi aussi.",
+        "Allah est Unique. Dans la sourate Al-Ikhlas, il est dit : dis, Il est Allah, l'Unique (112:1). Personne n'est comme Lui.",
+        "Même la petite abeille, Allah lui a appris à fabriquer le miel (16:68–69). Tout ce que tu vois te parle d'Allah."
+      ],
+      "takeaway": "Allah est Unique et Il a tout créé. C'est pourquoi nous disons : alhamdoulillah, louange à Allah."
+    },
+    "en": {
+      "title": "Who made everything?",
+      "intro": "Look around you: the sun, the trees, the animals and you. Who made all of that?",
+      "body": [
+        "Allah made everything: the sky and the earth, the sun and the moon, the flowers and the animals (6:101). And He made you too.",
+        "Allah is One. Surah Al-Ikhlas says: say, He is Allah, the One (112:1). There is no one like Him.",
+        "Allah even taught the little bee how to make honey (16:68–69). Everything you see tells you something about Allah."
+      ],
+      "takeaway": "Allah is One and He made everything. That is why we say: alhamdulillah, all praise is for Allah."
+    }
+  },
+  "exercises": [
+    {
+      "id": "nature-memory",
+      "type": "match",
+      "prompt": {
+        "nl": "Zoek de paren!",
+        "fr": "Trouve les paires !",
+        "en": "Find the pairs!"
+      },
+      "pairs": [
+        {
+          "left": { "nl": "De zon", "fr": "Le soleil", "en": "The sun" },
+          "right": { "nl": "geeft licht", "fr": "donne la lumière", "en": "gives light" }
+        },
+        {
+          "left": { "nl": "De regen", "fr": "La pluie", "en": "The rain" },
+          "right": { "nl": "laat planten groeien", "fr": "fait pousser les plantes", "en": "makes plants grow" }
+        },
+        {
+          "left": { "nl": "De bij", "fr": "L'abeille", "en": "The bee" },
+          "right": { "nl": "maakt honing", "fr": "fabrique le miel", "en": "makes honey" }
+        }
+      ],
+      "explanation": {
+        "nl": "Goed gedaan! Allah heeft alles zo gemaakt dat het ons helpt.",
+        "fr": "Bravo ! Allah a tout créé de façon à nous aider.",
+        "en": "Well done! Allah made everything in a way that helps us."
+      }
+    },
+    {
+      "id": "allah-is-one",
+      "type": "choice",
+      "prompt": {
+        "nl": "Wat zegt soera Al-Ikhlaas over Allah?",
+        "fr": "Que dit la sourate Al-Ikhlas sur Allah ?",
+        "en": "What does Surah Al-Ikhlas say about Allah?"
+      },
+      "options": [
+        { "nl": "Allah is Eén", "fr": "Allah est Unique", "en": "Allah is One" },
+        { "nl": "Allah is moe", "fr": "Allah est fatigué", "en": "Allah is tired" },
+        { "nl": "Allah slaapt 's nachts", "fr": "Allah dort la nuit", "en": "Allah sleeps at night" }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Zeg, Hij is Allah, de Ene (112:1). Er is niemand zoals Hij.",
+        "fr": "Dis, Il est Allah, l'Unique (112:1). Personne n'est comme Lui.",
+        "en": "Say, He is Allah, the One (112:1). There is no one like Him."
+      }
+    },
+    {
+      "id": "made-you-too",
+      "type": "truefalse",
+      "prompt": {
+        "nl": "Allah heeft de zon, de maan en ook jou gemaakt.",
+        "fr": "Allah a créé le soleil, la lune et toi aussi.",
+        "en": "Allah made the sun, the moon and you too."
+      },
+      "answer": true,
+      "explanation": {
+        "nl": "Juist! Allah heeft alles gemaakt, ook jou.",
+        "fr": "Exact ! Allah a tout créé, toi aussi.",
+        "en": "That's right! Allah made everything, including you."
+      }
+    }
+  ]
+}

@@ -42,3 +42,20 @@ lokaal/bron/
 # lokale dev-databases en sessiebestanden
 **/.devdb/
 **/cookies.txt
+
+# Losse sleutelbestanden (bv. SLEUTELS-INVULLEN.env) - nooit in git
+*.env
+!.env.example
+**/SLEUTELS*
+
+# Python
+**/.venv/
+**/__pycache__/
+*.pyc
+
+# Lokale archieven en prullenbak (niet in git)
+_to_delete/
+# _archief: wat al getrackt is blijft getrackt, nieuwe dingen erin blijven lokaal
+_archief/
+# Claude-uitvoer (lokaal, staat in snapshot-branch backup/werkmap-2026-11-09)
+Claude outputs/

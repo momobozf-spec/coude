@@ -1,0 +1,143 @@
+{
+  "slug": "created-from-nothing",
+  "theme": "evidences",
+  "audience": "adults",
+  "level": 1,
+  "order": 1,
+  "minutes": 3,
+  "review": {
+    "status": "draft",
+    "reviewedBy": "",
+    "reviewedAt": ""
+  },
+  "key": {
+    "arabic": "أَمْ خُلِقُوا مِنْ غَيْرِ شَيْءٍ أَمْ هُمُ الْخَالِقُونَ",
+    "reference": "Qur'an 52:35"
+  },
+  "sources": [
+    {
+      "kind": "quran",
+      "reference": "Qur'an 52:35–36 (At-Tur)"
+    },
+    {
+      "kind": "quran",
+      "reference": "Qur'an 3:190–191 (Al Imran)"
+    }
+  ],
+  "text": {
+    "nl": {
+      "title": "Waarom er een Schepper is",
+      "intro": "De Koran stelt een korte vraag die al veertien eeuwen mensen aan het denken zet. Er zijn maar drie mogelijke antwoorden.",
+      "body": [
+        "In soera At-Toer (52:35–36) vraagt Allah: zijn zij uit het niets geschapen, of zijn zij zelf de scheppers? Of hebben zij de hemelen en de aarde geschapen?",
+        "Er liggen dus drie opties op tafel. Ofwel ontstond alles uit niets, zonder oorzaak. Ofwel schiep het zichzelf. Ofwel is er een Schepper die zelf niet geschapen is.",
+        "Uit niets komt niets: dat aanvaarden we in elk ander deel van ons leven. En iets kan zichzelf niet maken, want dan zou het al moeten bestaan voordat het bestond. Wat overblijft, is een Schepper.",
+        "De Koran vraagt hier geen blind geloof, maar nodigt uit om na te denken. In soera Al Imraan (3:190–191) worden zij die nadenken over de schepping van de hemelen en de aarde mensen van begrip genoemd."
+      ],
+      "takeaway": "Islam vraagt je niet je verstand uit te zetten. Nadenken over de schepping is zelf een daad van aanbidding."
+    },
+    "fr": {
+      "title": "Pourquoi il y a un Créateur",
+      "intro": "Le Coran pose une question courte qui fait réfléchir les gens depuis quatorze siècles. Il n'y a que trois réponses possibles.",
+      "body": [
+        "Dans la sourate At-Tur (52:35–36), Allah demande : ont-ils été créés à partir de rien, ou sont-ils eux-mêmes les créateurs ? Ou ont-ils créé les cieux et la terre ?",
+        "Trois options sont donc sur la table. Soit tout est né de rien, sans cause. Soit cela s'est créé soi-même. Soit il y a un Créateur qui n'a pas lui-même été créé.",
+        "Rien ne vient de rien : nous l'acceptons dans tous les autres domaines de la vie. Et une chose ne peut pas se créer elle-même, car elle devrait exister avant d'exister. Ce qui reste, c'est un Créateur.",
+        "Le Coran ne demande pas ici une foi aveugle : il invite à réfléchir. Dans la sourate Al Imran (3:190–191), ceux qui méditent sur la création des cieux et de la terre sont appelés les gens doués d'intelligence."
+      ],
+      "takeaway": "L'islam ne te demande pas d'éteindre ta raison. Réfléchir à la création est en soi un acte d'adoration."
+    },
+    "en": {
+      "title": "Why there is a Creator",
+      "intro": "The Qur'an asks a short question that has made people think for fourteen centuries. There are only three possible answers.",
+      "body": [
+        "In Surah At-Tur (52:35–36), Allah asks: were they created from nothing, or were they themselves the creators? Or did they create the heavens and the earth?",
+        "So there are three options on the table. Either everything came from nothing, without a cause. Or it created itself. Or there is a Creator who was not Himself created.",
+        "Nothing comes from nothing: we accept that in every other part of life. And a thing cannot make itself, because it would have to exist before it existed. What remains is a Creator.",
+        "The Qur'an does not ask for blind faith here; it invites reflection. In Surah Al Imran (3:190–191), those who reflect on the creation of the heavens and the earth are called people of understanding."
+      ],
+      "takeaway": "Islam does not ask you to switch off your mind. Reflecting on creation is itself an act of worship."
+    }
+  },
+  "exercises": [
+    {
+      "id": "three-options",
+      "type": "choice",
+      "prompt": {
+        "nl": "Welke drie mogelijkheden zet de redenering uit soera At-Toer naast elkaar?",
+        "fr": "Quelles trois possibilités le raisonnement de la sourate At-Tur met-il côte à côte ?",
+        "en": "Which three possibilities does the reasoning in Surah At-Tur set side by side?"
+      },
+      "options": [
+        {
+          "nl": "Uit niets, door zichzelf, of door een Schepper",
+          "fr": "À partir de rien, par soi-même, ou par un Créateur",
+          "en": "From nothing, by itself, or by a Creator"
+        },
+        {
+          "nl": "Door toeval, door de natuur, of door de tijd",
+          "fr": "Par hasard, par la nature, ou par le temps",
+          "en": "By chance, by nature, or by time"
+        },
+        {
+          "nl": "Door de engelen, door de profeten, of door de mensen",
+          "fr": "Par les anges, par les prophètes, ou par les hommes",
+          "en": "By the angels, by the prophets, or by people"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Het vers zet precies drie opties naast elkaar: geschapen uit niets, zichzelf geschapen, of geschapen door Iemand die zelf niet geschapen is.",
+        "fr": "Le verset met exactement trois options côte à côte : créé à partir de rien, créé par soi-même, ou créé par Quelqu'un qui n'a pas été créé.",
+        "en": "The verse sets exactly three options side by side: created from nothing, self-created, or created by Someone who was not created."
+      }
+    },
+    {
+      "id": "cannot-self-create",
+      "type": "choice",
+      "prompt": {
+        "nl": "Waarom kan iets zichzelf niet scheppen?",
+        "fr": "Pourquoi une chose ne peut-elle pas se créer elle-même ?",
+        "en": "Why can a thing not create itself?"
+      },
+      "options": [
+        {
+          "nl": "Omdat het dan al zou moeten bestaan voordat het bestond",
+          "fr": "Parce qu'elle devrait alors exister avant d'exister",
+          "en": "Because it would have to exist before it existed"
+        },
+        {
+          "nl": "Omdat de wetenschap dat nog niet onderzocht heeft",
+          "fr": "Parce que la science ne l'a pas encore étudié",
+          "en": "Because science has not studied it yet"
+        },
+        {
+          "nl": "Omdat het te lang zou duren",
+          "fr": "Parce que cela prendrait trop de temps",
+          "en": "Because it would take too long"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Om jezelf te maken, moet je er al zijn. Wie er al is, hoeft niet meer gemaakt te worden. De optie spreekt zichzelf tegen.",
+        "fr": "Pour se créer soi-même, il faut déjà être là. Ce qui est déjà là n'a plus besoin d'être créé. L'option se contredit elle-même.",
+        "en": "To make yourself, you must already be there. What is already there no longer needs to be made. The option contradicts itself."
+      }
+    },
+    {
+      "id": "reflection-weakens",
+      "type": "truefalse",
+      "prompt": {
+        "nl": "Volgens de Koran is nadenken over de schepping iets wat het geloof verzwakt.",
+        "fr": "Selon le Coran, réfléchir à la création affaiblit la foi.",
+        "en": "According to the Qur'an, reflecting on creation weakens faith."
+      },
+      "answer": false,
+      "explanation": {
+        "nl": "Integendeel: in 3:190–191 worden zij die nadenken over de hemelen en de aarde mensen van begrip genoemd.",
+        "fr": "Au contraire : en 3:190–191, ceux qui méditent sur les cieux et la terre sont appelés les gens doués d'intelligence.",
+        "en": "On the contrary: in 3:190–191, those who reflect on the heavens and the earth are called people of understanding."
+      }
+    }
+  ]
+}

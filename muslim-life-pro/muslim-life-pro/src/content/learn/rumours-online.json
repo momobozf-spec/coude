@@ -1,0 +1,162 @@
+{
+  "slug": "rumours-online",
+  "theme": "modern",
+  "audience": "teens",
+  "level": 2,
+  "order": 201,
+  "minutes": 4,
+  "review": { "status": "draft", "reviewedBy": "", "reviewedAt": "" },
+  "key": {
+    "arabic": "إِن جَاءَكُمْ فَاسِقٌ بِنَبَإٍ فَتَبَيَّنُوا",
+    "reference": "Qur'an 49:6"
+  },
+  "sources": [
+    { "kind": "quran", "reference": "Qur'an 49:6 (Al-Hujurat)" },
+    { "kind": "quran", "reference": "Qur'an 49:12 (Al-Hujurat)" },
+    { "kind": "hadith", "reference": "Sahih Muslim 2589" },
+    { "kind": "hadith", "reference": "Sahih Muslim, introduction (Muqaddimah)" }
+  ],
+  "text": {
+    "nl": {
+      "title": "Roddels en geruchten online",
+      "intro": "Een screenshot, een filmpje, een bericht in de groepschat. Wat doe je voor je het doorstuurt?",
+      "body": [
+        "Allah zegt: als iemand die niet te vertrouwen is jullie nieuws brengt, controleer het dan eerst (49:6). Dat heet tabayyun.",
+        "De Profeet ﷺ zei dat het genoeg is als leugen dat iemand alles doorvertelt wat hij hoort (Muslim, inleiding). Doorsturen zonder te checken is dus niet onschuldig.",
+        "In 49:12 vraagt Allah om niet te veel te vermoeden, niet te bespioneren en geen ghiba te doen. Ghiba is over iemand iets zeggen wat hij zou haten om te horen, ook als het waar is (Muslim 2589)."
+      ],
+      "takeaway": "Check eerst, denk goed over anderen, en stuur niet door wat iemand pijn doet."
+    },
+    "fr": {
+      "title": "Rumeurs et ragots en ligne",
+      "intro": "Une capture d'écran, une vidéo, un message dans le groupe. Que fais-tu avant de transférer ?",
+      "body": [
+        "Allah dit : si quelqu'un de peu fiable vous apporte une nouvelle, vérifiez-la d'abord (49:6). C'est ce qu'on appelle le tabayyun.",
+        "Le Prophète ﷺ a dit qu'il suffit comme mensonge à une personne de rapporter tout ce qu'elle entend (Muslim, introduction). Transférer sans vérifier n'est donc pas innocent.",
+        "En 49:12, Allah demande de ne pas trop soupçonner, de ne pas espionner et de ne pas faire de ghiba. La ghiba, c'est dire sur quelqu'un ce qu'il détesterait entendre, même si c'est vrai (Muslim 2589)."
+      ],
+      "takeaway": "Vérifie d'abord, pense du bien des autres, et ne transfère pas ce qui fait du mal à quelqu'un."
+    },
+    "en": {
+      "title": "Rumours and gossip online",
+      "intro": "A screenshot, a video, a message in the group chat. What do you do before you forward it?",
+      "body": [
+        "Allah says: if someone untrustworthy brings you news, verify it first (49:6). This is called tabayyun.",
+        "The Prophet ﷺ said it is enough of a lie for a person to pass on everything they hear (Muslim, introduction). So forwarding without checking is not innocent.",
+        "In 49:12 Allah asks us not to assume too much, not to spy and not to commit ghiba. Ghiba is saying something about someone that they would hate to hear, even if it is true (Muslim 2589)."
+      ],
+      "takeaway": "Check first, think well of others, and don't forward what hurts someone."
+    }
+  },
+  "exercises": [
+    {
+      "id": "check-first",
+      "type": "choice",
+      "prompt": {
+        "nl": "Wat vraagt 49:6 als je nieuws krijgt van iemand die niet te vertrouwen is?",
+        "fr": "Que demande 49:6 quand tu reçois une nouvelle de quelqu'un de peu fiable ?",
+        "en": "What does 49:6 ask when you get news from someone untrustworthy?"
+      },
+      "options": [
+        { "nl": "Eerst controleren", "fr": "Vérifier d'abord", "en": "Verify it first" },
+        { "nl": "Meteen doorsturen", "fr": "Transférer tout de suite", "en": "Forward it straight away" },
+        { "nl": "Er een grap over maken", "fr": "En faire une blague", "en": "Make a joke about it" }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Controleer het eerst (49:6), zodat je niemand onrecht doet.",
+        "fr": "Vérifie-la d'abord (49:6), pour ne faire de tort à personne.",
+        "en": "Verify it first (49:6), so you do nobody an injustice."
+      }
+    },
+    {
+      "id": "terms-match",
+      "type": "match",
+      "prompt": {
+        "nl": "Koppel het begrip aan de betekenis.",
+        "fr": "Associe le terme à sa signification.",
+        "en": "Match the term to its meaning."
+      },
+      "pairs": [
+        {
+          "left": { "nl": "Tabayyun", "fr": "Tabayyun", "en": "Tabayyun" },
+          "right": { "nl": "nieuws eerst controleren", "fr": "vérifier une nouvelle d'abord", "en": "verifying news first" }
+        },
+        {
+          "left": { "nl": "Ghiba", "fr": "Ghiba", "en": "Ghiba" },
+          "right": {
+            "nl": "iets over iemand zeggen wat hij zou haten",
+            "fr": "dire sur quelqu'un ce qu'il détesterait",
+            "en": "saying something about someone they would hate"
+          }
+        },
+        {
+          "left": { "nl": "Husn adh-dhann", "fr": "Husn adh-dhann", "en": "Husn adh-dhann" },
+          "right": { "nl": "goed denken over anderen", "fr": "penser du bien des autres", "en": "thinking well of others" }
+        }
+      ],
+      "explanation": {
+        "nl": "Deze drie begrippen helpen je online eerlijk te blijven.",
+        "fr": "Ces trois notions t'aident à rester juste en ligne.",
+        "en": "These three ideas help you stay fair online."
+      }
+    },
+    {
+      "id": "group-chat-round",
+      "type": "quickfire",
+      "prompt": {
+        "nl": "Snelle ronde: klopt dit volgens de les?",
+        "fr": "Tour rapide : est-ce juste selon la leçon ?",
+        "en": "Quick round: is this right according to the lesson?"
+      },
+      "seconds": 40,
+      "items": [
+        {
+          "statement": {
+            "nl": "Een gerucht doorsturen zonder te checken is helemaal onschuldig.",
+            "fr": "Transférer une rumeur sans vérifier est totalement innocent.",
+            "en": "Forwarding a rumour without checking is completely innocent."
+          },
+          "answer": false
+        },
+        {
+          "statement": {
+            "nl": "Ghiba kan ook gaan over iets wat waar is.",
+            "fr": "La ghiba peut aussi concerner quelque chose de vrai.",
+            "en": "Ghiba can also be about something true."
+          },
+          "answer": true
+        },
+        {
+          "statement": {
+            "nl": "In 49:12 vraagt Allah om niet te bespioneren.",
+            "fr": "En 49:12, Allah demande de ne pas espionner.",
+            "en": "In 49:12 Allah asks us not to spy."
+          },
+          "answer": true
+        },
+        {
+          "statement": {
+            "nl": "Tabayyun betekent nieuws meteen geloven.",
+            "fr": "Le tabayyun signifie croire une nouvelle tout de suite.",
+            "en": "Tabayyun means believing news straight away."
+          },
+          "answer": false
+        },
+        {
+          "statement": {
+            "nl": "Goed denken over anderen hoort bij 49:12.",
+            "fr": "Penser du bien des autres fait partie de 49:12.",
+            "en": "Thinking well of others belongs to 49:12."
+          },
+          "answer": true
+        }
+      ],
+      "explanation": {
+        "nl": "Check eerst, vermijd ghiba, en denk goed over anderen (49:6, 49:12).",
+        "fr": "Vérifie d'abord, évite la ghiba et pense du bien des autres (49:6, 49:12).",
+        "en": "Check first, avoid ghiba and think well of others (49:6, 49:12)."
+      }
+    }
+  ]
+}

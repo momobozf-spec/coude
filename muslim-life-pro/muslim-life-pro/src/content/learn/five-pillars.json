@@ -1,0 +1,189 @@
+{
+  "slug": "five-pillars",
+  "theme": "rulings",
+  "audience": "teens",
+  "level": 1,
+  "order": 201,
+  "minutes": 4,
+  "review": { "status": "draft", "reviewedBy": "", "reviewedAt": "" },
+  "key": {
+    "arabic": "بُنِيَ الإِسْلاَمُ عَلَى خَمْسٍ",
+    "reference": "Sahih al-Bukhari 8"
+  },
+  "sources": [
+    { "kind": "hadith", "reference": "Sahih al-Bukhari 8" },
+    { "kind": "hadith", "reference": "Sahih Muslim 16" },
+    { "kind": "quran", "reference": "Qur'an 3:97 (Al Imran)" }
+  ],
+  "text": {
+    "nl": {
+      "title": "De vijf zuilen",
+      "intro": "Een huis heeft stevige pijlers nodig. De Profeet ﷺ legde uit op welke vijf pijlers de islam gebouwd is.",
+      "body": [
+        "De Profeet ﷺ zei: de islam is gebouwd op vijf (Bukhari 8, Muslim 16).",
+        "De shahada: getuigen dat er niemand aanbeden mag worden behalve Allah en dat Mohammed ﷺ Zijn boodschapper is. De salah: het gebed, vijf keer per dag. De zakat: een verplichte jaarlijkse bijdrage van wie genoeg bezit, voor mensen in nood.",
+        "De hadj: de bedevaart naar Mekka, voor wie het kan (3:97). En de sawm: vasten in de maand Ramadan."
+      ],
+      "takeaway": "Elke zuil draagt een deel van het huis. Samen maken ze je islam stevig."
+    },
+    "fr": {
+      "title": "Les cinq piliers",
+      "intro": "Une maison a besoin de piliers solides. Le Prophète ﷺ a expliqué sur quels cinq piliers l'islam est bâti.",
+      "body": [
+        "Le Prophète ﷺ a dit : l'islam est bâti sur cinq (Bukhari 8, Muslim 16).",
+        "La shahada : témoigner que nul ne mérite d'être adoré sauf Allah et que Mohammed ﷺ est Son messager. La salat : la prière, cinq fois par jour. La zakat : une contribution annuelle obligatoire de celui qui possède assez, pour les personnes dans le besoin.",
+        "Le hajj : le pèlerinage à La Mecque, pour qui en a les moyens (3:97). Et le sawm : le jeûne du mois de Ramadan."
+      ],
+      "takeaway": "Chaque pilier porte une partie de la maison. Ensemble, ils rendent ton islam solide."
+    },
+    "en": {
+      "title": "The five pillars",
+      "intro": "A house needs strong pillars. The Prophet ﷺ explained the five pillars Islam is built on.",
+      "body": [
+        "The Prophet ﷺ said: Islam is built on five (Bukhari 8, Muslim 16).",
+        "The shahada: testifying that no one deserves worship except Allah and that Muhammad ﷺ is His messenger. Salah: prayer, five times a day. Zakat: an obligatory yearly contribution from those who have enough, for people in need.",
+        "Hajj: the pilgrimage to Makkah, for those who are able (3:97). And sawm: fasting in the month of Ramadan."
+      ],
+      "takeaway": "Each pillar carries part of the house. Together they make your Islam strong."
+    }
+  },
+  "exercises": [
+    {
+      "id": "pillars-match",
+      "type": "match",
+      "prompt": {
+        "nl": "Koppel elke zuil aan wat hij betekent.",
+        "fr": "Associe chaque pilier à sa signification.",
+        "en": "Match each pillar to what it means."
+      },
+      "pairs": [
+        {
+          "left": { "nl": "Shahada", "fr": "Shahada", "en": "Shahada" },
+          "right": { "nl": "geloofsgetuigenis", "fr": "le témoignage de foi", "en": "the testimony of faith" }
+        },
+        {
+          "left": { "nl": "Salah", "fr": "Salat", "en": "Salah" },
+          "right": { "nl": "het gebed", "fr": "la prière", "en": "prayer" }
+        },
+        {
+          "left": { "nl": "Zakat", "fr": "Zakat", "en": "Zakat" },
+          "right": {
+            "nl": "verplichte bijdrage voor mensen in nood",
+            "fr": "contribution obligatoire pour les nécessiteux",
+            "en": "obligatory giving to people in need"
+          }
+        },
+        {
+          "left": { "nl": "Hadj", "fr": "Hajj", "en": "Hajj" },
+          "right": { "nl": "bedevaart naar Mekka", "fr": "pèlerinage à La Mecque", "en": "pilgrimage to Makkah" }
+        },
+        {
+          "left": { "nl": "Sawm", "fr": "Sawm", "en": "Sawm" },
+          "right": { "nl": "vasten in Ramadan", "fr": "jeûne du Ramadan", "en": "fasting in Ramadan" }
+        }
+      ],
+      "explanation": {
+        "nl": "Dit zijn de vijf zuilen uit Bukhari 8.",
+        "fr": "Ce sont les cinq piliers de Bukhari 8.",
+        "en": "These are the five pillars from Bukhari 8."
+      }
+    },
+    {
+      "id": "prayers-per-day",
+      "type": "choice",
+      "prompt": {
+        "nl": "Hoe vaak per dag bid je het verplichte gebed?",
+        "fr": "Combien de fois par jour fais-tu la prière obligatoire ?",
+        "en": "How many times a day do you pray the obligatory prayer?"
+      },
+      "options": [
+        { "nl": "Vijf keer", "fr": "Cinq fois", "en": "Five times" },
+        { "nl": "Drie keer", "fr": "Trois fois", "en": "Three times" },
+        { "nl": "Eén keer", "fr": "Une fois", "en": "Once" }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Er zijn vijf verplichte gebeden: fadjr, dhuhr, asr, maghrib en isha.",
+        "fr": "Il y a cinq prières obligatoires : fajr, dhuhr, asr, maghrib et isha.",
+        "en": "There are five obligatory prayers: fajr, dhuhr, asr, maghrib and isha."
+      }
+    },
+    {
+      "id": "pillars-quickfire",
+      "type": "quickfire",
+      "prompt": {
+        "nl": "Snelle ronde: waar of niet waar?",
+        "fr": "Tour rapide : vrai ou faux ?",
+        "en": "Quick round: true or false?"
+      },
+      "seconds": 40,
+      "items": [
+        {
+          "statement": {
+            "nl": "De islam is gebouwd op vijf zuilen.",
+            "fr": "L'islam est bâti sur cinq piliers.",
+            "en": "Islam is built on five pillars."
+          },
+          "answer": true
+        },
+        {
+          "statement": {
+            "nl": "Hadj is verplicht, ook voor wie het niet kan.",
+            "fr": "Le hajj est obligatoire, même pour qui n'en a pas les moyens.",
+            "en": "Hajj is obligatory, even for those who are not able."
+          },
+          "answer": false
+        },
+        {
+          "statement": {
+            "nl": "Moslims vasten in de maand Ramadan.",
+            "fr": "Les musulmans jeûnent pendant le mois de Ramadan.",
+            "en": "Muslims fast in the month of Ramadan."
+          },
+          "answer": true
+        },
+        {
+          "statement": {
+            "nl": "Zakat is bedoeld voor mensen in nood.",
+            "fr": "La zakat est destinée aux personnes dans le besoin.",
+            "en": "Zakat is meant for people in need."
+          },
+          "answer": true
+        },
+        {
+          "statement": {
+            "nl": "De shahada is een van de vijf zuilen.",
+            "fr": "La shahada est l'un des cinq piliers.",
+            "en": "The shahada is one of the five pillars."
+          },
+          "answer": true
+        }
+      ],
+      "explanation": {
+        "nl": "Hadj geldt voor wie het kan (3:97). De andere uitspraken staan in de les.",
+        "fr": "Le hajj concerne celui qui en a les moyens (3:97). Les autres affirmations sont dans la leçon.",
+        "en": "Hajj applies to those who are able (3:97). The other statements are in the lesson."
+      }
+    },
+    {
+      "id": "zakat-word",
+      "type": "wordbuild",
+      "prompt": {
+        "nl": "Bouw het woord!",
+        "fr": "Construis le mot !",
+        "en": "Build the word!"
+      },
+      "word": "ZAKAT",
+      "meaning": {
+        "nl": "Verplichte jaarlijkse bijdrage voor mensen in nood",
+        "fr": "Contribution annuelle obligatoire pour les nécessiteux",
+        "en": "Obligatory yearly giving for people in need"
+      },
+      "explanation": {
+        "nl": "Zakat is de derde zuil.",
+        "fr": "La zakat est le troisième pilier.",
+        "en": "Zakat is the third pillar."
+      }
+    }
+  ]
+}

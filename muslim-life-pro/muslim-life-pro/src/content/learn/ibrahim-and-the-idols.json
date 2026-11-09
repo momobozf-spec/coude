@@ -1,0 +1,148 @@
+{
+  "slug": "ibrahim-and-the-idols",
+  "theme": "prophets",
+  "audience": "adults",
+  "level": 1,
+  "order": 1,
+  "minutes": 4,
+  "review": {
+    "status": "draft",
+    "reviewedBy": "",
+    "reviewedAt": ""
+  },
+  "key": {
+    "arabic": "قُلْنَا يَا نَارُ كُونِي بَرْدًا وَسَلَامًا عَلَىٰ إِبْرَاهِيمَ",
+    "reference": "Qur'an 21:69"
+  },
+  "sources": [
+    {
+      "kind": "quran",
+      "reference": "Qur'an 21:51–70 (Al-Anbiya)"
+    }
+  ],
+  "text": {
+    "nl": {
+      "title": "Ibrahim en de afgodsbeelden",
+      "intro": "Ibrahim (vrede zij met hem) stond alleen tegenover zijn hele volk. Zijn wapen was een vraag.",
+      "body": [
+        "Ibrahim groeide op tussen mensen die beelden aanbaden. Hij vroeg hen wat dat voor beelden waren die ze zo toegewijd aanbaden. Hun antwoord: zo vonden wij onze vaders ook (21:52–53).",
+        "Toen het volk weg was, sloeg hij de beelden stuk, op het grootste na. Toen ze hem ondervroegen, zei hij: dit grootste heeft het gedaan, vraag het hen maar, als ze kunnen spreken (21:58–63).",
+        "Even keerden ze tot zichzelf. Maar daarna gaven ze toe dat de beelden niet spreken, en toch bleven ze koppig. Ibrahim vroeg: aanbidden jullie dan, naast Allah, wat jullie niet kan helpen en niet kan schaden? (21:64–66)",
+        "Ze besloten hem te verbranden. Allah zei: o vuur, wees koelte en veiligheid voor Ibrahim (21:68–69)."
+      ],
+      "takeaway": "Zo deden onze ouders het, is geen bewijs. Ibrahim leert ons traditie te toetsen aan de waarheid, met moed en met verstand."
+    },
+    "fr": {
+      "title": "Ibrahim et les idoles",
+      "intro": "Ibrahim (que la paix soit sur lui) se tenait seul face à tout son peuple. Son arme était une question.",
+      "body": [
+        "Ibrahim a grandi parmi des gens qui adoraient des statues. Il leur a demandé ce qu'étaient ces statues qu'ils adoraient avec tant de dévotion. Leur réponse : nous avons trouvé nos pères ainsi (21:52–53).",
+        "Pendant que le peuple était absent, il brisa les statues, sauf la plus grande. Quand on l'interrogea, il dit : c'est la plus grande qui l'a fait, demandez-leur donc, si elles peuvent parler (21:58–63).",
+        "Un instant, ils se remirent en question. Puis ils admirent que les statues ne parlent pas, et restèrent pourtant obstinés. Ibrahim demanda : adorez-vous donc, en dehors d'Allah, ce qui ne peut ni vous être utile ni vous nuire ? (21:64–66)",
+        "Ils décidèrent de le brûler. Allah dit : ô feu, sois fraîcheur et salut pour Ibrahim (21:68–69)."
+      ],
+      "takeaway": "« Nos parents faisaient ainsi » n'est pas une preuve. Ibrahim nous apprend à confronter la tradition à la vérité, avec courage et raison."
+    },
+    "en": {
+      "title": "Ibrahim and the idols",
+      "intro": "Ibrahim (peace be upon him) stood alone against his whole people. His weapon was a question.",
+      "body": [
+        "Ibrahim grew up among people who worshipped statues. He asked them what these statues were that they worshipped so devotedly. Their answer: we found our fathers doing the same (21:52–53).",
+        "While the people were away, he broke the statues, except the largest one. When they questioned him, he said: the largest of them did it, so ask them, if they can speak (21:58–63).",
+        "For a moment they turned to themselves. Then they admitted the statues do not speak, and still remained stubborn. Ibrahim asked: do you then worship, besides Allah, what can neither benefit nor harm you? (21:64–66)",
+        "They decided to burn him. Allah said: O fire, be coolness and safety for Ibrahim (21:68–69)."
+      ],
+      "takeaway": "\"Our parents did it this way\" is not proof. Ibrahim teaches us to test tradition against the truth, with courage and with reason."
+    }
+  },
+  "exercises": [
+    {
+      "id": "their-argument",
+      "type": "choice",
+      "prompt": {
+        "nl": "Wat was het argument van het volk om de beelden te aanbidden?",
+        "fr": "Quel était l'argument du peuple pour adorer les statues ?",
+        "en": "What was the people's argument for worshipping the statues?"
+      },
+      "options": [
+        {
+          "nl": "Hun vaders deden het ook",
+          "fr": "Leurs pères le faisaient aussi",
+          "en": "Their fathers did it too"
+        },
+        {
+          "nl": "De beelden spraken tot hen",
+          "fr": "Les statues leur parlaient",
+          "en": "The statues spoke to them"
+        },
+        {
+          "nl": "Een profeet had het bevolen",
+          "fr": "Un prophète l'avait ordonné",
+          "en": "A prophet had commanded it"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "In 21:53 antwoorden ze dat ze hun vaders zo aantroffen: traditie, geen bewijs.",
+        "fr": "En 21:53, ils répondent qu'ils ont trouvé leurs pères ainsi : une tradition, pas une preuve.",
+        "en": "In 21:53 they answer that they found their fathers this way: tradition, not proof."
+      }
+    },
+    {
+      "id": "story-order",
+      "type": "order",
+      "prompt": {
+        "nl": "Zet het verhaal in de juiste volgorde.",
+        "fr": "Remets l'histoire dans le bon ordre.",
+        "en": "Put the story in the right order."
+      },
+      "items": [
+        {
+          "nl": "Ibrahim vraagt zijn volk waarom ze beelden aanbidden",
+          "fr": "Ibrahim demande à son peuple pourquoi il adore des statues",
+          "en": "Ibrahim asks his people why they worship statues"
+        },
+        {
+          "nl": "Hij slaat de beelden stuk, op het grootste na",
+          "fr": "Il brise les statues, sauf la plus grande",
+          "en": "He breaks the statues, except the largest"
+        },
+        {
+          "nl": "Hij zegt: vraag het hen, als ze kunnen spreken",
+          "fr": "Il dit : demandez-leur, si elles peuvent parler",
+          "en": "He says: ask them, if they can speak"
+        },
+        {
+          "nl": "Het volk besluit hem te verbranden",
+          "fr": "Le peuple décide de le brûler",
+          "en": "The people decide to burn him"
+        },
+        {
+          "nl": "Allah maakt het vuur koel en veilig",
+          "fr": "Allah rend le feu frais et sans danger",
+          "en": "Allah makes the fire cool and safe"
+        }
+      ],
+      "explanation": {
+        "nl": "Eerst de vraag, dan de daad, dan het argument. Pas daarna kiest het volk voor geweld, en redt Allah zijn profeet (21:52–69).",
+        "fr": "D'abord la question, puis l'acte, puis l'argument. Ce n'est qu'ensuite que le peuple choisit la violence, et qu'Allah sauve Son prophète (21:52–69).",
+        "en": "First the question, then the act, then the argument. Only then do the people choose violence, and Allah saves His prophet (21:52–69)."
+      }
+    },
+    {
+      "id": "largest-statue",
+      "type": "truefalse",
+      "prompt": {
+        "nl": "Ibrahim liet het grootste beeld staan om zijn volk te laten nadenken.",
+        "fr": "Ibrahim a laissé la plus grande statue pour faire réfléchir son peuple.",
+        "en": "Ibrahim left the largest statue standing to make his people think."
+      },
+      "answer": true,
+      "explanation": {
+        "nl": "Door naar het grootste beeld te wijzen dwong hij hen toe te geven dat de beelden niet kunnen spreken (21:63–65).",
+        "fr": "En désignant la plus grande statue, il les a obligés à admettre que les statues ne peuvent pas parler (21:63–65).",
+        "en": "By pointing to the largest statue, he made them admit that the statues cannot speak (21:63–65)."
+      }
+    }
+  ]
+}

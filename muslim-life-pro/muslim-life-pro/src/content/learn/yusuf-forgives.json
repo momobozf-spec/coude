@@ -1,0 +1,156 @@
+{
+  "slug": "yusuf-forgives",
+  "theme": "prophets",
+  "audience": "teens",
+  "level": 2,
+  "order": 201,
+  "minutes": 4,
+  "review": { "status": "draft", "reviewedBy": "", "reviewedAt": "" },
+  "key": {
+    "arabic": "لَا تَثْرِيبَ عَلَيْكُمُ الْيَوْمَ",
+    "reference": "Qur'an 12:92"
+  },
+  "sources": [{ "kind": "quran", "reference": "Qur'an 12 (Yusuf), especially 12:15–20, 12:35, 12:55, 12:58, 12:92" }],
+  "text": {
+    "nl": {
+      "title": "Yusuf vergeeft zijn broers",
+      "intro": "Zijn eigen broers deden hem pijn. Jaren later had Yusuf (vrede zij met hem) alle macht om terug te slaan.",
+      "body": [
+        "Uit jaloezie gooiden Yusufs broers hem in een put (12:15). Reizigers vonden hem en verkochten hem voor een paar munten (12:20). Zijn vader Yaqub zei: geduld is het mooiste (12:18).",
+        "Yusuf kwam onschuldig in de gevangenis (12:35), maar bleef op Allah vertrouwen. Later kreeg hij de zorg over de voorraadschuren van het land (12:55).",
+        "Toen zijn broers om eten kwamen vragen (12:58), herkenden ze hem eerst niet. Hij had wraak kunnen nemen, maar zei: geen verwijt treft jullie vandaag, Allah zal jullie vergeven (12:92)."
+      ],
+      "takeaway": "Sterk zijn is niet terugslaan als het kan. Yusuf koos voor vergeving, ook toen hij alle macht had."
+    },
+    "fr": {
+      "title": "Youssouf pardonne à ses frères",
+      "intro": "Ses propres frères l'ont blessé. Des années plus tard, Youssouf (que la paix soit sur lui) avait tout le pouvoir de se venger.",
+      "body": [
+        "Par jalousie, les frères de Youssouf le jetèrent dans un puits (12:15). Des voyageurs le trouvèrent et le vendirent pour quelques pièces (12:20). Son père Yaqoub dit : la belle patience est ce qu'il y a de mieux (12:18).",
+        "Youssouf fut emprisonné alors qu'il était innocent (12:35), mais il garda confiance en Allah. Plus tard, il reçut la charge des réserves du pays (12:55).",
+        "Quand ses frères vinrent demander de la nourriture (12:58), ils ne le reconnurent pas d'abord. Il aurait pu se venger, mais il dit : pas de reproche contre vous aujourd'hui, Allah vous pardonnera (12:92)."
+      ],
+      "takeaway": "Être fort, ce n'est pas se venger quand on le peut. Youssouf a choisi le pardon, même quand il avait tout le pouvoir."
+    },
+    "en": {
+      "title": "Yusuf forgives his brothers",
+      "intro": "His own brothers hurt him. Years later, Yusuf (peace be upon him) had every power to strike back.",
+      "body": [
+        "Out of jealousy, Yusuf's brothers threw him into a well (12:15). Travellers found him and sold him for a few coins (12:20). His father Ya'qub said: patience is most beautiful (12:18).",
+        "Yusuf was put in prison although innocent (12:35), but he kept trusting Allah. Later he was given charge of the storehouses of the land (12:55).",
+        "When his brothers came asking for food (12:58), they did not recognise him at first. He could have taken revenge, but he said: no blame on you today, Allah will forgive you (12:92)."
+      ],
+      "takeaway": "Being strong is not striking back when you can. Yusuf chose forgiveness, even when he had all the power."
+    }
+  },
+  "exercises": [
+    {
+      "id": "yusuf-order",
+      "type": "order",
+      "prompt": {
+        "nl": "Zet het verhaal van Yusuf in volgorde.",
+        "fr": "Remets l'histoire de Youssouf dans l'ordre.",
+        "en": "Put Yusuf's story in order."
+      },
+      "items": [
+        {
+          "nl": "Zijn broers gooien hem in een put",
+          "fr": "Ses frères le jettent dans un puits",
+          "en": "His brothers throw him into a well"
+        },
+        {
+          "nl": "Hij komt onschuldig in de gevangenis",
+          "fr": "Il est emprisonné alors qu'il est innocent",
+          "en": "He is put in prison although innocent"
+        },
+        {
+          "nl": "Hij krijgt de zorg over de voorraadschuren",
+          "fr": "Il reçoit la charge des réserves",
+          "en": "He is given charge of the storehouses"
+        },
+        {
+          "nl": "Zijn broers komen om eten vragen",
+          "fr": "Ses frères viennent demander de la nourriture",
+          "en": "His brothers come asking for food"
+        },
+        {
+          "nl": "Hij vergeeft hen",
+          "fr": "Il leur pardonne",
+          "en": "He forgives them"
+        }
+      ],
+      "explanation": {
+        "nl": "Van de put via de gevangenis naar de voorraadschuren, en dan de vergeving (12:15–92).",
+        "fr": "Du puits à la prison, puis aux réserves, et enfin le pardon (12:15–92).",
+        "en": "From the well through prison to the storehouses, and then forgiveness (12:15–92)."
+      }
+    },
+    {
+      "id": "yusuf-words",
+      "type": "choice",
+      "prompt": {
+        "nl": "Wat zei Yusuf tegen zijn broers volgens 12:92?",
+        "fr": "Que dit Youssouf à ses frères selon 12:92 ?",
+        "en": "What did Yusuf say to his brothers according to 12:92?"
+      },
+      "options": [
+        {
+          "nl": "Geen verwijt treft jullie vandaag",
+          "fr": "Pas de reproche contre vous aujourd'hui",
+          "en": "No blame on you today"
+        },
+        {
+          "nl": "Jullie krijgen nooit meer eten",
+          "fr": "Vous n'aurez plus jamais de nourriture",
+          "en": "You will never get food again"
+        },
+        {
+          "nl": "Ga terug naar de put",
+          "fr": "Retournez au puits",
+          "en": "Go back to the well"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Hij vergaf hen en bad dat Allah hen zou vergeven (12:92).",
+        "fr": "Il leur pardonna et pria qu'Allah leur pardonne (12:92).",
+        "en": "He forgave them and prayed that Allah would forgive them (12:92)."
+      }
+    },
+    {
+      "id": "yusuf-revenge",
+      "type": "truefalse",
+      "prompt": {
+        "nl": "Yusuf nam wraak op zijn broers toen hij de macht had.",
+        "fr": "Youssouf s'est vengé de ses frères quand il en avait le pouvoir.",
+        "en": "Yusuf took revenge on his brothers when he had the power."
+      },
+      "answer": false,
+      "explanation": {
+        "nl": "Integendeel: hij vergaf hen (12:92).",
+        "fr": "Au contraire : il leur pardonna (12:92).",
+        "en": "On the contrary: he forgave them (12:92)."
+      }
+    },
+    {
+      "id": "sabr-word",
+      "type": "wordbuild",
+      "prompt": {
+        "nl": "Bouw het woord dat Yaqub gebruikte.",
+        "fr": "Construis le mot qu'utilisa Yaqoub.",
+        "en": "Build the word Ya'qub used."
+      },
+      "word": "SABR",
+      "meaning": {
+        "nl": "Geduld",
+        "fr": "La patience",
+        "en": "Patience"
+      },
+      "explanation": {
+        "nl": "Yaqub zei: geduld is het mooiste (12:18). Sabr betekent geduld.",
+        "fr": "Yaqoub dit : la belle patience est ce qu'il y a de mieux (12:18). Sabr signifie patience.",
+        "en": "Ya'qub said: patience is most beautiful (12:18). Sabr means patience."
+      }
+    }
+  ]
+}

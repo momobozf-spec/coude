@@ -1,0 +1,147 @@
+{
+  "slug": "asr-at-banu-qurayza",
+  "theme": "differences",
+  "audience": "adults",
+  "level": 2,
+  "order": 1,
+  "minutes": 4,
+  "review": {
+    "status": "draft",
+    "reviewedBy": "",
+    "reviewedAt": ""
+  },
+  "key": {
+    "arabic": "لَا يُصَلِّيَنَّ أَحَدٌ الْعَصْرَ إِلَّا فِي بَنِي قُرَيْظَةَ",
+    "reference": "Sahih al-Bukhari 946"
+  },
+  "sources": [
+    {
+      "kind": "hadith",
+      "reference": "Sahih al-Bukhari 946"
+    },
+    {
+      "kind": "hadith",
+      "reference": "Sahih Muslim 1770 (mentions zuhr instead of asr)"
+    }
+  ],
+  "text": {
+    "nl": {
+      "title": "Het asr-gebed bij Banu Qurayza",
+      "intro": "Twee groepen metgezellen begrepen dezelfde opdracht van de Profeet ﷺ op twee manieren. Wat deed hij?",
+      "body": [
+        "Na de Slag bij de Gracht zei de Profeet ﷺ tegen zijn metgezellen: niemand mag het asr-gebed verrichten behalve bij Banu Qurayza (Bukhari 946).",
+        "Onderweg dreigde de tijd van asr voorbij te gaan. Een groep zei: we bidden pas bij Banu Qurayza, zoals hij gezegd heeft. Een andere groep zei: hij bedoelde dat we moesten opschieten, niet dat we het gebed moesten laten verlopen. Zij baden onderweg.",
+        "Toen dit aan de Profeet ﷺ verteld werd, keurde hij geen van beide groepen af.",
+        "Geleerden leiden hieruit af dat er bij teksten die meer dan één begrip toelaten, ruimte is voor ijtihad: een oprechte inspanning om de bedoeling te begrijpen. Zo'n meningsverschil is iets anders dan het verwerpen van wat duidelijk vaststaat."
+      ],
+      "takeaway": "Bij sommige vragen geven oprechte geleerden verschillende antwoorden. Respect voor die verschillen hoort bij de weg van de Sahaba."
+    },
+    "fr": {
+      "title": "La prière du asr chez les Banu Qurayza",
+      "intro": "Deux groupes de compagnons ont compris le même ordre du Prophète ﷺ de deux façons. Qu'a-t-il fait ?",
+      "body": [
+        "Après la bataille du Fossé, le Prophète ﷺ dit à ses compagnons : que personne ne prie le asr ailleurs que chez les Banu Qurayza (Bukhari 946).",
+        "En chemin, l'heure du asr risquait de passer. Un groupe dit : nous ne prierons que chez les Banu Qurayza, comme il l'a dit. Un autre groupe dit : il voulait que nous nous dépêchions, pas que nous laissions passer la prière. Ils prièrent en chemin.",
+        "Lorsque cela fut rapporté au Prophète ﷺ, il ne blâma aucun des deux groupes.",
+        "Les savants en déduisent que, pour les textes qui admettent plus d'une compréhension, il y a de la place pour l'ijtihad : un effort sincère pour en saisir l'intention. Une telle divergence est autre chose que le rejet de ce qui est clairement établi."
+      ],
+      "takeaway": "Sur certaines questions, des savants sincères donnent des réponses différentes. Respecter ces divergences fait partie de la voie des Sahaba."
+    },
+    "en": {
+      "title": "The asr prayer at Banu Qurayza",
+      "intro": "Two groups of companions understood the same instruction of the Prophet ﷺ in two ways. What did he do?",
+      "body": [
+        "After the Battle of the Trench, the Prophet ﷺ told his companions: let no one pray asr except at Banu Qurayza (Bukhari 946).",
+        "On the way, the time of asr was about to pass. One group said: we will only pray at Banu Qurayza, as he said. Another group said: he meant that we should hurry, not that we should let the prayer lapse. They prayed on the way.",
+        "When this was mentioned to the Prophet ﷺ, he did not blame either group.",
+        "Scholars conclude from this that where a text allows more than one understanding, there is room for ijtihad: a sincere effort to grasp its intent. Such a difference is something other than rejecting what is clearly established."
+      ],
+      "takeaway": "On some questions, sincere scholars give different answers. Respecting those differences is part of the way of the Sahaba."
+    }
+  },
+  "exercises": [
+    {
+      "id": "prophet-reaction",
+      "type": "choice",
+      "prompt": {
+        "nl": "Hoe reageerde de Profeet ﷺ op de twee groepen?",
+        "fr": "Comment le Prophète ﷺ a-t-il réagi face aux deux groupes ?",
+        "en": "How did the Prophet ﷺ respond to the two groups?"
+      },
+      "options": [
+        {
+          "nl": "Hij keurde geen van beide groepen af",
+          "fr": "Il ne blâma aucun des deux groupes",
+          "en": "He blamed neither group"
+        },
+        {
+          "nl": "Hij keurde de groep af die onderweg bad",
+          "fr": "Il blâma le groupe qui avait prié en chemin",
+          "en": "He blamed the group that prayed on the way"
+        },
+        {
+          "nl": "Hij liet beide groepen het gebed opnieuw doen",
+          "fr": "Il fit refaire la prière aux deux groupes",
+          "en": "He had both groups repeat the prayer"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Volgens Bukhari 946 keurde hij geen van beide af: beide groepen handelden oprecht vanuit hun begrip van zijn woorden.",
+        "fr": "Selon Bukhari 946, il ne blâma aucun des deux : les deux groupes agirent sincèrement selon leur compréhension de ses paroles.",
+        "en": "According to Bukhari 946, he blamed neither: both groups acted sincerely on their understanding of his words."
+      }
+    },
+    {
+      "id": "events-order",
+      "type": "order",
+      "prompt": {
+        "nl": "Zet de gebeurtenissen in de juiste volgorde.",
+        "fr": "Remets les événements dans le bon ordre.",
+        "en": "Put the events in the right order."
+      },
+      "items": [
+        {
+          "nl": "De Profeet ﷺ zegt dat niemand asr bidt behalve bij Banu Qurayza",
+          "fr": "Le Prophète ﷺ dit que personne ne prie le asr ailleurs que chez les Banu Qurayza",
+          "en": "The Prophet ﷺ says no one should pray asr except at Banu Qurayza"
+        },
+        {
+          "nl": "Onderweg dreigt de tijd van asr voorbij te gaan",
+          "fr": "En chemin, l'heure du asr risque de passer",
+          "en": "On the way, the time of asr is about to pass"
+        },
+        {
+          "nl": "De metgezellen begrijpen de opdracht op twee manieren",
+          "fr": "Les compagnons comprennent l'ordre de deux façons",
+          "en": "The companions understand the instruction in two ways"
+        },
+        {
+          "nl": "De Profeet ﷺ keurt geen van beide groepen af",
+          "fr": "Le Prophète ﷺ ne blâme aucun des deux groupes",
+          "en": "The Prophet ﷺ blames neither group"
+        }
+      ],
+      "explanation": {
+        "nl": "Eerst de opdracht, dan de situatie die tot twee interpretaties leidt, en tot slot de bevestiging dat beide begrippen aanvaardbaar waren.",
+        "fr": "D'abord l'ordre, puis la situation qui mène à deux interprétations, et enfin la confirmation que les deux compréhensions étaient acceptables.",
+        "en": "First the instruction, then the situation that leads to two interpretations, and finally the confirmation that both understandings were acceptable."
+      }
+    },
+    {
+      "id": "every-difference",
+      "type": "truefalse",
+      "prompt": {
+        "nl": "Volgens deze les is elk meningsverschil even aanvaardbaar, ook over wat duidelijk vaststaat.",
+        "fr": "Selon cette leçon, toute divergence est également acceptable, même sur ce qui est clairement établi.",
+        "en": "According to this lesson, every difference of opinion is equally acceptable, even about what is clearly established."
+      },
+      "answer": false,
+      "explanation": {
+        "nl": "De ruimte geldt voor teksten die meer dan één begrip toelaten. Wat duidelijk vaststaat, zoals de verplichting van het gebed zelf, valt daar niet onder.",
+        "fr": "Cette marge concerne les textes qui admettent plus d'une compréhension. Ce qui est clairement établi, comme l'obligation de la prière elle-même, n'en fait pas partie.",
+        "en": "The room applies to texts that allow more than one understanding. What is clearly established, such as the obligation of prayer itself, is not part of it."
+      }
+    }
+  ]
+}

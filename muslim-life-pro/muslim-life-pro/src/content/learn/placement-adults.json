@@ -1,0 +1,165 @@
+{
+  "audience": "adults",
+  "questions": [
+    {
+      "id": "surah-count",
+      "type": "choice",
+      "prompt": {
+        "nl": "Hoeveel soera's telt de Koran?",
+        "fr": "Combien de sourates compte le Coran ?",
+        "en": "How many surahs does the Qur'an have?"
+      },
+      "options": [
+        {
+          "nl": "114",
+          "fr": "114",
+          "en": "114"
+        },
+        {
+          "nl": "99",
+          "fr": "99",
+          "en": "99"
+        },
+        {
+          "nl": "120",
+          "fr": "120",
+          "en": "120"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "De Koran telt 114 soera's.",
+        "fr": "Le Coran compte 114 sourates.",
+        "en": "The Qur'an has 114 surahs."
+      }
+    },
+    {
+      "id": "hadith",
+      "type": "choice",
+      "prompt": {
+        "nl": "Wat is een hadith?",
+        "fr": "Qu'est-ce qu'un hadith ?",
+        "en": "What is a hadith?"
+      },
+      "options": [
+        {
+          "nl": "Een overlevering van wat de Profeet ﷺ zei of deed",
+          "fr": "Un récit de ce que le Prophète ﷺ a dit ou fait",
+          "en": "A report of what the Prophet ﷺ said or did"
+        },
+        {
+          "nl": "Een soera van de Koran",
+          "fr": "Une sourate du Coran",
+          "en": "A surah of the Qur'an"
+        },
+        {
+          "nl": "Een gebedstijd",
+          "fr": "Un horaire de prière",
+          "en": "A prayer time"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Een hadith overlevert woorden, daden of goedkeuringen van de Profeet ﷺ.",
+        "fr": "Un hadith rapporte les paroles, actes ou approbations du Prophète ﷺ.",
+        "en": "A hadith reports the words, deeds or approvals of the Prophet ﷺ."
+      }
+    },
+    {
+      "id": "first-caliph",
+      "type": "choice",
+      "prompt": {
+        "nl": "Wie was de eerste kalief na de Profeet ﷺ?",
+        "fr": "Qui fut le premier calife après le Prophète ﷺ ?",
+        "en": "Who was the first caliph after the Prophet ﷺ?"
+      },
+      "options": [
+        {
+          "nl": "Abu Bakr",
+          "fr": "Abou Bakr",
+          "en": "Abu Bakr"
+        },
+        {
+          "nl": "Umar",
+          "fr": "Omar",
+          "en": "Umar"
+        },
+        {
+          "nl": "Ali",
+          "fr": "Ali",
+          "en": "Ali"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Abu Bakr as-Siddiq was de eerste kalief.",
+        "fr": "Abou Bakr as-Siddiq fut le premier calife.",
+        "en": "Abu Bakr as-Siddiq was the first caliph."
+      }
+    },
+    {
+      "id": "ijtihad",
+      "type": "choice",
+      "prompt": {
+        "nl": "Wat is ijtihad?",
+        "fr": "Qu'est-ce que l'ijtihad ?",
+        "en": "What is ijtihad?"
+      },
+      "options": [
+        {
+          "nl": "De oprechte inspanning van een geleerde om een regel uit de bronnen af te leiden",
+          "fr": "L'effort sincère d'un savant pour déduire une règle des sources",
+          "en": "A scholar's sincere effort to derive a ruling from the sources"
+        },
+        {
+          "nl": "Een vrijwillig gebed",
+          "fr": "Une prière surérogatoire",
+          "en": "A voluntary prayer"
+        },
+        {
+          "nl": "De bedevaart",
+          "fr": "Le pèlerinage",
+          "en": "The pilgrimage"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Ijtihad is de inspanning om de bedoeling van de bronnen te begrijpen.",
+        "fr": "L'ijtihad est l'effort pour comprendre l'intention des sources.",
+        "en": "Ijtihad is the effort to understand the intent of the sources."
+      }
+    },
+    {
+      "id": "yusuf-surah",
+      "type": "choice",
+      "prompt": {
+        "nl": "Welke soera vertelt één doorlopend verhaal van een profeet van begin tot eind?",
+        "fr": "Quelle sourate raconte d'un bout à l'autre l'histoire d'un seul prophète ?",
+        "en": "Which surah tells one prophet's story from beginning to end?"
+      },
+      "options": [
+        {
+          "nl": "Yusuf",
+          "fr": "Youssouf",
+          "en": "Yusuf"
+        },
+        {
+          "nl": "Al-Kahf",
+          "fr": "Al-Kahf",
+          "en": "Al-Kahf"
+        },
+        {
+          "nl": "Ya-Sin",
+          "fr": "Ya-Sin",
+          "en": "Ya-Sin"
+        }
+      ],
+      "answer": 0,
+      "explanation": {
+        "nl": "Soera Yusuf (12) vertelt het verhaal van Yusuf als één geheel.",
+        "fr": "La sourate Youssouf (12) raconte l'histoire de Youssouf d'un seul tenant.",
+        "en": "Surah Yusuf (12) tells Yusuf's story as a single whole."
+      }
+    }
+  ]
+}
