@@ -49,3 +49,22 @@ describe('zoekfilters in de URL', () => {
     expect(activeFilterCount({ ...DEFAULT_FILTERS, chains: ['lidl'], onlyPromotions: true, maxPrice: 'abc' })).toBe(2);
   });
 });
+
+describe('vertrekpunt uit de voorkeuren', () => {
+  it('stuurt postcode en maximale afstand mee als er een postcode is', () => {
+    const query = toSearchQuery({ ...DEFAULT_FILTERS, q: 'melk', sort: 'DISTANCE' }, 20, { postalCode: '2000', maxDistanceKm: 10 });
+    expect(query.postalCode).toBe('2000');
+    expect(query.maxDistanceKm).toBe(10);
+    expect(query.sort).toBe('DISTANCE');
+  });
+
+  it('stuurt zonder postcode ook geen maximale afstand', () => {
+    const query = toSearchQuery({ ...DEFAULT_FILTERS, q: 'melk' }, 20, { postalCode: null, maxDistanceKm: 10 });
+    expect(query.postalCode).toBeUndefined();
+    expect(query.maxDistanceKm).toBeUndefined();
+  });
+
+  it('kent de sortering op afstand in de URL', () => {
+    expect(parseSearchParams(new URLSearchParams('sorteer=DISTANCE')).sort).toBe('DISTANCE');
+  });
+});

@@ -324,7 +324,38 @@ een `reason`.
 
 Ontbrekende producten blijven zichtbaar (`MISSING` / `OVER_BUDGET`), vrije
 tekstregels worden apart gemeld, statiegeld staat apart in de aanbieding.
-Afstand (`maxDistanceKm`) is voorbereid maar nog zonder locatie van de gebruiker.
+Afstand: elke winkel krijgt `distanceKm` (zie [Afstand](#afstand)); met een
+`maxDistanceKm` (uit het verzoek, anders uit de voorkeuren) vallen verdere
+winkels uit de goedkoopste combinatie en de gebalanceerde keuze, maar blijven
+ze per winkel zichtbaar. Een onbekende afstand sluit nooit uit.
+
+## Afstand
+
+`apps/api/src/compare/geo/` — zuiver, zonder externe dienst.
+
+- **Vertrekpunt** is het midden van de postcode van de gebruiker:
+  `belgian-postal-codes.ts` bevat per Belgische postcode één coördinaat (het
+  rekenkundig midden van de deelgemeenten), gegenereerd door
+  `scripts/geo/generate-postal-codes.mjs` uit de postcodelijst van bpost met
+  coördinaten uit OpenStreetMap (© OpenStreetMap-bijdragers, ODbL; vermeld op
+  `/over-de-gegevens`). Geen geocoder, geen locatietoestemming, geen nieuw
+  persoonsgegeven: de postcode stond al in de voorkeuren.
+- **Afstand** is hemelsbreed (haversine), afgerond op 0,1 km. Per keten telt
+  het dichtstbijzijnde actieve filiaal met coördinaten
+  (`CompareCatalogService.nearestLocations`); een aanbod dat aan een filiaal
+  hangt, meet naar dat filiaal (`offerDistanceKm`). Geen filiaal met
+  coördinaten → `null`, en `null` wordt nooit uitgesloten of verborgen.
+- **Waar het werkt.** `GET /chains?postalCode=` geeft `distanceKm` en
+  `nearestLocation` per keten; `GET /search`, `/promotions` en `/products/:id`
+  nemen `postalCode` en `maxDistanceKm` aan, zetten `distanceKm` op elk aanbod
+  en kennen de sortering `DISTANCE` (dichtstbij eerst, dan eenheidsprijs;
+  zonder postcode gelijk aan `UNIT_PRICE`). Het mandje gebruikt de postcode en
+  de maximale reisafstand uit de voorkeuren. De app stuurt de postcode uit de
+  voorkeuren (profiel of browser) mee en toont de afstand naast elke keten;
+  de postcode komt niet in de URL, een gedeelde link bevat hem dus niet.
+- **Tests**: `geo.test.ts`, `compare-catalog.service.test.ts`,
+  `search.service.test.ts`, `basket-optimizer.test.ts` (afstand), en de
+  rooktest `smoke:compare` (blok "Afstand").
 
 ## Prijsalerts en meldingen
 
@@ -355,12 +386,12 @@ fouten als `{ message, issues[] }`; rate limits per route.
 
 | Methode | Pad | Auth | Doel |
 |---|---|---|---|
-| GET | `/chains` | – | ketens met bronsoort en laatste import |
+| GET | `/chains?postalCode=` | – | ketens met bronsoort en laatste import; met postcode ook `distanceKm` en `nearestLocation` |
 | GET | `/chains/:slug/locations?postalCode=&city=` | – | filialen |
 | GET | `/categories` | – | categorieën |
-| GET | `/search?q=&chains=&sort=&…` | – | zoeken; filters: categorie, merk, huismerk/A-merk, alleen promoties, klantenkaart, eenheid, beschikbaarheid, maxprijs; sortering: eenheidsprijs, verpakkingsprijs, korting, winkel, relevantie |
-| GET | `/promotions` | – | actuele aanbiedingen |
-| GET | `/products/:id` | – | detail: prijzen per keten, equivalenten, alternatieven, geschiedenis, dekking |
+| GET | `/search?q=&chains=&sort=&postalCode=&maxDistanceKm=&…` | – | zoeken; filters: categorie, merk, huismerk/A-merk, alleen promoties, klantenkaart, eenheid, beschikbaarheid, maxprijs, maximale afstand; sortering: eenheidsprijs, verpakkingsprijs, korting, winkel, relevantie, afstand |
+| GET | `/promotions?postalCode=&maxDistanceKm=` | – | actuele aanbiedingen |
+| GET | `/products/:id?postalCode=&maxDistanceKm=` | – | detail: prijzen per keten (met afstand), equivalenten, alternatieven, geschiedenis, dekking |
 | GET | `/products/:id/history` | – | prijsgeschiedenis (90 dagen) |
 | POST | `/products/:id/report-match` | JWT | onjuiste match melden |
 | GET/PATCH | `/preferences` | JWT | winkelvoorkeuren |
@@ -561,15 +592,15 @@ Niets anders wijzigt: zoeken, vergelijken, alerts en meldingen werken keten-onaf
 | §4 uniforme adapterstructuur, 7 ketens | volledig | `adapters/*` | `chain-adapter.test.ts` | geen live bron |
 | §5 toegestane bronnen, import CSV/JSON, demo gelabeld | volledig | `feed-schema.ts`, `csv-feed.ts`, `demo-catalog.ts` | `csv-feed.test.ts`, `demo-catalog.test.ts` | juridische check per keten open |
 | §6 productmodel, eenheden, centen | volledig | `schema.prisma`, `contracts/compare/product.ts` | — | inhoud kan `null` zijn |
-| §7 ketens en filialen, regionale prijzen | volledig (model + demo) | `StoreLocation`, `ProductOffer.storeLocationId` | smoke | afstand nog niet berekend |
+| §7 ketens en filialen, regionale prijzen, afstand | volledig (model + demo) | `StoreLocation`, `ProductOffer.storeLocationId`, `geo/*` | smoke, 10 geo-tests | afstand hemelsbreed vanaf postcodemidden, geen reistijd |
 | §8 prijzen/promoties, alle types en vlaggen | volledig | `ProductOffer`, `offer-pricing.ts` | `offer-pricing.test.ts` | — |
 | §9 prijsnormalisatie | volledig | `packages/pricing` | 61 tests | — |
 | §10 matching, 4 types, confidence, melden, bevestigde matches | volledig | `product-matcher.ts`, `import.service.ts` | 19 tests | geen beheerscherm voor bevestigen |
-| §11 zoeken, sortering, filters | volledig (API + app, URL-state) | `search.service.ts`, `apps/superette-web/src/app/zoeken` | smoke, walkthrough | afstand-sortering wacht op locatie |
+| §11 zoeken, sortering, filters | volledig (API + app, URL-state) | `search.service.ts`, `apps/superette-web/src/app/zoeken` | smoke, walkthrough, `search.service.test.ts` | sortering op afstand vereist een postcode in de voorkeuren |
 | §12 productdetail | volledig | `search.service.ts`, `app/producten/[id]` | smoke, walkthrough | — |
 | §13 boodschappenlijsten | volledig | `lists.service.ts`, `app/lijsten` | smoke, walkthrough | — |
 | §14 mandje: 3 modi, uitlegbaar | volledig | `basket-optimizer.ts`, `components/basket-results.tsx` | 17 tests + smoke + walkthrough | bezorgkosten niet gemodelleerd |
-| §15 voorkeuren (profiel + lokaal voor bezoekers) | volledig | `preferences.service.ts`, `lib/local-preferences.ts`, `app/profiel/voorkeuren` | smoke, 4 unit-tests, walkthrough | afstand doet nog niets |
+| §15 voorkeuren (profiel + lokaal voor bezoekers) | volledig | `preferences.service.ts`, `lib/local-preferences.ts`, `app/profiel/voorkeuren` | smoke, 4 unit-tests, walkthrough | — |
 | §16 prijsgeschiedenis met grafiek en tabel | volledig | `PriceHistory`, `historySummary`, `components/price-history-chart.tsx` | smoke, walkthrough | demo heeft maar één meetmoment, dus grafiek toont "te weinig meetmomenten" |
 | §17–§19 alerts, datamodel | volledig | `alerts/*`, `schema.prisma`, `components/alert-form.tsx` | 22 tests + smoke + walkthrough | — |
 | §20 "Mijn prijsalerts" (filters, sortering, acties) | volledig | `alerts.service.ts`, `app/alerts` | smoke, walkthrough | — |
@@ -594,9 +625,11 @@ Niets anders wijzigt: zoeken, vergelijken, alerts en meldingen werken keten-onaf
   gebruiker, idempotency-key, permanente vs. tijdelijke fouten), maar er is
   geen provider gekoppeld; zonder provider blijven meldingen eerlijk in-app
   (`EMAIL_UNAVAILABLE`).
-- **Afstand.** Filialen hebben coördinaten; de locatie van de gebruiker (postcode →
-  coördinaten) en de afstandsberekening ontbreken, dus `maxDistanceKm` en
-  "sorteren op afstand" doen nog niets.
+- **Afstand** is hemelsbreed vanaf het midden van de postcode, geen route of
+  reistijd; in landelijke gemeenten met één postcode voor veel deelgemeenten
+  kan ze enkele kilometers afwijken. Ketens zonder filiaal met coördinaten
+  (alle echte feeds tot nu toe geven geen filialen mee) krijgen geen afstand en
+  blijven altijd staan.
 - **Matching-pool.** Bij import wordt een nieuw product gematcht tegen hoogstens
   2000 producten uit dezelfde categorie (of dezelfde eenheid). Groot genoeg voor
   demo en eerste feeds; voor tienduizenden producten per keten is een

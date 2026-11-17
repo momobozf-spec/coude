@@ -8,6 +8,14 @@ Statussen: **PASS** (gedaan en aangetoond) · **PARTIAL** (gedaan, met een
 bekende beperking) · **BLOCKED** (kan hier niet, vereist mens/omgeving) ·
 **NOT APPLICABLE**.
 
+## Update 17 november 2026 (afstand)
+
+| Punt | Status | Bewijs |
+|---|---|---|
+| Afstand tot de supermarkt op postcode (sorteren, maximale reisafstand, mandje) | PASS | `src/compare/geo/*` (10 tests), `search.service.test.ts`, `compare-catalog.service.test.ts`, `basket-optimizer.test.ts` (3 afstandstests), rooktest `smoke:compare` blok "Afstand"; ontwerp in `docs/superpowers/specs/2026-11-17-afstand-design.md` |
+| Bronvermelding postcodecoördinaten (OpenStreetMap, ODbL) | PASS | `/over-de-gegevens` nl/fr/en; kop van `belgian-postal-codes.ts` |
+| Geen nieuw persoonsgegeven | PASS | postcode stond al in de voorkeuren; `docs/PRIVACY.md` rij 4 |
+
 ## Update 24 oktober 2026 (productieklaar maken, vergelijker)
 
 | Punt | Status | Bewijs |

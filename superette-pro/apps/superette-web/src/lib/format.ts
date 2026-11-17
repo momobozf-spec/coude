@@ -34,6 +34,16 @@ export function formatNumber(value: number, locale: AppLocale = 'nl', maximumFra
   return new Intl.NumberFormat(INTL_LOCALE[locale], { maximumFractionDigits }).format(value);
 }
 
+/**
+ * 3.26 → "3,3 km" (nl/fr), "3.3 km" (en). Hemelsbreed, op 0,1 km.
+ * Voor Engels nemen we en-GB: en-BE schrijft "3,3" maar "€1.79", en één
+ * scherm hoort één decimaalteken te hebben.
+ */
+export function formatDistance(km: number, locale: AppLocale = 'nl'): string {
+  const intl = locale === 'en' ? 'en-GB' : INTL_LOCALE[locale];
+  return `${new Intl.NumberFormat(intl, { minimumFractionDigits: km < 10 ? 1 : 0, maximumFractionDigits: 1 }).format(km)} km`;
+}
+
 export type DateStyle = 'date' | 'dateTime' | 'time' | 'dayMonth';
 
 /** ISO-8601 (of Unix-milliseconden) → Belgische datum/tijd in Europe/Brussels. */

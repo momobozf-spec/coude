@@ -35,6 +35,7 @@ export function offer(overrides: Partial<ProductOffer> & { storeChain: StoreChai
   return {
     id: `offer-${offerCounter}`,
     storeLocation: null,
+    distanceKm: null,
     storeProductName: 'Coca-Cola Zero 1,5 l',
     productUrl: null,
     imageUrl: null,

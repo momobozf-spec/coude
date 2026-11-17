@@ -89,7 +89,7 @@ export function StoreBasketCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1.5">
-          <ChainBadge chain={store.storeChain} />
+          <ChainBadge chain={store.storeChain} distanceKm={store.distanceKm} />
           <div className="flex flex-wrap items-center gap-1.5">
             {recommended && <Badge tone="accent">{t('lists.result.recommended')}</Badge>}
             {cheapest && !recommended && <Badge tone="accent">{t('lists.result.cheapest')}</Badge>}

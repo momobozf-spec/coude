@@ -96,7 +96,7 @@ export function ProductCard({ item, onAddToList }: { item: SearchResultItem; onA
             <PriceTag cents={bestOffer.priceCents} unitPrice={bestOffer.unitPrice} originalCents={bestOffer.originalPriceCents} />
             <div className="min-w-0 flex-1 space-y-1">
               <p className="text-xs font-semibold text-ink-muted">{t('search.bestAt', { chain: '' }).trim()}</p>
-              <ChainBadge chain={bestOffer.storeChain} />
+              <ChainBadge chain={bestOffer.storeChain} distanceKm={bestOffer.distanceKm} />
               {maxSaving > 0 ? (
                 <p className="text-[13px] font-semibold leading-snug text-accent-strong">{t('search.saveUpTo', { amount: formatEuro(maxSaving, locale) })}</p>
               ) : (
@@ -114,7 +114,7 @@ export function ProductCard({ item, onAddToList }: { item: SearchResultItem; onA
           {others.slice(0, VISIBLE_OTHERS).map((offer) => (
             <li key={offer.id} className="grid min-h-11 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3 py-1.5">
               <span className="flex min-w-0 flex-wrap items-center gap-1.5">
-                <ChainBadge chain={offer.storeChain} size="sm" />
+                <ChainBadge chain={offer.storeChain} size="sm" distanceKm={offer.distanceKm} />
                 {offer.promotionLabel && offer.promotionType !== 'NONE' && <Badge tone="promo">{offer.promotionLabel}</Badge>}
                 {offer.requiresLoyaltyCard && <Badge tone="info">{t('promo.requiresLoyaltyCard')}</Badge>}
                 {offer.provenance.status !== 'CURRENT' && <StatusBadge status={offer.provenance.status} />}
@@ -143,7 +143,7 @@ export function ProductCard({ item, onAddToList }: { item: SearchResultItem; onA
             {item.comparisons.map(({ product: other, matchType, offer }) => (
               <li key={offer.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1.5">
                 <span className="flex min-w-0 flex-wrap items-center gap-1.5">
-                  <ChainBadge chain={offer.storeChain} size="sm" />
+                  <ChainBadge chain={offer.storeChain} size="sm" distanceKm={offer.distanceKm} />
                   <Link href={`/producten/${other.id}`} className="truncate hover:underline">
                     {productTitle(other)}
                   </Link>
@@ -206,7 +206,7 @@ export function PromoCard({ item, onAddToList, compact = false }: { item: Search
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <PriceTag cents={offer.priceCents} unitPrice={offer.unitPrice} originalCents={offer.originalPriceCents} />
         <div className="min-w-0 flex-1 basis-28 space-y-1">
-          <ChainBadge chain={offer.storeChain} />
+          <ChainBadge chain={offer.storeChain} distanceKm={offer.distanceKm} />
           {offer.effectivePrice?.conditional && (
             <p className="text-[13px] font-semibold leading-snug text-promo-text">
               {t('promo.effective', { price: formatEuro(offer.effectivePrice.unitCents, locale), n: offer.effectivePrice.atQuantity })}

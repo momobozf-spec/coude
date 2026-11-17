@@ -75,6 +75,34 @@ async function main(): Promise<void> {
   const chains = await call('GET', '/compare/chains');
   check('GET /compare/chains → 200', chains.status, 200);
   check('zeven ketens', chains.body.length, 7);
+  check('zonder postcode geen afstand', chains.body.every((c: any) => c.distanceKm === null && c.nearestLocation === null), true);
+
+  console.log('\nAfstand (postcode 2000, Antwerpen)');
+  const near = await call('GET', '/compare/chains?postalCode=2000');
+  check('GET /compare/chains?postalCode=2000 → 200', near.status, 200);
+  const delhaizeNear = near.body.find((c: any) => c.slug === 'delhaize');
+  truthy('Delhaize heeft een afstand', typeof delhaizeNear?.distanceKm === 'number');
+  truthy('…naar een filiaal in Antwerpen (demo: Volkstraat), < 5 km', delhaizeNear?.distanceKm < 5 && delhaizeNear?.nearestLocation?.city === 'Antwerpen');
+  check('ongeldige postcode → 400', (await call('GET', '/compare/chains?postalCode=12')).status, 400);
+  check('onbekende postcode → 200 zonder afstand', (await call('GET', '/compare/chains?postalCode=9998')).body.every((c: any) => c.distanceKm === null), true);
+
+  const byDistance = await call('GET', '/compare/search?q=melk&sort=DISTANCE&postalCode=2000');
+  check('zoeken op afstand → 200', byDistance.status, 200);
+  check('sortering DISTANCE', byDistance.body.sort, 'DISTANCE');
+  truthy('elk aanbod heeft een afstand', byDistance.body.items.every((i: any) => i.offers.every((o: any) => typeof o.distanceKm === 'number')));
+  const distances = byDistance.body.items.map((i: any) => i.bestOffer.distanceKm as number);
+  truthy('dichtstbij eerst', distances.every((d: number, idx: number) => idx === 0 || d >= distances[idx - 1]));
+  truthy('beste aanbod = dichtstbijzijnde van het product', byDistance.body.items.every((i: any) => i.offers.every((o: any) => o.distanceKm >= i.bestOffer.distanceKm)));
+
+  // Vanuit Heers (3870) ligt alleen Jumbo Hasselt (demo) binnen 30 km; de rest zit 44–81 km ver.
+  const within = await call('GET', '/compare/search?q=melk&postalCode=3870&maxDistanceKm=30');
+  check('maximale afstand → 200', within.status, 200);
+  truthy('alleen aanbiedingen binnen 30 km', within.body.items.every((i: any) => i.offers.every((o: any) => o.distanceKm <= 30)));
+  const all = await call('GET', '/compare/search?q=melk&postalCode=3870');
+  const offerCount = (res: any) => res.body.items.reduce((n: number, i: any) => n + i.offers.length, 0);
+  truthy('zonder grens meer aanbiedingen (Leuven, Mechelen, Antwerpen, …)', offerCount(all) > offerCount(within));
+  check('zonder postcode negeert maxDistanceKm', (await call('GET', '/compare/search?q=melk&maxDistanceKm=1')).body.total, all.body.total);
+  check('maxDistanceKm buiten bereik → 400', (await call('GET', '/compare/search?q=melk&postalCode=3870&maxDistanceKm=999')).status, 400);
   truthy('ketens dragen bronvermelding', chains.body.every((c: any) => 'dataSourceKind' in c && 'lastImportedAt' in c));
 
   const search = await call('GET', '/compare/search?q=' + encodeURIComponent('Coca-Cola Zero 1,5 L'));
@@ -164,6 +192,19 @@ async function main(): Promise<void> {
   truthy('beste enkele winkel bepaald', balanced.body.bestSingleStore?.storeChain?.slug);
   truthy('goedkoopste combinatie bepaald', balanced.body.cheapestCombination?.totalCents >= 0);
   truthy('gebalanceerde keuze legt uit', balanced.body.balanced?.explanation?.length > 0);
+  // Alice heeft hierboven postcode 2000 gezet: elke winkel krijgt een afstand.
+  truthy('postcode in de voorkeuren → afstand per winkel', balanced.body.perStore.every((st: any) => typeof st.distanceKm === 'number'));
+  check('postcode zonder grens laat de verre winkel meetellen', balanced.body.perStore.length, (await call('POST', `/compare/lists/${listId}/compare`, { mode: 'BALANCED', maxStores: 3, minimumSavingCents: 0 }, alice)).body.perStore.length);
+  check('verhuizen naar Heers met 30 km → 200', (await call('PATCH', '/compare/preferences', { postalCode: '3870', maxDistanceKm: 30 }, alice)).status, 200);
+  const nearBasket = await call('POST', `/compare/lists/${listId}/compare`, { mode: 'CHEAPEST_COMBINATION', maxStores: 3, minimumSavingCents: 0 }, alice);
+  // Alice vergelijkt alleen Lidl, Colruyt en Delhaize (voorkeuren hierboven); vanuit Heers liggen die alle drie > 60 km.
+  truthy('afstanden vanaf Heers: alle gekozen winkels ver weg', nearBasket.body.perStore.every((st: any) => st.distanceKm > 60));
+  truthy('geen winkel binnen 30 km → grens losgelaten, combinatie blijft', nearBasket.body.cheapestCombination?.stores.length > 0);
+  truthy('…en dat staat in de uitleg', nearBasket.body.cheapestCombination?.explanation?.[0]?.includes('losgelaten'));
+  const jumboBasket = await call('POST', `/compare/lists/${listId}/compare`, { mode: 'CHEAPEST_COMBINATION', chainSlugs: ['jumbo', 'delhaize'], maxStores: 2, minimumSavingCents: 0 }, alice);
+  truthy('Jumbo Hasselt binnen 30 km van Heers', jumboBasket.body.perStore.find((st: any) => st.storeChain.slug === 'jumbo')?.distanceKm < 25);
+  check('goedkoopste combinatie alleen Jumbo (Delhaize 81 km valt af)', jumboBasket.body.cheapestCombination?.stores.map((st: any) => st.storeChain.slug), ['jumbo']);
+  check('voorkeur weer zonder grens → 200', (await call('PATCH', '/compare/preferences', { maxDistanceKm: null, postalCode: null }, alice)).status, 200);
 
   check('Bob leest lijst van Alice → 404', (await call('GET', `/compare/lists/${listId}`, undefined, bob)).status, 404);
   check('Bob wijzigt lijst van Alice → 404', (await call('PATCH', `/compare/lists/${listId}`, { name: 'x' }, bob)).status, 404);

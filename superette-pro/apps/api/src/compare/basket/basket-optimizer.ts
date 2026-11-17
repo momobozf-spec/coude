@@ -241,6 +241,7 @@ export function basketForStore(items: readonly OptimizerItem[], chain: Optimizer
     lines,
     hasData: chain.hasData,
     containsDemoData: counted.some((line) => line.chosenOffer?.provenance.isDemo === true),
+    distanceKm: chain.distanceKm,
   };
 }
 
@@ -400,16 +401,22 @@ export function compareBaskets(
   const bestSingleStore = [...withData].sort(rankStores)[0] ?? null;
 
   // Ketens die binnen de maximale afstand liggen (onbekende afstand = toegestaan).
-  const reachable = withData
+  const withinDistance = withData
     .map((store) => store.storeChain.slug)
     .filter((slug) => {
       const distance = chainBySlug.get(slug)?.distanceKm ?? null;
       return settings.maxDistanceKm == null || distance == null || distance <= settings.maxDistanceKm;
     });
+  // Ligt geen enkele winkel binnen de grens, dan is een lege vergelijking
+  // nutteloos: we laten de grens los en zeggen dat.
+  const distanceRelaxed = withinDistance.length === 0 && withData.length > 0;
+  const reachable = distanceRelaxed ? withData.map((store) => store.storeChain.slug) : withinDistance;
+  const distanceNote = distanceRelaxed ? [`Geen winkel binnen ${settings.maxDistanceKm} km; de afstandsgrens is losgelaten.`] : [];
 
   // Goedkoopste combinatie: elke regel bij de goedkoopste bereikbare winkel.
   const cheapest = evaluateSubset(storeBySlug, reachable, countable);
   const cheapestCombination = toCombination(cheapest, chainBySlug, bestSingleStore, [
+    ...distanceNote,
     `Elke regel bij de goedkoopste van ${reachable.length} winkels; ${cheapest.assignment.size} regels verdeeld over ${new Set([...cheapest.assignment.values()].map((v) => v.slug)).size} winkelbezoek(en).`,
   ]);
 
@@ -426,7 +433,7 @@ export function compareBaskets(
     if (best) bestBySize.push(best);
   }
 
-  const explanation: string[] = [];
+  const explanation: string[] = [...distanceNote];
   let chosen = bestBySize[0] ?? null;
   if (chosen) {
     explanation.push(`Startpunt: alles bij ${chainBySlug.get(chosen.slugs[0]!)?.ref.name} voor ${formatEuro(chosen.totalCents)}.`);

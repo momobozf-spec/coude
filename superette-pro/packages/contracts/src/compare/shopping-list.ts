@@ -94,6 +94,7 @@ export const basketCompareInputSchema = z.object({
   maxStores: z.number().int().min(1).max(3).default(2),
   /** Een extra winkelbezoek moet minstens dit bedrag opleveren. Standaard €3. */
   minimumSavingCents: z.number().int().nonnegative().max(100_000).default(300),
+  /** Maximale reisafstand in km; `null` = de waarde uit de voorkeuren (of geen grens). */
   maxDistanceKm: z.number().int().min(1).max(200).nullable().default(null),
   includePersonalizedOffers: z.boolean().default(false),
   includeOnlineOffers: z.boolean().default(true),
@@ -140,6 +141,8 @@ export const storeBasketResultSchema = z.object({
   lines: z.array(basketLineResultSchema),
   hasData: z.boolean(),
   containsDemoData: z.boolean(),
+  /** Afstand tot het dichtstbijzijnde filiaal vanaf de postcode in de voorkeuren; `null` als onbekend. */
+  distanceKm: z.number().nonnegative().nullable(),
 });
 export type StoreBasketResult = z.infer<typeof storeBasketResultSchema>;
 

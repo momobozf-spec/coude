@@ -151,14 +151,14 @@ async function request<T>(method: string, path: string, body?: unknown, retried 
 
 export const api = {
   // ── Publiek ──────────────────────────────────────────────────────────────
-  chains: () => request<StoreChain[]>('GET', '/compare/chains'),
+  chains: (params: { postalCode?: string | null } = {}) => request<StoreChain[]>('GET', `/compare/chains${query(params.postalCode ? { postalCode: params.postalCode } : {})}`),
   locations: (slug: string, params: { postalCode?: string; city?: string } = {}) =>
     request<StoreLocation[]>('GET', `/compare/chains/${encodeURIComponent(slug)}/locations${query(params)}`),
   categories: () => request<CatalogCategory[]>('GET', '/compare/categories'),
   search: (input: SearchQueryInput) => request<SearchResponse>('GET', `/compare/search${query(input)}`),
   promotions: (input: Partial<PromotionsQuery> & { chains?: string[] } = {}) =>
     request<SearchResponse>('GET', `/compare/promotions${query(input)}`),
-  product: (id: string, params: { chains?: string[]; includePersonalized?: boolean; includeOnline?: boolean; loyaltyCard?: string } = {}) =>
+  product: (id: string, params: { chains?: string[]; includePersonalized?: boolean; includeOnline?: boolean; loyaltyCard?: string; postalCode?: string; maxDistanceKm?: number } = {}) =>
     request<ProductDetail>('GET', `/compare/products/${encodeURIComponent(id)}${query(params)}`),
   history: (id: string) => request<PriceHistorySummary>('GET', `/compare/products/${encodeURIComponent(id)}/history`),
   reportMatch: (id: string, input: ReportMatchInput) =>

@@ -15,6 +15,7 @@ import { api } from '@/lib/api';
 import { formatRelative } from '@/lib/format';
 import { useI18n } from '@/lib/i18n';
 import { useAsync } from '@/lib/use-async';
+import { usePreferences } from '@/lib/use-preferences';
 
 const POPULAR = ['melk', 'Coca-Cola Zero 1,5 L', 'kipfilet', 'olijfolie', 'toiletpapier', 'koffie'];
 
@@ -24,7 +25,8 @@ export default function HomePage() {
   const [query, setQuery] = useState('');
   const [listTarget, setListTarget] = useState<SearchResultItem | null>(null);
 
-  const chains = useAsync(() => api.chains(), []);
+  const { preferences } = usePreferences();
+  const chains = useAsync(() => api.chains({ postalCode: preferences.postalCode }), [preferences.postalCode]);
   const promotions = useAsync(() => api.promotions({ pageSize: 6 }), []);
 
   function submit(event: FormEvent) {
@@ -119,12 +121,13 @@ export default function HomePage() {
         <ul className="divide-y divide-hairline overflow-hidden rounded-[18px] border border-hairline bg-canvas-raised md:grid md:grid-cols-2 md:divide-y-0">
           {(chains.data ?? []).map((chain) => (
             <li key={chain.id} className="flex min-h-14 items-center justify-between gap-3 px-4 py-2.5 md:border-b md:border-hairline">
-              <ChainBadge chain={chain} />
+              <ChainBadge chain={chain} distanceKm={chain.distanceKm} />
               <span className="flex flex-col items-end gap-0.5 text-right text-xs text-ink-muted">
                 {chain.dataSourceKind ? (
                   <>
                     <Badge tone={chain.dataSourceKind === 'DEMO' ? 'demo' : 'accent'}>{chain.dataSourceKind === 'DEMO' ? t('app.demoBadge') : t(`source.${chain.dataSourceKind}`)}</Badge>
                     {chain.lastImportedAt && <span>{t('chain.lastImport', { date: formatRelative(chain.lastImportedAt, locale) })}</span>}
+                    {chain.nearestLocation && <span>{t('chain.nearest', { location: chain.nearestLocation.city })}</span>}
                   </>
                 ) : (
                   <Badge tone="neutral">{t('chain.noData')}</Badge>

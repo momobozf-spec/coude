@@ -22,6 +22,7 @@ import type {
 import { parseQuantityLabel, toBaseQuantity } from '@superette/pricing';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CompareCatalogService, type OfferFilter } from '../catalog/compare-catalog.service';
+import { coordinatesForPostalCode } from '../geo/geo';
 import { normalizeBrand, normalizeText, stripQuantityTokens, tokenSimilarity } from '../matching/product-matcher';
 import { searchStem } from './search-terms';
 
@@ -40,13 +41,31 @@ function rank(offer: ProductOffer, sort: SearchSort): number {
       return offer.priceCents;
     case 'DISCOUNT':
       return -(offer.discountPercentage ?? 0);
+    case 'DISTANCE':
+      // Onbekende afstand komt achteraan; zonder postcode is dit effectief eenheidsprijs.
+      return offer.distanceKm ?? Number.MAX_SAFE_INTEGER;
   }
 }
 
-/** Het beste aanbod volgens de sortering; bij gelijke stand de laagste verpakkingsprijs. */
+/** Tweede sleutel: bij gelijke stand de laagste eenheidsprijs (afstand) of verpakkingsprijs. */
+function tieBreak(a: ProductOffer, b: ProductOffer, sort: SearchSort): number {
+  if (sort === 'DISTANCE') {
+    return (a.unitPrice?.cents ?? Number.MAX_SAFE_INTEGER) - (b.unitPrice?.cents ?? Number.MAX_SAFE_INTEGER) || a.priceCents - b.priceCents;
+  }
+  return a.priceCents - b.priceCents;
+}
+
+/** Het beste aanbod volgens de sortering; bij gelijke stand de laagste prijs. */
 export function pickBestOffer(offers: readonly ProductOffer[], sort: SearchSort): ProductOffer | null {
   if (offers.length === 0) return null;
-  return [...offers].sort((a, b) => rank(a, sort) - rank(b, sort) || a.priceCents - b.priceCents)[0]!;
+  return [...offers].sort((a, b) => rank(a, sort) - rank(b, sort) || tieBreak(a, b, sort))[0]!;
+}
+
+/** Vertrekpunt en afstandsgrens uit een query; zonder (gekende) postcode geen van beide. */
+export function distanceFilter(query: { postalCode?: string; maxDistanceKm?: number }): Pick<OfferFilter, 'origin' | 'maxDistanceKm'> {
+  const origin = coordinatesForPostalCode(query.postalCode);
+  if (!origin) return {};
+  return { origin, ...(query.maxDistanceKm !== undefined ? { maxDistanceKm: query.maxDistanceKm } : {}) };
 }
 
 @Injectable()
@@ -99,6 +118,7 @@ export class SearchService {
       onlyPromotions: query.onlyPromotions,
       ...(query.availability ? { availability: query.availability } : {}),
       ...(query.maxPriceCents !== undefined ? { maxPriceCents: query.maxPriceCents } : {}),
+      ...distanceFilter(query),
     };
     const offersByProduct = await this.catalog.offersByProduct(
       rows.map((row) => row.id),
@@ -130,7 +150,7 @@ export class SearchService {
         case 'RELEVANCE':
           return (relevance.get(b.product.id) ?? 0) - (relevance.get(a.product.id) ?? 0) || (a.bestOffer?.unitPrice?.cents ?? Number.MAX_SAFE_INTEGER) - (b.bestOffer?.unitPrice?.cents ?? Number.MAX_SAFE_INTEGER);
         default:
-          return rank(a.bestOffer!, query.sort) - rank(b.bestOffer!, query.sort) || a.bestOffer!.priceCents - b.bestOffer!.priceCents;
+          return rank(a.bestOffer!, query.sort) - rank(b.bestOffer!, query.sort) || tieBreak(a.bestOffer!, b.bestOffer!, query.sort);
       }
     });
 
@@ -244,7 +264,7 @@ export class SearchService {
     const products = await this.prisma.catalogProduct.findMany({ where: { id: { in: productIds }, active: true }, include: { category: true } });
     const offersByProduct = await this.catalog.offersByProduct(
       productIds,
-      { chainSlugs: query.chains, includePersonalized: query.includePersonalized, includeOnline: true, loyalty: 'ANY', onlyPromotions: true },
+      { chainSlugs: query.chains, includePersonalized: query.includePersonalized, includeOnline: true, loyalty: 'ANY', onlyPromotions: true, ...distanceFilter(query) },
       now,
     );
 

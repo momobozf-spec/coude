@@ -7,7 +7,7 @@
 import type { MatchType, PriceStatus, ProductOffer, Provenance, StoreChainRef } from '@superette/contracts';
 import { perUnitLabel } from '@superette/pricing';
 import { chainColorVar, chainInitials, chainInkVar } from '@/lib/chains';
-import { formatDate, formatEuro, formatRelative, formatUnitPrice } from '@/lib/format';
+import { formatDate, formatDistance, formatEuro, formatRelative, formatUnitPrice } from '@/lib/format';
 import { useI18n } from '@/lib/i18n';
 import { Badge, type BadgeTone } from './ui';
 
@@ -55,7 +55,8 @@ export function ProvenanceLine({ provenance, compact = false }: { provenance: Pr
   );
 }
 
-export function ChainBadge({ chain, size = 'md' }: { chain: StoreChainRef; size?: 'sm' | 'md' }) {
+export function ChainBadge({ chain, size = 'md', distanceKm = null }: { chain: StoreChainRef; size?: 'sm' | 'md'; distanceKm?: number | null }) {
+  const { locale } = useI18n();
   return (
     <span className="inline-flex min-w-0 items-center gap-1.5 font-semibold text-ink">
       <span
@@ -66,6 +67,9 @@ export function ChainBadge({ chain, size = 'md' }: { chain: StoreChainRef; size?
         {chainInitials(chain.name)}
       </span>
       <span className={`truncate ${size === 'sm' ? 'text-[13px]' : 'text-[15px]'}`}>{chain.name}</span>
+      {distanceKm !== null && (
+        <span className={`tabular shrink-0 font-normal text-ink-muted ${size === 'sm' ? 'text-[12px]' : 'text-[13px]'}`}>{formatDistance(distanceKm, locale)}</span>
+      )}
     </span>
   );
 }
@@ -182,7 +186,7 @@ export function OfferRow({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <ChainBadge chain={offer.storeChain} />
+            <ChainBadge chain={offer.storeChain} distanceKm={offer.distanceKm} />
             {highlight && <Badge tone="accent">{t('product.bestPrice')}</Badge>}
             {/* Het DEMO-label staat in de herkomstregel hieronder; niet twee keer per prijs. */}
           </div>

@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import {
+  belgianPostalCodeSchema,
   promotionsQuerySchema,
   reportMatchSchema,
   searchQuerySchema,
@@ -18,7 +19,7 @@ import { CurrentUser } from '../../auth/current-user.decorator';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
 import { CompareCatalogService } from '../catalog/compare-catalog.service';
-import { SearchService } from './search.service';
+import { distanceFilter, SearchService } from './search.service';
 
 const booleanQuery = z
   .union([z.boolean(), z.enum(['true', 'false', '1', '0'])])
@@ -33,6 +34,8 @@ const productDetailQuerySchema = z.object({
     .optional()
     .transform((value) => value === undefined || value === true || value === 'true' || value === '1'),
   loyaltyCard: z.enum(['ANY', 'REQUIRED', 'NOT_REQUIRED']).default('ANY'),
+  postalCode: belgianPostalCodeSchema.optional(),
+  maxDistanceKm: z.coerce.number().int().min(1).max(200).optional(),
 });
 
 const idSchema = z.string().regex(/^[a-z0-9]{10,40}$/i, 'Ongeldig id');
@@ -69,6 +72,7 @@ export class SearchController {
       includePersonalized: query.includePersonalized,
       includeOnline: query.includeOnline,
       loyalty: query.loyaltyCard,
+      ...distanceFilter(query),
     });
   }
 

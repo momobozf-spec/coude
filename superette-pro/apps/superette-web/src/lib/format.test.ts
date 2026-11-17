@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { centsToEuroInput, euroInputToCents, formatDate, formatEuro, formatRelative, formatUnitPrice, joinNatural } from './format';
+import { centsToEuroInput, euroInputToCents, formatDate, formatDistance, formatEuro, formatRelative, formatUnitPrice, joinNatural } from './format';
 
 const nbsp = (text: string) => text.replace(/ | /g, ' ');
 
@@ -61,5 +61,15 @@ describe('joinNatural', () => {
     expect(joinNatural(['Delhaize', 'Lidl'], 'fr')).toBe('Delhaize ou Lidl');
     expect(joinNatural(['Delhaize', 'Lidl'], 'en', 'and')).toBe('Delhaize and Lidl');
     expect(joinNatural(['Delhaize'], 'nl')).toBe('Delhaize');
+  });
+});
+
+describe('formatDistance', () => {
+  it('toont één decimaal onder de 10 km, daarboven hele kilometers', () => {
+    expect(formatDistance(3.26, 'nl')).toBe('3,3 km');
+    expect(formatDistance(3.26, 'en')).toBe('3.3 km');
+    expect(formatDistance(12, 'nl')).toBe('12 km');
+    expect(formatDistance(12.4, 'fr')).toBe('12,4 km');
+    expect(formatDistance(0, 'nl')).toBe('0,0 km');
   });
 });

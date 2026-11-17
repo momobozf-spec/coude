@@ -10,7 +10,7 @@ import {
   promotionRuleSchema,
   promotionTypeSchema,
 } from './enums';
-import { storeChainRefSchema, storeLocationRefSchema } from './store-chain';
+import { belgianPostalCodeSchema, storeChainRefSchema, storeLocationRefSchema } from './store-chain';
 
 /**
  * Herkomst en actualiteit van één prijs. Elke zichtbare prijs draagt dit mee;
@@ -43,6 +43,13 @@ export const productOfferSchema = z.object({
   id: z.string(),
   storeChain: storeChainRefSchema,
   storeLocation: storeLocationRefSchema.nullable(),
+  /**
+   * Hemelsbrede afstand in km (op 0,1) vanaf het midden van de postcode van
+   * de gebruiker tot het filiaal van dit aanbod, of anders tot het
+   * dichtstbijzijnde filiaal van de keten. `null` zonder postcode of als de
+   * keten geen filiaal met coördinaten heeft.
+   */
+  distanceKm: z.number().nonnegative().nullable(),
   /** Naam zoals de keten het product noemt. */
   storeProductName: z.string(),
   productUrl: z.string().nullable(),
@@ -138,7 +145,8 @@ export const coverageSchema = z.object({
 });
 export type Coverage = z.infer<typeof coverageSchema>;
 
-export const SEARCH_SORTS = ['UNIT_PRICE', 'PACKAGE_PRICE', 'DISCOUNT', 'STORE', 'RELEVANCE'] as const;
+/** `DISTANCE` sorteert op afstand (dichtstbij eerst) en gedraagt zich zonder postcode als `UNIT_PRICE`. */
+export const SEARCH_SORTS = ['UNIT_PRICE', 'PACKAGE_PRICE', 'DISCOUNT', 'STORE', 'RELEVANCE', 'DISTANCE'] as const;
 export const searchSortSchema = z.enum(SEARCH_SORTS);
 export type SearchSort = z.infer<typeof searchSortSchema>;
 
@@ -177,6 +185,10 @@ export const searchQuerySchema = z.object({
     .transform((value) => value === undefined || value === true || value === 'true' || value === '1'),
   /** Onzekere matches worden standaard niet als vergelijking getoond. */
   includeUncertain: booleanQuery,
+  /** Postcode van de gebruiker: zet `distanceKm` op elk aanbod en maakt `sort=DISTANCE` en `maxDistanceKm` mogelijk. */
+  postalCode: belgianPostalCodeSchema.optional(),
+  /** Laat aanbiedingen weg die verder liggen dan dit (onbekende afstand blijft). Vereist `postalCode`. */
+  maxDistanceKm: z.coerce.number().int().min(1).max(200).optional(),
   sort: searchSortSchema.default('UNIT_PRICE'),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(50).default(20),
@@ -289,6 +301,8 @@ export const promotionsQuerySchema = z.object({
   chains: slugListSchema,
   category: z.string().trim().max(60).optional(),
   includePersonalized: booleanQuery,
+  postalCode: belgianPostalCodeSchema.optional(),
+  maxDistanceKm: z.coerce.number().int().min(1).max(200).optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(50).default(20),
 });

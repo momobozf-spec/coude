@@ -229,3 +229,47 @@ describe('compareBaskets', () => {
     expect(result.freeTextLines).toEqual(['kaarsjes']);
   });
 });
+
+describe('afstand', () => {
+  const chainsWithDistance = [chain('lidl', { distanceKm: 2.5 }), chain('delhaize', { distanceKm: 18 }), chain('colruyt', { distanceKm: null })];
+  const items = [
+    item({
+      itemId: 'cola',
+      candidates: [
+        { offer: offer({ storeChain: CHAINS.lidl!, priceCents: 150 }), product: cola, matchType: 'EXACT' },
+        { offer: offer({ storeChain: CHAINS.delhaize!, priceCents: 100 }), product: cola, matchType: 'EXACT' },
+        { offer: offer({ storeChain: CHAINS.colruyt!, priceCents: 120 }), product: cola, matchType: 'EXACT' },
+      ],
+    }),
+  ];
+
+  it('toont per winkel de afstand', () => {
+    const result = compareBaskets(items, chainsWithDistance, settings());
+    const bySlug = new Map(result.perStore.map((store) => [store.storeChain.slug, store.distanceKm]));
+    expect(bySlug.get('lidl')).toBe(2.5);
+    expect(bySlug.get('delhaize')).toBe(18);
+    expect(bySlug.get('colruyt')).toBeNull();
+  });
+
+  it('laat winkels buiten de maximale afstand uit de combinaties, maar onbekende afstand blijft', () => {
+    const result = compareBaskets(items, chainsWithDistance, settings({ maxDistanceKm: 10, mode: 'CHEAPEST_COMBINATION' }));
+    // Delhaize (18 km) is de goedkoopste maar te ver; Colruyt (onbekend) mag wel.
+    expect(result.cheapestCombination?.stores.map((store) => store.storeChain.slug)).toEqual(['colruyt']);
+    // Per winkel blijft Delhaize zichtbaar: de gebruiker mag zelf beslissen.
+    expect(result.perStore.some((store) => store.storeChain.slug === 'delhaize')).toBe(true);
+  });
+
+  it('laat de grens los als geen enkele winkel erbinnen ligt, en zegt dat', () => {
+    // Alleen winkels met een gekende afstand (Colruyt met onbekende afstand zou altijd meetellen).
+    const farOnly = chainsWithDistance.filter((c) => c.distanceKm !== null);
+    const result = compareBaskets(items, farOnly, settings({ maxDistanceKm: 1, mode: 'BALANCED' }));
+    expect(result.cheapestCombination?.stores.length).toBeGreaterThan(0);
+    expect(result.cheapestCombination?.explanation[0]).toContain('Geen winkel binnen 1 km');
+    expect(result.balanced?.explanation[0]).toContain('losgelaten');
+  });
+
+  it('zonder grens telt de verre winkel gewoon mee', () => {
+    const result = compareBaskets(items, chainsWithDistance, settings({ mode: 'CHEAPEST_COMBINATION' }));
+    expect(result.cheapestCombination?.stores.map((store) => store.storeChain.slug)).toEqual(['delhaize']);
+  });
+});

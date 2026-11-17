@@ -69,7 +69,7 @@ export default function PreferencesPage() {
         )}
 
         <div className="grid gap-3 sm:grid-cols-3">
-          <Field label={t('prefs.postalCode')} name="postalCode" inputMode="numeric" pattern="[1-9][0-9]{3}" maxLength={4} value={draft.postalCode ?? ''} onChange={(e) => setDraft({ ...draft, postalCode: e.target.value })} />
+          <Field label={t('prefs.postalCode')} name="postalCode" inputMode="numeric" pattern="[1-9][0-9]{3}" maxLength={4} hint={t('prefs.postalCode.hint')} value={draft.postalCode ?? ''} onChange={(e) => setDraft({ ...draft, postalCode: e.target.value })} />
           <Field label={t('prefs.municipality')} name="municipality" value={draft.municipality ?? ''} onChange={(e) => setDraft({ ...draft, municipality: e.target.value })} maxLength={80} />
           <Field
             label={t('prefs.maxDistance')}

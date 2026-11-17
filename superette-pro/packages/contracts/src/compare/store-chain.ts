@@ -15,31 +15,6 @@ export const SOURCE_STATUSES = ['LIVE', 'DEMO', 'STALE', 'UNVERIFIED', 'UNAVAILA
 export const sourceStatusSchema = z.enum(SOURCE_STATUSES);
 export type SourceStatus = z.infer<typeof sourceStatusSchema>;
 
-/** Een supermarktketen zoals de app hem toont. */
-export const storeChainSchema = z.object({
-  id: z.string(),
-  slug: z.string(),
-  name: z.string(),
-  logoUrl: z.string().nullable(),
-  websiteUrl: z.string().nullable(),
-  /** Naam van de klantenkaart, bv. "Xtra" of "SuperPlus". `null` als de keten er geen heeft. */
-  loyaltyCardName: z.string().nullable(),
-  active: z.boolean(),
-  sortOrder: z.number().int(),
-  /** Herkomst van de gegevens die we voor deze keten hebben. `null` als er nog geen import was. */
-  dataSourceKind: dataSourceKindSchema.nullable(),
-  /** ISO-8601 van de laatste geslaagde import. */
-  lastImportedAt: z.string().datetime().nullable(),
-  sourceStatus: sourceStatusSchema,
-  /** `true` alleen bij LIVE: toegestane bron, voorwaarden nagekeken, geslaagde en recente import. */
-  isLive: z.boolean(),
-});
-export type StoreChain = z.infer<typeof storeChainSchema>;
-
-/** Verkorte verwijzing naar een keten in resultaten. */
-export const storeChainRefSchema = storeChainSchema.pick({ id: true, slug: true, name: true, logoUrl: true });
-export type StoreChainRef = z.infer<typeof storeChainRefSchema>;
-
 export const storeLocationSchema = z.object({
   id: z.string(),
   storeChainId: z.string(),
@@ -58,6 +33,39 @@ export type StoreLocation = z.infer<typeof storeLocationSchema>;
 
 export const storeLocationRefSchema = storeLocationSchema.pick({ id: true, name: true, city: true, postalCode: true });
 export type StoreLocationRef = z.infer<typeof storeLocationRefSchema>;
+
+/** Een supermarktketen zoals de app hem toont. */
+export const storeChainSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  logoUrl: z.string().nullable(),
+  websiteUrl: z.string().nullable(),
+  /** Naam van de klantenkaart, bv. "Xtra" of "SuperPlus". `null` als de keten er geen heeft. */
+  loyaltyCardName: z.string().nullable(),
+  active: z.boolean(),
+  sortOrder: z.number().int(),
+  /** Herkomst van de gegevens die we voor deze keten hebben. `null` als er nog geen import was. */
+  dataSourceKind: dataSourceKindSchema.nullable(),
+  /** ISO-8601 van de laatste geslaagde import. */
+  lastImportedAt: z.string().datetime().nullable(),
+  sourceStatus: sourceStatusSchema,
+  /** `true` alleen bij LIVE: toegestane bron, voorwaarden nagekeken, geslaagde en recente import. */
+  isLive: z.boolean(),
+  /**
+   * Hemelsbrede afstand (km, op 0,1) van het midden van de opgegeven postcode
+   * tot het dichtstbijzijnde filiaal. `null` zonder `postalCode`-parameter of
+   * zonder filiaal met coördinaten.
+   */
+  distanceKm: z.number().nonnegative().nullable(),
+  nearestLocation: storeLocationRefSchema.nullable(),
+});
+export type StoreChain = z.infer<typeof storeChainSchema>;
+
+/** Verkorte verwijzing naar een keten in resultaten. */
+export const storeChainRefSchema = storeChainSchema.pick({ id: true, slug: true, name: true, logoUrl: true });
+export type StoreChainRef = z.infer<typeof storeChainRefSchema>;
+
 
 /** Belgische postcode: 1000–9999. */
 export const belgianPostalCodeSchema = z

@@ -5,7 +5,7 @@
 import type { SearchQueryInput } from '@superette/contracts';
 import { euroInputToCents, centsToEuroInput } from './format';
 
-export const SEARCH_SORTS = ['UNIT_PRICE', 'PACKAGE_PRICE', 'DISCOUNT', 'STORE', 'RELEVANCE'] as const;
+export const SEARCH_SORTS = ['UNIT_PRICE', 'PACKAGE_PRICE', 'DISCOUNT', 'STORE', 'RELEVANCE', 'DISTANCE'] as const;
 export type SearchSortValue = (typeof SEARCH_SORTS)[number];
 
 export interface SearchFilters {
@@ -90,10 +90,17 @@ export function serializeSearchParams(filters: SearchFilters): URLSearchParams {
   return params;
 }
 
+/** Waar de gebruiker vertrekt (uit de voorkeuren): zonder postcode gaat er niets mee. */
+export interface SearchOrigin {
+  postalCode: string | null;
+  maxDistanceKm: number | null;
+}
+
 /** Wat naar `GET /compare/search` gaat. Bedragen als centen, lege filters weggelaten. */
-export function toSearchQuery(filters: SearchFilters, pageSize = 20): SearchQueryInput {
+export function toSearchQuery(filters: SearchFilters, pageSize = 20, origin?: SearchOrigin): SearchQueryInput {
   const maxPriceCents = euroInputToCents(filters.maxPrice);
   return {
+    ...(origin?.postalCode ? { postalCode: origin.postalCode, ...(origin.maxDistanceKm ? { maxDistanceKm: origin.maxDistanceKm } : {}) } : {}),
     q: filters.q,
     chains: filters.chains,
     ...(filters.category ? { category: filters.category } : {}),

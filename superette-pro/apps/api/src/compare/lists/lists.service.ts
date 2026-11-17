@@ -21,6 +21,7 @@ import type {
 import { PrismaService } from '../../prisma/prisma.service';
 import { compareBaskets, type OptimizerCandidate, type OptimizerChain, type OptimizerItem } from '../basket/basket-optimizer';
 import { CompareCatalogService, productLabel } from '../catalog/compare-catalog.service';
+import { coordinatesForPostalCode } from '../geo/geo';
 import { PreferencesService } from '../preferences/preferences.service';
 
 const LIST_INCLUDE = {
@@ -181,13 +182,18 @@ export class ListsService {
     const coverage = await this.catalog.coverage(chains.map((chain) => chain.slug));
     const hasData = new Map(coverage.chains.map((entry) => [entry.slug, entry.hasData]));
 
+    // Afstand: vanaf het midden van de postcode uit de voorkeuren naar het
+    // dichtstbijzijnde filiaal per keten. Zonder postcode blijft ze onbekend.
+    const origin = coordinatesForPostalCode(prefs.postalCode);
+    const nearest = origin ? await this.catalog.nearestLocations(origin, chains.map((chain) => chain.id)) : null;
+    const settings: BasketCompareInput = { ...input, maxDistanceKm: input.maxDistanceKm ?? prefs.maxDistanceKm };
+
     const optimizerChains: OptimizerChain[] = chains.map((chain) => ({
       ref: { id: chain.id, slug: chain.slug, name: chain.name, logoUrl: chain.logoUrl },
       loyaltyCardName: chain.loyaltyCardName,
       hasLoyaltyCard: prefs.loyaltyCardChainSlugs.includes(chain.slug),
       hasData: hasData.get(chain.slug) ?? false,
-      // Afstand vraagt filiaalcoördinaten én een locatie van de gebruiker; nog niet beschikbaar.
-      distanceKm: null,
+      distanceKm: nearest?.get(chain.id)?.distanceKm ?? null,
     }));
 
     // Kandidaten: het product zelf plus gerelateerde producten, met hun matchtype.
@@ -247,12 +253,12 @@ export class ListsService {
       };
     });
 
-    const result = compareBaskets(items, optimizerChains, input);
+    const result = compareBaskets(items, optimizerChains, settings);
 
     return {
       listId,
-      mode: input.mode,
-      settings: input,
+      mode: settings.mode,
+      settings,
       perStore: result.perStore,
       bestSingleStore: result.bestSingleStore,
       cheapestCombination: result.cheapestCombination,

@@ -76,6 +76,19 @@ export default function DataPage() {
           <p className="mt-2">{t('data.sourcesText')}</p>
         </section>
 
+        <section aria-labelledby="distance-title">
+          <h2 id="distance-title" className="text-lg font-bold">
+            {t('data.distanceTitle')}
+          </h2>
+          <p className="mt-2">{t('data.distanceText')}</p>
+          <p className="mt-2">
+            {t('data.distanceAttribution')}{' '}
+            <a href="https://www.openstreetmap.org/copyright" className="font-semibold text-brand-strong underline" rel="noopener noreferrer" target="_blank">
+              openstreetmap.org/copyright
+            </a>
+          </p>
+        </section>
+
         <section aria-labelledby="independence-title">
           <h2 id="independence-title" className="text-lg font-bold">
             {t('data.independenceTitle')}

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import type { SearchResultItem } from '@superette/contracts';
@@ -14,7 +15,7 @@ import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { usePreferences } from '@/lib/use-preferences';
 import { useAsync } from '@/lib/use-async';
-import { activeFilterCount, DEFAULT_FILTERS, parseSearchParams, SEARCH_SORTS, serializeSearchParams, toSearchQuery, type SearchFilters } from '@/lib/url-state';
+import { activeFilterCount, DEFAULT_FILTERS, parseSearchParams, SEARCH_SORTS, serializeSearchParams, toSearchQuery, type SearchFilters, type SearchOrigin } from '@/lib/url-state';
 
 const PAGE_SIZE = 20;
 
@@ -54,7 +55,10 @@ function SearchPageInner() {
     [filters, preferences],
   );
 
-  const results = useAsync(() => api.search(toSearchQuery(effectiveFilters, PAGE_SIZE)), [effectiveFilters], effectiveFilters.q.length > 0);
+  // Postcode en maximale reisafstand komen uit de voorkeuren, niet uit de URL: een gedeelde link bevat ze niet.
+  const origin: SearchOrigin = useMemo(() => ({ postalCode: preferences.postalCode, maxDistanceKm: preferences.maxDistanceKm }), [preferences.postalCode, preferences.maxDistanceKm]);
+
+  const results = useAsync(() => api.search(toSearchQuery(effectiveFilters, PAGE_SIZE, origin)), [effectiveFilters, origin], effectiveFilters.q.length > 0);
 
   const update = useCallback(
     (patch: Partial<SearchFilters>, resetPage = true) => {
@@ -187,6 +191,21 @@ function SearchPageInner() {
           </select>
         </div>
       </div>
+      {filters.sort === 'DISTANCE' && !preferences.postalCode && (
+        <p className="mt-2 text-[13px] text-ink-muted" role="status">
+          {t('search.sort.DISTANCE.needsPostalCode')}{' '}
+          <Link href="/profiel/voorkeuren" className="font-semibold text-brand-strong underline">
+            {t('profile.preferencesLink')}
+          </Link>
+        </p>
+      )}
+      {preferences.postalCode && (filters.sort === 'DISTANCE' || preferences.maxDistanceKm) && (
+        <p className="mt-2 text-[13px] text-ink-muted">
+          {preferences.maxDistanceKm
+            ? t('search.distance.withinFrom', { km: preferences.maxDistanceKm, postalCode: preferences.postalCode })
+            : t('search.distance.from', { postalCode: preferences.postalCode })}
+        </p>
+      )}
 
       <div className="mt-4 grid gap-6 md:grid-cols-[17rem_1fr]">
         <aside id="filters" className={`${filtersOpen ? 'block' : 'hidden'} md:block`} aria-label={t('common.filters')}>

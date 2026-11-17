@@ -29,6 +29,7 @@ export default function ProductPage() {
         chains: preferences.enabledChainSlugs,
         includePersonalized: preferences.includePersonalizedOffers,
         includeOnline: preferences.includeOnlineOffers,
+        ...(preferences.postalCode ? { postalCode: preferences.postalCode, ...(preferences.maxDistanceKm ? { maxDistanceKm: preferences.maxDistanceKm } : {}) } : {}),
       }),
     [id, preferences],
     !prefsLoading,

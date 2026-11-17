@@ -144,6 +144,13 @@ describe('validateEnv buiten productie', () => {
     expect(env.MOLLIE_API_KEY).toBeUndefined();
   });
 
+  it('start met een .env die letterlijk uit .env.example komt (COOKIE_SECURE= en HSTS_ENABLED= leeg)', () => {
+    const env = validateEnv({ ...base, COOKIE_SECURE: '', HSTS_ENABLED: '' });
+    expect(env.COOKIE_SECURE).toBeUndefined();
+    expect(env.HSTS_ENABLED).toBeUndefined();
+    expect(validateEnv({ ...base, COOKIE_SECURE: 'true', HSTS_ENABLED: 'false' })).toMatchObject({ COOKIE_SECURE: true, HSTS_ENABLED: false });
+  });
+
   it('laat lokale http-origins en demogegevens toe', () => {
     const env = validateEnv({ ...base, NODE_ENV: 'development', COMPARE_ALLOW_DEMO: 'true' });
     expect(env.APP_URL).toBe('http://localhost:3000');

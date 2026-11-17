@@ -176,7 +176,7 @@ async function main() {
   check('alle script-tags dragen de CSP-nonce', scriptsWithoutNonce.length === 0, scriptsWithoutNonce.slice(0, 2).join(' '));
   check('pagina hydrateert (interactief)', await page.evaluate(() => !!document.querySelector('nav.fixed a[href="/zoeken"]')) );
   check('titel bevat Superette', /Superette/.test(await page.title()));
-  check('demobanner zichtbaar', await page.getByRole('status').filter({ hasText: /demogegevens/i }).first().isVisible());
+  check('demobanner zichtbaar', await page.getByRole('status').filter({ hasText: /demo/i }).first().isVisible());
   // De heldertekst noemt de ketens ook; wacht op de kaartjes zelf.
   await page.waitForSelector('section[aria-labelledby="chains-title"] li >> text=Delhaize');
   check('zeven supermarkten getoond', (await page.locator('section[aria-labelledby="chains-title"] li').count()) === 7);
@@ -468,7 +468,7 @@ async function main() {
   await wide.screenshot({ path: resolve(shots, '08-zoeken-desktop.png'), fullPage: true });
   await wide.goto(`${WEB}/over-de-gegevens`);
   await wide.waitForSelector('text=Over de gegevens');
-  check('gegevenspagina legt DEMO uit', /demogegevens/i.test(await wide.locator('main').innerText()));
+  check('gegevenspagina legt DEMO uit', /demo(gegevens|nstratieprijzen)/i.test(await wide.locator('main').innerText()));
   await a11y(wide, 'over-de-gegevens');
   await wide.screenshot({ path: resolve(shots, '09-gegevens-desktop.png'), fullPage: true });
 

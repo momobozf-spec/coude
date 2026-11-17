@@ -29,6 +29,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CompareConfig } from '../compare-config';
 import { isConditionalRule, priceStatusFor, sourceKindLabel } from '../pricing/offer-pricing';
+import { distanceToNearestKm, haversineKm, roundKm, type GeoPoint, type NearestResult } from '../geo/geo';
 
 export type ProductRow = Prisma.CatalogProductGetPayload<{ include: { category: true } }>;
 
@@ -51,6 +52,33 @@ export interface OfferFilter {
   readonly maxPriceCents?: number;
   /** Alleen prijzen die keten-breed gelden of in deze filialen. */
   readonly locationIds?: readonly string[];
+  /** Vertrekpunt van de gebruiker (het midden van de postcode): zet `distanceKm` op elk aanbod. */
+  readonly origin?: GeoPoint;
+  /** Laat aanbiedingen weg die verder liggen dan dit; een onbekende afstand blijft staan. Vereist `origin`. */
+  readonly maxDistanceKm?: number;
+}
+
+export type LocationRow = Prisma.StoreLocationGetPayload<{ select: { id: true; storeChainId: true; name: true; city: true; postalCode: true; latitude: true; longitude: true } }>;
+
+/**
+ * Afstand van een aanbod: naar het eigen filiaal als dat coördinaten heeft,
+ * anders naar het dichtstbijzijnde filiaal van de keten, anders onbekend.
+ */
+export function offerDistanceKm(
+  origin: GeoPoint | undefined,
+  location: { latitude: number | null; longitude: number | null } | null,
+  nearestOfChain: NearestResult | null | undefined,
+): number | null {
+  if (!origin) return null;
+  if (location && location.latitude !== null && location.longitude !== null) {
+    return roundKm(haversineKm(origin, { latitude: location.latitude, longitude: location.longitude }));
+  }
+  return nearestOfChain?.distanceKm ?? null;
+}
+
+/** Binnen de maximale afstand, of onbekend (dat sluiten we nooit uit). */
+export function withinMaxDistance(distanceKm: number | null, maxDistanceKm: number | undefined | null): boolean {
+  return maxDistanceKm == null || distanceKm === null || distanceKm <= maxDistanceKm;
 }
 
 export const DEFAULT_OFFER_FILTER: OfferFilter = Object.freeze({
@@ -90,7 +118,7 @@ export class CompareCatalogService {
     };
   }
 
-  offerDto(row: OfferRow, now: Date = new Date()): ProductOffer {
+  offerDto(row: OfferRow, now: Date = new Date(), distanceKm: number | null = null): ProductOffer {
     const rule = parseRule(row.promotionRule);
     const product = row.storeProduct.catalogProduct;
 
@@ -127,6 +155,7 @@ export class CompareCatalogService {
       storeLocation: row.storeLocation
         ? { id: row.storeLocation.id, name: row.storeLocation.name, city: row.storeLocation.city, postalCode: row.storeLocation.postalCode }
         : null,
+      distanceKm,
       storeProductName: row.storeProduct.name,
       productUrl: row.storeProduct.productUrl,
       imageUrl: row.storeProduct.imageUrl ?? product.imageUrl,
@@ -207,13 +236,43 @@ export class CompareCatalogService {
       orderBy: [{ priceCents: 'asc' }],
     });
 
+    const nearest = filter.origin ? await this.nearestLocations(filter.origin, [...new Set(rows.map((row) => row.storeChainId))]) : new Map<string, NearestResult<LocationRow>>();
+
     for (const row of rows) {
+      const distanceKm = offerDistanceKm(filter.origin, row.storeLocation, nearest.get(row.storeChainId));
+      if (filter.origin && !withinMaxDistance(distanceKm, filter.maxDistanceKm)) continue;
       const productId = row.storeProduct.catalogProductId;
       const list = result.get(productId) ?? [];
-      list.push(this.offerDto(row, now));
+      list.push(this.offerDto(row, now, distanceKm));
       result.set(productId, list);
     }
 
+    return result;
+  }
+
+  /**
+   * Per keten het dichtstbijzijnde actieve filiaal met coördinaten vanaf
+   * `origin`. Ketens zonder zo'n filiaal ontbreken in het resultaat.
+   */
+  async nearestLocations(origin: GeoPoint, chainIds: readonly string[]): Promise<Map<string, NearestResult<LocationRow>>> {
+    const result = new Map<string, NearestResult<LocationRow>>();
+    if (chainIds.length === 0) return result;
+
+    const rows = await this.prisma.storeLocation.findMany({
+      where: { storeChainId: { in: [...chainIds] }, active: true, latitude: { not: null }, longitude: { not: null } },
+      select: { id: true, storeChainId: true, name: true, city: true, postalCode: true, latitude: true, longitude: true },
+    });
+
+    const byChain = new Map<string, LocationRow[]>();
+    for (const row of rows) {
+      const list = byChain.get(row.storeChainId) ?? [];
+      list.push(row);
+      byChain.set(row.storeChainId, list);
+    }
+    for (const [chainId, locations] of byChain) {
+      const nearest = distanceToNearestKm(origin, locations);
+      if (nearest) result.set(chainId, nearest);
+    }
     return result;
   }
 

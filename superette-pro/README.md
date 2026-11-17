@@ -1,8 +1,9 @@
 # Superette — Belgische supermarktvergelijker
 
 Prijzen van Belgische supermarkten naast elkaar: productzoeken, eenheidsprijzen
-per kg/l/stuk, productmatching, boodschappenlijsten, mandje-vergelijking en
-prijsalerts. App in `apps/superette-web` (nl/fr/en), API in `apps/api`
+per kg/l/stuk, productmatching, afstand tot de dichtstbijzijnde winkel (op
+postcode, zonder locatietoestemming), boodschappenlijsten, mandje-vergelijking
+en prijsalerts. App in `apps/superette-web` (nl/fr/en), API in `apps/api`
 (`src/compare/*`). Uitbater: **Marhaba Cooperation BV** (BE 1037.222.285,
 Sweetstraat 13, 3870 Heers). Zie **[docs/COMPARE.md](docs/COMPARE.md)** en hieronder
 **[Live zetten (Superette)](#live-zetten-superette)**.

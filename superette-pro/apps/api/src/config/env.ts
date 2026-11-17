@@ -134,10 +134,7 @@ export const envSchema = z
       .default('false')
       .transform((v): boolean | number | string => (v === 'true' ? true : v === 'false' ? false : /^\d+$/.test(v) ? Number(v) : v)),
     /** `Secure` op de sessiecookies. Standaard aan in productie, en daar niet uit te zetten. */
-    COOKIE_SECURE: z
-      .enum(['true', 'false'])
-      .optional()
-      .transform((v) => (v === undefined ? undefined : v === 'true')),
+    COOKIE_SECURE: blankAsUndefined(z.enum(['true', 'false'])).transform((v) => (v === undefined ? undefined : v === 'true')),
     /** Optioneel cookiedomein (bv. `.superette.be`). Leeg = host-only, de veiligste standaard. */
     COOKIE_DOMAIN: z.string().optional(),
     /** Levensduur van het access-token van de Superette-app (cookie). Kort: het is intrekbaar via de sessie. */
@@ -145,10 +142,7 @@ export const envSchema = z
     /** Levensduur van de sessie zelf (refresh-token). */
     WEB_REFRESH_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(30),
     /** HSTS alleen als de API via HTTPS wordt aangeboden. Standaard aan in productie. */
-    HSTS_ENABLED: z
-      .enum(['true', 'false'])
-      .optional()
-      .transform((v) => (v === undefined ? undefined : v === 'true')),
+    HSTS_ENABLED: blankAsUndefined(z.enum(['true', 'false'])).transform((v) => (v === undefined ? undefined : v === 'true')),
     LOG_FORMAT: z.enum(['json', 'pretty']).optional(),
     /** Release- of buildversie, zichtbaar in logs en de interne status. */
     APP_VERSION: z.string().max(64).default('dev'),

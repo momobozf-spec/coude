@@ -23,8 +23,14 @@ export default function PromotionsPage() {
   const effectiveChains = chainSlugs ?? preferences.enabledChainSlugs;
   const chains = useAsync(() => api.chains(), []);
   const promotions = useAsync(
-    () => api.promotions({ chains: effectiveChains, includePersonalized: preferences.includePersonalizedOffers, pageSize: 50 }),
-    [effectiveChains, preferences.includePersonalizedOffers],
+    () =>
+      api.promotions({
+        chains: effectiveChains,
+        includePersonalized: preferences.includePersonalizedOffers,
+        pageSize: 50,
+        ...(preferences.postalCode ? { postalCode: preferences.postalCode, ...(preferences.maxDistanceKm ? { maxDistanceKm: preferences.maxDistanceKm } : {}) } : {}),
+      }),
+    [effectiveChains, preferences.includePersonalizedOffers, preferences.postalCode, preferences.maxDistanceKm],
     !prefsLoading,
   );
 

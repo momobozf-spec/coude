@@ -28,7 +28,7 @@ staan hier alleen waar ze een Superette-gebruiker raken.
 | 1 | Account en authenticatie | e-mail, naam, wachtwoord-hash (Argon2id), taal, status | gebruikers | overeenkomst (6.1.b) | tot verwijdering | hosting, database |
 | 2 | Sessies | sessie-id, token-hashes (SHA-256), client, user-agent, tijdstippen | gebruikers | overeenkomst (6.1.b) / gerechtvaardigd belang beveiliging (6.1.f) | 30 dagen na verlopen of intrekken, daarna gewist door `purge` | hosting, database |
 | 3 | Boodschappenlijsten | lijstnamen, regels (product of vrije tekst), aantallen | gebruikers | overeenkomst | tot verwijdering door gebruiker/account | database |
-| 4 | Voorkeuren | ketens, favorieten, klantenkaartbezit, postcode/gemeente (optioneel), afstand, merkvoorkeur, e-mail-opt-in | gebruikers | overeenkomst; opt-in = toestemming (6.1.a) | tot verwijdering | database |
+| 4 | Voorkeuren | ketens, favorieten, klantenkaartbezit, postcode/gemeente (optioneel), maximale reisafstand, merkvoorkeur, e-mail-opt-in | gebruikers | overeenkomst; opt-in = toestemming (6.1.a) | tot verwijdering | database |
 | 5 | Prijsalerts en meldingen | product/categorie, doelprijs, ketens, kanaal, meldingsgeschiedenis | gebruikers | overeenkomst | tot verwijdering | database |
 | 6 | E-mailmeldingen | e-mailadres, overzicht van alerts | gebruikers met opt-in | toestemming (6.1.a), intrekbaar in voorkeuren | afleverstatus 90 dagen (aanbevolen; opruimtaak nog te maken) | e-mailprovider (verwerkersovereenkomst nodig) |
 | 7 | Nieuwsbrief | e-mailadres | gebruikers met opt-in | toestemming | tot intrekking | (nog geen tool) |
@@ -36,6 +36,12 @@ staan hier alleen waar ze een Superette-gebruiker raken.
 | 9 | Gegevensexport | alle bovenstaande, als download | gebruiker zelf | wettelijke verplichting (art. 15/20) | niet bewaard | – |
 | 10 | Accountverwijdering | zie hieronder | gebruiker zelf | wettelijke verplichting (art. 17) | – | – |
 | 11 | Boetiek (zelfde account) | toestemmingen, toegangslogs, bestellingen, kasbonnen | boetiekklanten | overeenkomst, wettelijke plicht (btw 7 jaar, camerawet) | volgens boetiekbeleid | – |
+
+De postcode (rij 4) dient voor de afstand tot de supermarkten: de API zet hem om
+in het midden van die postcode (ingebakken tabel, geen externe dienst) en
+rekent hemelsbreed naar de filialen. Bezoekers zonder account bewaren hem
+alleen in hun browser; de app stuurt hem als queryparameter mee naar de API
+en logt hem niet apart.
 
 **Niet verwerkt**: locatie van het toestel, trackingcookies, advertentie-id's,
 third-party analytics (CSP laat alleen een expliciet geconfigureerde

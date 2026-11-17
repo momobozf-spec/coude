@@ -21,6 +21,7 @@
     "db:seed:compare": "npm run db:seed:compare -w @superette/api",
     "compare:sync": "npm run compare:sync -w @superette/api --",
     "feeds:push": "npm exec --workspace @superette/api -- tsx scripts/feeds-push.ts",
+    "dev:db": "node scripts/dev-db.mjs",
     "dev:api": "npm run dev -w @superette/api",
     "dev:pwa": "npm run dev -w @superette/pwa",
     "dev:web": "npm run dev -w @superette/web",
