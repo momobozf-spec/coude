@@ -2,11 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_CONDITIONS, type PricingContext } from '@superrette/pricing-engine';
 import {
   BasketComparisonEngine,
+  FulfilmentPricing,
   SmartBasketOptimizer,
   selectionKey,
   type BasketCandidate,
   type BasketItemInput,
   type BasketRetailer,
+  type FulfilmentFeeSchedule,
 } from './index.js';
 
 const ctx: PricingContext = { at: new Date('2026-09-23T10:00:00Z'), loyaltyPrograms: [] };
@@ -201,5 +203,50 @@ describe('SmartBasketOptimizer', () => {
     const r = SmartBasketOptimizer.optimize(onlyLidlAndOther, { maxStores: 2 });
     expect(r.best?.foundCount).toBe(3);
     expect(r.recommendCombining).toBe(true);
+  });
+});
+
+describe('FulfilmentPricing (delivered basket)', () => {
+  const comparison = BasketComparisonEngine.compare({ items, retailers, candidates, context: ctx });
+  const smart = SmartBasketOptimizer.optimize(comparison, { maxStores: 2 });
+  const schedule: FulfilmentFeeSchedule = {
+    baseFeeCents: 1495,
+    percentBasisPoints: 800,
+    extraStoreFeeCents: 600,
+    minimumOrderCents: 0,
+  };
+
+  it('quotes shelf subtotal plus base, percentage and extra-store fees', () => {
+    const q = FulfilmentPricing.quote(10_000, 2, schedule);
+    expect(q.percentFeeCents).toBe(800);
+    expect(q.extraStoreFeeCents).toBe(600);
+    expect(q.feeTotalCents).toBe(1495 + 800 + 600);
+    expect(q.customerTotalCents).toBe(10_000 + 2895);
+    expect(FulfilmentPricing.quote(10_000, 1, { ...schedule, maxPercentFeeCents: 500 }).percentFeeCents).toBe(500);
+  });
+
+  it('keeps one store when the extra-store fee eats the shelf-price saving', () => {
+    expect(smart.recommendCombining).toBe(true);
+    const r = FulfilmentPricing.compare(smart, schedule);
+    expect(r.best?.plan.retailerIds).toEqual(['colruyt']);
+    // 776 + 1495 + 62 (8% of 776, rounded half-up)
+    expect(r.best?.quote.customerTotalCents).toBe(776 + 1495 + 62);
+    expect(r.combiningEatenByFees).toBe(true);
+  });
+
+  it('recommends combining only when it is still cheaper delivered', () => {
+    const r = FulfilmentPricing.compare(smart, { ...schedule, extraStoreFeeCents: 0 });
+    expect(new Set(r.best?.plan.retailerIds)).toEqual(new Set(['lidl', 'colruyt']));
+    expect(r.best?.quote.customerTotalCents).toBe(686 + 1495 + 55);
+    expect(r.combiningEatenByFees).toBe(false);
+  });
+
+  it('never offers incomplete baskets or orders below the minimum', () => {
+    const r = FulfilmentPricing.compare(smart, schedule);
+    expect(r.options.every((o) => o.plan.foundCount === items.length)).toBe(true);
+    expect(r.options.some((o) => o.plan.retailerIds.includes('lidl') && o.plan.retailerIds.length === 1)).toBe(false);
+    const tooSmall = FulfilmentPricing.compare(smart, { ...schedule, minimumOrderCents: 6000 });
+    expect(tooSmall.best).toBeNull();
+    expect(FulfilmentPricing.quote(776, 1, { ...schedule, minimumOrderCents: 6000 }).refusal).toBe('BELOW_MINIMUM');
   });
 });
