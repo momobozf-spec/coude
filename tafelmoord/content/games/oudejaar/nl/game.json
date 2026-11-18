@@ -1,0 +1,102 @@
+{
+  "game": "oudejaar",
+  "category": "volwassenen",
+  "age": "16+",
+  "price_cents": 2900,
+  "brand": "Tafelmoord",
+  "title": "Moord op Oudejaar",
+  "subtitle": "in Café De Laatste Ronde",
+  "invite_when": "Oudejaarsavond · Café De Laatste Ronde, Vlierbeke",
+  "host_plays": true,
+  "culprit": "mos",
+  "culprit_marker": "Jij hebt Fons vermoord",
+  "spoilers": [
+    "Mos is de moordenaar",
+    "De moordenaar is"
+  ],
+  "min_players": 6,
+  "max_players": 12,
+  "replaceable": [
+    "sofie",
+    "dries"
+  ],
+  "characters_by_count": {
+    "6": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos"
+    ],
+    "7": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos",
+      "sofie"
+    ],
+    "8": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos",
+      "sofie",
+      "dries"
+    ],
+    "9": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos",
+      "sofie",
+      "dries",
+      "elke"
+    ],
+    "10": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos",
+      "sofie",
+      "dries",
+      "elke",
+      "jeanine"
+    ],
+    "11": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos",
+      "sofie",
+      "dries",
+      "elke",
+      "jeanine",
+      "yusuf"
+    ],
+    "12": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos",
+      "sofie",
+      "dries",
+      "elke",
+      "jeanine",
+      "yusuf",
+      "bart"
+    ]
+  }
+}

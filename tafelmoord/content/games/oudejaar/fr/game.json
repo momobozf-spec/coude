@@ -1,0 +1,102 @@
+{
+  "game": "oudejaar",
+  "category": "volwassenen",
+  "age": "16+",
+  "price_cents": 2900,
+  "brand": "Tafelmoord",
+  "title": "Meurtre au Réveillon",
+  "subtitle": "au Café La Dernière Tournée",
+  "invite_when": "Soirée du Nouvel An · Café La Dernière Tournée, Vlierbeke",
+  "host_plays": true,
+  "culprit": "mos",
+  "culprit_marker": "C'est toi qui as tué Fons",
+  "spoilers": [
+    "Mos est l'assassin",
+    "L'assassin est"
+  ],
+  "min_players": 6,
+  "max_players": 12,
+  "replaceable": [
+    "sofie",
+    "dries"
+  ],
+  "characters_by_count": {
+    "6": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos"
+    ],
+    "7": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos",
+      "sofie"
+    ],
+    "8": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos",
+      "sofie",
+      "dries"
+    ],
+    "9": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos",
+      "sofie",
+      "dries",
+      "elke"
+    ],
+    "10": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos",
+      "sofie",
+      "dries",
+      "elke",
+      "jeanine"
+    ],
+    "11": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos",
+      "sofie",
+      "dries",
+      "elke",
+      "jeanine",
+      "yusuf"
+    ],
+    "12": [
+      "linda",
+      "kevin",
+      "nadia",
+      "jp",
+      "greet",
+      "mos",
+      "sofie",
+      "dries",
+      "elke",
+      "jeanine",
+      "yusuf",
+      "bart"
+    ]
+  }
+}

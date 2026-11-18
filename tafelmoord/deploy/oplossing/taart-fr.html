@@ -1,0 +1,143 @@
+<!doctype html><html lang="fr" class="cat-kinderen"><head><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta charset="utf-8">
+<title>Solution – Qui a caché le gâteau ?</title>
+<style>@page { size: A4; } /* Tafelmoord – bruin café: donker hout, koper, crèmepapier */
+@page {
+  margin: 16mm 14mm 18mm;
+  background: #f6efe2;
+  @bottom-center { content: counter(page); font: 9pt "DejaVu Serif", serif; color: #8a6d4b; }
+}
+html { font-family: "DejaVu Serif", Georgia, serif; font-size: 10.5pt; line-height: 1.5; color: #2b1d12; }
+body { margin: 0; }
+.brand { position: running(brand); }
+h1, h2, h3 { font-family: "DejaVu Serif", serif; color: #5a2a14; line-height: 1.2; }
+h2 { font-size: 14pt; margin: 1.4em 0 0.4em; border-bottom: 1.5px solid #b07a3c; padding-bottom: 3px; page-break-after: avoid; }
+h3 { font-size: 11.5pt; }
+p { margin: 0.4em 0; }
+ul, ol { padding-left: 1.3em; margin: 0.4em 0; }
+li { margin: 0.15em 0; }
+strong { color: #3e1d0d; }
+blockquote {
+  margin: 0.7em 0; padding: 0.6em 0.9em;
+  background: #efe3cc; border-left: 4px solid #b07a3c; border-radius: 3px;
+  font-style: italic; page-break-inside: avoid;
+}
+blockquote p { margin: 0.25em 0; }
+table { border-collapse: collapse; width: 100%; margin: 0.6em 0; font-size: 9.2pt; page-break-inside: auto; }
+th { background: #5a2a14; color: #f6efe2; text-align: left; padding: 4px 6px; }
+td { border-bottom: 1px solid #d9c6a5; padding: 4px 6px; vertical-align: top; }
+tr { page-break-inside: avoid; }
+
+.cover-title { font-size: 22pt; margin: 0; text-align: center; letter-spacing: 0.5px; }
+.cover-sub { text-align: center; font-style: italic; color: #8a6d4b; margin: 0 0 1em; }
+.doc-title { text-align: center; border: none; font-size: 16pt; }
+.cover { page-break-after: always; text-align: center; padding-top: 18mm; }
+.cover h2 { border: none; font-size: 20pt; margin-top: 1.2em; }
+.cover .costume { text-align: left; margin-top: 2.5em; background: #efe3cc; padding: 0.7em; border-radius: 4px; }
+.role { font-style: italic; color: #8a6d4b; text-align: center; }
+.secret {
+  display: inline-block; text-transform: uppercase; letter-spacing: 2px; font-size: 8.5pt;
+  color: #f6efe2; background: #7a1f12; padding: 3px 10px; border-radius: 2px;
+}
+.invite { text-align: center; margin-top: 10mm; }
+.invite h2 { border: none; font-size: 20pt; margin: 0.2em 0; }
+.invite .kicker { text-transform: uppercase; letter-spacing: 2px; font-size: 8.5pt; color: #8a6d4b; }
+.invite .when { margin-top: 1.5em; font-weight: bold; }
+.invite .costume { text-align: left; background: #efe3cc; padding: 0.7em; border-radius: 4px; margin-top: 1.5em; }
+.card { page-break-before: always; }
+.vote { page-break-after: always; }
+.vote .line { border-bottom: 1px solid #8a6d4b; height: 9mm; }
+.qr { text-align: center; margin: 1em 0; }
+.qr img { width: 42mm; height: 42mm; }
+.qr p { font-size: 8.5pt; color: #8a6d4b; word-break: break-all; }
+
+/* Kinderspellen: helder feestpalet, grotere letters */
+html.cat-kinderen { font-size: 11.5pt; color: #1f2a44; }
+.cat-kinderen h1, .cat-kinderen h2, .cat-kinderen h3 { color: #c2410c; }
+.cat-kinderen h2 { border-bottom-color: #f59e0b; }
+.cat-kinderen blockquote { background: #fef3c7; border-left-color: #f59e0b; font-style: normal; }
+.cat-kinderen th { background: #2563eb; }
+.cat-kinderen td { border-bottom-color: #bfdbfe; }
+.cat-kinderen .cover .costume, .cat-kinderen .invite .costume { background: #dbeafe; }
+.cat-kinderen .secret { background: #2563eb; }
+.cat-kinderen .role, .cat-kinderen .cover-sub, .cat-kinderen .invite .kicker { color: #6b7280; }
+html.cat-kinderen body { page: kids; }
+@page kids { background: #fffdf7; @bottom-center { content: counter(page); font: 9pt "DejaVu Serif", serif; color: #6b7280; } }
+</style></head>
+<body><h1 class="cover-title">Qui a caché le gâteau ?</h1><p class="cover-sub">Un jeu d&#x27;enquête pour l&#x27;anniversaire de Mamy Rosa</p><h2>C'est Lowie qui a caché le gâteau</h2>
+<p>Lis à voix haute au groupe :</p>
+<blockquote>
+<p>Lowie adore le chocolat. Ce matin, il avait déjà mangé trois biscuits, alors maman a dit : « Plus de bonbons jusqu'au gâteau ! » Mais le gâteau sentait si bon…</p>
+<p>Quand tout le monde est allé au jardin pour la photo, Lowie a dit : « Je dois faire pipi ! » Mais il est allé au garage. Il voulait juste goûter un tout petit peu de chocolat. Oups, son doigt est allé trop loin et un morceau est tombé ! Quand Bolleke s'est mis à aboyer, il a eu peur. Vite, il a caché le gâteau dans la remise, sous une vieille nappe.</p>
+</blockquote>
+<h2>Comment le sait-on ?</h2>
+<ol>
+<li><strong>Il n'était pas sur la photo.</strong> Sur la photo de Noor de 15h05, il manque Sem et Lowie.</li>
+<li><strong>Sem était à l'intérieur, Lowie non.</strong> Lotte et Noor ont vu Sem faire signe par la fenêtre.</li>
+<li><strong>Il n'est pas allé aux toilettes.</strong> Sem était à côté des toilettes et aussi de l'escalier. Personne n'est passé.</li>
+<li><strong>De la farine sur ses chaussures.</strong> Ines a fait tomber de la farine dans le garage. Bolleke a reniflé la poudre blanche sur les chaussures de Lowie.</li>
+<li><strong>Du chocolat sur sa manche.</strong> Le glaçage d'Ines sent l'orange. Un biscuit au chocolat normal, non.</li>
+</ol>
+<p><strong>Preuves en plus avec plus de joueurs :</strong> Jonas a vu le gâteau à 14h50. Rayan a vu Lowie aller vers le garage à 15h01. Fien a vu à 15h07 une manche blanche avec une tache brune dans la remise. Bas a trouvé des empreintes avec des étoiles, comme les semelles de Lowie.</p>
+<h2>Pourquoi ce n'étaient pas les autres</h2>
+<table>
+<thead>
+<tr>
+<th>Enfant</th>
+<th>Pourquoi suspect</th>
+<th>Pourquoi innocent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sem</td>
+<td>Pas sur la photo.</td>
+<td>Il était à l'intérieur et faisait signe par la fenêtre.</td>
+</tr>
+<tr>
+<td>Mila</td>
+<td>Son chien vole de la nourriture.</td>
+<td>Un chien ne peut pas ouvrir un frigo.</td>
+</tr>
+<tr>
+<td>Ines</td>
+<td>C'est elle qui est allée chercher le gâteau.</td>
+<td>Elle est sur la photo et a fait le gâteau elle-même.</td>
+</tr>
+<tr>
+<td>Lotte</td>
+<td>Elle a regardé les cadeaux.</td>
+<td>Elle était au jardin pour la photo.</td>
+</tr>
+<tr>
+<td>Noor</td>
+<td>Elle n'est pas sur la photo.</td>
+<td>C'est elle qui a pris la photo.</td>
+</tr>
+<tr>
+<td>Jonas</td>
+<td>Il est allé dans le garage.</td>
+<td>À 14h50, le gâteau était encore là.</td>
+</tr>
+<tr>
+<td>Rayan</td>
+<td>Il fait disparaître des choses.</td>
+<td>Il tenait la porte du jardin.</td>
+</tr>
+<tr>
+<td>Fien</td>
+<td>Elle était près de la remise.</td>
+<td>Elle avait déjà mangé assez de bonbons.</td>
+</tr>
+<tr>
+<td>Bas</td>
+<td>Il voulait le morceau avec les lettres.</td>
+<td>C'est lui qui a retrouvé le gâteau.</td>
+</tr>
+</tbody>
+</table>
+<h2>Les aveux de Lowie</h2>
+<p>Demande au joueur de Lowie de lire ceci :</p>
+<blockquote>
+<p>« Oui, c'était moi. Pardon, Mamy ! Je voulais juste goûter un tout petit peu de chocolat. Je peux te donner le premier morceau de gâteau ? »</p>
+</blockquote>
+<p><em>Et maintenant : du gâteau pour tout le monde ! Merci d'avoir joué à Fête Enquête.</em></p></body></html>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meurtre au Réveillon – jeu de meurtre à la maison | Tafelmoord</title>
+<meta name="description" content="Un jeu de meurtre belge à la maison pour 6 à 12 joueurs. Téléchargez-le tout de suite, jouez sur votre smartphone. Avec le Pack festif en bonus.">
+<link rel="alternate" hreflang="nl" href="https://tafelmoord.vercel.app/nl/oudejaar.html">
+<link rel="alternate" hreflang="fr" href="https://tafelmoord.vercel.app/fr/oudejaar.html">
+<link rel="preload" href="../fonts/bodoni-moda-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../tm2.css">
+</head>
+<body>
+<header class="scene" id="scene" data-state="dark">
+  <div class="room" aria-hidden="true"><span class='name' style='left:8%;top:22%;transform:rotate(-8deg)'>Linda?</span><span class='name' style='left:70%;top:18%;transform:rotate(6deg)'>Kevin?</span><span class='name' style='left:14%;top:64%;transform:rotate(4deg)'>Nadia?</span><span class='name' style='left:74%;top:60%;transform:rotate(-5deg)'>Jean-Pierre?</span><span class='name' style='left:40%;top:82%;transform:rotate(-3deg)'>Greet?</span><span class='name' style='left:58%;top:40%;transform:rotate(7deg)'>Marc?</span><span class="glass g1"></span><span class="glass g2"></span><span class="glass g3"></span></div>
+  <div class="wrap scene-in">
+    <nav class="nav"><a class="logo" href="../fr/index.html">Tafelmoord</a><a class="lang" href="../nl/oudejaar.html" hreflang="nl">Nederlands</a></nav>
+    <div class="blackout-copy"><p class="time">23h45</p><p class="dark-line">Panne de courant au Café La Dernière Tournée.</p><p class="hint">Cherchez avec votre lampe. Quelqu&#x27;un à table est un assassin.</p>
+      <button class="btn lights" id="lights" type="button">Rallumer la lumière</button></div>
+    <div class="lit">
+      <div class="lit-copy">
+        <p class="kind">Jeu de meurtre à la maison, à télécharger</p>
+        <h1>Meurtre au Réveillon<em>au Café La Dernière Tournée</em></h1>
+        <p class="lead">À minuit, le patron du café est retrouvé mort dans la cave. Vos invités et vous êtes les suspects : chacun reçoit un rôle, un secret et un alibi. Qui ment à table ?</p>
+        <ul class="facts"><li>6 à 12 joueurs</li><li>2 à 3 heures</li><li>dès 16 ans</li><li>jouable sur smartphone</li></ul>
+        <div class="cta"><a class="btn" href="#kopen">Acheter le jeu</a><span class="price">29 €<small>TVA comprise, directement par e-mail</small></span></div>
+      </div>
+      <div class="table"><p class="flip-hint">Retournez une carte</p><div class="suspects"><button class="sus" type="button" aria-pressed="false" aria-label="Linda Verlinden"><span class="sus-in"><span class="sus-front"><span class="no">Suspect 1/12</span><span class="who">Linda Verlinden</span><span class="role">Épouse de Fons, derrière le comptoir avec lui</span><span class="stamp">CONFIDENTIEL</span></span><span class="sus-back"><span class="motive">Elle a appris ce soir que le café était vendu. Ou le savait-elle déjà ?</span><span class="q">Qui a fait le coup ?</span></span></span></button><button class="sus" type="button" aria-pressed="false" aria-label="Kevin Verlinden"><span class="sus-in"><span class="sus-front"><span class="no">Suspect 2/12</span><span class="who">Kevin Verlinden</span><span class="role">Fils de Fons et Linda, barman</span><span class="stamp">CONFIDENTIEL</span></span><span class="sus-back"><span class="motive">Toujours fauché. Et ce soir, étrangement nerveux.</span><span class="q">Qui a fait le coup ?</span></span></span></button><button class="sus" type="button" aria-pressed="false" aria-label="Nadia El Amrani"><span class="sus-in"><span class="sus-front"><span class="no">Suspect 3/12</span><span class="who">Nadia El Amrani</span><span class="role">Comptable du café</span><span class="stamp">CONFIDENTIEL</span></span><span class="sus-back"><span class="motive">Elle connaît chaque euro du café. Même ceux qui ont disparu.</span><span class="q">Qui a fait le coup ?</span></span></span></button><button class="sus" type="button" aria-pressed="false" aria-label="Jean-Pierre JP Lambert"><span class="sus-in"><span class="sus-front"><span class="no">Suspect 4/12</span><span class="who">Jean-Pierre JP Lambert</span><span class="role">Brasseur namurois et fournisseur de boissons</span><span class="stamp">CONFIDENTIEL</span></span><span class="sus-back"><span class="motive">Attend son argent depuis des mois. Ce soir, il devait être payé.</span><span class="q">Qui a fait le coup ?</span></span></span></button><button class="sus" type="button" aria-pressed="false" aria-label="Greet Peeters"><span class="sus-in"><span class="sus-front"><span class="no">Suspect 5/12</span><span class="who">Greet Peeters</span><span class="role">Promotrice immobilière, acheteuse du café</span><span class="stamp">CONFIDENTIEL</span></span><span class="sus-back"><span class="motive">Elle rachète le café. L&#x27;acte se signe le 2 janvier.</span><span class="q">Qui a fait le coup ?</span></span></span></button><button class="sus" type="button" aria-pressed="false" aria-label="Marc Mos Mertens"><span class="sus-in"><span class="sus-front"><span class="no">Suspect 6/12</span><span class="who">Marc Mos Mertens</span><span class="role">Habitué depuis 1991, le plus vieil ami de Fons</span><span class="stamp">CONFIDENTIEL</span></span><span class="sus-back"><span class="motive">Habitué depuis 1991. Le plus vieil ami de Fons.</span><span class="q">Qui a fait le coup ?</span></span></span></button></div><p class="reveal">Vous le découvrirez au réveillon.</p></div>
+    </div>
+  </div>
+  <div class="torch" aria-hidden="true"></div>
+</header>
+<section class="sheet"><div class="wrap">
+  <h2>Ce que contient le jeu</h2><p class="sub">Tout ce qu&#x27;il faut pour une soirée de 2 à 3 heures, en PDF. Jouez sur smartphone ou imprimez.</p>
+  <ul class="box"><li class='doc'><span class='n'>1</span><strong>Guide de l&#x27;hôte</strong><span>Prologue, répartition des rôles selon le nombre de joueurs et règles du jeu.</span></li><li class='doc stack'><span class='n'>12</span><strong>Livrets de personnage</strong><span>Pour chaque joueur : qui vous êtes, votre secret, votre alibi et ce que vous devez découvrir.</span></li><li class='doc stack'><span class='n'>12</span><strong>Invitations</strong><span>À envoyer par WhatsApp, avec une idée de costume pour chaque invité.</span></li><li class='doc'><span class='n'>3</span><strong>Manches</strong><span>À chaque manche, de nouveaux indices arrivent sur la table.</span></li><li class='doc'><span class='n'>2</span><strong>Pièces à conviction</strong><span>Des indices en plus pour les petits groupes de 6 ou 7.</span></li><li class='doc'><span class='n'>1</span><strong>Bulletin de vote</strong><span>Chacun désigne le coupable avant la révélation.</span></li><li class='doc'><span class='n'>1</span><strong>Solution derrière un QR code</strong><span>Même l&#x27;hôte ne sait pas qui a fait le coup. Il joue comme les autres.</span></li><li class='doc bonus'><span class='n'>+</span><strong>Bonus : Pack festif</strong><span>Déroulé jusqu&#x27;à minuit, menu belge, musique, déco et pancarte de porte.</span></li></ul>
+</div></section>
+<section class="dark"><div class="wrap">
+  <h2>Comment on joue</h2>
+  <ol class="steps"><li><strong>Achetez et téléchargez</strong><span>Payez par Bancontact, carte ou Apple Pay. Le jeu est prêt tout de suite.</span></li><li><strong>Distribuez les rôles</strong><span>Choisissez qui joue qui et envoyez à chacun son invitation et son livret.</span></li><li><strong>Jouez trois manches</strong><span>Questions, accusations, mensonges. De nouveaux indices à chaque manche.</span></li><li><strong>Votez et révélez</strong><span>Tout le monde vote. Scannez le QR code et découvrez le coupable.</span></li></ol>
+  <div class="why"><div><h3>Vraiment belge</h3><p>Un café brun, une bière de Noël wallonne et une friterie juste à côté.</p></div><div><h3>Pas de meneur de jeu</h3><p>La solution est derrière un QR code : tout le monde joue.</p></div><div><h3>À jouer ce soir</h3><p>Dans votre boîte mail en une minute. Même le 31 décembre.</p></div></div>
+</div></section>
+<section class="buy" id="kopen"><div class="bill">
+  <h2>Café La Dernière Tournée</h2><p class="addr">Addition – table 1</p>
+  <div class="line"><span>1 × Meurtre au Réveillon (FR)</span><span>29,00 €</span></div>
+  <div class="line total"><span>Total</span><span>29,00 €</span></div>
+  <p class="vat">Dont TVA 21 % : 5,03 €. Facture de Marhaba Cooperation BV.</p>
+  <label class="waiver" for="waiver"><input type="checkbox" id="waiver"><span>Je demande à recevoir le jeu immédiatement et je reconnais perdre ainsi mon droit de rétractation.</span></label>
+  <button id="buy" class="btn" disabled>Payer – 29 €</button>
+  <p id="buy-error" class="error" role="alert" hidden></p>
+  <p class="safe">Paiement sécurisé via Stripe par Bancontact, carte ou Apple Pay.</p>
+</div></section>
+<footer><div class="wrap">
+  <p>Tafelmoord est un produit de Marhaba Cooperation BV, TVA BE1037222285.</p>
+  <p><a href="voorwaarden.html">Conditions générales</a> · <a href="privacy.html">Confidentialité</a> · <span data-mail></span></p>
+</div></footer>
+<script src="../config.js"></script>
+<script>
+(function () {
+  var cfg = window.TAFELMOORD || {};
+  var PRODUCT = "oudejaar-fr";
+  var T = {"checkout": "Payer – 29 €", "error": "Le paiement ne fonctionne pas pour le moment. Réessayez plus tard.", "notConfigured": "Le paiement n'est pas encore configuré.", "wait": "Un instant…"};
+  document.querySelectorAll("[data-mail]").forEach(function (el) { if (cfg.supportEmail) el.textContent = cfg.supportEmail; });
+  var box = document.getElementById("waiver"), btn = document.getElementById("buy"), err = document.getElementById("buy-error");
+  box.addEventListener("change", function () { btn.disabled = !box.checked; });
+  btn.addEventListener("click", function () {
+    err.hidden = true;
+    if (!cfg.functionsUrl) { err.textContent = T.notConfigured; err.hidden = false; return; }
+    btn.disabled = true; btn.textContent = T.wait;
+    fetch(cfg.functionsUrl + "/tafelmoord-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product: PRODUCT, waiver: box.checked === true })
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (res.ok && res.d.url) { window.location.href = res.d.url; return; }
+        throw new Error(res.d.error || T.error);
+      })
+      .catch(function (e) {
+        err.textContent = e.message || T.error;
+        err.hidden = false; btn.disabled = !box.checked; btn.textContent = T.checkout;
+      });
+  });
+})();
+</script>
+<script>
+(function () {
+  var scene = document.getElementById("scene"), torch = scene.querySelector(".torch");
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function lightsOn() { scene.setAttribute("data-state", "lit"); try { sessionStorage.setItem("tm-lit", "1"); } catch (e) {} }
+  try { if (sessionStorage.getItem("tm-lit") === "1" || reduce || location.hash) lightsOn(); } catch (e) { if (reduce) lightsOn(); }
+  function move(x, y) { var r = scene.getBoundingClientRect(); torch.style.setProperty("--x", (x - r.left) + "px"); torch.style.setProperty("--y", (y - r.top) + "px"); }
+  scene.addEventListener("pointermove", function (e) { move(e.clientX, e.clientY); });
+  scene.addEventListener("touchmove", function (e) { var t = e.touches[0]; if (t) move(t.clientX, t.clientY); }, { passive: true });
+  // Zonder muis: de zaklamp zwaait zelf even rond
+  if (!reduce) { var a = 0, auto = setInterval(function () { if (scene.getAttribute("data-state") !== "dark") return clearInterval(auto); a += .035; var r = scene.getBoundingClientRect(); move(r.left + r.width * (.5 + .32 * Math.cos(a)), r.top + r.height * (.6 + .18 * Math.sin(a * 1.6))); }, 30);
+    scene.addEventListener("pointermove", function () { clearInterval(auto); }, { once: true }); }
+  document.getElementById("lights").addEventListener("click", lightsOn);
+  scene.querySelectorAll(".sus").forEach(function (b) { b.addEventListener("click", function () { b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true"); }); });
+})();
+</script>
+</body>
+</html>

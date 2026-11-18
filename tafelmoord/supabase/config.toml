@@ -1,0 +1,9 @@
+# Klanten zijn anoniem: de shop-functies vereisen geen Supabase-login.
+[functions.tafelmoord-checkout]
+verify_jwt = false
+
+[functions.tafelmoord-download]
+verify_jwt = false
+
+[functions.tafelmoord-webhook]
+verify_jwt = false

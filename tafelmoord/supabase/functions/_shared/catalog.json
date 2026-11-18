@@ -1,0 +1,54 @@
+{
+  "oudejaar-fr": {
+    "game": "oudejaar",
+    "lang": "fr",
+    "category": "volwassenen",
+    "brand": "Tafelmoord",
+    "title": "Meurtre au Réveillon",
+    "subtitle": "au Café La Dernière Tournée",
+    "age": "16+",
+    "min_players": 6,
+    "max_players": 12,
+    "price_cents": 2900,
+    "file": "oudejaar-fr.zip"
+  },
+  "oudejaar-nl": {
+    "game": "oudejaar",
+    "lang": "nl",
+    "category": "volwassenen",
+    "brand": "Tafelmoord",
+    "title": "Moord op Oudejaar",
+    "subtitle": "in Café De Laatste Ronde",
+    "age": "16+",
+    "min_players": 6,
+    "max_players": 12,
+    "price_cents": 2900,
+    "file": "oudejaar-nl.zip"
+  },
+  "taart-fr": {
+    "game": "taart",
+    "lang": "fr",
+    "category": "kinderen",
+    "brand": "Fête Enquête",
+    "title": "Qui a caché le gâteau ?",
+    "subtitle": "Un jeu d'enquête pour l'anniversaire de Mamy Rosa",
+    "age": "8-12",
+    "min_players": 6,
+    "max_players": 10,
+    "price_cents": 1900,
+    "file": "taart-fr.zip"
+  },
+  "taart-nl": {
+    "game": "taart",
+    "lang": "nl",
+    "category": "kinderen",
+    "brand": "Speurfeest",
+    "title": "Wie verstopte de taart?",
+    "subtitle": "Een speurspel op het verjaardagsfeest van Oma Rosa",
+    "age": "8-12",
+    "min_players": 6,
+    "max_players": 10,
+    "price_cents": 1900,
+    "file": "taart-nl.zip"
+  }
+}

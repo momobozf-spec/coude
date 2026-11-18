@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Bedankt. Het spel is van jou.</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main class="thanks">
+  <h1>Bedankt. Het spel is van jou.</h1>
+  <p id="status">We controleren je betaling…</p>
+  <a id="dl" class="btn" href="#" hidden>Download je spelpakket</a>
+  <section class="next">
+    <h2>Zo begin je</h2>
+    <ol><li>Pak het zip-bestand uit en open eerst de <strong>gids</strong>.</li><li>Open de karakterboekjes van anderen niet, anders weet je wie de dader is.</li><li>Open de <strong>oplossing</strong> pas na de stemming.</li></ol>
+    <p class="small">Bewaar deze pagina: de link blijft 6 maanden geldig. Problemen? Mail ons. <span data-mail></span></p>
+  </section>
+</main>
+<script src="../config.js"></script>
+<script>
+(function () {
+  var cfg = window.TAFELMOORD || {};
+  var T = {"error": "Er ging iets mis. Mail ons, dan helpen we je meteen.", "notFound": "We vinden je bestelling niet. Mail ons, dan helpen we je meteen.", "offline": "Geen verbinding. Herlaad de pagina.", "processing": "Je betaling wordt nog verwerkt\u2026", "received": "Je betaling is ontvangen."};
+  var status = document.getElementById("status"), dl = document.getElementById("dl");
+  document.querySelectorAll("[data-mail]").forEach(function (el) { if (cfg.supportEmail) el.textContent = cfg.supportEmail; });
+  var sid = new URLSearchParams(location.search).get("session_id");
+  if (!sid || !cfg.functionsUrl) { status.textContent = T.notFound; return; }
+
+  function getLink() {
+    return fetch(cfg.functionsUrl + "/tafelmoord-download?session_id=" + encodeURIComponent(sid))
+      .then(function (r) { return r.json().then(function (d) { return { status: r.status, d: d }; }); });
+  }
+  dl.addEventListener("click", function (e) {
+    // Downloadlinks zijn 10 minuten geldig: bij elke klik een verse link.
+    e.preventDefault();
+    getLink().then(function (res) { if (res.d.url) location.href = res.d.url; else status.textContent = res.d.error || T.error; });
+  });
+
+  var tries = 0;
+  (function poll() {
+    getLink().then(function (res) {
+      if (res.d.url) { status.textContent = T.received; dl.hidden = false; return; }
+      if (res.status === 402 && tries++ < 10) { status.textContent = T.processing; setTimeout(poll, 3000); return; }
+      status.textContent = res.d.error || T.error;
+    }).catch(function () { status.textContent = T.offline; });
+  })();
+})();
+</script>
+</body>
+</html>

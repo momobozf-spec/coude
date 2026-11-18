@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wie verstopte de taart? – speurspel voor een kinderfeestje</title>
+<meta name="description" content="Een speurspel voor een kinderfeestje thuis, voor 6 tot 10 kinderen van 8 tot 12 jaar. Direct te downloaden en te printen. Geen moord, wel een verdwenen taart.">
+<link rel="alternate" hreflang="nl" href="https://tafelmoord.vercel.app/nl/taart.html">
+<link rel="alternate" hreflang="fr" href="https://tafelmoord.vercel.app/fr/taart.html">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="cat-kinderen">
+<nav class="topnav">
+  <a href="../nl/index.html">Speurfeest</a>
+  <a href="../fr/taart.html" hreflang="fr">Français</a>
+</nav>
+<header class="hero">
+  <p class="eyebrow">Speurfeest · speurspel voor kinderfeestjes</p>
+  <h1>De verjaardagstaart is verdwenen!</h1>
+  <p class="lead">Oma Rosa wordt 80, maar de chocoladetaart is weg uit de koelkast. Eén van de kinderen weet meer en mag liegen. Wie lost het mysterie op vóór de kaarsjes uitgeblazen worden?</p>
+  <a class="btn" href="#kopen">Speel het nu · <span>€19</span></a>
+  <p class="small">Direct in je mailbox · 6 tot 10 kinderen · 8 tot 12 jaar · 60 à 90 minuten</p>
+</header>
+
+<main>
+  <section class="grid3">
+    <div><h3>Klaar in 10 minuten</h3><p>Print de boekjes, lees de gids en je kan beginnen. Jij bent de spelleider en kent de oplossing.</p></div><div><h3>Spannend, niet eng</h3><p>Geen moord, geen bloed. Een verdwenen taart, een blaffende hond en voetafdrukken in de bloem.</p></div><div><h3>Iedereen speelt mee</h3><p>Elk kind krijgt een eigen rol, een geheim en een kostuumtip. Ook de stille kinderen.</p></div>
+  </section>
+
+  <section class="how">
+    <h2>Zo werkt het</h2>
+    <ol><li><strong>Betaal</strong> met Bancontact, kaart of Apple Pay.</li><li><strong>Download</strong> meteen je spelpakket (pdf).</li><li><strong>Stuur de uitnodigingen</strong> met kostuumtip een week op voorhand.</li><li><strong>Speel</strong> drie korte rondes, laat de kinderen stemmen en lees de oplossing voor.</li></ol>
+  </section>
+
+  <section class="contents">
+    <h2>In het pakket</h2>
+    <ul><li>Gids voor de spelleider, met proloog en hulpvragen</li><li>10 uitnodigingen en 10 karakterboekjes, met kostuumtips</li><li>Stemformulier</li><li>De volledige oplossing</li></ul>
+  </section>
+
+  <section id="kopen" class="buy">
+    <h2>Wie verstopte de taart?</h2>
+    <p class="price">€19 <span class="small">incl. btw</span></p>
+    <label class="waiver" for="waiver">
+      <input type="checkbox" id="waiver">
+      <span>Ik wil het spel meteen ontvangen en ik erken dat ik daardoor mijn herroepingsrecht verlies.</span>
+    </label>
+    <button id="buy" class="btn" disabled>Afrekenen</button>
+    <p id="buy-error" class="error" role="alert" hidden></p>
+    <p class="small">Veilig betalen via Stripe. Je ontvangt een factuur van Marhaba Cooperation BV.</p>
+  </section>
+</main>
+
+<footer>
+  <p>Een product van Marhaba Cooperation BV · BTW BE1037222285</p>
+  <p><a href="voorwaarden.html">Algemene voorwaarden</a> · <a href="privacy.html">Privacy</a> · <span class="mail" data-mail>Contact</span></p>
+</footer>
+
+<script src="../config.js"></script>
+<script>
+(function () {
+  var cfg = window.TAFELMOORD || {};
+  var PRODUCT = "taart-nl";
+  var T = {"checkout": "Afrekenen", "error": "Afrekenen lukt nu niet. Probeer het straks opnieuw.", "notConfigured": "De betaling is nog niet ingesteld.", "wait": "Even geduld\u2026"};
+  document.querySelectorAll("[data-mail]").forEach(function (el) { if (cfg.supportEmail) el.textContent = cfg.supportEmail; });
+
+  var box = document.getElementById("waiver"), btn = document.getElementById("buy"), err = document.getElementById("buy-error");
+  box.addEventListener("change", function () { btn.disabled = !box.checked; });
+
+  btn.addEventListener("click", function () {
+    err.hidden = true;
+    if (!cfg.functionsUrl) { err.textContent = T.notConfigured; err.hidden = false; return; }
+    btn.disabled = true; btn.textContent = T.wait;
+    fetch(cfg.functionsUrl + "/tafelmoord-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product: PRODUCT, waiver: box.checked === true })
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (res.ok && res.d.url) { window.location.href = res.d.url; return; }
+        throw new Error(res.d.error || T.error);
+      })
+      .catch(function (e) {
+        err.textContent = e.message || T.error;
+        err.hidden = false; btn.disabled = !box.checked; btn.textContent = T.checkout;
+      });
+  });
+})();
+</script>
+</body>
+</html>

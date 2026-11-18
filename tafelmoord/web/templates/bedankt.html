@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{{ s.thanks_title }}</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main class="thanks">
+  <h1>{{ s.thanks_title }}</h1>
+  <p id="status">{{ s.thanks_checking }}</p>
+  <a id="dl" class="btn" href="#" hidden>{{ s.thanks_download }}</a>
+  <section class="next">
+    <h2>{{ s.thanks_next_title }}</h2>
+    <ol>{% for n in s.thanks_next %}<li>{{ n | safe }}</li>{% endfor %}</ol>
+    <p class="small">{{ s.thanks_keep }} <span data-mail></span></p>
+  </section>
+</main>
+<script src="../config.js"></script>
+<script>
+(function () {
+  var cfg = window.TAFELMOORD || {};
+  var T = {{ {"processing": s.thanks_processing, "received": s.thanks_received, "notFound": s.thanks_not_found, "error": s.thanks_error, "offline": s.thanks_offline} | tojson }};
+  var status = document.getElementById("status"), dl = document.getElementById("dl");
+  document.querySelectorAll("[data-mail]").forEach(function (el) { if (cfg.supportEmail) el.textContent = cfg.supportEmail; });
+  var sid = new URLSearchParams(location.search).get("session_id");
+  if (!sid || !cfg.functionsUrl) { status.textContent = T.notFound; return; }
+
+  function getLink() {
+    return fetch(cfg.functionsUrl + "/tafelmoord-download?session_id=" + encodeURIComponent(sid))
+      .then(function (r) { return r.json().then(function (d) { return { status: r.status, d: d }; }); });
+  }
+  dl.addEventListener("click", function (e) {
+    // Downloadlinks zijn 10 minuten geldig: bij elke klik een verse link.
+    e.preventDefault();
+    getLink().then(function (res) { if (res.d.url) location.href = res.d.url; else status.textContent = res.d.error || T.error; });
+  });
+
+  var tries = 0;
+  (function poll() {
+    getLink().then(function (res) {
+      if (res.d.url) { status.textContent = T.received; dl.hidden = false; return; }
+      if (res.status === 402 && tries++ < 10) { status.textContent = T.processing; setTimeout(poll, 3000); return; }
+      status.textContent = res.d.error || T.error;
+    }).catch(function () { status.textContent = T.offline; });
+  })();
+})();
+</script>
+</body>
+</html>

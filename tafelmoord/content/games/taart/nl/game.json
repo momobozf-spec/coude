@@ -1,0 +1,69 @@
+{
+  "game": "taart",
+  "category": "kinderen",
+  "age": "8-12",
+  "price_cents": 1900,
+  "brand": "Speurfeest",
+  "title": "Wie verstopte de taart?",
+  "subtitle": "Een speurspel op het verjaardagsfeest van Oma Rosa",
+  "invite_when": "Het verjaardagsfeest van Oma Rosa · zaterdagmiddag",
+  "host_plays": false,
+  "culprit": "lowie",
+  "culprit_marker": "Jij hebt de taart verstopt",
+  "spoilers": [],
+  "min_players": 6,
+  "max_players": 10,
+  "replaceable": [],
+  "characters_by_count": {
+    "6": [
+      "lotte",
+      "lowie",
+      "mila",
+      "sem",
+      "ines",
+      "noor"
+    ],
+    "7": [
+      "lotte",
+      "lowie",
+      "mila",
+      "sem",
+      "ines",
+      "noor",
+      "jonas"
+    ],
+    "8": [
+      "lotte",
+      "lowie",
+      "mila",
+      "sem",
+      "ines",
+      "noor",
+      "jonas",
+      "rayan"
+    ],
+    "9": [
+      "lotte",
+      "lowie",
+      "mila",
+      "sem",
+      "ines",
+      "noor",
+      "jonas",
+      "rayan",
+      "fien"
+    ],
+    "10": [
+      "lotte",
+      "lowie",
+      "mila",
+      "sem",
+      "ines",
+      "noor",
+      "jonas",
+      "rayan",
+      "fien",
+      "bas"
+    ]
+  }
+}

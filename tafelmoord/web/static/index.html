@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tafelmoord · Speurfeest</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Stuur bezoekers naar hun taal: Frans als de browser Frans voorkeurt, anders Nederlands.
+  (function () {
+    var langs = (navigator.languages || [navigator.language || ""]).map(function (l) { return String(l).toLowerCase(); });
+    var fr = langs.length && langs[0].indexOf("fr") === 0;
+    location.replace(fr ? "fr/index.html" : "nl/index.html");
+  })();
+</script>
+</head>
+<body>
+<main class="home">
+  <p><a href="nl/index.html">Nederlands</a> · <a href="fr/index.html">Français</a></p>
+</main>
+</body>
+</html>

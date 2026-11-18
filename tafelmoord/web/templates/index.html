@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ s.home_title }}</title>
+<meta name="description" content="{{ s.home_lead }}">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="topnav">
+  <span>{{ s.home_title }}</span>
+  <a href="../{{ other_lang }}/index.html" hreflang="{{ other_lang }}">{{ s.other_lang_label }}</a>
+</nav>
+<main class="home">
+  <h1>{{ s.home_title }}</h1>
+  <p class="lead">{{ s.home_lead }}</p>
+  {% for category, items in groups %}
+  <section>
+    <h2>{{ s["category_" ~ category] }}</h2>
+    <div class="cards">
+      {% for p in items %}
+      <a class="card cat-{{ p.category }}" href="{{ p.game }}.html">
+        <span class="eyebrow">{{ p.brand }}</span>
+        <strong>{{ p.title }}</strong>
+        <span>{{ p.subtitle }}</span>
+        <span class="small">{{ p.min_players }}–{{ p.max_players }} {{ s.kids if p.category == "kinderen" else s.players }} · {{ p.age }} {{ s.years }} · {{ p.price_label }}</span>
+        <span class="more">{{ s.view_game }} →</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+</main>
+<footer>
+  <p>{{ s.footer_company }}</p>
+  <p><a href="voorwaarden.html">{{ s.terms }}</a> · <a href="privacy.html">{{ s.privacy }}</a></p>
+</footer>
+</body>
+</html>

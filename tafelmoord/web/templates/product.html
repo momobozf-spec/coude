@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ shop.meta_title }}</title>
+<meta name="description" content="{{ shop.meta_description }}">
+<link rel="alternate" hreflang="{{ lang }}" href="{{ site_url }}/{{ lang }}/{{ game }}.html">
+{% if other %}<link rel="alternate" hreflang="{{ other.lang }}" href="{{ site_url }}/{{ other.lang }}/{{ game }}.html">{% endif %}
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="cat-{{ category }}">
+<nav class="topnav">
+  <a href="../{{ lang }}/index.html">{{ brand }}</a>
+  {% if other %}<a href="../{{ other.lang }}/{{ game }}.html" hreflang="{{ other.lang }}">{{ s.other_lang_label }}</a>{% endif %}
+</nav>
+<header class="hero">
+  <p class="eyebrow">{{ shop.eyebrow }}</p>
+  <h1>{{ shop.headline }}</h1>
+  <p class="lead">{{ shop.lead }}</p>
+  <a class="btn" href="#kopen">{{ s.buy_cta }} · <span>{{ price_label }}</span></a>
+  <p class="small">{{ shop.facts }}</p>
+</header>
+
+<main>
+  <section class="grid3">
+    {% for title, text in shop.features %}<div><h3>{{ title }}</h3><p>{{ text }}</p></div>{% endfor %}
+  </section>
+
+  <section class="how">
+    <h2>{{ s.how_title }}</h2>
+    <ol>{% for step in shop.steps %}<li>{{ step | safe }}</li>{% endfor %}</ol>
+  </section>
+
+  <section class="contents">
+    <h2>{{ s.contents_title }}</h2>
+    <ul>{% for c in shop.contents %}<li>{{ c }}</li>{% endfor %}</ul>
+  </section>
+
+  <section id="kopen" class="buy">
+    <h2>{{ title }}</h2>
+    <p class="price">{{ price_label }} <span class="small">{{ s.incl_vat }}</span></p>
+    <label class="waiver" for="waiver">
+      <input type="checkbox" id="waiver">
+      <span>{{ s.waiver }}</span>
+    </label>
+    <button id="buy" class="btn" disabled>{{ s.checkout }}</button>
+    <p id="buy-error" class="error" role="alert" hidden></p>
+    <p class="small">{{ s.secure }}</p>
+  </section>
+</main>
+
+<footer>
+  <p>{{ s.footer_company }}</p>
+  <p><a href="voorwaarden.html">{{ s.terms }}</a> · <a href="privacy.html">{{ s.privacy }}</a> · <span class="mail" data-mail>{{ s.contact }}</span></p>
+</footer>
+
+<script src="../config.js"></script>
+<script>
+(function () {
+  var cfg = window.TAFELMOORD || {};
+  var PRODUCT = {{ product_id | tojson }};
+  var T = {{ {"wait": s.please_wait, "checkout": s.checkout, "notConfigured": s.err_not_configured, "error": s.err_checkout} | tojson }};
+  document.querySelectorAll("[data-mail]").forEach(function (el) { if (cfg.supportEmail) el.textContent = cfg.supportEmail; });
+
+  var box = document.getElementById("waiver"), btn = document.getElementById("buy"), err = document.getElementById("buy-error");
+  box.addEventListener("change", function () { btn.disabled = !box.checked; });
+
+  btn.addEventListener("click", function () {
+    err.hidden = true;
+    if (!cfg.functionsUrl) { err.textContent = T.notConfigured; err.hidden = false; return; }
+    btn.disabled = true; btn.textContent = T.wait;
+    fetch(cfg.functionsUrl + "/tafelmoord-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product: PRODUCT, waiver: box.checked === true })
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (res.ok && res.d.url) { window.location.href = res.d.url; return; }
+        throw new Error(res.d.error || T.error);
+      })
+      .catch(function (e) {
+        err.textContent = e.message || T.error;
+        err.hidden = false; btn.disabled = !box.checked; btn.textContent = T.checkout;
+      });
+  });
+})();
+</script>
+</body>
+</html>

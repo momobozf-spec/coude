@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Qui a caché le gâteau ? – jeu d&#39;enquête pour anniversaire d&#39;enfants</title>
+<meta name="description" content="Un jeu d&#39;enquête pour un anniversaire d&#39;enfants à la maison, de 6 à 10 enfants de 8 à 12 ans. À télécharger et imprimer tout de suite. Pas de meurtre, juste un gâteau disparu.">
+<link rel="alternate" hreflang="fr" href="https://tafelmoord.vercel.app/fr/taart.html">
+<link rel="alternate" hreflang="nl" href="https://tafelmoord.vercel.app/nl/taart.html">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="cat-kinderen">
+<nav class="topnav">
+  <a href="../fr/index.html">Fête Enquête</a>
+  <a href="../nl/taart.html" hreflang="nl">Nederlands</a>
+</nav>
+<header class="hero">
+  <p class="eyebrow">Fête Enquête · jeu d&#39;enquête pour anniversaires</p>
+  <h1>Le gâteau d&#39;anniversaire a disparu !</h1>
+  <p class="lead">Mamy Rosa a 80 ans, mais le gâteau au chocolat a disparu du frigo. L&#39;un des enfants en sait plus et a le droit de mentir. Qui résoudra le mystère avant de souffler les bougies ?</p>
+  <a class="btn" href="#kopen">Joue maintenant · <span>19 €</span></a>
+  <p class="small">Directement dans ta boîte mail · 6 à 10 enfants · 8 à 12 ans · 60 à 90 minutes</p>
+</header>
+
+<main>
+  <section class="grid3">
+    <div><h3>Prêt en 10 minutes</h3><p>Imprime les livrets, lis le guide et c&#39;est parti. Tu es le meneur de jeu et tu connais la solution.</p></div><div><h3>Palpitant, pas effrayant</h3><p>Pas de meurtre, pas de sang. Un gâteau disparu, un chien qui aboie et des empreintes dans la farine.</p></div><div><h3>Tout le monde joue</h3><p>Chaque enfant a son rôle, son secret et une idée de costume. Même les plus timides.</p></div>
+  </section>
+
+  <section class="how">
+    <h2>Comment ça marche</h2>
+    <ol><li><strong>Paie</strong> par Bancontact, carte ou Apple Pay.</li><li><strong>Télécharge</strong> ton kit de jeu (pdf) tout de suite.</li><li><strong>Envoie les invitations</strong> avec l'idée de costume une semaine à l'avance.</li><li><strong>Joue</strong> trois manches courtes, fais voter les enfants et lis la solution.</li></ol>
+  </section>
+
+  <section class="contents">
+    <h2>Dans le kit</h2>
+    <ul><li>Guide du meneur de jeu, avec prologue et questions d&#39;aide</li><li>10 invitations et 10 livrets de personnage, avec idées de costumes</li><li>Bulletin de vote</li><li>La solution complète</li></ul>
+  </section>
+
+  <section id="kopen" class="buy">
+    <h2>Qui a caché le gâteau ?</h2>
+    <p class="price">19 € <span class="small">TVA comprise</span></p>
+    <label class="waiver" for="waiver">
+      <input type="checkbox" id="waiver">
+      <span>Je veux recevoir le jeu immédiatement et je reconnais perdre ainsi mon droit de rétractation.</span>
+    </label>
+    <button id="buy" class="btn" disabled>Passer au paiement</button>
+    <p id="buy-error" class="error" role="alert" hidden></p>
+    <p class="small">Paiement sécurisé via Stripe. Tu reçois une facture de Marhaba Cooperation BV.</p>
+  </section>
+</main>
+
+<footer>
+  <p>Un produit de Marhaba Cooperation BV · TVA BE1037222285</p>
+  <p><a href="voorwaarden.html">Conditions générales</a> · <a href="privacy.html">Vie privée</a> · <span class="mail" data-mail>Contact</span></p>
+</footer>
+
+<script src="../config.js"></script>
+<script>
+(function () {
+  var cfg = window.TAFELMOORD || {};
+  var PRODUCT = "taart-fr";
+  var T = {"checkout": "Passer au paiement", "error": "Le paiement ne fonctionne pas pour le moment. R\u00e9essaie dans un instant.", "notConfigured": "Le paiement n\u0027est pas encore configur\u00e9.", "wait": "Un instant\u2026"};
+  document.querySelectorAll("[data-mail]").forEach(function (el) { if (cfg.supportEmail) el.textContent = cfg.supportEmail; });
+
+  var box = document.getElementById("waiver"), btn = document.getElementById("buy"), err = document.getElementById("buy-error");
+  box.addEventListener("change", function () { btn.disabled = !box.checked; });
+
+  btn.addEventListener("click", function () {
+    err.hidden = true;
+    if (!cfg.functionsUrl) { err.textContent = T.notConfigured; err.hidden = false; return; }
+    btn.disabled = true; btn.textContent = T.wait;
+    fetch(cfg.functionsUrl + "/tafelmoord-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product: PRODUCT, waiver: box.checked === true })
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (res.ok && res.d.url) { window.location.href = res.d.url; return; }
+        throw new Error(res.d.error || T.error);
+      })
+      .catch(function (e) {
+        err.textContent = e.message || T.error;
+        err.hidden = false; btn.disabled = !box.checked; btn.textContent = T.checkout;
+      });
+  });
+})();
+</script>
+</body>
+</html>

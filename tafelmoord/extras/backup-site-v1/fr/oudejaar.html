@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meurtre au Réveillon – murder party belge à la maison</title>
+<meta name="description" content="Une murder party belge à jouer chez soi, de 6 à 12 joueurs. À télécharger tout de suite, jouable sur GSM. Tout le monde est suspect, même l&#39;hôte.">
+<link rel="alternate" hreflang="fr" href="https://tafelmoord.vercel.app/fr/oudejaar.html">
+<link rel="alternate" hreflang="nl" href="https://tafelmoord.vercel.app/nl/oudejaar.html">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="cat-volwassenen">
+<nav class="topnav">
+  <a href="../fr/index.html">Tafelmoord</a>
+  <a href="../nl/oudejaar.html" hreflang="nl">Nederlands</a>
+</nav>
+<header class="hero">
+  <p class="eyebrow">Tafelmoord · murder party belge à la maison</p>
+  <h1>Quelqu&#39;un à table est un assassin.</h1>
+  <p class="lead">Réveillon du Nouvel An au Café La Dernière Tournée. À minuit, le patron gît mort à la cave. Tes invités et toi êtes les suspects, et chacun a quelque chose à cacher.</p>
+  <a class="btn" href="#kopen">Joue maintenant · <span>29 €</span></a>
+  <p class="small">Directement dans ta boîte mail · 6 à 12 joueurs · 2 à 3 heures · dès 16 ans</p>
+</header>
+
+<main>
+  <section class="grid3">
+    <div><h3>Pas besoin de maître du jeu</h3><p>La solution est cachée derrière un QR code. Même toi, l&#39;hôte, tu ne sais pas qui a fait le coup.</p></div><div><h3>Jouable sur GSM</h3><p>Envoie à chaque invité son livret par WhatsApp. Tu peux imprimer, mais ce n&#39;est pas obligatoire.</p></div><div><h3>Vraiment belge</h3><p>Un vieux café, une table de whist, de la bière de Noël d&#39;un brasseur namurois et une friterie juste à côté.</p></div>
+  </section>
+
+  <section class="how">
+    <h2>Comment ça marche</h2>
+    <ol><li><strong>Paie</strong> par Bancontact, carte ou Apple Pay.</li><li><strong>Télécharge</strong> ton kit de jeu (pdf) tout de suite.</li><li><strong>Distribue les rôles</strong> et envoie à chacun son invitation et son livret.</li><li><strong>Joue</strong> trois manches, vote pour le coupable et scanne la solution.</li></ol>
+  </section>
+
+  <section class="contents">
+    <h2>Dans le kit</h2>
+    <ul><li>Guide de l&#39;hôte, avec prologue et règles</li><li>12 invitations et 12 livrets de personnage, avec idées de costumes</li><li>Pièces à conviction pour les petits groupes (6 ou 7 joueurs)</li><li>Bulletin de vote et solution complète</li>
+        <li>Bonus : Pack festif avec déroulé jusqu'à minuit, menu belge, musique, déco et pancarte de porte</li></ul>
+  </section>
+
+  <section id="kopen" class="buy">
+    <h2>Meurtre au Réveillon</h2>
+    <p class="price">29 € <span class="small">TVA comprise</span></p>
+    <label class="waiver" for="waiver">
+      <input type="checkbox" id="waiver">
+      <span>Je veux recevoir le jeu immédiatement et je reconnais perdre ainsi mon droit de rétractation.</span>
+    </label>
+    <button id="buy" class="btn" disabled>Passer au paiement</button>
+    <p id="buy-error" class="error" role="alert" hidden></p>
+    <p class="small">Paiement sécurisé via Stripe. Tu reçois une facture de Marhaba Cooperation BV.</p>
+  </section>
+</main>
+
+<footer>
+  <p>Un produit de Marhaba Cooperation BV · TVA BE1037222285</p>
+  <p><a href="voorwaarden.html">Conditions générales</a> · <a href="privacy.html">Vie privée</a> · <span class="mail" data-mail>Contact</span></p>
+</footer>
+
+<script src="../config.js"></script>
+<script>
+(function () {
+  var cfg = window.TAFELMOORD || {};
+  var PRODUCT = "oudejaar-fr";
+  var T = {"checkout": "Passer au paiement", "error": "Le paiement ne fonctionne pas pour le moment. R\u00e9essaie dans un instant.", "notConfigured": "Le paiement n\u0027est pas encore configur\u00e9.", "wait": "Un instant\u2026"};
+  document.querySelectorAll("[data-mail]").forEach(function (el) { if (cfg.supportEmail) el.textContent = cfg.supportEmail; });
+
+  var box = document.getElementById("waiver"), btn = document.getElementById("buy"), err = document.getElementById("buy-error");
+  box.addEventListener("change", function () { btn.disabled = !box.checked; });
+
+  btn.addEventListener("click", function () {
+    err.hidden = true;
+    if (!cfg.functionsUrl) { err.textContent = T.notConfigured; err.hidden = false; return; }
+    btn.disabled = true; btn.textContent = T.wait;
+    fetch(cfg.functionsUrl + "/tafelmoord-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product: PRODUCT, waiver: box.checked === true })
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (res.ok && res.d.url) { window.location.href = res.d.url; return; }
+        throw new Error(res.d.error || T.error);
+      })
+      .catch(function (e) {
+        err.textContent = e.message || T.error;
+        err.hidden = false; btn.disabled = !box.checked; btn.textContent = T.checkout;
+      });
+  });
+})();
+</script>
+</body>
+</html>

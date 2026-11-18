@@ -1,0 +1,81 @@
+:root {
+  --wood: #2a1810; --wood-2: #3b2216; --copper: #c8873e; --cream: #f6efe2;
+  --ink: #2b1d12; --muted: #8a6d4b; --blood: #9b2a1a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Charter, "Iowan Old Style", Georgia, "Times New Roman", serif; color: var(--ink); background: var(--cream); line-height: 1.6; font-size: 17px; }
+h1, h2, h3 { font-family: "Iowan Old Style", Charter, Georgia, serif; line-height: 1.15; margin: 0 0 .5em; }
+a { color: var(--blood); }
+.small { font-size: .85em; color: var(--muted); }
+.eyebrow { text-transform: uppercase; letter-spacing: .18em; font-size: .78rem; color: var(--copper); margin: 0 0 1rem; }
+
+.hero {
+  background: radial-gradient(ellipse at 50% 0%, #5a2e17 0%, var(--wood) 70%);
+  color: var(--cream); text-align: center; padding: 18vh 20px 14vh;
+}
+.hero h1 { font-size: clamp(2.2rem, 7vw, 4.4rem); font-weight: 800; }
+.hero .lead { max-width: 36rem; margin: 0 auto 2rem; font-size: 1.15rem; color: #e9dcc4; }
+.hero .small { color: #c9b28f; margin-top: 1rem; }
+
+.btn {
+  display: inline-block; background: var(--copper); color: var(--wood); font-weight: 600;
+  padding: .9rem 1.6rem; border-radius: 4px; text-decoration: none; border: 0; font-size: 1.05rem;
+  cursor: pointer; font-family: inherit;
+}
+.btn:hover { background: #dc9b51; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+main { max-width: 60rem; margin: 0 auto; padding: 0 20px; }
+section { padding: 3.5rem 0; border-bottom: 1px solid #e2d4b9; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 2rem; }
+.grid3 h3 { color: var(--blood); }
+.how ol, .contents ul { padding-left: 1.2rem; }
+.how li, .contents li { margin: .4rem 0; }
+
+.buy { text-align: center; }
+.buy .price { font-family: "Iowan Old Style", Georgia, serif; font-size: 2.4rem; margin: 0 0 1.2rem; }
+.waiver { display: flex; gap: .7rem; align-items: flex-start; text-align: left; max-width: 32rem; margin: 0 auto 1.4rem;
+  background: #efe3cc; padding: .9rem 1rem; border-radius: 4px; cursor: pointer; }
+.waiver input { margin-top: .35rem; width: 1.1rem; height: 1.1rem; flex: none; }
+.error { color: var(--blood); font-weight: 600; }
+
+.thanks { max-width: 40rem; text-align: center; padding-top: 12vh; }
+.thanks h1 { font-size: clamp(1.9rem, 5vw, 3rem); }
+.thanks .next { text-align: left; border: 0; }
+
+footer { text-align: center; padding: 2.5rem 20px 3rem; font-size: .85rem; color: var(--muted); }
+footer a { color: var(--muted); }
+.legal { max-width: 42rem; padding: 3rem 20px; margin: 0 auto; }
+.legal h2 { margin-top: 1.6em; font-size: 1.2rem; }
+
+/* Navigatie en overzichtspagina */
+.topnav { display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  background: var(--wood); color: var(--cream); font-size: .9rem;
+  padding-block: .7rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.topnav a { color: var(--cream); text-decoration: none; font-weight: 600; }
+.topnav a:hover { text-decoration: underline; }
+.home { padding-block: 3rem; }
+.home h1 { font-size: clamp(2rem, 5vw, 3.2rem); text-wrap: balance; }
+.home .lead { max-width: 38rem; color: var(--muted); font-size: 1.1rem; }
+.home section { border: 0; padding-block: 1.5rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.2rem; }
+.card { display: flex; flex-direction: column; gap: .35rem; padding: 1.3rem; border-radius: 6px; text-decoration: none;
+  color: var(--ink); background: #efe3cc; border: 1px solid #e2d4b9; min-width: 0; }
+.card strong { font-size: 1.3rem; font-family: "Iowan Old Style", Georgia, serif; }
+.card .eyebrow { margin: 0; }
+.card .more { margin-top: auto; padding-top: .6rem; color: var(--blood); font-weight: 600; }
+.card:hover { border-color: var(--copper); }
+.card:focus-visible, .topnav a:focus-visible, .btn:focus-visible { outline: 3px solid var(--copper); outline-offset: 3px; }
+.mail { user-select: all; }
+
+/* Kinderspellen: helder feestpalet */
+body.cat-kinderen { --wood: #1d4ed8; --copper: #f59e0b; --cream: #fffbeb; --ink: #1f2a44; --muted: #64748b; --blood: #c2410c; background: var(--cream); }
+.cat-kinderen .hero { background: radial-gradient(ellipse at 50% 0%, #3b82f6 0%, #1d4ed8 75%); }
+.cat-kinderen .hero .lead { color: #eff6ff; }
+.cat-kinderen .hero .small { color: #dbeafe; }
+.cat-kinderen .eyebrow { color: #fde68a; }
+.cat-kinderen .waiver { background: #fef3c7; }
+.cat-kinderen section { border-bottom-color: #fde68a; }
+.card.cat-kinderen { background: #eff6ff; border-color: #bfdbfe; }
+.card.cat-kinderen .eyebrow { color: #c2410c; }
+.card.cat-kinderen .more { color: #1d4ed8; }
